@@ -9,6 +9,12 @@ export function inventoryPath(env = process.env, platform = process.platform, ho
     : path.join(home, '.vmware', 'inventory.vmls'));
 }
 
+export function preferencesPath(env = process.env, platform = process.platform, home = os.homedir()) {
+  return env.VMWARE_PREFERENCES_PATH || (platform === 'win32'
+    ? path.join(env.APPDATA || path.join(home, 'AppData', 'Roaming'), 'VMware', 'preferences.ini')
+    : path.join(home, '.vmware', 'preferences'));
+}
+
 export function credentialsPath(env = process.env, platform = process.platform, home = os.homedir()) {
   if (env.VMWARE_CREDENTIALS_FILE) return env.VMWARE_CREDENTIALS_FILE;
   if (platform === 'win32') return env.APPDATA ? path.join(env.APPDATA, 'VMwareWorkstationPlugin', 'credentials.json') : null;

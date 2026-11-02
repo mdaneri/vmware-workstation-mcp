@@ -1,11 +1,11 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "vmware-workstation",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "license": "MIT",
   "repository": "https://github.com/mdaneri/vmware-workstation-mcp",
   "author": { "name": "mdaneri", "url": "https://github.com/mdaneri" },
-  "description": "Manage VMware Workstation with vmrun, REST, and direct headless VNC/RFB console screenshots and input.",
+  "description": "Manage VMware Workstation with vmrun, REST, LAN segments, and direct headless VNC/RFB console screenshots and input.",
   "keywords": ["vmware", "workstation", "virtual-machines", "snapshots", "windows", "linux"],
   "extensions": {
     "com.openai": {

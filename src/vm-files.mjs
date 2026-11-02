@@ -67,7 +67,7 @@ export class VMFiles {
       }
     });
   }
-  async configure(input, { protectFile } = {}) {
+  async configure(input, { protectFile, expectedOriginal, beforeCommit } = {}) {
     const a = configureVMSchema.parse(input);
     return this.exclusive(async () => {
       const vmx = await this.backend.vmx(a.vmx);
@@ -76,6 +76,7 @@ export class VMFiles {
       const lock = `${vmx}.lck`;
       try { await fs.access(lock); throw new Error('VMware holds a VMX lock; close or power off the VM before editing.'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
       const original = await fs.readFile(vmx, 'utf8');
+      if (expectedOriginal !== undefined && original !== expectedOriginal) throw new Error('VMX changed before editing; inspect and retry.');
       const config = parseAssignments(original);
       const sensitiveKeys = Object.entries(config).some(([key, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key) && value) || Object.entries(a.settings).some(([key, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key) && value);
       if (!protectFile && sensitiveKeys) protectFile = this.protectSensitiveFile;
@@ -101,6 +102,7 @@ export class VMFiles {
       }
       for (const [key, update] of updates) if (!seen.has(key) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
       const mode = (await fs.stat(vmx)).mode & 0o777;
+      if (beforeCommit) await beforeCommit();
       const backup = `${vmx}.backup-${randomUUID()}`;
       if (protectFile) {
         await fs.writeFile(backup, '', { flag: 'wx', mode: 0o600 }); await protectFile(backup); await fs.writeFile(backup, original);
@@ -110,6 +112,9 @@ export class VMFiles {
       await fs.writeFile(temporary, lines.join('\n').replace(/\n*$/, '\n'), { flag: protectFile ? 'w' : 'wx', mode });
       // Detect another writer after we read the original before replacing it.
       if (await fs.readFile(vmx, 'utf8') !== original) { await fs.unlink(temporary); throw new Error(`VMX changed during editing; original retained. Backup: ${backup}`); }
+      if (beforeCommit) {
+        try { await beforeCommit(); } catch (error) { await fs.unlink(temporary); throw error; }
+      }
       await fs.rename(temporary, vmx);
       return { vmx, updated: true, backup, changedSettings: Object.keys(a.settings), note: 'VMX saved while VM was not running and had no detected saved state/VMX lock. Close/reopen its Workstation tab if it has cached settings.' };
     });
