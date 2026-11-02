@@ -18,7 +18,7 @@ import { inspectArtifact, machineRecords } from '../src/ovf-artifacts.mjs';
 const descriptor = (href = '') => `<Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"><References>${href ? `<File ovf:href="${href}"/>` : ''}</References></Envelope>`;
 const flags = ['machineOutput', 'schemaValidate', 'sourceType', 'targetType', 'hideEula', 'name', 'net', 'prop', 'deploymentOption', 'acceptAllEulas', 'configFile'];
 async function fixture(t, extraEnv = {}) {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'vmware-ovf-test-'));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'vmware-ovf-test-')));
   const suffix = process.platform === 'win32' ? '.exe' : '';
   const binary = path.join(root, `ovftool${suffix}`); const vmrun = path.join(root, `vmrun${suffix}`);
   await fs.writeFile(binary, '', { mode: 0o755 }); await fs.writeFile(vmrun, '', { mode: 0o755 });
