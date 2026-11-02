@@ -1,20 +1,22 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { credentialsPath } from './host-platform.mjs';
+import { readPrivateFile } from './local-file-security.mjs';
 
 export class Credentials {
   constructor(env = process.env) {
     this.env = env; this.secrets = new Set();
-    this.filename = env.VMWARE_CREDENTIALS_FILE || (env.APPDATA ? path.join(env.APPDATA, 'VMwareWorkstationPlugin', 'credentials.json') : null);
+    this.filename = credentialsPath(env);
   }
   async load() {
     if (!this.filename) return {};
     try {
-      const result = JSON.parse(await fs.readFile(this.filename, 'utf8'));
+      const result = JSON.parse(process.platform === 'linux' ? await readPrivateFile(this.filename) : await fs.readFile(this.filename, 'utf8'));
       if (!result || typeof result !== 'object' || Array.isArray(result)) throw new Error();
       return result;
     } catch (error) {
       if (!this.env.VMWARE_CREDENTIALS_FILE && error.code === 'ENOENT') return {};
-      throw new Error('Cannot read local VMware credentials as a JSON object. Check VMWARE_CREDENTIALS_FILE or the default credentials file, permissions, and format.');
+      throw new Error('Cannot read local VMware credentials as a JSON object. Check VMWARE_CREDENTIALS_FILE or the default credentials file, permissions, and format. On Linux use an owned regular file with mode 600.');
     }
   }
   profile(value = 'default') {

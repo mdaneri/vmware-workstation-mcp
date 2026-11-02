@@ -9,9 +9,9 @@ import { VMFiles, encodeVMX } from '../src/vm-files.mjs';
 async function fixture(t) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'vmware-new-'));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
-  const binary = path.join(root, 'vmrun.exe');
-  const diskManager = path.join(root, 'vmware-vdiskmanager.exe');
-  await fs.writeFile(binary, ''); await fs.writeFile(diskManager, '');
+  const binary = path.join(root, process.platform === 'win32' ? 'vmrun.exe' : 'vmrun');
+  const diskManager = path.join(root, process.platform === 'win32' ? 'vmware-vdiskmanager.exe' : 'vmware-vdiskmanager');
+  await fs.writeFile(binary, '', { mode: 0o755 }); await fs.writeFile(diskManager, '', { mode: 0o755 });
   const calls = [];
   let running = [];
   const backend = new Workstation({ env: { VMRUN_PATH: binary }, run: async (file, args, options) => {

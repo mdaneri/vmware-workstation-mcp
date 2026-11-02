@@ -8,9 +8,9 @@ import { Workstation, parseAssignments, parseCountedList, isWithin } from '../sr
 async function fixture(t, run) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'vmware-plugin-'));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
-  const binary = path.join(root, 'vmrun.exe');
+  const binary = path.join(root, process.platform === 'win32' ? 'vmrun.exe' : 'vmrun');
   const vmx = path.join(root, 'VM with spaces.vmx');
-  await fs.writeFile(binary, 'test executable placeholder');
+  await fs.writeFile(binary, 'test executable placeholder', { mode: 0o755 });
   await fs.writeFile(vmx, 'displayName = "Lab"\nmemsize = "4096"\nsecret = "do not return"');
   const inventory = path.join(root, 'inventory.vmls');
   const env = { VMRUN_PATH: binary, VMWARE_INVENTORY_PATH: inventory };

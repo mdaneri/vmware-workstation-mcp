@@ -24,6 +24,13 @@ try {
     $config = Get-Content -LiteralPath $credentialPath -Raw | ConvertFrom-Json -AsHashtable
     if ($config.guest.default.username -ne 'FAKE-test-user-only' -or $config.rest.password -ne 'FAKE-test-value-only') { throw 'Credential profile round-trip failed' }
     if ($config.console.console_test.password -ne 'TestVNC1' -or $config.console.console_test.vmx -ne $testVMX) { throw 'Console credential round-trip failed' }
+    if (-not $IsWindows) {
+        foreach ($file in @($credentialPath, $testVMX)) {
+            if ([IO.File]::GetUnixFileMode($file) -ne ([IO.UnixFileMode]::UserRead -bor [IO.UnixFileMode]::UserWrite)) { throw 'Linux file mode must be 600' }
+        }
+        Write-Output 'PowerShell setup helpers verified on Linux with fake credentials and user-only file permissions.'
+        return
+    }
     $acl = Get-Acl -LiteralPath $credentialPath
     $sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
     if (-not $acl.AreAccessRulesProtected) { throw 'Credential ACL inheritance was not disabled' }

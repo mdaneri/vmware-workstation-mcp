@@ -5,9 +5,16 @@ param(
     [string]$VMPasswordProfile,
     [string]$ConsoleProfile,
     [string]$VMX,
-    [string]$Path = (Join-Path $env:APPDATA 'VMwareWorkstationPlugin/credentials.json')
+    [string]$Path = $env:VMWARE_CREDENTIALS_FILE
 )
 $ErrorActionPreference = 'Stop'
+if (-not $Path) {
+    if ($IsWindows) { $Path = Join-Path $env:APPDATA 'VMwareWorkstationPlugin/credentials.json' }
+    else {
+        $configBase = if ($env:XDG_CONFIG_HOME -and [IO.Path]::IsPathFullyQualified($env:XDG_CONFIG_HOME)) { $env:XDG_CONFIG_HOME } else { Join-Path ([Environment]::GetFolderPath('UserProfile')) '.config' }
+        $Path = Join-Path $configBase 'vmware-workstation-mcp/credentials.json'
+    }
+}
 if (-not $Rest -and -not $GuestProfile -and -not $VMPasswordProfile -and -not $ConsoleProfile) { throw 'Choose -Rest, -GuestProfile, -VMPasswordProfile, and/or -ConsoleProfile.' }
 foreach ($profile in @($GuestProfile, $VMPasswordProfile, $ConsoleProfile)) {
     if ($profile -and $profile -notmatch '^[a-zA-Z][a-zA-Z0-9_]{0,31}$') { throw 'Profile names must start with a letter and contain up to 32 letters, digits, or underscores.' }
@@ -18,6 +25,21 @@ function Read-Password([string]$Prompt) {
     $pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
     try { return [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer) }
     finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer); $secure.Dispose() }
+}
+if (-not $IsWindows) {
+    $records = [Collections.Generic.List[object]]::new()
+    if ($Rest) { $records.Add(@{ kind = 'rest'; username = (Read-Host 'Workstation REST username'); password = (Read-Password 'Workstation REST password') }) }
+    if ($GuestProfile) { $records.Add(@{ kind = 'guest'; profile = $GuestProfile; username = (Read-Host 'Guest OS username'); password = (Read-Password 'Guest OS password') }) }
+    if ($VMPasswordProfile) { $records.Add(@{ kind = 'vm'; profile = $VMPasswordProfile; password = (Read-Password 'Encrypted VM password') }) }
+    if ($ConsoleProfile) { $records.Add(@{ kind = 'console'; profile = $ConsoleProfile; vmx = $VMX; password = (Read-Password 'Native VNC password (1 to 8 ASCII characters; use a dedicated password)') }) }
+    $entry = Join-Path (Split-Path -Parent $PSScriptRoot) 'server/set-credentials.cjs'
+    $previousPath = $env:VMWARE_CREDENTIALS_FILE
+    try {
+        $env:VMWARE_CREDENTIALS_FILE = $Path
+        ConvertTo-Json -InputObject @($records.ToArray()) -Depth 8 -Compress | & node $entry --stdin
+        if ($LASTEXITCODE) { throw 'Credential setup failed. See the diagnostic above.' }
+    } finally { $env:VMWARE_CREDENTIALS_FILE = $previousPath }
+    return
 }
 $config = @{}
 if (Test-Path -LiteralPath $Path) { $config = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json -AsHashtable }

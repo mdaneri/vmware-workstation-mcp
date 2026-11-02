@@ -2,8 +2,8 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import os from 'node:os';
 import { isIP } from 'node:net';
+import { inventoryPath, findVMwareExecutable } from './host-platform.mjs';
 
 const execute = promisify(execFile);
 
@@ -34,26 +34,11 @@ export class Workstation {
     this.env = env;
     this.execute = run;
     this.tail = Promise.resolve();
-    this.inventoryPath = env.VMWARE_INVENTORY_PATH || path.join(env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming'), 'VMware', 'inventory.vmls');
+    this.inventoryPath = inventoryPath(env);
   }
 
   async executable() {
-    if (this.env.VMRUN_PATH) {
-      const configured = this.env.VMRUN_PATH;
-      if (!path.isAbsolute(configured) || !/vmrun\.exe$/i.test(path.basename(configured))) throw new Error('VMRUN_PATH must be an absolute path to vmrun.exe.');
-      if (!(await fs.stat(configured)).isFile()) throw new Error('VMRUN_PATH is not a file.');
-      return configured;
-    }
-    const candidates = [
-      ...[this.env.ProgramFiles, this.env['ProgramFiles(x86)']].filter(Boolean).map(root => path.join(root, 'VMware', 'VMware Workstation', 'vmrun.exe')),
-      ...(this.env.PATH || this.env.Path || '').split(path.delimiter).filter(Boolean).map(root => path.join(root, 'vmrun.exe')),
-    ];
-    for (const candidate of candidates) {
-      try { if (path.isAbsolute(candidate) && (await fs.stat(candidate)).isFile()) return candidate; } catch (error) {
-        if (!['ENOENT', 'ENOTDIR'].includes(error.code)) throw error;
-      }
-    }
-    throw new Error('vmrun.exe was not found. Install VMware Workstation or set VMRUN_PATH.');
+    return findVMwareExecutable('vmrun', { env: this.env });
   }
 
   async run(args, { mutation = false, authentication = [], timeout = 120000 } = {}) {

@@ -17,7 +17,7 @@ async function eventually(predicate) {
 }
 async function fixture(t, { version = '3.8', password = 'testVNC1', inspector, managerOptions = {} } = {}) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'vmware-console-test-'));
-  const binary = path.join(root, 'vmrun.exe'); await fs.writeFile(binary, '');
+  const binary = path.join(root, process.platform === 'win32' ? 'vmrun.exe' : 'vmrun'); await fs.writeFile(binary, '', { mode: 0o755 });
   const credentialsPath = path.join(root, 'credentials.json');
   const credentialData = { console: {} };
   const env = { VMRUN_PATH: binary, VMWARE_CREDENTIALS_FILE: credentialsPath };
@@ -55,7 +55,7 @@ async function fixture(t, { version = '3.8', password = 'testVNC1', inspector, m
     const port = server.address().port;
     await fs.writeFile(vmx, `displayName = "${name}"\nRemoteDisplay.vnc.enabled = "TRUE"\nRemoteDisplay.vnc.ip = "127.0.0.1"\nRemoteDisplay.vnc.port = "${port}"\n`);
     credentialData.console[name] = { vmx, password };
-    await fs.writeFile(credentialsPath, JSON.stringify(credentialData));
+    await fs.writeFile(credentialsPath, JSON.stringify(credentialData), { mode: 0o600 });
     return { vmx, port, state, server };
   }
   return { root, credentialsPath, credentialData, env, backend, credentials, manager, add };
@@ -92,11 +92,14 @@ test('serializes same-VM chords and always releases modifiers, without a global 
   const f = await fixture(t); const vm = await f.add('bios');
   await Promise.all([f.manager.key('bios', 'Ctrl+Alt+Delete'), f.manager.key('bios', 'Shift+F10')]);
   await eventually(() => vm.state.keys.length === 10);
-  assert.deepEqual(vm.state.keys.map(e => [e.keysym, e.down]), [
+  const controlChord = [
     [keysyms.ControlLeft, true], [keysyms.AltLeft, true], [keysyms.Delete, true],
     [keysyms.Delete, false], [keysyms.AltLeft, false], [keysyms.ControlLeft, false],
-    [keysyms.ShiftLeft, true], [keysyms.F10, true], [keysyms.F10, false], [keysyms.ShiftLeft, false],
-  ]);
+  ];
+  const shiftChord = [[keysyms.ShiftLeft, true], [keysyms.F10, true], [keysyms.F10, false], [keysyms.ShiftLeft, false]];
+  const events = vm.state.keys.map(e => [e.keysym, e.down]);
+  // Concurrent endpoint reads may finish in either order; each chord must remain intact.
+  assert.deepEqual(events, events[0][0] === keysyms.ControlLeft ? [...controlChord, ...shiftChord] : [...shiftChord, ...controlChord]);
 });
 test('captures fresh frames after preboot-to-installer resolution changes', async t => {
   const f = await fixture(t); const vm = await f.add('bios');
