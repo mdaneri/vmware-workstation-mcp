@@ -1,6 +1,6 @@
 {
   "name": "vmware-workstation-plugin-dev",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "license": "MIT",
   "repository": {
@@ -14,14 +14,17 @@
     "smoke": "node scripts/smoke.mjs",
     "smoke:rest": "node scripts/smoke-rest.mjs",
     "test:console:live": "node scripts/live-console.mjs",
+    "test:ovf:live": "node scripts/live-ovf.mjs",
     "validate": "node scripts/validate-package.mjs && node scripts/validate-credentials.mjs",
     "prepackage": "npm run build && npm run validate",
     "package": "node scripts/package-plugin.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.2",
+    "@xmldom/xmldom": "0.9.12",
     "pngjs": "7.0.0",
     "rfb2": "1.1.0",
+    "tar-stream": "3.2.2",
     "zod": "4.6.7"
   },
   "devDependencies": {

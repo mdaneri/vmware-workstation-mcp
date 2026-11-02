@@ -354,6 +354,433 @@
       }
     },
     {
+      "name": "ovf_tool_status",
+      "description": "Discover optional local VMware OVF Tool, version and supported flags. VMWARE_OVFTOOL_PATH overrides automatic discovery with an absolute executable path.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ovf_inspect",
+      "description": "Start a read-only background appliance probe. job_status.result reports hardware, disks, NICs, properties, deployment options and manifest checks. Local flat OVF/OVA packages only.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Absolute local OVF/OVA file path; URLs are not accepted."
+          },
+          "timeout_seconds": {
+            "default": 3600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          }
+        },
+        "required": [
+          "source"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ovf_validate",
+      "description": "Start read-only local OVF/OVA schema and manifest validation. Returns a job ID. Remote-host compatibility, signer trust and guest boot are not established.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Absolute local OVF/OVA file path; URLs are not accepted."
+          },
+          "timeout_seconds": {
+            "default": 3600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          }
+        },
+        "required": [
+          "source"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ovf_import",
+      "description": "Start an OVF/OVA import into a NEW VM directory. Supports typed network/property mappings and explicit EULA acceptance. Registration through REST and headless power-on are opt-in. Returns a job ID; poll job_status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Absolute local OVF/OVA file path; URLs are not accepted."
+          },
+          "directory": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "NEW output directory; parent must exist."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "network_mappings": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
+          },
+          "property_mappings": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
+          },
+          "property_profile": {
+            "description": "Local credentials.json ovf_properties profile; use for sensitive deployment properties.",
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,31}$"
+          },
+          "deployment_option": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "accept_eulas": {
+            "default": false,
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "default": 3600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          },
+          "register": {
+            "default": false,
+            "type": "boolean"
+          },
+          "power_on": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "source",
+          "directory"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ovf_export",
+      "description": "Start a powered-off VMX export to OVF/OVA. Refuses snapshots, locks, saved state, external backings, encryption and vTPM. OVF needs a new parent directory. Only OVA permits explicit overwrite=true. Returns a job ID.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "destination": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Absolute .ova or .ovf output path. OVF requires a NEW parent directory."
+          },
+          "overwrite": {
+            "default": false,
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "default": 3600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          }
+        },
+        "required": [
+          "vmx",
+          "destination"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ovf_convert",
+      "description": "Start a local OVF/OVA/VMX conversion using VMware OVF Tool. VMX sources require power-off and no snapshots. OVF/VMX targets need new parent directories; overwrite is limited to OVA. Returns a job ID.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Absolute local .ovf, .ova or .vmx source."
+          },
+          "destination": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Absolute .ovf, .ova or .vmx target. OVF/VMX require a NEW parent directory."
+          },
+          "overwrite": {
+            "default": false,
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "network_mappings": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
+          },
+          "property_mappings": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
+          },
+          "property_profile": {
+            "description": "Local credentials.json ovf_properties profile; use for sensitive deployment properties.",
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,31}$"
+          },
+          "deployment_option": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "accept_eulas": {
+            "default": false,
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "default": 3600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          }
+        },
+        "required": [
+          "source",
+          "destination"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "job_status",
+      "description": "Read a background job state, observed progress and final result/error. Prior-server-session job IDs report interrupted with unknown outcome.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "job_list",
+      "description": "List up to 100 background jobs retained in this server session. Job results and logs are memory-only.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "job_cancel",
+      "description": "Request cancellation of a background job and its native OVF Tool process. Partial files and registration/power changes may remain; inspect before retrying.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "job_logs",
+      "description": "Read bounded, redacted background job output. Raw probe metadata/property defaults are omitted. A truncated log is explicitly marked.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
       "name": "list_lan_segments",
       "description": "List the current host user LAN segment catalog. Optionally supply vmx to inspect adapter indices and segment associations, including orphaned IDs. Does not scan disks or change VMs.",
       "inputSchema": {

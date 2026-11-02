@@ -10,6 +10,9 @@ import { VMFiles, createVMSchema, configureVMSchema } from './vm-files.mjs';
 import { ConsoleManager, consoleSchemas } from './console.mjs';
 import { localFileProtector } from './local-file-security.mjs';
 import { LanSegments, lanSegmentSchemas } from './lan-segments.mjs';
+import { OvfManager, ovfSchemas } from './ovf.mjs';
+import { JobManager, jobSchemas } from './jobs.mjs';
+import { findVMwareExecutable } from './host-platform.mjs';
 
 const backend = new Workstation();
 const credentials = new Credentials();
@@ -17,7 +20,9 @@ const rest = new RestClient({ credentials, backend });
 const vmFiles = new VMFiles(backend, { protectSensitiveFile: localFileProtector(backend) });
 const lanSegments = new LanSegments(backend, vmFiles, { protectFile: localFileProtector(backend) });
 const consoles = new ConsoleManager({ backend, credentials, rest });
-const server = new McpServer({ name: 'vmware-workstation', version: '0.4.0' });
+const jobs = new JobManager({ redact: text => credentials.redact(text) });
+const ovf = new OvfManager({ backend, credentials, jobs, rest });
+const server = new McpServer({ name: 'vmware-workstation', version: '0.5.0' });
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
 function tool(name, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false) {
@@ -42,6 +47,17 @@ tool('console_scroll', 'Send RFB wheel events to the VM at the last console poin
 tool('console_status', 'Check this VM native loopback-only VNC configuration and authenticated RFB session. Does not start the VM or modify its VNC settings.', consoleSchemas.console_status, true, a => consoles.status(a.vm_id));
 tool('create_vm', 'Create a new blank VMX and sparse virtual disk in a NEW directory using VMware Virtual Disk Manager. Configure CPUs, memory, firmware, networking and optional ISO. Does not install a guest OS or power on/register the VM.', createVMSchema, false, a => vmFiles.create(a), false);
 tool('configure_vm', 'Edit a powered-off UTF-8 VMX with a backup. Set arbitrary VMX key/value strings or null to remove keys. Refuses running, locked, or detected suspended VMs. Use for CPU, memory, boot media, network and other VMX configuration.', configureVMSchema, false, a => vmFiles.configure(a));
+
+tool('ovf_tool_status', 'Discover optional local VMware OVF Tool, version and supported flags. VMWARE_OVFTOOL_PATH overrides automatic discovery with an absolute executable path.', ovfSchemas.ovf_tool_status, true, () => ovf.status());
+tool('ovf_inspect', 'Start a read-only background appliance probe. job_status.result reports hardware, disks, NICs, properties, deployment options and manifest checks. Local flat OVF/OVA packages only.', ovfSchemas.ovf_inspect, true, a => ovf.start('ovf_inspect', a));
+tool('ovf_validate', 'Start read-only local OVF/OVA schema and manifest validation. Returns a job ID. Remote-host compatibility, signer trust and guest boot are not established.', ovfSchemas.ovf_validate, true, a => ovf.start('ovf_validate', a));
+tool('ovf_import', 'Start an OVF/OVA import into a NEW VM directory. Supports typed network/property mappings and explicit EULA acceptance. Registration through REST and headless power-on are opt-in. Returns a job ID; poll job_status.', ovfSchemas.ovf_import, false, a => ovf.start('ovf_import', a), false);
+tool('ovf_export', 'Start a powered-off VMX export to OVF/OVA. Refuses snapshots, locks, saved state, external backings, encryption and vTPM. OVF needs a new parent directory. Only OVA permits explicit overwrite=true. Returns a job ID.', ovfSchemas.ovf_export, false, a => ovf.start('ovf_export', a));
+tool('ovf_convert', 'Start a local OVF/OVA/VMX conversion using VMware OVF Tool. VMX sources require power-off and no snapshots. OVF/VMX targets need new parent directories; overwrite is limited to OVA. Returns a job ID.', ovfSchemas.ovf_convert, false, a => ovf.start('ovf_convert', a));
+tool('job_status', 'Read a background job state, observed progress and final result/error. Prior-server-session job IDs report interrupted with unknown outcome.', jobSchemas.job_status, true, a => jobs.status(a.job_id));
+tool('job_list', 'List up to 100 background jobs retained in this server session. Job results and logs are memory-only.', jobSchemas.job_list, true, () => jobs.list());
+tool('job_cancel', 'Request cancellation of a background job and its native OVF Tool process. Partial files and registration/power changes may remain; inspect before retrying.', jobSchemas.job_cancel, false, a => jobs.cancel(a.job_id));
+tool('job_logs', 'Read bounded, redacted background job output. Raw probe metadata/property defaults are omitted. A truncated log is explicitly marked.', jobSchemas.job_logs, true, a => jobs.logs(a.job_id));
 
 tool('list_lan_segments', 'List the current host user LAN segment catalog. Optionally supply vmx to inspect adapter indices and segment associations, including orphaned IDs. Does not scan disks or change VMs.', lanSegmentSchemas.list_lan_segments, true, a => lanSegments.list(a));
 tool('create_lan_segment', 'Create a named private LAN segment in Workstation preferences with a backup, or return the uniquely named existing segment. Close the Workstation/Player GUI first. Does not create a VMnet, DHCP server or VM adapter.', lanSegmentSchemas.create_lan_segment, false, a => lanSegments.create(a), false);
@@ -82,12 +98,17 @@ tool('workstation_capabilities', 'Show full vmrun/REST tool coverage, compare th
     consoleTools: Object.keys(consoleSchemas),
     lanSegmentTools: Object.keys(lanSegmentSchemas),
     lanSegmentPreferencesPath: lanSegments.filename,
+    ovfTool: await ovf.status(),
+    ovfTools: Object.keys(ovfSchemas),
+    backgroundJobTools: Object.keys(jobSchemas),
+    diskManager: await findVMwareExecutable('vmware-vdiskmanager', { env: backend.env, beside: await backend.executable() }).then(executable => ({ available: true, executable, features: ['create_vm sparse disk creation; advanced disk tools are not implemented'] })).catch(error => ({ available: false, error: error.message })),
     note: 'Coverage describes callable implementations. It does not prove a REST service is running, credentials work, or guest operations succeed.',
   };
 });
-process.stdin.once('end', () => consoles.close());
-process.once('SIGTERM', () => { consoles.close(); process.exit(0); });
-process.once('SIGINT', () => { consoles.close(); process.exit(0); });
+async function shutdown() { consoles.close(); await jobs.close(); }
+process.stdin.once('end', () => { void shutdown(); });
+process.once('SIGTERM', () => { void shutdown().finally(() => process.exit(0)); });
+process.once('SIGINT', () => { void shutdown().finally(() => process.exit(0)); });
 server.connect(new StdioServerTransport()).catch(error => {
   console.error(error);
   process.exitCode = 1;
