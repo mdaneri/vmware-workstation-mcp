@@ -169,6 +169,19 @@ test('VMX sources reject running, locked, suspended, encrypted, vTPM, snapshot a
   await assert.rejects(f.ovf.vmSource(f.vmx), /raw/);
 });
 
+test('VMX exports skip stale backings on disabled devices regardless of presence-value case', async t => {
+  const f = await fixture(t);
+  for (const [index, presence] of ['FALSE', 'false', 'FaLsE'].entries()) {
+    await fs.writeFile(f.vmx, `SATA0:0.PRESENT = "${presence}"\nSATA0:0.fileName = "removed.iso"\n`);
+    const done = await finish(f, await f.ovf.start('ovf_export', { vmx: f.vmx, destination: path.join(f.root, `export-${index}.ova`) }));
+    assert.equal(done.state, 'succeeded', done.error);
+  }
+  for (const presence of ['TRUE', 'true', 'TrUe', undefined]) {
+    await fs.writeFile(f.vmx, `${presence ? `sata0:0.present = "${presence}"\n` : ''}sata0:0.fileName = "removed.iso"\n`);
+    await assert.rejects(f.ovf.vmSource(f.vmx), /existing file/);
+  }
+});
+
 test('destination space checks fail before creating output and failed transfers retain partial output safely', async t => {
   const f = await fixture(t); const destination = path.join(f.root, 'new', 'output.ovf');
   f.ovf.space = async () => ({ bavail: 0, bsize: 4096 });
@@ -188,6 +201,38 @@ test('sensitive property profiles are resolved locally and redacted from job log
   const done = await finish(f, job); assert.equal(done.state, 'succeeded', done.error);
   assert.doesNotMatch(f.jobs.logs(job.job_id).log, new RegExp(secret)); assert.match(f.jobs.logs(job.job_id).log, /REDACTED/);
   assert.ok((await f.calls())[1].includes(`--prop:password=${secret}`));
+});
+
+test('profile secrets overlapping native protocol, size metadata and target paths do not corrupt imports', async t => {
+  for (const secret of ['SUCCESS', '1024', 'nested']) await t.test(secret, async t => {
+    const f = await fixture(t);
+    await fs.writeFile(f.credentials.filename, JSON.stringify({ ovf_properties: { lab: { password: secret } } }));
+    const directory = path.join(f.root, 'imported');
+    const job = await f.ovf.start('ovf_import', { source: f.source, directory, property_profile: 'lab' });
+    const done = await finish(f, job);
+    assert.equal(done.state, 'succeeded', done.error);
+    assert.equal(done.result.destination, path.join(directory, 'nested', 'machine.vmx'));
+    assert.equal((await fs.stat(done.result.destination)).isFile(), true);
+    assert.equal(f.jobs.logs(job.job_id).log.includes(secret), false);
+    assert.match(f.jobs.logs(job.job_id).log, /REDACTED/);
+    // A later probe reuses the remembered secret but must still parse numeric metadata intact.
+    const probe = await finish(f, await f.ovf.start('ovf_inspect', { source: f.source }));
+    assert.equal(probe.state, 'succeeded', probe.error);
+    assert.equal(probe.result.metadata.sizes.flat, '1024');
+  });
+});
+
+test('errors remain redacted after raw native protocol parsing', async t => {
+  const f = await fixture(t); const secret = 'SUCCESS';
+  await fs.writeFile(f.credentials.filename, JSON.stringify({ ovf_properties: { lab: { password: secret } } }));
+  f.ovf.rest.request = async () => { throw new Error(`Registration rejected ${secret}`); };
+  const job = await f.ovf.start('ovf_import', { source: f.source, directory: path.join(f.root, 'imported'), property_profile: 'lab', register: true });
+  const done = await finish(f, job);
+  assert.equal(done.state, 'failed');
+  assert.match(done.error, /post-import action failed/);
+  assert.match(done.error, /Registration rejected \[REDACTED\]/);
+  assert.equal(done.error.includes(secret), false);
+  assert.equal(f.jobs.logs(job.job_id).log.includes(secret), false);
 });
 
 test('jobs enforce source conflicts, cancellation, native child timeout, shutdown and prior-session interruption', async t => {

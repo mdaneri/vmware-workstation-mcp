@@ -103,7 +103,9 @@ export class JobManager {
         if (job.controller.signal.aborted) { reject(new Error('Process interrupted.')); return; }
         if (tooLarge) { reject(new Error('OVF Tool output exceeded 1 MiB; process stopped. Partial files may remain.')); return; }
         if (startError) { reject(new Error('Cannot start OVF Tool. Check installation and permissions.')); return; }
-        resolve({ code, signal, output: this.redact(output) });
+        // Machine records must remain intact for internal parsing (even if a secret is
+        // "SUCCESS" or a size/path substring). Logs, errors and MCP responses redact at their output boundaries.
+        resolve({ code, signal, output });
       });
       if (job.controller.signal.aborted) stop();
     });

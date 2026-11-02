@@ -54908,7 +54908,7 @@ var OvfManager = class {
       if (!isWithin(import_node_path9.default.dirname(vmx3), directory)) throw new Error("External VM working/snapshot directories are unsupported.");
     }
     if (Object.keys(config2).some((name2) => /^(bios440|efi32|efi64)\.filename$/.test(name2))) throw new Error("Custom firmware file backings are unsupported.");
-    for (const [name2, value] of Object.entries(config2)) if ((/\.filename$/.test(name2) || ["nvram", "extendedconfigfile"].includes(name2)) && value && config2[name2.replace(/filename$/, "present")] !== "false") {
+    for (const [name2, value] of Object.entries(config2)) if ((/\.filename$/.test(name2) || ["nvram", "extendedconfigfile"].includes(name2)) && value && config2[name2.replace(/filename$/, "present")]?.toLowerCase() !== "false") {
       if (value.toLowerCase() === "auto detect") continue;
       const file2 = await inspectFile(import_node_path9.default.resolve(import_node_path9.default.dirname(vmx3), value));
       if (import_node_path9.default.extname(file2).toLowerCase() === ".vmdk") {
@@ -55201,7 +55201,7 @@ var JobManager = class {
           reject(new Error("Cannot start OVF Tool. Check installation and permissions."));
           return;
         }
-        resolve({ code, signal, output: this.redact(output2) });
+        resolve({ code, signal, output: output2 });
       });
       if (job.controller.signal.aborted) stop();
     });

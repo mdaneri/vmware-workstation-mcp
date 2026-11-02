@@ -129,7 +129,7 @@ export class OvfManager {
       if (!isWithin(path.dirname(vmx), directory)) throw new Error('External VM working/snapshot directories are unsupported.');
     }
     if (Object.keys(config).some(name => /^(bios440|efi32|efi64)\.filename$/.test(name))) throw new Error('Custom firmware file backings are unsupported.');
-    for (const [name, value] of Object.entries(config)) if ((/\.filename$/.test(name) || ['nvram', 'extendedconfigfile'].includes(name)) && value && config[name.replace(/filename$/, 'present')] !== 'false') {
+    for (const [name, value] of Object.entries(config)) if ((/\.filename$/.test(name) || ['nvram', 'extendedconfigfile'].includes(name)) && value && config[name.replace(/filename$/, 'present')]?.toLowerCase() !== 'false') {
       if (value.toLowerCase() === 'auto detect') continue;
       const file = await inspectFile(path.resolve(path.dirname(vmx), value));
       if (path.extname(file).toLowerCase() === '.vmdk') {
