@@ -32,6 +32,8 @@ Pass environment settings to the MCP process; desktop applications may not inher
 
 ## Credentials and guest operations
 
+LAN segments use `~/.vmware/preferences`, with optional absolute `VMWARE_PREFERENCES_PATH` override. See the [LAN segment workflows](README.md#lan-segments). Listing works while the GUI is open; mutation requires the Workstation/Player GUI to be closed, verified through native `/proc/<pid>/comm` metadata. Adapter changes additionally require a powered-off, unlocked UTF-8 VMX. The plugin preserves unrelated preferences, supports UTF-8/Windows-1252 catalogs, and creates private catalog backups/replacements. Restricted `/proc` access can prevent the process check; it fails closed.
+
 Linux credentials default to `${XDG_CONFIG_HOME:-$HOME/.config}/vmware-workstation-mcp/credentials.json`; relative `XDG_CONFIG_HOME` values are ignored. `VMWARE_CREDENTIALS_FILE` overrides the filename. Files must be regular, owned by your account, **mode 600**, with no symlink or extra hard links. Newly created configuration directories have mode 700. The JSON structure and environment overrides match Windows.
 
 Run from the extracted plugin directory:

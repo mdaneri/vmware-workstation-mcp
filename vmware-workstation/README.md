@@ -1,6 +1,6 @@
 # VMware Workstation
 
-Local Windows and Linux MCP plugin, version 0.3.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 93 tools: the original 87 tools plus six [direct native VNC/RFB console tools](console.md). All original tool names, input schemas, and annotations remain unchanged. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
+Local Windows and Linux MCP plugin, version 0.4.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 98 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), and five [LAN segment tools](#lan-segments). All original tool names, input schemas, and annotations remain unchanged. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
 
 Requires VMware Workstation with vmrun, Node.js 22.12+, PowerShell 7 for setup helpers, and a host with local stdio MCP support. REST tools additionally need a running, authenticated vmrest service. Guest OS commands need VMware Tools running and a guest OS account; console tools need neither and work before the OS boots. The plugin runs as your local user and opens no HTTP listener. Native VNC listeners are configured on the VM itself and restricted to localhost.
 
@@ -180,6 +180,56 @@ Use `configure_vm` to edit an existing powered-off VM locally. The tool creates 
 
 VMX editing does not resize VMDKs or guest filesystems; use the corresponding VMware workflow for disk expansion. Arbitrary VMX settings still need to form a valid, compatible VMware configuration. The tool detects concurrent writes before replacement, but cannot exclude another VMware process starting at the same time.
 
+## LAN segments
+
+Use LAN segments to connect a group of lab VMs on a private network. These are separate from NAT, host-only, and custom VMnet networks. Workstation does not supply DHCP on a LAN segment; configure static guest addresses or run your own DHCP service in a guest.
+
+Version 0.4.0 adds five tools. Listing is read-only and works with the Workstation GUI open. For any change, close **all Workstation/Player GUI windows** first so cached settings cannot overwrite offline edits. Fully power off a VM before attaching or detaching an adapter; running, locked, and detected suspended VMs are refused. No VMware UI automation or REST service is involved.
+
+For example, connect two existing adapters to a segment called `Lab backend`:
+
+```json
+{ "tool": "create_lan_segment", "arguments": { "name": "Lab backend" } }
+```
+
+```json
+{ "tool": "list_lan_segments", "arguments": { "vmx": "C:/VMs/app/machine.vmx" } }
+```
+
+```json
+{ "tool": "attach_vm_adapter_to_lan_segment", "arguments": { "vmx": "C:/VMs/app/machine.vmx", "adapter": 1, "segment": "Lab backend" } }
+```
+
+```json
+{ "tool": "attach_vm_adapter_to_lan_segment", "arguments": { "vmx": "C:/VMs/db/machine.vmx", "adapter": 0, "segment": "Lab backend" } }
+```
+
+`adapter` is the **zero-based VMX index**: `0` means `ethernet0` and `1` means `ethernet1`. Use the optional `vmx` on `list_lan_segments` to inspect adapter indices, names and segment IDs; omit it to list just the catalog. The tools preserve other adapters, hardware and MAC settings. Attach clears an obsolete custom VMnet setting and enables connection at next boot. It uses an existing present adapter; add adapters separately through the existing VM configuration workflow. Creating a uniquely named existing segment returns its ID without creating a duplicate. Duplicate names require selection by `id` (the VMware `pvnID`) from the listing.
+
+To detach an adapter while preserving it, choose its replacement network:
+
+```json
+{ "tool": "detach_vm_adapter_from_lan_segment", "arguments": { "vmx": "C:/VMs/app/machine.vmx", "adapter": 1, "segment": "Lab backend", "network": "hostonly" } }
+```
+
+The adapter is left **disconnected**, including at the next boot (`connected` and `startConnected` are `FALSE`). Replacement modes are `nat` (default), `bridged`, `hostonly`, and `custom`; `custom` requires `vmnet`, for example `"vmnet7"`. Reconnect it explicitly when ready. Detach also cleans a matching segment ID from a disabled adapter without enabling it. If its catalog entry was deleted elsewhere, supply the orphaned `pvnID` directly.
+
+Detach every reference before removing a segment:
+
+```json
+{ "tool": "detach_vm_adapter_from_lan_segment", "arguments": { "vmx": "C:/VMs/db/machine.vmx", "adapter": 0, "segment": "Lab backend" } }
+```
+
+```json
+{ "tool": "remove_lan_segment", "arguments": { "segment": "Lab backend", "vmx_paths": ["C:/VMs/app/machine.vmx", "C:/VMs/db/machine.vmx"] } }
+```
+
+Removal always checks registered and running VMs, plus optional `vmx_paths` for unregistered VMs. It refuses remaining IDs, including disabled/disconnected adapters, and unreadable, encrypted, unsupported or out-of-root VM files. Missing stale inventory files are reported and skipped; a missing explicitly supplied VMX is an error. It cannot discover other unregistered VMs or VMs owned by other host users, so supply all relevant unregistered VMX paths. Missing or malformed inventory blocks removal. There is no force removal or automatic mass detach.
+
+The catalog is per host user: `%APPDATA%/VMware/preferences.ini` on Windows or `~/.vmware/preferences` on Linux; `VMWARE_PREFERENCES_PATH` overrides it with an absolute path. Catalog edits support UTF-8 and Windows-1252, preserving unrelated bytes and line endings. Names must fit the existing encoding; other encodings are refused rather than converted. Adapter VMX files must be UTF-8. Changes create adjacent uniquely named backups (initializing missing preferences has no previous file to back up), private catalog replacement files, and a temporary catalog lock. Never remove a lock while an operation is active. Concurrent file changes abort the write; other VMware processes can still race the final replacement, so keep external configuration tools idle during changes.
+
+Automated tests exercise catalog changes and adapter transitions in temporary fixtures, native process guards, and bundled MCP discovery/listing. Real LAN segment mutations and guest connectivity have not been live-validated; the implementation matches the catalog format observed read-only on Workstation 26.0.1.
+
 ## Scope and operation behavior
 
 | Variable | Meaning |
@@ -187,6 +237,7 @@ VMX editing does not resize VMDKs or guest filesystems; use the corresponding VM
 | `VMRUN_PATH` | Absolute vmrun.exe path; default discovery checks Program Files and PATH |
 | `VMWARE_VDISKMANAGER_PATH` | Optional absolute disk-manager path for blank VM creation; otherwise beside vmrun |
 | `VMWARE_INVENTORY_PATH` | Override inventory.vmls location |
+| `VMWARE_PREFERENCES_PATH` | Absolute current-user preferences override for the LAN segment catalog |
 | `VMWARE_ALLOWED_ROOTS` | Semicolon-separated absolute directories for VMX targets and CLI clone/template destinations |
 | `VMWARE_ALLOWED_HOST_ROOTS` | Semicolon-separated directories for file transfer, screenshot, and shared-folder host paths |
 | `VMWARE_CREDENTIALS_FILE` | Optional absolute credentials JSON path |

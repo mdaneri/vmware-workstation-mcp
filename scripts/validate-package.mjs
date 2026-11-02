@@ -5,6 +5,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import Ajv from 'ajv';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { writeGenerated } from './write-generated.mjs';
 
 const pluginRoot = path.resolve('vmware-workstation');
 const ajv = new Ajv2020({ strict: false });
@@ -28,8 +29,8 @@ try {
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [path.join(pluginRoot, 'server/server.cjs')], stderr: 'pipe' }));
   assert.equal(client.getServerVersion().version, manifest.version, 'Bundled server version must match plugin');
   const { tools } = await client.listTools();
-  assert.equal(tools.length, 93);
-  assert.equal(new Set(tools.map(t => t.name)).size, 93);
+  assert.equal(tools.length, 98);
+  assert.equal(new Set(tools.map(t => t.name)).size, 98);
   const legacy = JSON.parse(await fs.readFile('tests/fixtures/legacy-tool-schemas.json', 'utf8'));
   for (const prior of legacy.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Backward compatibility: ${prior.name}`);
   for (const tool of tools) {
@@ -37,6 +38,6 @@ try {
     assert.equal(tool.inputSchema.additionalProperties, false, `${tool.name}: tool arguments must be strict`);
     assert.equal(typeof tool.annotations.readOnlyHint, 'boolean');
   }
-  await fs.writeFile('vmware-workstation/tool-schemas.json', JSON.stringify({ tools }, null, 2) + '\n');
-  console.log('Both portable manifests and all 93 MCP schemas validated; all original 87 tool schemas/annotations are unchanged.');
+  await writeGenerated('vmware-workstation/tool-schemas.json', JSON.stringify({ tools }, null, 2) + '\n');
+  console.log('Both portable manifests and all 98 MCP schemas validated; all original 87 tool schemas/annotations are unchanged.');
 } finally { await client.close(); }

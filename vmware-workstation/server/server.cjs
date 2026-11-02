@@ -2812,9 +2812,9 @@ var require_validate = __commonJS({
       }
       let expr = data;
       const segments = jsonPointer.split("/");
-      for (const segment of segments) {
-        if (segment) {
-          data = (0, codegen_1._)`${data}${(0, codegen_1.getProperty)((0, util_1.unescapeJsonPointer)(segment))}`;
+      for (const segment2 of segments) {
+        if (segment2) {
+          data = (0, codegen_1._)`${data}${(0, codegen_1.getProperty)((0, util_1.unescapeJsonPointer)(segment2))}`;
           expr = (0, codegen_1._)`${expr} && ${data}`;
         }
       }
@@ -3262,8 +3262,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path7) {
-      let input2 = path7;
+    function removeDotSegments(path8) {
+      let input2 = path8;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -3337,18 +3337,18 @@ var require_utils = __commonJS({
       }
       return output2.join("");
     }
-    function removeDotSegmentsRelative(path7) {
-      if (path7 === "" || path7[0] === "/") {
-        return removeDotSegments(path7);
+    function removeDotSegmentsRelative(path8) {
+      if (path8 === "" || path8[0] === "/") {
+        return removeDotSegments(path8);
       }
-      const segments = path7.split("/");
+      const segments = path8.split("/");
       const last = segments.length - 1;
       const output2 = [];
       let trailingDirectory = false;
       for (let i = 0; i <= last; i++) {
-        const segment = segments[i];
-        if (segment === "." || segment === "..") {
-          if (segment === "..") {
+        const segment2 = segments[i];
+        if (segment2 === "." || segment2 === "..") {
+          if (segment2 === "..") {
             if (output2.length !== 0 && output2[output2.length - 1] !== "..") {
               output2.pop();
             } else {
@@ -3357,7 +3357,7 @@ var require_utils = __commonJS({
           }
           trailingDirectory = i === last;
         } else {
-          output2.push(segment);
+          output2.push(segment2);
         }
       }
       if (trailingDirectory && output2[output2.length - 1] !== "..") {
@@ -3704,8 +3704,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path7 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path7 && path7 !== "/" ? path7 : void 0;
+        const path8 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path8 && path8 !== "/" ? path8 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -7242,12 +7242,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name2}"`);
       return f;
     };
-    function addFormats(ajv, list, fs8, exportName) {
+    function addFormats(ajv, list, fs9, exportName) {
       var _a3;
       var _b;
       (_a3 = (_b = ajv.opts.code).formats) !== null && _a3 !== void 0 ? _a3 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
-        ajv.addFormat(f, fs8[f]);
+        ajv.addFormat(f, fs9[f]);
     }
     module2.exports = exports2 = formatsPlugin;
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -9717,8 +9717,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path7, errorMaps, issueData } = params;
-  const fullPath = [...path7, ...issueData.path || []];
+  const { data, path: path8, errorMaps, issueData } = params;
+  const fullPath = [...path8, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -9833,11 +9833,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path7, key) {
+  constructor(parent, value, path8, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path7;
+    this._path = path8;
     this._key = key;
   }
   get path() {
@@ -13792,10 +13792,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path7) {
-  if (!path7)
+function getElementAtPath(obj, path8) {
+  if (!path8)
     return obj;
-  return path7.reduce((acc, key) => acc?.[key], obj);
+  return path8.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -14135,11 +14135,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path7, issues) {
+function prefixIssues(path8, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path7);
+    iss.path.unshift(path8);
     return iss;
   });
 }
@@ -14601,16 +14601,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path7 = []) => {
+  const processError = (error63, path8 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path7, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path8, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
       } else {
-        const fullpath = [...path7, ...issue2.path];
+        const fullpath = [...path8, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -14649,17 +14649,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path7 = []) => {
+  const processError = (error63, path8 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path7, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path8, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path8, ...issue2.path]);
       } else {
-        const fullpath = [...path7, ...issue2.path];
+        const fullpath = [...path8, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -14698,8 +14698,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path7 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path7) {
+  const path8 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path8) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -28531,7 +28531,7 @@ function _stringbool(Classes, _params) {
   const _String = Classes.String ?? $ZodString;
   const stringSchema = new _String({ type: "string", error: params.error });
   const booleanSchema = new _Boolean({ type: "boolean", error: params.error });
-  const codec2 = new _Codec({
+  const codec3 = new _Codec({
     type: "pipe",
     in: stringSchema,
     out: booleanSchema,
@@ -28549,7 +28549,7 @@ function _stringbool(Classes, _params) {
           expected: "stringbool",
           values: [...truthySet, ...falsySet],
           input: payload.value,
-          inst: codec2,
+          inst: codec3,
           continue: false
         });
         return {};
@@ -28564,10 +28564,10 @@ function _stringbool(Classes, _params) {
     }),
     error: params.error
   });
-  codec2._zod.bag.truthy = truthyArray;
-  codec2._zod.bag.falsy = falsyArray;
-  codec2._zod.bag.case = params.case ?? "insensitive";
-  return codec2;
+  codec3._zod.bag.truthy = truthyArray;
+  codec3._zod.bag.falsy = falsyArray;
+  codec3._zod.bag.case = params.case ?? "insensitive";
+  return codec3;
 }
 // @__NO_SIDE_EFFECTS__
 function _stringFormat(Class2, format, fnOrRegex, _params = {}) {
@@ -28687,8 +28687,8 @@ function processSchema(schema, ctx, _params = { path: [], schemaPath: [] }) {
   const _result = ctx.seen.get(schema);
   return _result.schema;
 }
-function encodeJSONPointerSegment(segment) {
-  return segment.replace(/~/g, "~0").replace(/\//g, "~1");
+function encodeJSONPointerSegment(segment2) {
+  return segment2.replace(/~/g, "~0").replace(/\//g, "~1");
 }
 function extractDefs(ctx, schema) {
   const root = ctx.seen.get(schema);
@@ -30250,11 +30250,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path7) {
-  if (path7.length === 0) {
+function getDotPath(path8) {
+  if (path8.length === 0) {
     return "object root";
   }
-  return path7.reduce((acc, seg, index) => {
+  return path8.reduce((acc, seg, index) => {
     if (index === 0) {
       return String(seg);
     }
@@ -32184,8 +32184,8 @@ function codec(in_, out, params) {
     reverseTransform: params.encode
   });
 }
-function invertCodec(codec2) {
-  const def = codec2._zod.def;
+function invertCodec(codec3) {
+  const def = codec3._zod.def;
   return new ZodCodec({
     type: "pipe",
     in: def.out,
@@ -32474,20 +32474,20 @@ function detectVersion(schema, defaultTarget) {
 function applyMinItems(items, minItems) {
   return items.map((item, index) => index < minItems ? item : item.optional());
 }
-function decodeJSONPointerSegment(segment) {
-  return segment.replace(/~1/g, "/").replace(/~0/g, "~");
+function decodeJSONPointerSegment(segment2) {
+  return segment2.replace(/~1/g, "/").replace(/~0/g, "~");
 }
 function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path7 = ref.slice(1).split("/").filter(Boolean);
-  if (path7.length === 0) {
+  const path8 = ref.slice(1).split("/").filter(Boolean);
+  if (path8.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path7[0] === defsKey) {
-    const key = path7[1] === void 0 ? void 0 : decodeJSONPointerSegment(path7[1]);
+  if (path8[0] === defsKey) {
+    const key = path8[1] === void 0 ? void 0 : decodeJSONPointerSegment(path8[1]);
     if (!key || !ctx.defs[key]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -38757,6 +38757,9 @@ var import_node_path = __toESM(require("node:path"), 1);
 function inventoryPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
   return env.VMWARE_INVENTORY_PATH || (platform === "win32" ? import_node_path.default.join(env.APPDATA || import_node_path.default.join(home, "AppData", "Roaming"), "VMware", "inventory.vmls") : import_node_path.default.join(home, ".vmware", "inventory.vmls"));
 }
+function preferencesPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
+  return env.VMWARE_PREFERENCES_PATH || (platform === "win32" ? import_node_path.default.join(env.APPDATA || import_node_path.default.join(home, "AppData", "Roaming"), "VMware", "preferences.ini") : import_node_path.default.join(home, ".vmware", "preferences"));
+}
 function credentialsPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
   if (env.VMWARE_CREDENTIALS_FILE) return env.VMWARE_CREDENTIALS_FILE;
   if (platform === "win32") return env.APPDATA ? import_node_path.default.join(env.APPDATA, "VMwareWorkstationPlugin", "credentials.json") : null;
@@ -38947,14 +38950,14 @@ var Workstation = class {
     }
     const key = (value) => process.platform === "win32" ? import_node_path2.default.normalize(value).toLowerCase() : import_node_path2.default.normalize(value);
     const records = /* @__PURE__ */ new Map();
-    for (const [name2, vmx2] of Object.entries(entries)) {
-      if (/^vmlist\d+\.config$/.test(name2) && vmx2 && import_node_path2.default.extname(vmx2).toLowerCase() === ".vmx") {
-        records.set(key(vmx2), { vmx: vmx2, displayName: entries[name2.replace(/\.config$/, ".DisplayName")] || import_node_path2.default.basename(vmx2, import_node_path2.default.extname(vmx2)), registered: true, running: false });
+    for (const [name2, vmx3] of Object.entries(entries)) {
+      if (/^vmlist\d+\.config$/.test(name2) && vmx3 && import_node_path2.default.extname(vmx3).toLowerCase() === ".vmx") {
+        records.set(key(vmx3), { vmx: vmx3, displayName: entries[name2.replace(/\.config$/, ".DisplayName")] || import_node_path2.default.basename(vmx3, import_node_path2.default.extname(vmx3)), registered: true, running: false });
       }
     }
-    for (const vmx2 of running) {
-      const record2 = records.get(key(vmx2)) || { vmx: vmx2, displayName: import_node_path2.default.basename(vmx2, import_node_path2.default.extname(vmx2)), registered: false };
-      records.set(key(vmx2), { ...record2, running: true });
+    for (const vmx3 of running) {
+      const record2 = records.get(key(vmx3)) || { vmx: vmx3, displayName: import_node_path2.default.basename(vmx3, import_node_path2.default.extname(vmx3)), registered: false };
+      records.set(key(vmx3), { ...record2, running: true });
     }
     const vms = await Promise.all([...records.values()].map(async (record2) => {
       try {
@@ -38967,43 +38970,43 @@ var Workstation = class {
     return { vms, warnings, note: "running=false does not distinguish powered off, suspended, or unavailable VMs. Inventory is not a disk scan." };
   }
   async details(input2) {
-    const vmx2 = await this.vmx(input2);
-    const config2 = parseAssignments(await import_promises2.default.readFile(vmx2, "utf8"));
+    const vmx3 = await this.vmx(input2);
+    const config2 = parseAssignments(await import_promises2.default.readFile(vmx3, "utf8"));
     const running = parseCountedList(await this.run(["list"]));
     const realRunning = await Promise.all(running.map(async (file2) => import_promises2.default.realpath(file2).catch(() => file2)));
     const compare = (file2) => process.platform === "win32" ? file2.toLowerCase() : file2;
     const hardware = Object.fromEntries(Object.entries(config2).filter(([key]) => /^(displayName|guestOS|memsize|numvcpus|virtualHW.version|ethernet\d+\.(present|connectionType|vnet)|(?:scsi|sata|ide|nvme)\d+:\d+\.(present|fileName|deviceType))$/.test(key)));
-    return { vmx: vmx2, running: realRunning.some((file2) => compare(file2) === compare(vmx2)), hardware };
+    return { vmx: vmx3, running: realRunning.some((file2) => compare(file2) === compare(vmx3)), hardware };
   }
   async power(input2, action, mode = "soft", gui = false) {
     if (!["start", "stop", "reset", "suspend", "pause", "unpause"].includes(action)) throw new Error("Unsupported power action.");
     if (!["soft", "hard"].includes(mode)) throw new Error("Power mode must be soft or hard.");
-    const vmx2 = await this.vmx(input2);
-    const args = [action, vmx2];
+    const vmx3 = await this.vmx(input2);
+    const args = [action, vmx3];
     if (action === "start") args.push(gui ? "gui" : "nogui");
     if (["stop", "reset", "suspend"].includes(action)) args.push(mode);
     const output2 = await this.run(args, { mutation: true });
-    return { vmx: vmx2, action, output: output2, commandSucceeded: true, note: "vmrun returned successfully; guest application readiness is not established." };
+    return { vmx: vmx3, action, output: output2, commandSucceeded: true, note: "vmrun returned successfully; guest application readiness is not established." };
   }
   async snapshots(input2) {
-    const vmx2 = await this.vmx(input2);
-    return { vmx: vmx2, snapshots: parseCountedList(await this.run(["listSnapshots", vmx2])) };
+    const vmx3 = await this.vmx(input2);
+    return { vmx: vmx3, snapshots: parseCountedList(await this.run(["listSnapshots", vmx3])) };
   }
   async snapshot(input2, action, name2) {
     if (!["snapshot", "revertToSnapshot", "deleteSnapshot"].includes(action)) throw new Error("Unsupported snapshot action.");
     if (typeof name2 !== "string" || !name2.trim() || name2.length > 256 || /[\x00-\x1f]/.test(name2)) throw new Error("Provide a nonblank snapshot name of at most 256 characters without control characters.");
-    const vmx2 = await this.vmx(input2);
+    const vmx3 = await this.vmx(input2);
     if (action !== "snapshot") {
-      const { snapshots } = await this.snapshots(vmx2);
+      const { snapshots } = await this.snapshots(vmx3);
       if (snapshots.filter((value) => value === name2).length !== 1) throw new Error("Snapshot name must identify exactly one existing snapshot; inspect the snapshot tree in Workstation if ambiguous.");
     }
-    return { vmx: vmx2, action, name: name2, output: await this.run([action, vmx2, name2], { mutation: true }), commandSucceeded: true };
+    return { vmx: vmx3, action, name: name2, output: await this.run([action, vmx3, name2], { mutation: true }), commandSucceeded: true };
   }
   async guestIP(input2) {
-    const vmx2 = await this.vmx(input2);
-    const address = (await this.run(["getGuestIPAddress", vmx2])).trim();
+    const vmx3 = await this.vmx(input2);
+    const address = (await this.run(["getGuestIPAddress", vmx3])).trim();
     if (!(0, import_node_net.isIP)(address)) throw new Error("vmrun did not return a valid guest IP address. The VM must be running with VMware Tools available.");
-    return { vmx: vmx2, address };
+    return { vmx: vmx3, address };
   }
 };
 
@@ -39096,17 +39099,17 @@ var Credentials = class {
     if (typeof password !== "string" || !password) throw new Error(`Encrypted VM password profile '${name2}' is not configured.`);
     return password;
   }
-  async console(vmx2, requestedProfile) {
+  async console(vmx3, requestedProfile) {
     const file2 = await this.load();
     const canonical = (value) => process.platform === "win32" ? import_node_path4.default.resolve(value).toLowerCase() : import_node_path4.default.resolve(value);
     const profiles = file2.console || {};
     const resolved = await Promise.all(Object.entries(profiles).map(async ([name3, entry2]) => [name3, typeof entry2?.vmx === "string" ? await import_promises4.default.realpath(entry2.vmx).catch(() => entry2.vmx) : null]));
-    const matches = resolved.filter(([, target]) => target && canonical(target) === canonical(vmx2));
+    const matches = resolved.filter(([, target]) => target && canonical(target) === canonical(vmx3));
     if (!requestedProfile && matches.length > 1) throw new Error("Multiple console profiles identify this VM. Use its configured profile alias as vm_id.");
     const name2 = this.profile(requestedProfile || matches[0]?.[0] || "default");
     const entry = profiles[name2];
     const profileTarget = resolved.find(([profile]) => profile === name2)?.[1];
-    if (profileTarget && canonical(profileTarget) !== canonical(vmx2)) throw new Error("Console credential profile belongs to another VM.");
+    if (profileTarget && canonical(profileTarget) !== canonical(vmx3)) throw new Error("Console credential profile belongs to another VM.");
     const password = this.remember(this.env[`VMWARE_CONSOLE_${name2.toUpperCase()}_PASSWORD`] ?? entry?.password);
     if (typeof password !== "string" || !/^[\x20-\x7e]{1,8}$/.test(password)) throw new Error(`Console password profile '${name2}' must contain 1 to 8 ASCII characters. Configure it locally; never paste passwords into chat.`);
     return { profile: name2, password };
@@ -40467,7 +40470,7 @@ var VMFiles = class {
       const vmrun = await this.backend.executable();
       const diskManager = await findVMwareExecutable("vmware-vdiskmanager", { env: this.backend.env, beside: vmrun });
       await import_promises5.default.mkdir(directory);
-      const vmx2 = import_node_path5.default.join(directory, "machine.vmx");
+      const vmx3 = import_node_path5.default.join(directory, "machine.vmx");
       const disk = import_node_path5.default.join(directory, "disk.vmdk");
       try {
         await this.backend.execute(diskManager, ["-c", "-s", `${a.disk_gb}GB`, "-a", "lsilogic", "-t", "0", disk], { windowsHide: true, shell: false, timeout: a.timeout_seconds * 1e3, maxBuffer: 1024 * 1024, encoding: "utf8" });
@@ -40497,34 +40500,35 @@ var VMFiles = class {
         if (a.network === "custom") settings["ethernet0.vnet"] = a.vmnet;
         if (iso) Object.assign(settings, { "sata0.present": "TRUE", "sata0:0.present": "TRUE", "sata0:0.deviceType": "cdrom-image", "sata0:0.fileName": iso });
         const text = Object.entries(settings).map(([key, value]) => `${key} = "${encodeVMX(value)}"`).join("\n") + "\n";
-        await import_promises5.default.writeFile(vmx2, text, { flag: "wx", encoding: "utf8" });
-        return { created: true, vmx: vmx2, disk, directory, registered: false, poweredOn: false, guestOSInstalled: false, note: "Blank VM and sparse disk created. Open the VMX in Workstation or register through REST; install a guest OS separately." };
+        await import_promises5.default.writeFile(vmx3, text, { flag: "wx", encoding: "utf8" });
+        return { created: true, vmx: vmx3, disk, directory, registered: false, poweredOn: false, guestOSInstalled: false, note: "Blank VM and sparse disk created. Open the VMX in Workstation or register through REST; install a guest OS separately." };
       } catch (error62) {
         throw new Error(`VM creation failed (${error62.code || "disk/configuration error"}). Partial files may remain in ${directory}; inspect before retrying. No existing VM was overwritten.`);
       }
     });
   }
-  async configure(input2, { protectFile } = {}) {
+  async configure(input2, { protectFile, expectedOriginal, beforeCommit } = {}) {
     const a = configureVMSchema.parse(input2);
     return this.exclusive(async () => {
-      const vmx2 = await this.backend.vmx(a.vmx);
-      const details = await this.backend.details(vmx2);
+      const vmx3 = await this.backend.vmx(a.vmx);
+      const details = await this.backend.details(vmx3);
       if (details.running) throw new Error("Power off the VM before editing its VMX.");
-      const lock = `${vmx2}.lck`;
+      const lock = `${vmx3}.lck`;
       try {
         await import_promises5.default.access(lock);
         throw new Error("VMware holds a VMX lock; close or power off the VM before editing.");
       } catch (error62) {
         if (error62.code !== "ENOENT") throw error62;
       }
-      const original = await import_promises5.default.readFile(vmx2, "utf8");
+      const original = await import_promises5.default.readFile(vmx3, "utf8");
+      if (expectedOriginal !== void 0 && original !== expectedOriginal) throw new Error("VMX changed before editing; inspect and retry.");
       const config2 = parseAssignments(original);
       const sensitiveKeys = Object.entries(config2).some(([key, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key) && value) || Object.entries(a.settings).some(([key, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key) && value);
       if (!protectFile && sensitiveKeys) protectFile = this.protectSensitiveFile;
       if (config2[".encoding"] && !/^utf-?8$/i.test(config2[".encoding"])) throw new Error("Local VMX editing supports UTF-8 only. Use REST or convert the VMX encoding explicitly.");
       for (const value of [config2["checkpoint.vmState"], config2["suspend.filename"]].filter(Boolean)) {
         try {
-          await import_promises5.default.access(import_node_path5.default.resolve(import_node_path5.default.dirname(vmx2), value));
+          await import_promises5.default.access(import_node_path5.default.resolve(import_node_path5.default.dirname(vmx3), value));
           throw new Error("VM has a saved/suspended state; fully power it off before editing hardware.");
         } catch (error62) {
           if (error62.code !== "ENOENT") throw error62;
@@ -40550,25 +40554,34 @@ var VMFiles = class {
         seen.add(key);
       }
       for (const [key, update] of updates) if (!seen.has(key) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
-      const mode = (await import_promises5.default.stat(vmx2)).mode & 511;
-      const backup = `${vmx2}.backup-${(0, import_node_crypto.randomUUID)()}`;
+      const mode = (await import_promises5.default.stat(vmx3)).mode & 511;
+      if (beforeCommit) await beforeCommit();
+      const backup = `${vmx3}.backup-${(0, import_node_crypto.randomUUID)()}`;
       if (protectFile) {
         await import_promises5.default.writeFile(backup, "", { flag: "wx", mode: 384 });
         await protectFile(backup);
         await import_promises5.default.writeFile(backup, original);
-      } else await import_promises5.default.copyFile(vmx2, backup, import_node_fs3.constants.COPYFILE_EXCL);
-      const temporary = `${vmx2}.edit-${(0, import_node_crypto.randomUUID)()}`;
+      } else await import_promises5.default.copyFile(vmx3, backup, import_node_fs3.constants.COPYFILE_EXCL);
+      const temporary = `${vmx3}.edit-${(0, import_node_crypto.randomUUID)()}`;
       if (protectFile) {
         await import_promises5.default.writeFile(temporary, "", { flag: "wx", mode: 384 });
         await protectFile(temporary);
       }
       await import_promises5.default.writeFile(temporary, lines.join("\n").replace(/\n*$/, "\n"), { flag: protectFile ? "w" : "wx", mode });
-      if (await import_promises5.default.readFile(vmx2, "utf8") !== original) {
+      if (await import_promises5.default.readFile(vmx3, "utf8") !== original) {
         await import_promises5.default.unlink(temporary);
         throw new Error(`VMX changed during editing; original retained. Backup: ${backup}`);
       }
-      await import_promises5.default.rename(temporary, vmx2);
-      return { vmx: vmx2, updated: true, backup, changedSettings: Object.keys(a.settings), note: "VMX saved while VM was not running and had no detected saved state/VMX lock. Close/reopen its Workstation tab if it has cached settings." };
+      if (beforeCommit) {
+        try {
+          await beforeCommit();
+        } catch (error62) {
+          await import_promises5.default.unlink(temporary);
+          throw error62;
+        }
+      }
+      await import_promises5.default.rename(temporary, vmx3);
+      return { vmx: vmx3, updated: true, backup, changedSettings: Object.keys(a.settings), note: "VMX saved while VM was not running and had no detected saved state/VMX lock. Close/reopen its Workstation tab if it has cached settings." };
     });
   }
 };
@@ -45052,12 +45065,12 @@ var ConsoleManager = class {
   async endpoint(vmID) {
     const file2 = await this.credentials.load();
     const aliases = Object.fromEntries(Object.entries(file2.console || {}).filter(([, entry]) => typeof entry?.vmx === "string").map(([name2, entry]) => [name2, entry.vmx]));
-    const vmx2 = await this.backend.resolveVM(vmID, { aliases, restInventory: this.rest ? async () => {
+    const vmx3 = await this.backend.resolveVM(vmID, { aliases, restInventory: this.rest ? async () => {
       const response = await this.rest.request("GET", "/api/vms");
       if (!Array.isArray(response.data)) throw new Error("REST inventory did not return VM IDs and paths.");
       return response.data;
     } : void 0 });
-    const config2 = Object.fromEntries(Object.entries(parseAssignments(await import_promises7.default.readFile(vmx2, "utf8"))).map(([key2, value]) => [key2.toLowerCase(), value]));
+    const config2 = Object.fromEntries(Object.entries(parseAssignments(await import_promises7.default.readFile(vmx3, "utf8"))).map(([key2, value]) => [key2.toLowerCase(), value]));
     if (String(config2["remotedisplay.vnc.enabled"]).toLowerCase() !== "true") throw new Error("Native VNC is disabled for this VM. Configure it while powered off; console calls never enable VNC or start a VM automatically.");
     const host2 = config2["remotedisplay.vnc.ip"];
     if (!["127.0.0.1", "::1"].includes(host2)) throw new Error("VNC must explicitly bind to 127.0.0.1 or ::1 in the VMX. Wildcard/external listeners are refused.");
@@ -45066,10 +45079,10 @@ var ConsoleManager = class {
     const port = Number(portText);
     if (port < 1024 || port > 65535) throw new Error("VNC port must be between 1024 and 65535.");
     this.credentials.remember(config2["remotedisplay.vnc.password"]);
-    const auth = await this.credentials.console(vmx2, Object.hasOwn(aliases, vmID) ? vmID : void 0);
-    const key = process.platform === "win32" ? vmx2.toLowerCase() : vmx2;
+    const auth = await this.credentials.console(vmx3, Object.hasOwn(aliases, vmID) ? vmID : void 0);
+    const key = process.platform === "win32" ? vmx3.toLowerCase() : vmx3;
     const signature = (0, import_node_crypto4.createHash)("sha256").update(`${host2}:${port}\0${auth.password}`).digest("hex");
-    return { vmx: vmx2, host: host2, port, ...auth, key, signature };
+    return { vmx: vmx3, host: host2, port, ...auth, key, signature };
   }
   async verify(endpoint) {
     const listeners = await this.listenerInspector(this.backend, endpoint);
@@ -45087,14 +45100,14 @@ var ConsoleManager = class {
     const owners = [];
     for (const vm2 of inventory.vms.filter((item) => item.running)) {
       let config2;
-      let vmx2;
+      let vmx3;
       try {
-        vmx2 = await import_promises7.default.realpath(vm2.vmx);
-        config2 = Object.fromEntries(Object.entries(parseAssignments(await import_promises7.default.readFile(vmx2, "utf8"))).map(([key, value]) => [key.toLowerCase(), value]));
+        vmx3 = await import_promises7.default.realpath(vm2.vmx);
+        config2 = Object.fromEntries(Object.entries(parseAssignments(await import_promises7.default.readFile(vmx3, "utf8"))).map(([key, value]) => [key.toLowerCase(), value]));
       } catch {
         throw new Error("Cannot verify VNC port ownership because a running VMX is unreadable.");
       }
-      if (Number(config2["remotedisplay.vnc.port"]) === endpoint.port) owners.push(vmx2);
+      if (Number(config2["remotedisplay.vnc.port"]) === endpoint.port) owners.push(vmx3);
     }
     if (owners.length !== 1 || canonical(owners[0]) !== canonical(endpoint.vmx)) throw new Error("VNC port does not uniquely identify this running VM. Use a unique native VNC port for each VM.");
     return "native worker, unique running VMX port, and VNC password authentication";
@@ -45299,14 +45312,341 @@ var ConsoleManager = class {
   }
 };
 
+// src/lan-segments.mjs
+var import_promises9 = __toESM(require("node:fs/promises"), 1);
+var import_node_path7 = __toESM(require("node:path"), 1);
+var import_node_crypto5 = require("node:crypto");
+var vmx = external_exports.string().min(1).describe("Absolute VMX path. Adapter changes require a powered-off, unlocked UTF-8 VM.");
+var segment = external_exports.string().min(1).max(256).describe("LAN segment name or pvnID returned by list_lan_segments. Use the ID if names are ambiguous.");
+var adapter = external_exports.number().int().min(0).max(255).describe("Zero-based VMX adapter index: 0 means ethernet0, not the REST NIC index.");
+var lanSegmentSchemas = {
+  list_lan_segments: external_exports.object({ vmx: vmx.optional() }).strict(),
+  create_lan_segment: external_exports.object({ name: external_exports.string().min(1).max(256).refine((value) => value === value.trim() && !/[\p{Cc}\p{Cs}]/u.test(value), "Use a nonblank name without control characters or surrounding whitespace.") }).strict(),
+  remove_lan_segment: external_exports.object({ segment, vmx_paths: external_exports.array(vmx).max(1024).default([]).describe("Additional unregistered VMX files to check for references. Registered and running VMs are always checked; detach references before removal.") }).strict(),
+  attach_vm_adapter_to_lan_segment: external_exports.object({ vmx, adapter, segment }).strict(),
+  detach_vm_adapter_from_lan_segment: external_exports.object({
+    vmx,
+    adapter,
+    segment,
+    network: external_exports.enum(["nat", "bridged", "hostonly", "custom"]).default("nat").describe("Replacement network mode. The adapter is left disconnected with startConnected=FALSE."),
+    vmnet: external_exports.string().regex(/^vmnet\d{1,3}$/).optional().describe("Required only for the custom replacement network.")
+  }).strict()
+};
+var idPattern = /^(?:[0-9a-f]{2} ){7}[0-9a-f]{2}-(?:[0-9a-f]{2} ){7}[0-9a-f]{2}$/i;
+var namespace = /^pref\.namedpvns(?:\.|\d+\.)/i;
+var assignment = /^\s*([\w.:-]+)\s*=\s*"([^"\r\n]*)"\s*$/;
+var unescapeBytes = (value) => value.replace(/\|([0-9a-f]{2})/gi, (_, hex3) => String.fromCharCode(parseInt(hex3, 16)));
+var idKey = (id) => id.toLowerCase();
+function codec2(label) {
+  if (!/^(utf-?8|windows-1252)$/i.test(label)) throw new Error("LAN segment preferences support UTF-8 and windows-1252 only; refusing to transcode this preferences file.");
+  const utf8 = /^utf-?8$/i.test(label);
+  const decoder = new TextDecoder(utf8 ? "utf-8" : "windows-1252", { fatal: true });
+  const table = utf8 ? null : new Map(Array.from({ length: 256 }, (_, byte) => [decoder.decode(Uint8Array.of(byte)), byte]));
+  return {
+    decode: (raw) => decoder.decode(Buffer.from(unescapeBytes(raw), "latin1")),
+    encode: (value) => {
+      const bytes = utf8 ? Buffer.from(value, "utf8") : Buffer.from([...value].map((char) => {
+        if (!table.has(char)) throw new Error("The segment name cannot be represented in windows-1252; use a representable name.");
+        return table.get(char);
+      }));
+      return [...bytes].map((byte) => byte === 34 || byte === 124 || byte < 32 ? `|${byte.toString(16).padStart(2, "0").toUpperCase()}` : String.fromCharCode(byte)).join("");
+    }
+  };
+}
+function parseLanPreferences(bytes, defaultEncoding = "UTF-8") {
+  const raw = bytes.toString("latin1");
+  const lines = raw.match(/[^\r\n]*(?:\r\n|\n|$)/g).filter(Boolean);
+  const entries = lines.map((line) => line.replace(/[\r\n]+$/, "").replace(/^\xef\xbb\xbf/, ""));
+  const encodingLines = entries.filter((line) => /^\s*\.encoding\b/i.test(line));
+  if (encodingLines.length > 1 || encodingLines.length && !encodingLines[0].match(assignment)) throw new Error("Malformed or duplicate preferences encoding.");
+  const encoding = encodingLines[0]?.match(assignment)?.[2] || defaultEncoding;
+  const encodingCodec = codec2(encoding);
+  const values = /* @__PURE__ */ new Map();
+  for (const line of entries) {
+    if (!/^\s*pref\.namedpvns/i.test(line)) continue;
+    const match = line.match(assignment);
+    if (!match || !/^pref\.namedpvns(?:\.count|\d+\.(?:name|pvnid))$/i.test(match[1])) throw new Error("Unrecognized LAN segment catalog entry; preferences were not changed.");
+    const key = match[1].toLowerCase();
+    if (values.has(key)) throw new Error("Duplicate LAN segment preference key.");
+    values.set(key, encodingCodec.decode(match[2]));
+  }
+  const count = values.get("pref.namedpvns.count") ?? (values.size ? null : "0");
+  if (!/^\d{1,5}$/.test(count ?? "") || Number(count) > 1e4) throw new Error("Invalid LAN segment catalog count.");
+  if (values.size !== (values.has("pref.namedpvns.count") ? 1 : 0) + Number(count) * 2) throw new Error("LAN segment catalog count does not match its entries.");
+  const segments = [];
+  const ids = /* @__PURE__ */ new Set();
+  for (let index = 0; index < Number(count); index++) {
+    const name2 = values.get(`pref.namedpvns${index}.name`);
+    const id = values.get(`pref.namedpvns${index}.pvnid`);
+    if (!name2?.trim() || !idPattern.test(id || "") || ids.has(idKey(id))) throw new Error("Incomplete or duplicate LAN segment identity.");
+    ids.add(idKey(id));
+    segments.push({ name: name2, id: idKey(id) });
+  }
+  return { lines, encoding, codec: encodingCodec, segments, newline: raw.includes("\r\n") ? "\r\n" : "\n", hasEncoding: !!encodingLines.length };
+}
+function renderPreferences(document, segments) {
+  const bom = document.lines[0]?.startsWith("\xEF\xBB\xBF") ? "\xEF\xBB\xBF" : "";
+  const lines = document.lines.map((line, index) => index === 0 ? line.replace(/^\xef\xbb\xbf/, "") : line).filter((line) => !namespace.test(line.trimStart()));
+  let text = bom + lines.join("");
+  const nl = document.newline;
+  if (text && !text.endsWith("\n")) text += nl;
+  if (!document.hasEncoding) text += `.encoding = "${document.encoding}"${nl}`;
+  text += `pref.namedPVNs.count = "${segments.length}"${nl}`;
+  segments.forEach((entry, index) => {
+    text += `pref.namedPVNs${index}.name = "${document.codec.encode(entry.name)}"${nl}`;
+    text += `pref.namedPVNs${index}.pvnID = "${entry.id}"${nl}`;
+  });
+  return Buffer.from(text, "latin1");
+}
+function resolveSegment(segments, selector) {
+  const matches = segments.filter((entry) => entry.name.toLowerCase() === selector.toLowerCase() || entry.id === selector.toLowerCase());
+  if (matches.length !== 1) throw new Error(matches.length ? "LAN segment name is ambiguous; use its pvnID." : "LAN segment was not found. Use list_lan_segments.");
+  return matches[0];
+}
+async function assertLanGUIClosed(backend2, platform = process.platform, procRoot = "/proc") {
+  let names2;
+  if (platform === "win32") {
+    const result = await backend2.execute("pwsh", ["-NoProfile", "-NonInteractive", "-Command", "$ErrorActionPreference='Stop'; ConvertTo-Json -InputObject @(Get-Process | Where-Object { $_.ProcessName -in @('vmware','vmplayer') } | ForEach-Object { $_.ProcessName }) -Compress"], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4, maxBuffer: 1024 * 1024 });
+    names2 = result.stdout.trim() ? JSON.parse(result.stdout) : [];
+    if (!Array.isArray(names2) || names2.some((name2) => typeof name2 !== "string")) throw new Error("Cannot verify Workstation GUI process state.");
+  } else if (platform === "linux") {
+    names2 = [];
+    for (const pid of (await import_promises9.default.readdir(procRoot)).filter((entry) => /^\d+$/.test(entry))) {
+      try {
+        names2.push((await import_promises9.default.readFile(import_node_path7.default.join(procRoot, pid, "comm"), "utf8")).trim());
+      } catch (error62) {
+        if (error62.code !== "ENOENT" && error62.code !== "ESRCH") throw error62;
+      }
+    }
+  } else throw new Error("LAN segments support Windows and Linux Workstation hosts.");
+  if (names2.some((name2) => /^(?:vmware|vmplayer)(?:\.exe)?$/i.test(name2))) throw new Error("Close the VMware Workstation/Player GUI before changing LAN segments or adapters; its cached settings can overwrite offline edits.");
+}
+var LanSegments = class {
+  constructor(backend2, vmFiles2, { assertGUIClosed = assertLanGUIClosed, protectFile } = {}) {
+    this.backend = backend2;
+    this.vmFiles = vmFiles2;
+    this.assertGUIClosed = () => assertGUIClosed(backend2);
+    this.protectFile = protectFile;
+    this.filename = preferencesPath(backend2.env);
+    this.tail = Promise.resolve();
+  }
+  async readCatalog() {
+    if (!import_node_path7.default.isAbsolute(this.filename) || /[\x00-\x1f]/.test(this.filename)) throw new Error("VMWARE_PREFERENCES_PATH must be an absolute path without control characters.");
+    let bytes = null;
+    try {
+      const stat = await import_promises9.default.lstat(this.filename);
+      if (!stat.isFile() || stat.nlink !== 1 || stat.size > 4 * 1024 * 1024) throw new Error("Preferences must be a regular, unlinked file no larger than 4 MiB.");
+      bytes = await import_promises9.default.readFile(this.filename);
+    } catch (error62) {
+      if (error62.code !== "ENOENT") throw error62;
+    }
+    return { bytes, document: parseLanPreferences(bytes || Buffer.alloc(0), process.platform === "win32" ? "windows-1252" : "UTF-8") };
+  }
+  async unchanged(catalog) {
+    const current = await this.readCatalog();
+    if (catalog.bytes === null ? current.bytes !== null : current.bytes === null || !catalog.bytes.equals(current.bytes)) throw new Error("LAN segment preferences changed concurrently; inspect and retry.");
+  }
+  exclusive(callback) {
+    const job = this.tail.then(async () => {
+      await this.readCatalog();
+      const lock = `${this.filename}.lan-segments.lock`;
+      try {
+        await import_promises9.default.mkdir(lock, { mode: 448 });
+      } catch (error62) {
+        if (error62.code === "EEXIST") throw new Error("LAN segment edit lock exists; another operation may be active. Inspect before removing a stale lock.");
+        throw error62;
+      }
+      try {
+        await this.assertGUIClosed();
+        return await callback();
+      } finally {
+        await import_promises9.default.rmdir(lock);
+      }
+    });
+    this.tail = job.catch(() => {
+    });
+    return job;
+  }
+  async writeCatalog(catalog, segments, beforeCommit) {
+    const bytes = renderPreferences(catalog.document, segments);
+    const backup = catalog.bytes === null ? null : `${this.filename}.backup-${(0, import_node_crypto5.randomUUID)()}`;
+    const temporary = `${this.filename}.edit-${(0, import_node_crypto5.randomUUID)()}`;
+    const write = async (filename, content) => {
+      await import_promises9.default.writeFile(filename, "", { flag: "wx", mode: 384 });
+      if (this.protectFile) await this.protectFile(filename);
+      await import_promises9.default.writeFile(filename, content);
+    };
+    try {
+      if (backup) await write(backup, catalog.bytes);
+      await write(temporary, bytes);
+      if (beforeCommit) await beforeCommit();
+      await this.assertGUIClosed();
+      await this.unchanged(catalog);
+      await import_promises9.default.rename(temporary, this.filename);
+    } catch (error62) {
+      await import_promises9.default.unlink(temporary).catch((cleanup) => {
+        if (cleanup.code !== "ENOENT") throw cleanup;
+      });
+      throw error62;
+    }
+    return { preferencesPath: this.filename, backup };
+  }
+  async readVM(input2) {
+    const vmx3 = await this.backend.vmx(input2);
+    const bytes = await import_promises9.default.readFile(vmx3);
+    const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes);
+    const values = /* @__PURE__ */ new Map();
+    for (const line of text.split(/\r?\n/)) {
+      const match = line.replace(/^\uFEFF/, "").match(assignment);
+      if (!match) {
+        if (/^\s*(?:ethernet\d+\.|\.encoding|checkpoint\.vmstate|suspend\.filename)/i.test(line)) throw new Error("Malformed VM network or state setting.");
+        continue;
+      }
+      const key = match[1].toLowerCase();
+      if (key.startsWith("encryption.")) throw new Error("Encrypted VMX files cannot be inspected safely for LAN segment references.");
+      if (/^(ethernet\d+\.|\.encoding|checkpoint\.vmstate|suspend\.filename)/.test(key)) {
+        const index = key.match(/^ethernet(\d+)\./)?.[1];
+        if (index !== void 0 && (String(Number(index)) !== index || Number(index) > 255)) throw new Error("Unsupported VM adapter index; cannot verify LAN segment references.");
+        if (values.has(key)) throw new Error("Duplicate VM network or state setting.");
+        values.set(key, unescapeBytes(match[2]));
+      }
+    }
+    if (values.has(".encoding") && !/^utf-?8$/i.test(values.get(".encoding"))) throw new Error("LAN adapter inspection and editing require a UTF-8 VMX.");
+    return { vmx: vmx3, text, values };
+  }
+  adapters(vm2, segments) {
+    const indices = [...new Set([...vm2.values.keys()].map((key) => key.match(/^ethernet(\d+)\./)?.[1]).filter((value) => value !== void 0))].map(Number).sort((a, b) => a - b);
+    return indices.map((index) => {
+      const prefix = `ethernet${index}`;
+      const type = vm2.values.get(`${prefix}.connectiontype`) || null;
+      const id = vm2.values.get(`${prefix}.pvnid`)?.toLowerCase() || null;
+      return { adapter: index, device: prefix, present: /^true$/i.test(vm2.values.get(`${prefix}.present`) || ""), network: type, segmentId: id, segmentName: segments.find((entry) => entry.id === id)?.name || null, startConnected: !/^false$/i.test(vm2.values.get(`${prefix}.startconnected`) || "") };
+    });
+  }
+  async list(input2 = {}) {
+    const a = lanSegmentSchemas.list_lan_segments.parse(input2);
+    const catalog = await this.readCatalog();
+    return { preferencesPath: this.filename, segments: catalog.document.segments, ...a.vmx ? { vmx: a.vmx, adapters: this.adapters(await this.readVM(a.vmx), catalog.document.segments) } : {}, note: "Catalog is per host user. Supply vmx to inspect adapters. Inventory is not a disk scan; unregistered VMs may also reference these segment IDs." };
+  }
+  async create(input2) {
+    const a = lanSegmentSchemas.create_lan_segment.parse(input2);
+    return this.exclusive(async () => {
+      const catalog = await this.readCatalog();
+      const existing = catalog.document.segments.filter((entry) => entry.name.toLowerCase() === a.name.toLowerCase());
+      if (existing.length > 1) throw new Error("LAN segment name is ambiguous; catalog was not changed.");
+      if (existing.length) return { created: false, segment: existing[0], backup: null };
+      if (catalog.document.segments.length >= 1e4) throw new Error("LAN segment catalog is full.");
+      let id;
+      do {
+        const bytes = (0, import_node_crypto5.randomBytes)(16);
+        bytes[0] = 82;
+        const hex3 = [...bytes].map((byte) => byte.toString(16).padStart(2, "0"));
+        id = `${hex3.slice(0, 8).join(" ")}-${hex3.slice(8).join(" ")}`;
+      } while (catalog.document.segments.some((entry) => entry.id === id));
+      const segment2 = { name: a.name, id };
+      return { created: true, segment: segment2, ...await this.writeCatalog(catalog, [...catalog.document.segments, segment2]) };
+    });
+  }
+  async remove(input2) {
+    const a = lanSegmentSchemas.remove_lan_segment.parse(input2);
+    return this.exclusive(async () => {
+      const catalog = await this.readCatalog();
+      const segment2 = resolveSegment(catalog.document.segments, a.segment);
+      const inventoryBytes = await import_promises9.default.readFile(this.backend.inventoryPath);
+      for (const line of inventoryBytes.toString("utf8").split(/\r?\n/)) {
+        if (!/^\s*vmlist\d+\.config\b/i.test(line)) continue;
+        const entry = line.match(assignment);
+        const value = entry && unescapeBytes(entry[2]);
+        if (!entry || value && (!import_node_path7.default.isAbsolute(value) || import_node_path7.default.extname(value).toLowerCase() !== ".vmx")) throw new Error("Malformed VM inventory; cannot verify LAN segment references.");
+      }
+      const inventory = await this.backend.listVMs();
+      if (inventory.warnings.length) throw new Error("Cannot verify segment usage because VM inventory is unavailable. Restore inventory before removal.");
+      const references = [];
+      const skippedMissingVMs = [];
+      const scanned = /* @__PURE__ */ new Set();
+      const snapshots = [];
+      for (const input3 of [...inventory.vms.map((vm2) => vm2.vmx), ...a.vmx_paths]) {
+        let vm2;
+        try {
+          vm2 = await this.readVM(input3);
+        } catch (error62) {
+          if (error62.code === "ENOENT" && !a.vmx_paths.includes(input3)) {
+            skippedMissingVMs.push(input3);
+            continue;
+          }
+          throw new Error(`Cannot inspect a VM for LAN segment references: ${error62.message}`);
+        }
+        const key = process.platform === "win32" ? vm2.vmx.toLowerCase() : vm2.vmx;
+        if (scanned.has(key)) continue;
+        scanned.add(key);
+        snapshots.push(vm2);
+        for (const nic of this.adapters(vm2, catalog.document.segments)) {
+          if (nic.segmentId === segment2.id) references.push({ vmx: vm2.vmx, adapter: nic.adapter });
+        }
+      }
+      if (references.length) throw new Error(`LAN segment is referenced by VM adapters; detach them before removal: ${JSON.stringify(references)}`);
+      const recheck = async () => {
+        if (!inventoryBytes.equals(await import_promises9.default.readFile(this.backend.inventoryPath))) throw new Error("VM inventory changed during removal; inspect and retry.");
+        const current = await this.backend.listVMs();
+        if (current.warnings.length || JSON.stringify(current.vms) !== JSON.stringify(inventory.vms)) throw new Error("VM inventory or running state changed during removal; inspect and retry.");
+        for (const vm2 of snapshots) if (await import_promises9.default.readFile(vm2.vmx, "utf8") !== vm2.text) throw new Error("A VMX changed during segment removal; inspect and retry.");
+      };
+      return { removed: true, segment: segment2, checkedVMs: scanned.size, skippedMissingVMs, ...await this.writeCatalog(catalog, catalog.document.segments.filter((entry) => entry.id !== segment2.id), recheck), note: "Checked registered/running and explicitly supplied VMX files. Unregistered VMs outside this set were not scanned." };
+    });
+  }
+  async editAdapter(input2, detach) {
+    const a = lanSegmentSchemas[detach ? "detach_vm_adapter_from_lan_segment" : "attach_vm_adapter_to_lan_segment"].parse(input2);
+    if (detach && (a.network === "custom" ? !a.vmnet : a.vmnet !== void 0)) throw new Error("Supply vmnet only with network=custom; custom requires vmnet.");
+    return this.exclusive(async () => {
+      const catalog = await this.readCatalog();
+      const vm2 = await this.readVM(a.vmx);
+      const segment2 = detach && idPattern.test(a.segment) ? { id: a.segment.toLowerCase(), name: catalog.document.segments.find((entry) => entry.id === a.segment.toLowerCase())?.name || null } : resolveSegment(catalog.document.segments, a.segment);
+      const prefix = `ethernet${a.adapter}`;
+      const present = vm2.values.get(`${prefix}.present`) || "";
+      if (detach ? !/^(true|false)$/i.test(present) : !/^true$/i.test(present)) throw new Error("Selected network adapter is not present. LAN tools do not create or delete adapters.");
+      if (detach && vm2.values.get(`${prefix}.pvnid`)?.toLowerCase() !== segment2.id) throw new Error("Adapter is not attached to the selected LAN segment; VMX was not changed.");
+      for (const key of ["checkpoint.vmstate", "suspend.filename"]) {
+        const saved = vm2.values.get(key);
+        if (saved) {
+          try {
+            await import_promises9.default.access(import_node_path7.default.resolve(import_node_path7.default.dirname(vm2.vmx), saved));
+            throw new Error("VM has a saved/suspended state; power it off first.");
+          } catch (error62) {
+            if (error62.code !== "ENOENT") throw error62;
+          }
+        }
+      }
+      const settings = {
+        [`${prefix}.connectionType`]: detach ? a.network : "pvn",
+        [`${prefix}.pvnID`]: detach ? null : segment2.id,
+        [`${prefix}.vnet`]: detach && a.network === "custom" ? a.vmnet : null,
+        [`${prefix}.startConnected`]: detach ? "FALSE" : "TRUE",
+        [`${prefix}.connected`]: detach ? "FALSE" : "TRUE"
+      };
+      const result = await this.vmFiles.configure({ vmx: vm2.vmx, settings }, { expectedOriginal: vm2.text, beforeCommit: async () => {
+        await this.assertGUIClosed();
+        await this.unchanged(catalog);
+      } });
+      return { ...result, adapter: a.adapter, segment: segment2, attached: !detach, network: detach ? a.network : "pvn", startConnected: !detach };
+    });
+  }
+  attach(input2) {
+    return this.editAdapter(input2, false);
+  }
+  detach(input2) {
+    return this.editAdapter(input2, true);
+  }
+};
+
 // src/server.mjs
 var backend = new Workstation();
 var credentials = new Credentials();
 var rest = new RestClient({ credentials, backend });
 var vmFiles = new VMFiles(backend, { protectSensitiveFile: localFileProtector(backend) });
+var lanSegments = new LanSegments(backend, vmFiles, { protectFile: localFileProtector(backend) });
 var consoles = new ConsoleManager({ backend, credentials, rest });
-var server = new McpServer({ name: "vmware-workstation", version: "0.3.0" });
-var vmx = external_exports.string().min(1).describe("Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.");
+var server = new McpServer({ name: "vmware-workstation", version: "0.4.0" });
+var vmx2 = external_exports.string().min(1).describe("Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.");
 var name = external_exports.string().min(1).max(256).describe("Exact snapshot name.");
 function tool(name2, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false) {
   server.registerTool(name2, {
@@ -45331,20 +45671,25 @@ tool("console_scroll", "Send RFB wheel events to the VM at the last console poin
 tool("console_status", "Check this VM native loopback-only VNC configuration and authenticated RFB session. Does not start the VM or modify its VNC settings.", consoleSchemas.console_status, true, (a) => consoles.status(a.vm_id));
 tool("create_vm", "Create a new blank VMX and sparse virtual disk in a NEW directory using VMware Virtual Disk Manager. Configure CPUs, memory, firmware, networking and optional ISO. Does not install a guest OS or power on/register the VM.", createVMSchema, false, (a) => vmFiles.create(a), false);
 tool("configure_vm", "Edit a powered-off UTF-8 VMX with a backup. Set arbitrary VMX key/value strings or null to remove keys. Refuses running, locked, or detected suspended VMs. Use for CPU, memory, boot media, network and other VMX configuration.", configureVMSchema, false, (a) => vmFiles.configure(a));
+tool("list_lan_segments", "List the current host user LAN segment catalog. Optionally supply vmx to inspect adapter indices and segment associations, including orphaned IDs. Does not scan disks or change VMs.", lanSegmentSchemas.list_lan_segments, true, (a) => lanSegments.list(a));
+tool("create_lan_segment", "Create a named private LAN segment in Workstation preferences with a backup, or return the uniquely named existing segment. Close the Workstation/Player GUI first. Does not create a VMnet, DHCP server or VM adapter.", lanSegmentSchemas.create_lan_segment, false, (a) => lanSegments.create(a), false);
+tool("remove_lan_segment", "Remove a LAN segment from Workstation preferences with a backup. Refuses references in registered/running and supplied unregistered VMX files; detach those adapters first. Cannot discover other unregistered VMs. Close the Workstation/Player GUI first.", lanSegmentSchemas.remove_lan_segment, false, (a) => lanSegments.remove(a));
+tool("attach_vm_adapter_to_lan_segment", "Attach an existing powered-off VM adapter to a LAN segment. adapter is the zero-based ethernetN index. Backs up the UTF-8 VMX, clears any custom VMnet, and enables connection at next power-on. Close the Workstation/Player GUI first.", lanSegmentSchemas.attach_vm_adapter_to_lan_segment, false, (a) => lanSegments.attach(a));
+tool("detach_vm_adapter_from_lan_segment", "Detach an existing powered-off VM adapter from the specified LAN segment, preserving the adapter. Backs up the UTF-8 VMX, removes its segment ID, selects a replacement network (default NAT), and leaves the adapter disconnected at next power-on. Close the Workstation/Player GUI first.", lanSegmentSchemas.detach_vm_adapter_from_lan_segment, false, (a) => lanSegments.detach(a));
 tool("workstation_status", "Check local vmrun availability and count running VMs without changing them.", {}, true, () => backend.status());
 tool("list_vms", "List registered and running VMs. Stale inventory entries are retained and marked. This does not scan disks.", {}, true, () => backend.listVMs());
-tool("get_vm_details", "Read selected VM hardware configuration and whether the VM is running. Does not expose the full VMX.", { vmx }, true, (a) => backend.details(a.vmx));
+tool("get_vm_details", "Read selected VM hardware configuration and whether the VM is running. Does not expose the full VMX.", { vmx: vmx2 }, true, (a) => backend.details(a.vmx));
 tool("vm_power", "Start, gracefully stop, reset, suspend, pause or unpause a VM. Defaults to soft mode. Hard stop/reset can lose data; use only when explicitly requested. No automatic hard fallback.", {
-  vmx,
+  vmx: vmx2,
   action: external_exports.enum(["start", "stop", "reset", "suspend", "pause", "unpause"]),
   mode: external_exports.enum(["soft", "hard"]).default("soft"),
   gui: external_exports.boolean().default(false)
 }, false, (a) => backend.power(a.vmx, a.action, a.mode, a.gui));
-tool("list_snapshots", "List snapshot names without changing the VM.", { vmx }, true, (a) => backend.snapshots(a.vmx));
-tool("create_snapshot", "Create a named snapshot on the selected VM. Requires a user request to create it.", { vmx, name }, false, (a) => backend.snapshot(a.vmx, "snapshot", a.name), false);
-tool("revert_snapshot", "Revert the VM to an existing snapshot. Discards later VM state; requires explicit user authorization for this VM and snapshot.", { vmx, name }, false, (a) => backend.snapshot(a.vmx, "revertToSnapshot", a.name));
-tool("delete_snapshot", "Delete one named snapshot, preserving children. Removes a restore point; requires explicit user authorization for this VM and snapshot.", { vmx, name }, false, (a) => backend.snapshot(a.vmx, "deleteSnapshot", a.name));
-tool("get_guest_ip", "Get the IP address reported by VMware Tools in a running VM. Does not log into the guest or wait for startup.", { vmx }, true, (a) => backend.guestIP(a.vmx));
+tool("list_snapshots", "List snapshot names without changing the VM.", { vmx: vmx2 }, true, (a) => backend.snapshots(a.vmx));
+tool("create_snapshot", "Create a named snapshot on the selected VM. Requires a user request to create it.", { vmx: vmx2, name }, false, (a) => backend.snapshot(a.vmx, "snapshot", a.name), false);
+tool("revert_snapshot", "Revert the VM to an existing snapshot. Discards later VM state; requires explicit user authorization for this VM and snapshot.", { vmx: vmx2, name }, false, (a) => backend.snapshot(a.vmx, "revertToSnapshot", a.name));
+tool("delete_snapshot", "Delete one named snapshot, preserving children. Removes a restore point; requires explicit user authorization for this VM and snapshot.", { vmx: vmx2, name }, false, (a) => backend.snapshot(a.vmx, "deleteSnapshot", a.name));
+tool("get_guest_ip", "Get the IP address reported by VMware Tools in a running VM. Does not log into the guest or wait for startup.", { vmx: vmx2 }, true, (a) => backend.guestIP(a.vmx));
 for (const command of commands) {
   tool(
     `vmrun_${snake(command.command)}`,
@@ -45373,6 +45718,8 @@ tool("workstation_capabilities", "Show full vmrun/REST tool coverage, compare th
     restSchema: restProvenance,
     credentialsFilePath: credentials.filename,
     consoleTools: Object.keys(consoleSchemas),
+    lanSegmentTools: Object.keys(lanSegmentSchemas),
+    lanSegmentPreferencesPath: lanSegments.filename,
     note: "Coverage describes callable implementations. It does not prove a REST service is running, credentials work, or guest operations succeed."
   };
 });

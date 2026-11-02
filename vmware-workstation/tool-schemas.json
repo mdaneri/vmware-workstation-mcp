@@ -354,6 +354,199 @@
       }
     },
     {
+      "name": "list_lan_segments",
+      "description": "List the current host user LAN segment catalog. Optionally supply vmx to inspect adapter indices and segment associations, including orphaned IDs. Does not scan disks or change VMs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute VMX path. Adapter changes require a powered-off, unlocked UTF-8 VM."
+          }
+        },
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "create_lan_segment",
+      "description": "Create a named private LAN segment in Workstation preferences with a backup, or return the uniquely named existing segment. Close the Workstation/Player GUI first. Does not create a VMnet, DHCP server or VM adapter.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "remove_lan_segment",
+      "description": "Remove a LAN segment from Workstation preferences with a backup. Refuses references in registered/running and supplied unregistered VMX files; detach those adapters first. Cannot discover other unregistered VMs. Close the Workstation/Player GUI first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "segment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "LAN segment name or pvnID returned by list_lan_segments. Use the ID if names are ambiguous."
+          },
+          "vmx_paths": {
+            "default": [],
+            "description": "Additional unregistered VMX files to check for references. Registered and running VMs are always checked; detach references before removal.",
+            "maxItems": 1024,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Absolute VMX path. Adapter changes require a powered-off, unlocked UTF-8 VM."
+            }
+          }
+        },
+        "required": [
+          "segment"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "attach_vm_adapter_to_lan_segment",
+      "description": "Attach an existing powered-off VM adapter to a LAN segment. adapter is the zero-based ethernetN index. Backs up the UTF-8 VMX, clears any custom VMnet, and enables connection at next power-on. Close the Workstation/Player GUI first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute VMX path. Adapter changes require a powered-off, unlocked UTF-8 VM."
+          },
+          "adapter": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255,
+            "description": "Zero-based VMX adapter index: 0 means ethernet0, not the REST NIC index."
+          },
+          "segment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "LAN segment name or pvnID returned by list_lan_segments. Use the ID if names are ambiguous."
+          }
+        },
+        "required": [
+          "vmx",
+          "adapter",
+          "segment"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "detach_vm_adapter_from_lan_segment",
+      "description": "Detach an existing powered-off VM adapter from the specified LAN segment, preserving the adapter. Backs up the UTF-8 VMX, removes its segment ID, selects a replacement network (default NAT), and leaves the adapter disconnected at next power-on. Close the Workstation/Player GUI first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute VMX path. Adapter changes require a powered-off, unlocked UTF-8 VM."
+          },
+          "adapter": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255,
+            "description": "Zero-based VMX adapter index: 0 means ethernet0, not the REST NIC index."
+          },
+          "segment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "LAN segment name or pvnID returned by list_lan_segments. Use the ID if names are ambiguous."
+          },
+          "network": {
+            "default": "nat",
+            "description": "Replacement network mode. The adapter is left disconnected with startConnected=FALSE.",
+            "type": "string",
+            "enum": [
+              "nat",
+              "bridged",
+              "hostonly",
+              "custom"
+            ]
+          },
+          "vmnet": {
+            "description": "Required only for the custom replacement network.",
+            "type": "string",
+            "pattern": "^vmnet\\d{1,3}$"
+          }
+        },
+        "required": [
+          "vmx",
+          "adapter",
+          "segment"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
       "name": "workstation_status",
       "description": "Check local vmrun availability and count running VMs without changing them.",
       "inputSchema": {

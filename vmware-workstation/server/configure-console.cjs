@@ -20215,7 +20215,7 @@ var VMFiles = class {
       }
     });
   }
-  async configure(input2, { protectFile } = {}) {
+  async configure(input2, { protectFile, expectedOriginal, beforeCommit } = {}) {
     const a = configureVMSchema.parse(input2);
     return this.exclusive(async () => {
       const vmx = await this.backend.vmx(a.vmx);
@@ -20229,6 +20229,7 @@ var VMFiles = class {
         if (error62.code !== "ENOENT") throw error62;
       }
       const original = await import_promises5.default.readFile(vmx, "utf8");
+      if (expectedOriginal !== void 0 && original !== expectedOriginal) throw new Error("VMX changed before editing; inspect and retry.");
       const config2 = parseAssignments(original);
       const sensitiveKeys = Object.entries(config2).some(([key, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key) && value) || Object.entries(a.settings).some(([key, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key) && value);
       if (!protectFile && sensitiveKeys) protectFile = this.protectSensitiveFile;
@@ -20262,6 +20263,7 @@ var VMFiles = class {
       }
       for (const [key, update] of updates) if (!seen.has(key) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
       const mode = (await import_promises5.default.stat(vmx)).mode & 511;
+      if (beforeCommit) await beforeCommit();
       const backup = `${vmx}.backup-${(0, import_node_crypto.randomUUID)()}`;
       if (protectFile) {
         await import_promises5.default.writeFile(backup, "", { flag: "wx", mode: 384 });
@@ -20277,6 +20279,14 @@ var VMFiles = class {
       if (await import_promises5.default.readFile(vmx, "utf8") !== original) {
         await import_promises5.default.unlink(temporary);
         throw new Error(`VMX changed during editing; original retained. Backup: ${backup}`);
+      }
+      if (beforeCommit) {
+        try {
+          await beforeCommit();
+        } catch (error62) {
+          await import_promises5.default.unlink(temporary);
+          throw error62;
+        }
       }
       await import_promises5.default.rename(temporary, vmx);
       return { vmx, updated: true, backup, changedSettings: Object.keys(a.settings), note: "VMX saved while VM was not running and had no detected saved state/VMX lock. Close/reopen its Workstation tab if it has cached settings." };

@@ -8,6 +8,20 @@ Generated from the command implementations and installed REST contract. Source v
 
 `configure_vm` edits a powered-off UTF-8 VMX with a backup. Required: `vmx`, `settings` (VMX keys to string values, or null to remove). It rejects running/locked/detected suspended VMs.
 
+## LAN segments (5)
+
+These tools edit the current user Workstation preferences catalog and adapter VMX settings, independently of REST/VMnets. Close the Workstation/Player GUI for mutations. Adapter edits require a powered-off, unlocked UTF-8 VMX; catalog edits support UTF-8 and windows-1252 without transcoding unrelated preferences. All file changes create backups (except initializing a missing catalog). See [LAN segment workflows](README.md#lan-segments) for examples and removal coverage.
+
+| Tool | Arguments |
+| --- | --- |
+| `list_lan_segments` | `vmx` |
+| `create_lan_segment` | `name` |
+| `remove_lan_segment` | `segment`, `vmx_paths` |
+| `attach_vm_adapter_to_lan_segment` | `vmx`, `adapter`, `segment` |
+| `detach_vm_adapter_from_lan_segment` | `vmx`, `adapter`, `segment`, `network`, `vmnet` |
+
+`adapter` is zero-based (`0` = `ethernet0`); `segment` accepts a name or pvnID. `list_lan_segments.vmx` is optional. Removal checks registered/running VMs and optional `vmx_paths`, refuses any remaining references, and cannot discover other unregistered VMs. Detach selects `network` (default `nat`; `custom` requires `vmnet`) and leaves the adapter disconnected, without removing it. An orphaned pvnID can be detached by ID.
+
 ## vmrun commands (47)
 
 All tools accept `timeout_seconds` (default 120). VM tools require `vmx` and accept optional `vm_password_profile` and `guest_profile`. Guest operations default `guest_profile` to `default`. Output-file operations accept `overwrite` (default false). Optional arguments are marked with `?`; defaulted arguments show their defaults.
@@ -114,4 +128,4 @@ All console tools accept `vm_id`: an absolute VMX path, a unique inventory name,
 
 ## Convenience tools (9) and capabilities
 
-`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **93 MCP tools**.
+`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **98 MCP tools**.

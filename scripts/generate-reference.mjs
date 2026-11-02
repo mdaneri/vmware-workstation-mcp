@@ -1,9 +1,13 @@
-import fs from 'node:fs/promises';
+import { writeGenerated } from './write-generated.mjs';
 import { commands, snake } from '../src/vmrun-commands.mjs';
 import { restOperations, restToolName } from '../src/rest.mjs';
 import { consoleSchemas } from '../src/console.mjs';
+import { lanSegmentSchemas } from '../src/lan-segments.mjs';
 let text = '# Complete operation reference\n\nGenerated from the command implementations and installed REST contract. Source version: vmrun 1.17.0.25688693; vmrest 1.3.1 build 25688693.\n\n';
 text += '## New VM creation and local configuration\n\n`create_vm` creates a blank VMX and sparse VMDK in a new directory. Required: `directory`, `name`. Options: `guest_os`, `memory_mb`, `cpus`, `disk_gb`, `hardware_version`, `firmware`, `network`, `vmnet`, `iso_path`, `timeout_seconds`.\n\n`configure_vm` edits a powered-off UTF-8 VMX with a backup. Required: `vmx`, `settings` (VMX keys to string values, or null to remove). It rejects running/locked/detected suspended VMs.\n\n';
+text += '## LAN segments (5)\n\nThese tools edit the current user Workstation preferences catalog and adapter VMX settings, independently of REST/VMnets. Close the Workstation/Player GUI for mutations. Adapter edits require a powered-off, unlocked UTF-8 VMX; catalog edits support UTF-8 and windows-1252 without transcoding unrelated preferences. All file changes create backups (except initializing a missing catalog). See [LAN segment workflows](README.md#lan-segments) for examples and removal coverage.\n\n| Tool | Arguments |\n| --- | --- |\n';
+for (const [name, schema] of Object.entries(lanSegmentSchemas)) text += `| \`${name}\` | ${Object.keys(schema.shape).map(key => `\`${key}\``).join(', ')} |\n`;
+text += '\n`adapter` is zero-based (`0` = `ethernet0`); `segment` accepts a name or pvnID. `list_lan_segments.vmx` is optional. Removal checks registered/running VMs and optional `vmx_paths`, refuses any remaining references, and cannot discover other unregistered VMs. Detach selects `network` (default `nat`; `custom` requires `vmnet`) and leaves the adapter disconnected, without removing it. An orphaned pvnID can be detached by ID.\n\n';
 text += '## vmrun commands (47)\n\nAll tools accept `timeout_seconds` (default 120). VM tools require `vmx` and accept optional `vm_password_profile` and `guest_profile`. Guest operations default `guest_profile` to `default`. Output-file operations accept `overwrite` (default false). Optional arguments are marked with `?`; defaulted arguments show their defaults.\n\n| CLI command | MCP tool | Operation arguments | Guest auth | Effect |\n| --- | --- | --- | --- | --- |\n';
 for (const c of commands) {
   const parameters = c.parameters.map(p => `\`${p.name}${p.optional ? '?' : p.default !== undefined ? `=${p.default}` : ''}\``).join(', ') || '(none)';
@@ -16,5 +20,5 @@ for (const o of restOperations) {
 }
 text += '\nThe vendor operation ID `updataSharedFolder` is exposed with the corrected tool name `rest_update_shared_folder`.\n\n## Direct native VNC/RFB console (6)\n\nAll console tools accept `vm_id`: an absolute VMX path, a unique inventory name, a configured console profile alias, or a REST VM ID when REST is configured. The VM must be running with native VNC explicitly bound to loopback and a local password profile. VMware Tools and guest login are unnecessary. Setup: [console guide](console.md).\n\n| Tool | Arguments |\n| --- | --- |\n';
 for (const [name, schema] of Object.entries(consoleSchemas)) text += `| \`${name}\` | ${Object.keys(schema.shape).map(key => `\`${key}\``).join(', ')} |\n`;
-text += '\n## Convenience tools (9) and capabilities\n\n`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **93 MCP tools**.\n';
-await fs.writeFile('vmware-workstation/reference.md', text);
+text += '\n## Convenience tools (9) and capabilities\n\n`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **98 MCP tools**.\n';
+await writeGenerated('vmware-workstation/reference.md', text);

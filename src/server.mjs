@@ -9,13 +9,15 @@ import importedHelp from './catalogs/vmrun-help.json' with { type: 'json' };
 import { VMFiles, createVMSchema, configureVMSchema } from './vm-files.mjs';
 import { ConsoleManager, consoleSchemas } from './console.mjs';
 import { localFileProtector } from './local-file-security.mjs';
+import { LanSegments, lanSegmentSchemas } from './lan-segments.mjs';
 
 const backend = new Workstation();
 const credentials = new Credentials();
 const rest = new RestClient({ credentials, backend });
 const vmFiles = new VMFiles(backend, { protectSensitiveFile: localFileProtector(backend) });
+const lanSegments = new LanSegments(backend, vmFiles, { protectFile: localFileProtector(backend) });
 const consoles = new ConsoleManager({ backend, credentials, rest });
-const server = new McpServer({ name: 'vmware-workstation', version: '0.3.0' });
+const server = new McpServer({ name: 'vmware-workstation', version: '0.4.0' });
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
 function tool(name, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false) {
@@ -40,6 +42,12 @@ tool('console_scroll', 'Send RFB wheel events to the VM at the last console poin
 tool('console_status', 'Check this VM native loopback-only VNC configuration and authenticated RFB session. Does not start the VM or modify its VNC settings.', consoleSchemas.console_status, true, a => consoles.status(a.vm_id));
 tool('create_vm', 'Create a new blank VMX and sparse virtual disk in a NEW directory using VMware Virtual Disk Manager. Configure CPUs, memory, firmware, networking and optional ISO. Does not install a guest OS or power on/register the VM.', createVMSchema, false, a => vmFiles.create(a), false);
 tool('configure_vm', 'Edit a powered-off UTF-8 VMX with a backup. Set arbitrary VMX key/value strings or null to remove keys. Refuses running, locked, or detected suspended VMs. Use for CPU, memory, boot media, network and other VMX configuration.', configureVMSchema, false, a => vmFiles.configure(a));
+
+tool('list_lan_segments', 'List the current host user LAN segment catalog. Optionally supply vmx to inspect adapter indices and segment associations, including orphaned IDs. Does not scan disks or change VMs.', lanSegmentSchemas.list_lan_segments, true, a => lanSegments.list(a));
+tool('create_lan_segment', 'Create a named private LAN segment in Workstation preferences with a backup, or return the uniquely named existing segment. Close the Workstation/Player GUI first. Does not create a VMnet, DHCP server or VM adapter.', lanSegmentSchemas.create_lan_segment, false, a => lanSegments.create(a), false);
+tool('remove_lan_segment', 'Remove a LAN segment from Workstation preferences with a backup. Refuses references in registered/running and supplied unregistered VMX files; detach those adapters first. Cannot discover other unregistered VMs. Close the Workstation/Player GUI first.', lanSegmentSchemas.remove_lan_segment, false, a => lanSegments.remove(a));
+tool('attach_vm_adapter_to_lan_segment', 'Attach an existing powered-off VM adapter to a LAN segment. adapter is the zero-based ethernetN index. Backs up the UTF-8 VMX, clears any custom VMnet, and enables connection at next power-on. Close the Workstation/Player GUI first.', lanSegmentSchemas.attach_vm_adapter_to_lan_segment, false, a => lanSegments.attach(a));
+tool('detach_vm_adapter_from_lan_segment', 'Detach an existing powered-off VM adapter from the specified LAN segment, preserving the adapter. Backs up the UTF-8 VMX, removes its segment ID, selects a replacement network (default NAT), and leaves the adapter disconnected at next power-on. Close the Workstation/Player GUI first.', lanSegmentSchemas.detach_vm_adapter_from_lan_segment, false, a => lanSegments.detach(a));
 tool('workstation_status', 'Check local vmrun availability and count running VMs without changing them.', {}, true, () => backend.status());
 tool('list_vms', 'List registered and running VMs. Stale inventory entries are retained and marked. This does not scan disks.', {}, true, () => backend.listVMs());
 tool('get_vm_details', 'Read selected VM hardware configuration and whether the VM is running. Does not expose the full VMX.', { vmx }, true, a => backend.details(a.vmx));
@@ -72,6 +80,8 @@ tool('workstation_capabilities', 'Show full vmrun/REST tool coverage, compare th
     restURL: rest.baseURL(), restSchema: restProvenance,
     credentialsFilePath: credentials.filename,
     consoleTools: Object.keys(consoleSchemas),
+    lanSegmentTools: Object.keys(lanSegmentSchemas),
+    lanSegmentPreferencesPath: lanSegments.filename,
     note: 'Coverage describes callable implementations. It does not prove a REST service is running, credentials work, or guest operations succeed.',
   };
 });
