@@ -29,15 +29,18 @@ try {
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [path.join(pluginRoot, 'server/server.cjs')], stderr: 'pipe' }));
   assert.equal(client.getServerVersion().version, manifest.version, 'Bundled server version must match plugin');
   const { tools } = await client.listTools();
-  assert.equal(tools.length, 98);
-  assert.equal(new Set(tools.map(t => t.name)).size, 98);
+  assert.equal(tools.length, 108);
+  assert.equal(new Set(tools.map(t => t.name)).size, 108);
   const legacy = JSON.parse(await fs.readFile('tests/fixtures/legacy-tool-schemas.json', 'utf8'));
   for (const prior of legacy.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Backward compatibility: ${prior.name}`);
+  const preOvf = JSON.parse(await fs.readFile('tests/fixtures/pre-ovf-tool-schemas.json', 'utf8'));
+  assert.equal(preOvf.tools.length, 98);
+  for (const prior of preOvf.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Pre-OVF compatibility: ${prior.name}`);
   for (const tool of tools) {
     assert.ok(toolValidator.validateSchema(tool.inputSchema), `${tool.name}: invalid input schema`);
     assert.equal(tool.inputSchema.additionalProperties, false, `${tool.name}: tool arguments must be strict`);
     assert.equal(typeof tool.annotations.readOnlyHint, 'boolean');
   }
   await writeGenerated('vmware-workstation/tool-schemas.json', JSON.stringify({ tools }, null, 2) + '\n');
-  console.log('Both portable manifests and all 98 MCP schemas validated; all original 87 tool schemas/annotations are unchanged.');
+  console.log('Both portable manifests and all 108 MCP schemas validated; all 98 pre-OVF tool schemas/annotations are unchanged (including the original 87).');
 } finally { await client.close(); }

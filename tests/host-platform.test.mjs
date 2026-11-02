@@ -29,6 +29,10 @@ test('native executable discovery handles PATH, explicit overrides and sibling d
   assert.equal(await findVMwareExecutable('vmrun', { env: { PATH: root } }), binary);
   assert.equal(await findVMwareExecutable('vmrun', { env: { VMRUN_PATH: binary } }), binary);
   assert.equal(await findVMwareExecutable('vmware-vdiskmanager', { env: {}, beside: binary }), disk);
+  const ovfDirectory = path.join(root, 'OVFTool'); await fs.mkdir(ovfDirectory);
+  const ovf = path.join(ovfDirectory, `ovftool${suffix}`); await fs.writeFile(ovf, '', { mode: 0o755 });
+  assert.equal(await findVMwareExecutable('ovftool', { env: {}, beside: binary }), ovf);
+  assert.equal(await findVMwareExecutable('ovftool', { env: { VMWARE_OVFTOOL_PATH: ovf } }), ovf);
   await assert.rejects(findVMwareExecutable('vmrun', { env: { VMRUN_PATH: 'relative/vmrun' } }), /absolute path/);
   await assert.rejects(findVMwareExecutable('vmrun', { env: { VMRUN_PATH: disk } }), /absolute path/);
   if (process.platform === 'linux') {

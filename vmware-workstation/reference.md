@@ -2,6 +2,25 @@
 
 Generated from the command implementations and installed REST contract. Source version: vmrun 1.17.0.25688693; vmrest 1.3.1 build 25688693.
 
+## Local OVF/OVA appliances and background jobs (10)
+
+Optional VMware OVF Tool is discovered automatically or configured with an absolute `VMWARE_OVFTOOL_PATH`. `ovf_tool_status` reports executable, version and installed flags. All other OVF tools return a background job ID, including read-only inspection/validation. Poll `job_status` until terminal; inspect `result` or `error`. See the [appliance workflow guide](ovf.md) for path configuration, examples, overwrite policy and limitations.
+
+| Tool | Arguments |
+| --- | --- |
+| `ovf_tool_status` | (none) |
+| `ovf_inspect` | `source`, `timeout_seconds` |
+| `ovf_validate` | `source`, `timeout_seconds` |
+| `ovf_import` | `source`, `directory`, `name`, `network_mappings`, `property_mappings`, `property_profile`, `deployment_option`, `accept_eulas`, `timeout_seconds`, `register`, `power_on` |
+| `ovf_export` | `vmx`, `destination`, `overwrite`, `timeout_seconds` |
+| `ovf_convert` | `source`, `destination`, `overwrite`, `name`, `network_mappings`, `property_mappings`, `property_profile`, `deployment_option`, `accept_eulas`, `timeout_seconds` |
+| `job_status` | `job_id` |
+| `job_list` | (none) |
+| `job_cancel` | `job_id` |
+| `job_logs` | `job_id` |
+
+Only flat local appliances are supported. VMX exports refuse running/locked/suspended/encrypted/vTPM/snapshot sources and external backings. OVF/VMX targets require new parent directories; only a single OVA file can be explicitly overwritten. Import registration and headless power-on default to false. Jobs are bounded and session-scoped; cancellation/timeouts/interruption may leave partial files and never imply rollback. Full cross-tool orchestration remains a later roadmap phase.
+
 ## New VM creation and local configuration
 
 `create_vm` creates a blank VMX and sparse VMDK in a new directory. Required: `directory`, `name`. Options: `guest_os`, `memory_mb`, `cpus`, `disk_gb`, `hardware_version`, `firmware`, `network`, `vmnet`, `iso_path`, `timeout_seconds`.
@@ -128,4 +147,4 @@ All console tools accept `vm_id`: an absolute VMX path, a unique inventory name,
 
 ## Convenience tools (9) and capabilities
 
-`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **98 MCP tools**.
+`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **108 MCP tools**.

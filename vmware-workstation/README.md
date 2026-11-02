@@ -1,6 +1,6 @@
 # VMware Workstation
 
-Local Windows and Linux MCP plugin, version 0.4.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 98 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), and five [LAN segment tools](#lan-segments). All original tool names, input schemas, and annotations remain unchanged. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
+Local Windows and Linux MCP plugin, version 0.5.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 108 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), five [LAN segment tools](#lan-segments), and ten [OVF/OVA and background job tools](ovf.md). All 98 previous tool names, input schemas, and annotations remain unchanged. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
 
 Requires VMware Workstation with vmrun, Node.js 22.12+, PowerShell 7 for setup helpers, and a host with local stdio MCP support. REST tools additionally need a running, authenticated vmrest service. Guest OS commands need VMware Tools running and a guest OS account; console tools need neither and work before the OS boots. The plugin runs as your local user and opens no HTTP listener. Native VNC listeners are configured on the VM itself and restricted to localhost.
 
@@ -20,7 +20,7 @@ See [the full command and endpoint reference](reference.md) for the exact operat
 | VM lifecycle | Full/linked clones, snapshot-based clones, deletion, hardware upgrade, Tools installation/status, Photon VM download |
 | Networking | Host networks, network creation, NAT port forwarding, DHCP MAC/IP bindings, VM NIC create/update/delete, guest address and NIC/IP-stack information |
 
-This covers the installed vmrun and Workstation API interfaces. Blank VM creation also uses VMware Virtual Disk Manager to create a sparse disk. Other disk-manager operations and separate interfaces such as ESXi/vCenter, OVF Tool, and vmcli are outside this scope.
+This covers the installed vmrun and Workstation API interfaces. Blank VM creation also uses VMware Virtual Disk Manager to create a sparse disk; optional [OVF Tool support](ovf.md) adds local appliance workflows. Other disk-manager operations and separate interfaces such as ESXi/vCenter and vmcli are outside this scope.
 
 ## Connect in Codex
 
@@ -248,3 +248,7 @@ Without configured roots, explicitly selected accessible paths are permitted. Wi
 Each low-level tool accepts `timeout_seconds` from 1 to 3600 (default 120); output is limited to 1 MiB. CLI invocations are serialized within this process, and REST workflows are serialized separately. Other VMware processes can act concurrently. A failed/timed-out mutation can have taken effect; inspect state before retrying. Soft shutdown never falls back to hard automatically. Destructive changes require the user's authorization for the exact target and action.
 
 Inventory combines Workstation's inventory file and `vmrun list`, not a disk scan. A non-running VM may be powered off, suspended, or unavailable. Power-command success does not prove service readiness. The convenience snapshot revert/delete tools reject duplicate snapshot names; low-level CLI tools retain VMware's snapshot naming/path semantics, so inspect the tree to choose the exact target.
+
+## OVF/OVA appliances
+
+Use `ovf_tool_status` to discover optional VMware OVF Tool, or set the absolute `VMWARE_OVFTOOL_PATH` environment override. `ovf_inspect`, `ovf_validate`, `ovf_import`, `ovf_export` and `ovf_convert` return background job IDs; poll `job_status`, inspect `job_logs`, or request `job_cancel`. Imports default to unregistered and powered off. OVF/VMX outputs require new directories; only one OVA file permits explicit overwrite. See the [appliance workflow guide](ovf.md) for Windows/Linux path configuration, runnable argument examples, private deployment-property profiles, limitations and live validation.
