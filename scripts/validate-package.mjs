@@ -17,6 +17,8 @@ for (const filename of ['plugin.json', 'mcp.json']) {
   assert.ok(ajv.validate(schema, manifest), JSON.stringify(ajv.errors));
 }
 const manifest = JSON.parse(await fs.readFile(path.join(pluginRoot, 'plugin.json'), 'utf8'));
+const development = JSON.parse(await fs.readFile('package.json', 'utf8'));
+assert.equal(manifest.version, development.version, 'Plugin and source versions must agree');
 const ui = manifest.extensions['com.openai'].interface;
 assert.ok(ui.shortDescription.length <= 30);
 assert.equal(ui.category, 'Developer Tools');
@@ -24,6 +26,7 @@ for (const key of ['logo', 'composerIcon']) assert.ok((await fs.stat(path.join(p
 const client = new Client({ name: 'package-schema-validation', version: '0.1.0' });
 try {
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [path.join(pluginRoot, 'server/server.cjs')], stderr: 'pipe' }));
+  assert.equal(client.getServerVersion().version, manifest.version, 'Bundled server version must match plugin');
   const { tools } = await client.listTools();
   assert.equal(tools.length, 93);
   assert.equal(new Set(tools.map(t => t.name)).size, 93);

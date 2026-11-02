@@ -2,7 +2,7 @@
 
 Version 0.2.0 adds direct, headless VNC/RFB access to VMware Workstation's per-VM display. The console is the hypervisor framebuffer: BIOS/UEFI, PXE and installer screens use the same path as the installed OS. No guest IP address, VMware Tools, guest account, host screenshots, host mouse/keyboard injection, or window activation is used.
 
-Native listener inspection and the packaged setup helpers require PowerShell 7 (`pwsh`) on PATH, already used by this local project's setup/validation workflow. The Node runtime minimum is 22.12. After installing/reinstalling the local 0.2.0 package through the existing marketplace flow, open a fresh local chat or reload the plugin so its six new tools appear. Edit the source package rather than the installed cache.
+Windows listener inspection and the packaged setup helpers require PowerShell 7 (`pwsh`) on PATH. Version 0.3.0 adds [Linux setup](linux.md), native executable discovery, user-only file permissions and `/proc` listener inspection. The Node runtime minimum is 22.12. After installing/reinstalling the local package through the existing marketplace flow, open a fresh local chat or reload the plugin. Edit the source package rather than the installed cache.
 
 ## Installed-version verification
 
@@ -76,7 +76,7 @@ Clicks use **VM framebuffer coordinates**, validated against the current dimensi
 
 ## Connection and security behavior
 
-Connections are lazy and password-authenticated: no VNC `None` authentication fallback. VMX bind settings must explicitly be loopback, and Windows listener metadata must also show loopback-only binding. The listener must belong to a VMware VM worker. When Windows exposes its command line, it must name the exact VMX; otherwise the running VM inventory and per-VM port must uniquely identify the target, followed by password authentication. External/wildcard listeners, port/VM mismatches, unreadable/ambiguous running inventory, and authentication failures are refused. A misconfigured native listener must be fixed while the VM is off; console tools never create a firewall exception or silently rebind a running listener.
+Connections are lazy and password-authenticated: no VNC `None` authentication fallback. VMX bind settings and native listener metadata must show loopback-only binding. The listener must belong to a VMware VM worker. Linux requires readable `/proc` executable/socket metadata and an exact VMX argv token. When Windows exposes its command line, it must name the VMX; otherwise the running VM inventory and per-VM port must uniquely identify the target, followed by password authentication. External/wildcard listeners, port/VM mismatches, unreadable/ambiguous running inventory, and authentication failures are refused. A misconfigured native listener must be fixed while the VM is off; console tools never create a firewall exception or silently rebind a running listener.
 
 Each VM has an independent TCP/RFB session and framebuffer. Operations serialize within a VM so chords/clicks do not interleave, while different VMs can run concurrently. Defaults: eight sessions, five-minute idle expiry, ten-second handshake/frame timeouts, 16 megapixel frame limit, and 10 MiB PNG output limit. Stale/disconnected sessions are re-created on the next call. Read calls may reconnect, but failed inputs are never replayed. Sockets close when the MCP process ends.
 

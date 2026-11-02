@@ -15,11 +15,11 @@ async function fixture(t) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'vmware-all-'));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
   const vmx = path.join(root, 'lab.vmx');
-  const binary = path.join(root, 'vmrun.exe');
+  const binary = path.join(root, process.platform === 'win32' ? 'vmrun.exe' : 'vmrun');
   const source = path.join(root, 'source file.txt');
   const output = path.join(root, 'output file.txt');
   const clone = path.join(root, 'clone.vmx');
-  await Promise.all([fs.writeFile(vmx, ''), fs.writeFile(binary, ''), fs.writeFile(source, 'source')]);
+  await Promise.all([fs.writeFile(vmx, ''), fs.writeFile(binary, '', { mode: 0o755 }), fs.writeFile(source, 'source')]);
   const env = { VMRUN_PATH: binary, VMWARE_GUEST_DEFAULT_USERNAME: 'guest', VMWARE_GUEST_DEFAULT_PASSWORD: 'test-secret-not-real', VMWARE_VM_DEFAULT_PASSWORD: 'test-encryption-not-real' };
   const calls = [];
   const backend = new Workstation({ env, run: async (file, args, options) => { calls.push({ file, args, options }); return { stdout: 'ok' }; } });
@@ -120,7 +120,7 @@ test('credential file profiles and JSON/URL/form redaction', async t => {
   const f = await fixture(t);
   const filename = path.join(f.root, 'credentials.json');
   const password = 'pass word/+"&';
-  await fs.writeFile(filename, JSON.stringify({ guest: { linux: { username: 'tester', password } }, rest: { username: 'api', password }, vm: { encrypted: { password } } }));
+  await fs.writeFile(filename, JSON.stringify({ guest: { linux: { username: 'tester', password } }, rest: { username: 'api', password }, vm: { encrypted: { password } } }), { mode: 0o600 });
   const credentials = new Credentials({ VMWARE_CREDENTIALS_FILE: filename });
   assert.equal((await credentials.guest('linux')).password, password);
   assert.equal(await credentials.vm('encrypted'), password);

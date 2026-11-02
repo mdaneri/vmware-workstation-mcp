@@ -32,10 +32,58 @@ var import_node_util2 = require("node:util");
 // src/workstation.mjs
 var import_node_child_process = require("node:child_process");
 var import_node_util = require("node:util");
-var import_promises = __toESM(require("node:fs/promises"), 1);
-var import_node_path = __toESM(require("node:path"), 1);
-var import_node_os = __toESM(require("node:os"), 1);
+var import_promises2 = __toESM(require("node:fs/promises"), 1);
+var import_node_path2 = __toESM(require("node:path"), 1);
 var import_node_net = require("node:net");
+
+// src/host-platform.mjs
+var import_promises = __toESM(require("node:fs/promises"), 1);
+var import_node_fs = require("node:fs");
+var import_node_os = __toESM(require("node:os"), 1);
+var import_node_path = __toESM(require("node:path"), 1);
+function inventoryPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
+  return env.VMWARE_INVENTORY_PATH || (platform === "win32" ? import_node_path.default.join(env.APPDATA || import_node_path.default.join(home, "AppData", "Roaming"), "VMware", "inventory.vmls") : import_node_path.default.join(home, ".vmware", "inventory.vmls"));
+}
+function credentialsPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
+  if (env.VMWARE_CREDENTIALS_FILE) return env.VMWARE_CREDENTIALS_FILE;
+  if (platform === "win32") return env.APPDATA ? import_node_path.default.join(env.APPDATA, "VMwareWorkstationPlugin", "credentials.json") : null;
+  const base = env.XDG_CONFIG_HOME && import_node_path.default.isAbsolute(env.XDG_CONFIG_HOME) ? env.XDG_CONFIG_HOME : import_node_path.default.join(home, ".config");
+  return import_node_path.default.join(base, "vmware-workstation-mcp", "credentials.json");
+}
+async function findVMwareExecutable(name, { env = process.env, platform = process.platform, beside } = {}) {
+  if (!["win32", "linux"].includes(platform)) throw new Error("VMware Workstation hosts supported by this plugin are Windows and Linux.");
+  const filename = `${name}${platform === "win32" ? ".exe" : ""}`;
+  const setting = name === "vmrun" ? "VMRUN_PATH" : "VMWARE_VDISKMANAGER_PATH";
+  const validFile = async (candidate) => {
+    if (!import_node_path.default.isAbsolute(candidate) || !(await import_promises.default.stat(candidate)).isFile()) return false;
+    if (platform !== "win32") await import_promises.default.access(candidate, import_node_fs.constants.X_OK);
+    return true;
+  };
+  if (env[setting]) {
+    const configured = env[setting];
+    const actualName = import_node_path.default.basename(configured);
+    if (!import_node_path.default.isAbsolute(configured) || (platform === "win32" ? actualName.toLowerCase() !== filename : actualName !== filename)) throw new Error(`${setting} must be an absolute path to ${filename}.`);
+    if (!await validFile(configured)) throw new Error(`${setting} is not an executable file.`);
+    return configured;
+  }
+  const directories = [
+    ...beside ? [import_node_path.default.dirname(beside)] : [],
+    ...platform === "win32" ? [env.ProgramFiles, env["ProgramFiles(x86)"]].filter(Boolean).map((root) => import_node_path.default.join(root, "VMware", "VMware Workstation")) : [],
+    ...(env.PATH || env.Path || "").split(import_node_path.default.delimiter).filter(Boolean),
+    ...platform === "linux" ? ["/usr/bin", "/usr/local/bin", "/usr/lib/vmware/bin"] : []
+  ];
+  for (const directory of new Set(directories)) {
+    const candidate = import_node_path.default.join(directory, filename);
+    try {
+      if (await validFile(candidate)) return candidate;
+    } catch (error62) {
+      if (!["ENOENT", "ENOTDIR", "EACCES"].includes(error62.code)) throw error62;
+    }
+  }
+  throw new Error(`${filename} was not found. Install VMware Workstation on this host or set ${setting}.`);
+}
+
+// src/workstation.mjs
 var execute = (0, import_node_util.promisify)(import_node_child_process.execFile);
 function parseAssignments(text) {
   const values = {};
@@ -53,35 +101,18 @@ function parseCountedList(text) {
   return lines;
 }
 function isWithin(root, target) {
-  const relative = import_node_path.default.relative(root, target);
-  return relative === "" || !relative.startsWith(`..${import_node_path.default.sep}`) && relative !== ".." && !import_node_path.default.isAbsolute(relative);
+  const relative = import_node_path2.default.relative(root, target);
+  return relative === "" || !relative.startsWith(`..${import_node_path2.default.sep}`) && relative !== ".." && !import_node_path2.default.isAbsolute(relative);
 }
 var Workstation = class {
   constructor({ env = process.env, run = execute } = {}) {
     this.env = env;
     this.execute = run;
     this.tail = Promise.resolve();
-    this.inventoryPath = env.VMWARE_INVENTORY_PATH || import_node_path.default.join(env.APPDATA || import_node_path.default.join(import_node_os.default.homedir(), "AppData", "Roaming"), "VMware", "inventory.vmls");
+    this.inventoryPath = inventoryPath(env);
   }
   async executable() {
-    if (this.env.VMRUN_PATH) {
-      const configured = this.env.VMRUN_PATH;
-      if (!import_node_path.default.isAbsolute(configured) || !/vmrun\.exe$/i.test(import_node_path.default.basename(configured))) throw new Error("VMRUN_PATH must be an absolute path to vmrun.exe.");
-      if (!(await import_promises.default.stat(configured)).isFile()) throw new Error("VMRUN_PATH is not a file.");
-      return configured;
-    }
-    const candidates = [
-      ...[this.env.ProgramFiles, this.env["ProgramFiles(x86)"]].filter(Boolean).map((root) => import_node_path.default.join(root, "VMware", "VMware Workstation", "vmrun.exe")),
-      ...(this.env.PATH || this.env.Path || "").split(import_node_path.default.delimiter).filter(Boolean).map((root) => import_node_path.default.join(root, "vmrun.exe"))
-    ];
-    for (const candidate of candidates) {
-      try {
-        if (import_node_path.default.isAbsolute(candidate) && (await import_promises.default.stat(candidate)).isFile()) return candidate;
-      } catch (error62) {
-        if (!["ENOENT", "ENOTDIR"].includes(error62.code)) throw error62;
-      }
-    }
-    throw new Error("vmrun.exe was not found. Install VMware Workstation or set VMRUN_PATH.");
+    return findVMwareExecutable("vmrun", { env: this.env });
   }
   async run(args, { mutation = false, authentication = [], timeout = 12e4 } = {}) {
     const job = this.tail.then(async () => {
@@ -117,56 +148,56 @@ var Workstation = class {
     }
   }
   async hostPath(input2, kind, overwrite = false) {
-    if (typeof input2 !== "string" || !import_node_path.default.isAbsolute(input2) || /[\x00-\x1f]/.test(input2)) throw new Error("Host paths must be absolute and contain no control characters.");
-    const absolute = import_node_path.default.resolve(input2);
+    if (typeof input2 !== "string" || !import_node_path2.default.isAbsolute(input2) || /[\x00-\x1f]/.test(input2)) throw new Error("Host paths must be absolute and contain no control characters.");
+    const absolute = import_node_path2.default.resolve(input2);
     let stat;
     try {
-      stat = await import_promises.default.stat(absolute);
+      stat = await import_promises2.default.stat(absolute);
     } catch (error62) {
       if (error62.code !== "ENOENT") throw error62;
     }
     if (kind === "input-file" && !stat?.isFile()) throw new Error("Host source must be an existing file.");
     if (kind === "directory" && !stat?.isDirectory()) throw new Error("Host directory must already exist.");
-    if (kind === "new-vmx" && (stat || import_node_path.default.extname(absolute).toLowerCase() !== ".vmx")) throw new Error("Clone destination must be a new .vmx file.");
+    if (kind === "new-vmx" && (stat || import_node_path2.default.extname(absolute).toLowerCase() !== ".vmx")) throw new Error("Clone destination must be a new .vmx file.");
     if (kind === "output-file" && (stat?.isDirectory() || stat && !overwrite)) throw new Error("Host destination exists; choose another file or explicitly set overwrite=true.");
     if (kind === "destination-directory" && stat && !stat.isDirectory()) throw new Error("Destination must be a directory path.");
     let ancestor = absolute;
     const missing = [];
     while (true) {
       try {
-        ancestor = await import_promises.default.realpath(ancestor);
+        ancestor = await import_promises2.default.realpath(ancestor);
         break;
       } catch (error62) {
         if (error62.code !== "ENOENT") throw error62;
-        const entry = await import_promises.default.lstat(ancestor).catch((missingError) => {
+        const entry = await import_promises2.default.lstat(ancestor).catch((missingError) => {
           if (missingError.code !== "ENOENT") throw missingError;
           return null;
         });
         if (entry?.isSymbolicLink()) throw new Error("Destination contains a dangling link.");
-        const parent = import_node_path.default.dirname(ancestor);
+        const parent = import_node_path2.default.dirname(ancestor);
         if (parent === ancestor) throw error62;
-        missing.unshift(import_node_path.default.basename(ancestor));
+        missing.unshift(import_node_path2.default.basename(ancestor));
         ancestor = parent;
       }
     }
-    const resolved = import_node_path.default.join(ancestor, ...missing);
+    const resolved = import_node_path2.default.join(ancestor, ...missing);
     const rootSetting = kind === "new-vmx" || kind === "destination-directory" ? this.env.VMWARE_ALLOWED_ROOTS : this.env.VMWARE_ALLOWED_HOST_ROOTS;
     if (rootSetting) {
-      const roots = rootSetting.split(import_node_path.default.delimiter).filter(Boolean);
-      if (!roots.length || roots.some((root) => !import_node_path.default.isAbsolute(root))) throw new Error("Allowed host roots must be absolute.");
-      const canonical = await Promise.all(roots.map((root) => import_promises.default.realpath(root)));
+      const roots = rootSetting.split(import_node_path2.default.delimiter).filter(Boolean);
+      if (!roots.length || roots.some((root) => !import_node_path2.default.isAbsolute(root))) throw new Error("Allowed host roots must be absolute.");
+      const canonical = await Promise.all(roots.map((root) => import_promises2.default.realpath(root)));
       if (!canonical.some((root) => isWithin(root, resolved))) throw new Error("Host path is outside the configured allowed roots.");
     }
     return resolved;
   }
   async vmx(input2) {
-    if (typeof input2 !== "string" || !import_node_path.default.isAbsolute(input2) || import_node_path.default.extname(input2).toLowerCase() !== ".vmx" || /[\x00-\x1f]/.test(input2)) throw new Error("Provide an absolute path to an existing .vmx file.");
-    const resolved = await import_promises.default.realpath(input2);
-    if (import_node_path.default.extname(resolved).toLowerCase() !== ".vmx" || !(await import_promises.default.stat(resolved)).isFile()) throw new Error("VM target must resolve to a .vmx file.");
+    if (typeof input2 !== "string" || !import_node_path2.default.isAbsolute(input2) || import_node_path2.default.extname(input2).toLowerCase() !== ".vmx" || /[\x00-\x1f]/.test(input2)) throw new Error("Provide an absolute path to an existing .vmx file.");
+    const resolved = await import_promises2.default.realpath(input2);
+    if (import_node_path2.default.extname(resolved).toLowerCase() !== ".vmx" || !(await import_promises2.default.stat(resolved)).isFile()) throw new Error("VM target must resolve to a .vmx file.");
     if (this.env.VMWARE_ALLOWED_ROOTS) {
-      const roots = this.env.VMWARE_ALLOWED_ROOTS.split(import_node_path.default.delimiter).filter(Boolean);
-      if (!roots.length || roots.some((root) => !import_node_path.default.isAbsolute(root))) throw new Error("VMWARE_ALLOWED_ROOTS must contain absolute directories.");
-      const canonicalRoots = await Promise.all(roots.map((root) => import_promises.default.realpath(root)));
+      const roots = this.env.VMWARE_ALLOWED_ROOTS.split(import_node_path2.default.delimiter).filter(Boolean);
+      if (!roots.length || roots.some((root) => !import_node_path2.default.isAbsolute(root))) throw new Error("VMWARE_ALLOWED_ROOTS must contain absolute directories.");
+      const canonicalRoots = await Promise.all(roots.map((root) => import_promises2.default.realpath(root)));
       if (!canonicalRoots.some((root) => isWithin(root, resolved))) throw new Error("VM is outside VMWARE_ALLOWED_ROOTS.");
     }
     return resolved;
@@ -178,11 +209,11 @@ var Workstation = class {
   }
   async resolveVM(vmID, { aliases = {}, restInventory } = {}) {
     if (typeof vmID !== "string" || !vmID.trim() || /[\x00-\x1f]/.test(vmID)) throw new Error("Provide a VMX path, unique inventory name, console profile alias, or REST VM ID.");
-    if (import_node_path.default.isAbsolute(vmID)) return this.vmx(vmID);
+    if (import_node_path2.default.isAbsolute(vmID)) return this.vmx(vmID);
     if (Object.hasOwn(aliases, vmID)) return this.vmx(aliases[vmID]);
     const { vms } = await this.listVMs();
     const normalize = (value) => process.platform === "win32" ? value.toLowerCase() : value;
-    const matches = vms.filter((vm) => [vm.displayName, import_node_path.default.basename(vm.vmx, ".vmx")].some((name) => normalize(name) === normalize(vmID)));
+    const matches = vms.filter((vm) => [vm.displayName, import_node_path2.default.basename(vm.vmx, ".vmx")].some((name) => normalize(name) === normalize(vmID)));
     if (matches.length > 1) throw new Error("VM name is ambiguous. Use the exact VMX path.");
     if (matches.length === 1) return this.vmx(matches[0].vmx);
     if (restInventory) {
@@ -197,24 +228,24 @@ var Workstation = class {
     let entries = {};
     const warnings = [];
     try {
-      entries = parseAssignments(await import_promises.default.readFile(this.inventoryPath, "utf8"));
+      entries = parseAssignments(await import_promises2.default.readFile(this.inventoryPath, "utf8"));
     } catch (error62) {
       warnings.push(`Inventory unavailable (${error62.code || error62.message}); showing running VMs only.`);
     }
-    const key = (value) => process.platform === "win32" ? import_node_path.default.normalize(value).toLowerCase() : import_node_path.default.normalize(value);
+    const key = (value) => process.platform === "win32" ? import_node_path2.default.normalize(value).toLowerCase() : import_node_path2.default.normalize(value);
     const records = /* @__PURE__ */ new Map();
     for (const [name, vmx] of Object.entries(entries)) {
-      if (/^vmlist\d+\.config$/.test(name) && vmx && import_node_path.default.extname(vmx).toLowerCase() === ".vmx") {
-        records.set(key(vmx), { vmx, displayName: entries[name.replace(/\.config$/, ".DisplayName")] || import_node_path.default.basename(vmx, import_node_path.default.extname(vmx)), registered: true, running: false });
+      if (/^vmlist\d+\.config$/.test(name) && vmx && import_node_path2.default.extname(vmx).toLowerCase() === ".vmx") {
+        records.set(key(vmx), { vmx, displayName: entries[name.replace(/\.config$/, ".DisplayName")] || import_node_path2.default.basename(vmx, import_node_path2.default.extname(vmx)), registered: true, running: false });
       }
     }
     for (const vmx of running) {
-      const record2 = records.get(key(vmx)) || { vmx, displayName: import_node_path.default.basename(vmx, import_node_path.default.extname(vmx)), registered: false };
+      const record2 = records.get(key(vmx)) || { vmx, displayName: import_node_path2.default.basename(vmx, import_node_path2.default.extname(vmx)), registered: false };
       records.set(key(vmx), { ...record2, running: true });
     }
     const vms = await Promise.all([...records.values()].map(async (record2) => {
       try {
-        await import_promises.default.access(record2.vmx);
+        await import_promises2.default.access(record2.vmx);
         return { ...record2, exists: true };
       } catch {
         return { ...record2, exists: false };
@@ -224,9 +255,9 @@ var Workstation = class {
   }
   async details(input2) {
     const vmx = await this.vmx(input2);
-    const config2 = parseAssignments(await import_promises.default.readFile(vmx, "utf8"));
+    const config2 = parseAssignments(await import_promises2.default.readFile(vmx, "utf8"));
     const running = parseCountedList(await this.run(["list"]));
-    const realRunning = await Promise.all(running.map(async (file2) => import_promises.default.realpath(file2).catch(() => file2)));
+    const realRunning = await Promise.all(running.map(async (file2) => import_promises2.default.realpath(file2).catch(() => file2)));
     const compare = (file2) => process.platform === "win32" ? file2.toLowerCase() : file2;
     const hardware = Object.fromEntries(Object.entries(config2).filter(([key]) => /^(displayName|guestOS|memsize|numvcpus|virtualHW.version|ethernet\d+\.(present|connectionType|vnet)|(?:scsi|sata|ide|nvme)\d+:\d+\.(present|fileName|deviceType))$/.test(key)));
     return { vmx, running: realRunning.some((file2) => compare(file2) === compare(vmx)), hardware };
@@ -264,23 +295,63 @@ var Workstation = class {
 };
 
 // src/credentials.mjs
-var import_promises2 = __toESM(require("node:fs/promises"), 1);
-var import_node_path2 = __toESM(require("node:path"), 1);
+var import_promises4 = __toESM(require("node:fs/promises"), 1);
+var import_node_path4 = __toESM(require("node:path"), 1);
+
+// src/local-file-security.mjs
+var import_node_path3 = __toESM(require("node:path"), 1);
+var import_promises3 = __toESM(require("node:fs/promises"), 1);
+var import_node_fs2 = require("node:fs");
+async function openPrivateFile(filename, flags = import_node_fs2.constants.O_RDONLY) {
+  const handle = await import_promises3.default.open(filename, flags | import_node_fs2.constants.O_NOFOLLOW | import_node_fs2.constants.O_NONBLOCK, 384);
+  try {
+    const stat = await handle.stat();
+    if (!stat.isFile() || stat.uid !== process.getuid() || stat.nlink !== 1) throw new Error("Sensitive files must be regular files owned by the current user with exactly one hard link.");
+    return handle;
+  } catch (error62) {
+    await handle.close();
+    throw error62;
+  }
+}
+async function readPrivateFile(filename) {
+  const handle = await openPrivateFile(filename);
+  try {
+    if ((await handle.stat()).mode & 63) throw new Error("Credentials file must be private (chmod 600).");
+    return await handle.readFile("utf8");
+  } finally {
+    await handle.close();
+  }
+}
+function localFileProtector(backend) {
+  if (process.platform === "linux") return async (filename) => {
+    const handle = await openPrivateFile(filename);
+    try {
+      await handle.chmod(384);
+      if ((await handle.stat()).mode & 63) throw new Error("This filesystem does not enforce private Linux file permissions. Use a native Linux filesystem for sensitive files.");
+    } finally {
+      await handle.close();
+    }
+  };
+  const root = import_node_path3.default.resolve(import_node_path3.default.dirname(process.argv[1]), "..");
+  return (filename) => backend.execute("pwsh", ["-NoProfile", "-File", import_node_path3.default.join(root, "scripts", "Protect-LocalFile.ps1"), "-LiteralPath", filename], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
+}
+
+// src/credentials.mjs
 var Credentials = class {
   constructor(env = process.env) {
     this.env = env;
     this.secrets = /* @__PURE__ */ new Set();
-    this.filename = env.VMWARE_CREDENTIALS_FILE || (env.APPDATA ? import_node_path2.default.join(env.APPDATA, "VMwareWorkstationPlugin", "credentials.json") : null);
+    this.filename = credentialsPath(env);
   }
   async load() {
     if (!this.filename) return {};
     try {
-      const result = JSON.parse(await import_promises2.default.readFile(this.filename, "utf8"));
+      const result = JSON.parse(process.platform === "linux" ? await readPrivateFile(this.filename) : await import_promises4.default.readFile(this.filename, "utf8"));
       if (!result || typeof result !== "object" || Array.isArray(result)) throw new Error();
       return result;
     } catch (error62) {
       if (!this.env.VMWARE_CREDENTIALS_FILE && error62.code === "ENOENT") return {};
-      throw new Error("Cannot read local VMware credentials as a JSON object. Check VMWARE_CREDENTIALS_FILE or the default credentials file, permissions, and format.");
+      throw new Error("Cannot read local VMware credentials as a JSON object. Check VMWARE_CREDENTIALS_FILE or the default credentials file, permissions, and format. On Linux use an owned regular file with mode 600.");
     }
   }
   profile(value = "default") {
@@ -314,9 +385,9 @@ var Credentials = class {
   }
   async console(vmx, requestedProfile) {
     const file2 = await this.load();
-    const canonical = (value) => process.platform === "win32" ? import_node_path2.default.resolve(value).toLowerCase() : import_node_path2.default.resolve(value);
+    const canonical = (value) => process.platform === "win32" ? import_node_path4.default.resolve(value).toLowerCase() : import_node_path4.default.resolve(value);
     const profiles = file2.console || {};
-    const resolved = await Promise.all(Object.entries(profiles).map(async ([name2, entry2]) => [name2, typeof entry2?.vmx === "string" ? await import_promises2.default.realpath(entry2.vmx).catch(() => entry2.vmx) : null]));
+    const resolved = await Promise.all(Object.entries(profiles).map(async ([name2, entry2]) => [name2, typeof entry2?.vmx === "string" ? await import_promises4.default.realpath(entry2.vmx).catch(() => entry2.vmx) : null]));
     const matches = resolved.filter(([, target]) => target && canonical(target) === canonical(vmx));
     if (!requestedProfile && matches.length > 1) throw new Error("Multiple console profiles identify this VM. Use its configured profile alias as vm_id.");
     const name = this.profile(requestedProfile || matches[0]?.[0] || "default");
@@ -345,9 +416,9 @@ var Credentials = class {
 };
 
 // src/vm-files.mjs
-var import_promises3 = __toESM(require("node:fs/promises"), 1);
-var import_node_fs = require("node:fs");
-var import_node_path3 = __toESM(require("node:path"), 1);
+var import_promises5 = __toESM(require("node:fs/promises"), 1);
+var import_node_fs3 = require("node:fs");
+var import_node_path5 = __toESM(require("node:path"), 1);
 var import_node_crypto = require("node:crypto");
 
 // node_modules/zod/v4/classic/external.js
@@ -1167,10 +1238,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path5) {
-  if (!path5)
+function getElementAtPath(obj, path6) {
+  if (!path6)
     return obj;
-  return path5.reduce((acc, key) => acc?.[key], obj);
+  return path6.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -1510,11 +1581,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path5, issues) {
+function prefixIssues(path6, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path5);
+    iss.path.unshift(path6);
     return iss;
   });
 }
@@ -1976,16 +2047,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path5 = []) => {
+  const processError = (error63, path6 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path5, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path6, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path6, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path6, ...issue2.path]);
       } else {
-        const fullpath = [...path5, ...issue2.path];
+        const fullpath = [...path6, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -2024,17 +2095,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path5 = []) => {
+  const processError = (error63, path6 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path5, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path6, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path6, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path6, ...issue2.path]);
       } else {
-        const fullpath = [...path5, ...issue2.path];
+        const fullpath = [...path6, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -2073,8 +2144,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path5 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path5) {
+  const path6 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path6) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -19212,13 +19283,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path5 = ref.slice(1).split("/").filter(Boolean);
-  if (path5.length === 0) {
+  const path6 = ref.slice(1).split("/").filter(Boolean);
+  if (path6.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path5[0] === defsKey) {
-    const key = path5[1] === void 0 ? void 0 : decodeJSONPointerSegment(path5[1]);
+  if (path6[0] === defsKey) {
+    const key = path6[1] === void 0 ? void 0 : decodeJSONPointerSegment(path6[1]);
     if (!key || !ctx.defs[key]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -20105,14 +20176,13 @@ var VMFiles = class {
       const directory = await this.backend.hostPath(a.directory, "destination-directory");
       const iso = a.iso_path ? await this.backend.hostPath(a.iso_path, "input-file") : null;
       const vmrun = await this.backend.executable();
-      const diskManager = this.backend.env.VMWARE_VDISKMANAGER_PATH || import_node_path3.default.join(import_node_path3.default.dirname(vmrun), "vmware-vdiskmanager.exe");
-      if (!import_node_path3.default.isAbsolute(diskManager) || import_node_path3.default.basename(diskManager).toLowerCase() !== "vmware-vdiskmanager.exe" || !(await import_promises3.default.stat(diskManager)).isFile()) throw new Error("VMware Virtual Disk Manager was not found beside vmrun; set VMWARE_VDISKMANAGER_PATH.");
-      await import_promises3.default.mkdir(directory);
-      const vmx = import_node_path3.default.join(directory, "machine.vmx");
-      const disk = import_node_path3.default.join(directory, "disk.vmdk");
+      const diskManager = await findVMwareExecutable("vmware-vdiskmanager", { env: this.backend.env, beside: vmrun });
+      await import_promises5.default.mkdir(directory);
+      const vmx = import_node_path5.default.join(directory, "machine.vmx");
+      const disk = import_node_path5.default.join(directory, "disk.vmdk");
       try {
         await this.backend.execute(diskManager, ["-c", "-s", `${a.disk_gb}GB`, "-a", "lsilogic", "-t", "0", disk], { windowsHide: true, shell: false, timeout: a.timeout_seconds * 1e3, maxBuffer: 1024 * 1024, encoding: "utf8" });
-        if (!(await import_promises3.default.stat(disk)).isFile()) throw new Error("Disk manager did not create the VMDK.");
+        if (!(await import_promises5.default.stat(disk)).isFile()) throw new Error("Disk manager did not create the VMDK.");
         const settings = {
           ".encoding": "UTF-8",
           "config.version": "8",
@@ -20138,7 +20208,7 @@ var VMFiles = class {
         if (a.network === "custom") settings["ethernet0.vnet"] = a.vmnet;
         if (iso) Object.assign(settings, { "sata0.present": "TRUE", "sata0:0.present": "TRUE", "sata0:0.deviceType": "cdrom-image", "sata0:0.fileName": iso });
         const text = Object.entries(settings).map(([key, value]) => `${key} = "${encodeVMX(value)}"`).join("\n") + "\n";
-        await import_promises3.default.writeFile(vmx, text, { flag: "wx", encoding: "utf8" });
+        await import_promises5.default.writeFile(vmx, text, { flag: "wx", encoding: "utf8" });
         return { created: true, vmx, disk, directory, registered: false, poweredOn: false, guestOSInstalled: false, note: "Blank VM and sparse disk created. Open the VMX in Workstation or register through REST; install a guest OS separately." };
       } catch (error62) {
         throw new Error(`VM creation failed (${error62.code || "disk/configuration error"}). Partial files may remain in ${directory}; inspect before retrying. No existing VM was overwritten.`);
@@ -20153,19 +20223,19 @@ var VMFiles = class {
       if (details.running) throw new Error("Power off the VM before editing its VMX.");
       const lock = `${vmx}.lck`;
       try {
-        await import_promises3.default.access(lock);
+        await import_promises5.default.access(lock);
         throw new Error("VMware holds a VMX lock; close or power off the VM before editing.");
       } catch (error62) {
         if (error62.code !== "ENOENT") throw error62;
       }
-      const original = await import_promises3.default.readFile(vmx, "utf8");
+      const original = await import_promises5.default.readFile(vmx, "utf8");
       const config2 = parseAssignments(original);
       const sensitiveKeys = Object.entries(config2).some(([key, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key) && value) || Object.entries(a.settings).some(([key, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key) && value);
       if (!protectFile && sensitiveKeys) protectFile = this.protectSensitiveFile;
       if (config2[".encoding"] && !/^utf-?8$/i.test(config2[".encoding"])) throw new Error("Local VMX editing supports UTF-8 only. Use REST or convert the VMX encoding explicitly.");
       for (const value of [config2["checkpoint.vmState"], config2["suspend.filename"]].filter(Boolean)) {
         try {
-          await import_promises3.default.access(import_node_path3.default.resolve(import_node_path3.default.dirname(vmx), value));
+          await import_promises5.default.access(import_node_path5.default.resolve(import_node_path5.default.dirname(vmx), value));
           throw new Error("VM has a saved/suspended state; fully power it off before editing hardware.");
         } catch (error62) {
           if (error62.code !== "ENOENT") throw error62;
@@ -20191,34 +20261,28 @@ var VMFiles = class {
         seen.add(key);
       }
       for (const [key, update] of updates) if (!seen.has(key) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
+      const mode = (await import_promises5.default.stat(vmx)).mode & 511;
       const backup = `${vmx}.backup-${(0, import_node_crypto.randomUUID)()}`;
       if (protectFile) {
-        await import_promises3.default.writeFile(backup, "", { flag: "wx" });
+        await import_promises5.default.writeFile(backup, "", { flag: "wx", mode: 384 });
         await protectFile(backup);
-        await import_promises3.default.writeFile(backup, original);
-      } else await import_promises3.default.copyFile(vmx, backup, import_node_fs.constants.COPYFILE_EXCL);
+        await import_promises5.default.writeFile(backup, original);
+      } else await import_promises5.default.copyFile(vmx, backup, import_node_fs3.constants.COPYFILE_EXCL);
       const temporary = `${vmx}.edit-${(0, import_node_crypto.randomUUID)()}`;
       if (protectFile) {
-        await import_promises3.default.writeFile(temporary, "", { flag: "wx" });
+        await import_promises5.default.writeFile(temporary, "", { flag: "wx", mode: 384 });
         await protectFile(temporary);
       }
-      await import_promises3.default.writeFile(temporary, lines.join("\n").replace(/\n*$/, "\n"), { flag: protectFile ? "w" : "wx" });
-      if (await import_promises3.default.readFile(vmx, "utf8") !== original) {
-        await import_promises3.default.unlink(temporary);
+      await import_promises5.default.writeFile(temporary, lines.join("\n").replace(/\n*$/, "\n"), { flag: protectFile ? "w" : "wx", mode });
+      if (await import_promises5.default.readFile(vmx, "utf8") !== original) {
+        await import_promises5.default.unlink(temporary);
         throw new Error(`VMX changed during editing; original retained. Backup: ${backup}`);
       }
-      await import_promises3.default.rename(temporary, vmx);
+      await import_promises5.default.rename(temporary, vmx);
       return { vmx, updated: true, backup, changedSettings: Object.keys(a.settings), note: "VMX saved while VM was not running and had no detected saved state/VMX lock. Close/reopen its Workstation tab if it has cached settings." };
     });
   }
 };
-
-// src/local-file-security.mjs
-var import_node_path4 = __toESM(require("node:path"), 1);
-function localFileProtector(backend) {
-  const root = import_node_path4.default.resolve(import_node_path4.default.dirname(process.argv[1]), "..");
-  return (filename) => backend.execute("pwsh", ["-NoProfile", "-File", import_node_path4.default.join(root, "scripts", "Protect-LocalFile.ps1"), "-LiteralPath", filename], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
-}
 
 // src/configure-console.mjs
 async function main() {
@@ -20232,7 +20296,7 @@ async function main() {
     const auth = await credentials.console(vmx, values.profile);
     const protectFile = localFileProtector(backend);
     const result = await new VMFiles(backend).configure({ vmx, settings: { "RemoteDisplay.vnc.enabled": "TRUE", "RemoteDisplay.vnc.ip": "127.0.0.1", "RemoteDisplay.vnc.port": String(port), "RemoteDisplay.vnc.password": auth.password, "RemoteDisplay.vnc.key": null } }, { protectFile });
-    console.log(JSON.stringify({ ...result, port, host: "127.0.0.1", profile: auth.profile, note: "Native VNC configured offline; VMX and backup restricted to the current Windows user. Power the VM on with vmrun_start mode=nogui. The VNC password is also stored in the VMX as required by VMware; do not share it." }));
+    console.log(JSON.stringify({ ...result, port, host: "127.0.0.1", profile: auth.profile, note: "Native VNC configured offline; VMX and backup restricted to the current user. Power the VM on with vmrun_start mode=nogui. The VNC password is also stored in the VMX as required by VMware; do not share it." }));
   } catch (error62) {
     console.error(credentials.redact(error62.message));
     process.exitCode = 1;

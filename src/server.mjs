@@ -15,7 +15,7 @@ const credentials = new Credentials();
 const rest = new RestClient({ credentials, backend });
 const vmFiles = new VMFiles(backend, { protectSensitiveFile: localFileProtector(backend) });
 const consoles = new ConsoleManager({ backend, credentials, rest });
-const server = new McpServer({ name: 'vmware-workstation', version: '0.2.0' });
+const server = new McpServer({ name: 'vmware-workstation', version: '0.3.0' });
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
 function tool(name, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false) {

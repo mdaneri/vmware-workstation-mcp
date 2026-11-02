@@ -5,6 +5,7 @@ import { connect, Framebuffer, security, encodings, buttons, keysyms, keysymFrom
 import pngjs from 'pngjs';
 import { z } from 'zod';
 import { parseAssignments } from './workstation.mjs';
+import { inspectLinuxListener } from './linux-listener.mjs';
 
 export const consoleSchemas = {
   console_screenshot: z.object({ vm_id: z.string().min(1) }).strict(),
@@ -36,9 +37,10 @@ export function keySequence(key) {
   return sequence;
 }
 
-// Only reads Windows TCP/process metadata; never touches desktop pixels, focus, or input.
+// Only reads native TCP/process metadata; never touches desktop pixels, focus, or input.
 export async function inspectNativeListener(backend, endpoint) {
-  if (process.platform !== 'win32') throw new Error('Native listener verification currently requires Windows.');
+  if (process.platform === 'linux') return inspectLinuxListener(endpoint.port);
+  if (process.platform !== 'win32') throw new Error('Native listener verification requires Windows or Linux.');
   const port = endpoint.port;
   if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('Invalid VNC listener port.');
   const command = `$ErrorActionPreference='Stop'; $connections=@(Get-NetTCPConnection -State Listen -LocalPort ${port} -ErrorAction SilentlyContinue); @($connections | ForEach-Object { $owner=Get-CimInstance Win32_Process -Filter ('ProcessId='+$_.OwningProcess); [pscustomobject]@{address=$_.LocalAddress;port=$_.LocalPort;processName=$owner.Name;commandLine=$owner.CommandLine} }) | ConvertTo-Json -Compress`;
@@ -82,7 +84,13 @@ export class ConsoleManager {
     if (!listeners.length) throw new Error('No native VNC listener is running. Power on this VM headlessly after configuring VNC.');
     if (listeners.some(item => !['127.0.0.1', '::1'].includes(item.address))) throw new Error('VNC port is exposed beyond loopback. Stop the VM and fix its native listener configuration.');
     const canonical = value => process.platform === 'win32' ? value.replace(/\//g, '\\').toLowerCase() : value;
-    const matches = listeners.filter(item => item.address === endpoint.host && /^vmware-vmx(?:\.exe)?$/i.test(item.processName || '') && typeof item.commandLine === 'string' && canonical(item.commandLine).includes(canonical(endpoint.vmx)));
+    const matchesVM = item => Array.isArray(item.arguments)
+      ? item.arguments.some(argument => canonical(argument) === canonical(endpoint.vmx))
+      : typeof item.commandLine === 'string' && canonical(item.commandLine).includes(canonical(endpoint.vmx));
+    const candidates = listeners.filter(item => item.address === endpoint.host);
+    const matches = candidates.filter(item => /^vmware-vmx(?:\.exe)?$/i.test(item.processName || '') && matchesVM(item));
+    // Every socket owner at the selected address must verify; SO_REUSEPORT must not hide a second owner.
+    if (candidates.some(item => Array.isArray(item.arguments)) && matches.length !== candidates.length) throw new Error('The Linux VNC listener owner or exact VMX argument could not be verified. Run the plugin as the VM owner in the same PID/network namespace.');
     if (matches.length) return 'native worker command line and loopback listener';
     const native = listeners.filter(item => item.address === endpoint.host && /^vmware-vmx(?:\.exe)?$/i.test(item.processName || ''));
     if (!native.length || native.some(item => item.commandLine)) throw new Error('The VNC listener does not belong to the selected VMware VM. Refusing a possible cross-VM connection.');

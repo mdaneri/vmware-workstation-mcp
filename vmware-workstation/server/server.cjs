@@ -410,11 +410,11 @@ var require_codegen = __commonJS({
         const rhs = this.rhs === void 0 ? "" : ` = ${this.rhs}`;
         return `${varKind} ${this.name}${rhs};` + _n;
       }
-      optimizeNames(names2, constants2) {
+      optimizeNames(names2, constants4) {
         if (!names2[this.name.str])
           return;
         if (this.rhs)
-          this.rhs = optimizeExpr(this.rhs, names2, constants2);
+          this.rhs = optimizeExpr(this.rhs, names2, constants4);
         return this;
       }
       get names() {
@@ -431,10 +431,10 @@ var require_codegen = __commonJS({
       render({ _n }) {
         return `${this.lhs} = ${this.rhs};` + _n;
       }
-      optimizeNames(names2, constants2) {
+      optimizeNames(names2, constants4) {
         if (this.lhs instanceof code_1.Name && !names2[this.lhs.str] && !this.sideEffects)
           return;
-        this.rhs = optimizeExpr(this.rhs, names2, constants2);
+        this.rhs = optimizeExpr(this.rhs, names2, constants4);
         return this;
       }
       get names() {
@@ -495,8 +495,8 @@ var require_codegen = __commonJS({
       optimizeNodes() {
         return `${this.code}` ? this : void 0;
       }
-      optimizeNames(names2, constants2) {
-        this.code = optimizeExpr(this.code, names2, constants2);
+      optimizeNames(names2, constants4) {
+        this.code = optimizeExpr(this.code, names2, constants4);
         return this;
       }
       get names() {
@@ -525,12 +525,12 @@ var require_codegen = __commonJS({
         }
         return nodes.length > 0 ? this : void 0;
       }
-      optimizeNames(names2, constants2) {
+      optimizeNames(names2, constants4) {
         const { nodes } = this;
         let i = nodes.length;
         while (i--) {
           const n2 = nodes[i];
-          if (n2.optimizeNames(names2, constants2))
+          if (n2.optimizeNames(names2, constants4))
             continue;
           subtractNames(names2, n2.names);
           nodes.splice(i, 1);
@@ -583,12 +583,12 @@ var require_codegen = __commonJS({
           return void 0;
         return this;
       }
-      optimizeNames(names2, constants2) {
+      optimizeNames(names2, constants4) {
         var _a3;
-        this.else = (_a3 = this.else) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names2, constants2);
-        if (!(super.optimizeNames(names2, constants2) || this.else))
+        this.else = (_a3 = this.else) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names2, constants4);
+        if (!(super.optimizeNames(names2, constants4) || this.else))
           return;
-        this.condition = optimizeExpr(this.condition, names2, constants2);
+        this.condition = optimizeExpr(this.condition, names2, constants4);
         return this;
       }
       get names() {
@@ -611,10 +611,10 @@ var require_codegen = __commonJS({
       render(opts) {
         return `for(${this.iteration})` + super.render(opts);
       }
-      optimizeNames(names2, constants2) {
-        if (!super.optimizeNames(names2, constants2))
+      optimizeNames(names2, constants4) {
+        if (!super.optimizeNames(names2, constants4))
           return;
-        this.iteration = optimizeExpr(this.iteration, names2, constants2);
+        this.iteration = optimizeExpr(this.iteration, names2, constants4);
         return this;
       }
       get names() {
@@ -650,10 +650,10 @@ var require_codegen = __commonJS({
       render(opts) {
         return `for(${this.varKind} ${this.name} ${this.loop} ${this.iterable})` + super.render(opts);
       }
-      optimizeNames(names2, constants2) {
-        if (!super.optimizeNames(names2, constants2))
+      optimizeNames(names2, constants4) {
+        if (!super.optimizeNames(names2, constants4))
           return;
-        this.iterable = optimizeExpr(this.iterable, names2, constants2);
+        this.iterable = optimizeExpr(this.iterable, names2, constants4);
         return this;
       }
       get names() {
@@ -695,11 +695,11 @@ var require_codegen = __commonJS({
         (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNodes();
         return this;
       }
-      optimizeNames(names2, constants2) {
+      optimizeNames(names2, constants4) {
         var _a3, _b;
-        super.optimizeNames(names2, constants2);
-        (_a3 = this.catch) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names2, constants2);
-        (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNames(names2, constants2);
+        super.optimizeNames(names2, constants4);
+        (_a3 = this.catch) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names2, constants4);
+        (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNames(names2, constants4);
         return this;
       }
       get names() {
@@ -1000,7 +1000,7 @@ var require_codegen = __commonJS({
     function addExprNames(names2, from) {
       return from instanceof code_1._CodeOrName ? addNames(names2, from.names) : names2;
     }
-    function optimizeExpr(expr, names2, constants2) {
+    function optimizeExpr(expr, names2, constants4) {
       if (expr instanceof code_1.Name)
         return replaceName(expr);
       if (!canOptimize(expr))
@@ -1015,14 +1015,14 @@ var require_codegen = __commonJS({
         return items;
       }, []));
       function replaceName(n2) {
-        const c = constants2[n2.str];
+        const c = constants4[n2.str];
         if (c === void 0 || names2[n2.str] !== 1)
           return n2;
         delete names2[n2.str];
         return c;
       }
       function canOptimize(e2) {
-        return e2 instanceof code_1._Code && e2._items.some((c) => c instanceof code_1.Name && names2[c.str] === 1 && constants2[c.str] !== void 0);
+        return e2 instanceof code_1._Code && e2._items.some((c) => c instanceof code_1.Name && names2[c.str] === 1 && constants4[c.str] !== void 0);
       }
     }
     function subtractNames(names2, from) {
@@ -3262,8 +3262,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path5) {
-      let input2 = path5;
+    function removeDotSegments(path7) {
+      let input2 = path7;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -3337,11 +3337,11 @@ var require_utils = __commonJS({
       }
       return output2.join("");
     }
-    function removeDotSegmentsRelative(path5) {
-      if (path5 === "" || path5[0] === "/") {
-        return removeDotSegments(path5);
+    function removeDotSegmentsRelative(path7) {
+      if (path7 === "" || path7[0] === "/") {
+        return removeDotSegments(path7);
       }
-      const segments = path5.split("/");
+      const segments = path7.split("/");
       const last = segments.length - 1;
       const output2 = [];
       let trailingDirectory = false;
@@ -3704,8 +3704,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path5 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path5 && path5 !== "/" ? path5 : void 0;
+        const path7 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path7 && path7 !== "/" ? path7 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -7242,12 +7242,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name2}"`);
       return f;
     };
-    function addFormats(ajv, list, fs5, exportName) {
+    function addFormats(ajv, list, fs8, exportName) {
       var _a3;
       var _b;
       (_a3 = (_b = ajv.opts.code).formats) !== null && _a3 !== void 0 ? _a3 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
-        ajv.addFormat(f, fs5[f]);
+        ajv.addFormat(f, fs8[f]);
     }
     module2.exports = exports2 = formatsPlugin;
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -7742,7 +7742,7 @@ var require_crc = __commonJS({
 var require_parser = __commonJS({
   "node_modules/pngjs/lib/parser.js"(exports2, module2) {
     "use strict";
-    var constants2 = require_constants();
+    var constants4 = require_constants();
     var CrcCalculator = require_crc();
     var Parser = module2.exports = function(options, dependencies) {
       this._options = options;
@@ -7753,12 +7753,12 @@ var require_parser = __commonJS({
       this._palette = [];
       this._colorType = 0;
       this._chunks = {};
-      this._chunks[constants2.TYPE_IHDR] = this._handleIHDR.bind(this);
-      this._chunks[constants2.TYPE_IEND] = this._handleIEND.bind(this);
-      this._chunks[constants2.TYPE_IDAT] = this._handleIDAT.bind(this);
-      this._chunks[constants2.TYPE_PLTE] = this._handlePLTE.bind(this);
-      this._chunks[constants2.TYPE_tRNS] = this._handleTRNS.bind(this);
-      this._chunks[constants2.TYPE_gAMA] = this._handleGAMA.bind(this);
+      this._chunks[constants4.TYPE_IHDR] = this._handleIHDR.bind(this);
+      this._chunks[constants4.TYPE_IEND] = this._handleIEND.bind(this);
+      this._chunks[constants4.TYPE_IDAT] = this._handleIDAT.bind(this);
+      this._chunks[constants4.TYPE_PLTE] = this._handlePLTE.bind(this);
+      this._chunks[constants4.TYPE_tRNS] = this._handleTRNS.bind(this);
+      this._chunks[constants4.TYPE_gAMA] = this._handleGAMA.bind(this);
       this.read = dependencies.read;
       this.error = dependencies.error;
       this.metadata = dependencies.metadata;
@@ -7773,10 +7773,10 @@ var require_parser = __commonJS({
       };
     };
     Parser.prototype.start = function() {
-      this.read(constants2.PNG_SIGNATURE.length, this._parseSignature.bind(this));
+      this.read(constants4.PNG_SIGNATURE.length, this._parseSignature.bind(this));
     };
     Parser.prototype._parseSignature = function(data) {
-      let signature = constants2.PNG_SIGNATURE;
+      let signature = constants4.PNG_SIGNATURE;
       for (let i = 0; i < signature.length; i++) {
         if (data[i] !== signature[i]) {
           this.error(new Error("Invalid file signature"));
@@ -7793,7 +7793,7 @@ var require_parser = __commonJS({
         name2 += String.fromCharCode(data[i]);
       }
       let ancillary = Boolean(data[4] & 32);
-      if (!this._hasIHDR && type !== constants2.TYPE_IHDR) {
+      if (!this._hasIHDR && type !== constants4.TYPE_IHDR) {
         this.error(new Error("Expected IHDR on beggining"));
         return;
       }
@@ -7841,7 +7841,7 @@ var require_parser = __commonJS({
         this.error(new Error("Unsupported bit depth " + depth));
         return;
       }
-      if (!(colorType in constants2.COLORTYPE_TO_BPP_MAP)) {
+      if (!(colorType in constants4.COLORTYPE_TO_BPP_MAP)) {
         this.error(new Error("Unsupported color type"));
         return;
       }
@@ -7858,16 +7858,16 @@ var require_parser = __commonJS({
         return;
       }
       this._colorType = colorType;
-      let bpp = constants2.COLORTYPE_TO_BPP_MAP[this._colorType];
+      let bpp = constants4.COLORTYPE_TO_BPP_MAP[this._colorType];
       this._hasIHDR = true;
       this.metadata({
         width,
         height,
         depth,
         interlace: Boolean(interlace),
-        palette: Boolean(colorType & constants2.COLORTYPE_PALETTE),
-        color: Boolean(colorType & constants2.COLORTYPE_COLOR),
-        alpha: Boolean(colorType & constants2.COLORTYPE_ALPHA),
+        palette: Boolean(colorType & constants4.COLORTYPE_PALETTE),
+        color: Boolean(colorType & constants4.COLORTYPE_COLOR),
+        alpha: Boolean(colorType & constants4.COLORTYPE_ALPHA),
         bpp,
         colorType
       });
@@ -7891,7 +7891,7 @@ var require_parser = __commonJS({
     };
     Parser.prototype._parseTRNS = function(data) {
       this._crc.write(data);
-      if (this._colorType === constants2.COLORTYPE_PALETTE_COLOR) {
+      if (this._colorType === constants4.COLORTYPE_PALETTE_COLOR) {
         if (this._palette.length === 0) {
           this.error(new Error("Transparency chunk must be after palette"));
           return;
@@ -7905,10 +7905,10 @@ var require_parser = __commonJS({
         }
         this.palette(this._palette);
       }
-      if (this._colorType === constants2.COLORTYPE_GRAYSCALE) {
+      if (this._colorType === constants4.COLORTYPE_GRAYSCALE) {
         this.transColor([data.readUInt16BE(0)]);
       }
-      if (this._colorType === constants2.COLORTYPE_COLOR) {
+      if (this._colorType === constants4.COLORTYPE_COLOR) {
         this.transColor([
           data.readUInt16BE(0),
           data.readUInt16BE(2),
@@ -7922,7 +7922,7 @@ var require_parser = __commonJS({
     };
     Parser.prototype._parseGAMA = function(data) {
       this._crc.write(data);
-      this.gamma(data.readUInt32BE(0) / constants2.GAMMA_DIVISION);
+      this.gamma(data.readUInt32BE(0) / constants4.GAMMA_DIVISION);
       this._handleChunkEnd();
     };
     Parser.prototype._handleIDAT = function(length) {
@@ -7934,7 +7934,7 @@ var require_parser = __commonJS({
     };
     Parser.prototype._parseIDAT = function(length, data) {
       this._crc.write(data);
-      if (this._colorType === constants2.COLORTYPE_PALETTE_COLOR && this._palette.length === 0) {
+      if (this._colorType === constants4.COLORTYPE_PALETTE_COLOR && this._palette.length === 0) {
         throw new Error("Expected palette not found");
       }
       this.inflateData(data);
@@ -8422,9 +8422,9 @@ var require_parser_async = __commonJS({
 var require_bitpacker = __commonJS({
   "node_modules/pngjs/lib/bitpacker.js"(exports2, module2) {
     "use strict";
-    var constants2 = require_constants();
+    var constants4 = require_constants();
     module2.exports = function(dataIn, width, height, options) {
-      let outHasAlpha = [constants2.COLORTYPE_COLOR_ALPHA, constants2.COLORTYPE_ALPHA].indexOf(
+      let outHasAlpha = [constants4.COLORTYPE_COLOR_ALPHA, constants4.COLORTYPE_ALPHA].indexOf(
         options.colorType
       ) !== -1;
       if (options.colorType === options.inputColorType) {
@@ -8444,11 +8444,11 @@ var require_bitpacker = __commonJS({
       }
       let data = options.bitDepth !== 16 ? dataIn : new Uint16Array(dataIn.buffer);
       let maxValue = 255;
-      let inBpp = constants2.COLORTYPE_TO_BPP_MAP[options.inputColorType];
+      let inBpp = constants4.COLORTYPE_TO_BPP_MAP[options.inputColorType];
       if (inBpp === 4 && !options.inputHasAlpha) {
         inBpp = 3;
       }
-      let outBpp = constants2.COLORTYPE_TO_BPP_MAP[options.colorType];
+      let outBpp = constants4.COLORTYPE_TO_BPP_MAP[options.colorType];
       if (options.bitDepth === 16) {
         maxValue = 65535;
         outBpp *= 2;
@@ -8472,24 +8472,24 @@ var require_bitpacker = __commonJS({
         let blue;
         let alpha = maxValue;
         switch (options.inputColorType) {
-          case constants2.COLORTYPE_COLOR_ALPHA:
+          case constants4.COLORTYPE_COLOR_ALPHA:
             alpha = data[inIndex + 3];
             red = data[inIndex];
             green = data[inIndex + 1];
             blue = data[inIndex + 2];
             break;
-          case constants2.COLORTYPE_COLOR:
+          case constants4.COLORTYPE_COLOR:
             red = data[inIndex];
             green = data[inIndex + 1];
             blue = data[inIndex + 2];
             break;
-          case constants2.COLORTYPE_ALPHA:
+          case constants4.COLORTYPE_ALPHA:
             alpha = data[inIndex + 1];
             red = data[inIndex];
             green = red;
             blue = red;
             break;
-          case constants2.COLORTYPE_GRAYSCALE:
+          case constants4.COLORTYPE_GRAYSCALE:
             red = data[inIndex];
             green = red;
             blue = red;
@@ -8522,8 +8522,8 @@ var require_bitpacker = __commonJS({
         for (let x = 0; x < width; x++) {
           let rgba = getRGBA(data, inIndex);
           switch (options.colorType) {
-            case constants2.COLORTYPE_COLOR_ALPHA:
-            case constants2.COLORTYPE_COLOR:
+            case constants4.COLORTYPE_COLOR_ALPHA:
+            case constants4.COLORTYPE_COLOR:
               if (options.bitDepth === 8) {
                 outData[outIndex] = rgba.red;
                 outData[outIndex + 1] = rgba.green;
@@ -8540,8 +8540,8 @@ var require_bitpacker = __commonJS({
                 }
               }
               break;
-            case constants2.COLORTYPE_ALPHA:
-            case constants2.COLORTYPE_GRAYSCALE: {
+            case constants4.COLORTYPE_ALPHA:
+            case constants4.COLORTYPE_GRAYSCALE: {
               let grayscale = (rgba.red + rgba.green + rgba.blue) / 3;
               if (options.bitDepth === 8) {
                 outData[outIndex] = grayscale;
@@ -8714,7 +8714,7 @@ var require_filter_pack = __commonJS({
 var require_packer = __commonJS({
   "node_modules/pngjs/lib/packer.js"(exports2, module2) {
     "use strict";
-    var constants2 = require_constants();
+    var constants4 = require_constants();
     var CrcStream = require_crc();
     var bitPacker = require_bitpacker();
     var filter = require_filter_pack();
@@ -8727,23 +8727,23 @@ var require_packer = __commonJS({
       options.inputHasAlpha = options.inputHasAlpha != null ? options.inputHasAlpha : true;
       options.deflateFactory = options.deflateFactory || zlib4.createDeflate;
       options.bitDepth = options.bitDepth || 8;
-      options.colorType = typeof options.colorType === "number" ? options.colorType : constants2.COLORTYPE_COLOR_ALPHA;
-      options.inputColorType = typeof options.inputColorType === "number" ? options.inputColorType : constants2.COLORTYPE_COLOR_ALPHA;
+      options.colorType = typeof options.colorType === "number" ? options.colorType : constants4.COLORTYPE_COLOR_ALPHA;
+      options.inputColorType = typeof options.inputColorType === "number" ? options.inputColorType : constants4.COLORTYPE_COLOR_ALPHA;
       if ([
-        constants2.COLORTYPE_GRAYSCALE,
-        constants2.COLORTYPE_COLOR,
-        constants2.COLORTYPE_COLOR_ALPHA,
-        constants2.COLORTYPE_ALPHA
+        constants4.COLORTYPE_GRAYSCALE,
+        constants4.COLORTYPE_COLOR,
+        constants4.COLORTYPE_COLOR_ALPHA,
+        constants4.COLORTYPE_ALPHA
       ].indexOf(options.colorType) === -1) {
         throw new Error(
           "option color type:" + options.colorType + " is not supported at present"
         );
       }
       if ([
-        constants2.COLORTYPE_GRAYSCALE,
-        constants2.COLORTYPE_COLOR,
-        constants2.COLORTYPE_COLOR_ALPHA,
-        constants2.COLORTYPE_ALPHA
+        constants4.COLORTYPE_GRAYSCALE,
+        constants4.COLORTYPE_COLOR,
+        constants4.COLORTYPE_COLOR_ALPHA,
+        constants4.COLORTYPE_ALPHA
       ].indexOf(options.inputColorType) === -1) {
         throw new Error(
           "option input color type:" + options.inputColorType + " is not supported at present"
@@ -8767,7 +8767,7 @@ var require_packer = __commonJS({
     };
     Packer.prototype.filterData = function(data, width, height) {
       let packedData = bitPacker(data, width, height, this._options);
-      let bpp = constants2.COLORTYPE_TO_BPP_MAP[this._options.colorType];
+      let bpp = constants4.COLORTYPE_TO_BPP_MAP[this._options.colorType];
       let filteredData = filter(packedData, width, height, this._options, bpp);
       return filteredData;
     };
@@ -8787,8 +8787,8 @@ var require_packer = __commonJS({
     };
     Packer.prototype.packGAMA = function(gamma) {
       let buf = Buffer.alloc(4);
-      buf.writeUInt32BE(Math.floor(gamma * constants2.GAMMA_DIVISION), 0);
-      return this._packChunk(constants2.TYPE_gAMA, buf);
+      buf.writeUInt32BE(Math.floor(gamma * constants4.GAMMA_DIVISION), 0);
+      return this._packChunk(constants4.TYPE_gAMA, buf);
     };
     Packer.prototype.packIHDR = function(width, height) {
       let buf = Buffer.alloc(13);
@@ -8799,13 +8799,13 @@ var require_packer = __commonJS({
       buf[10] = 0;
       buf[11] = 0;
       buf[12] = 0;
-      return this._packChunk(constants2.TYPE_IHDR, buf);
+      return this._packChunk(constants4.TYPE_IHDR, buf);
     };
     Packer.prototype.packIDAT = function(data) {
-      return this._packChunk(constants2.TYPE_IDAT, data);
+      return this._packChunk(constants4.TYPE_IDAT, data);
     };
     Packer.prototype.packIEND = function() {
-      return this._packChunk(constants2.TYPE_IEND, null);
+      return this._packChunk(constants4.TYPE_IEND, null);
     };
   }
 });
@@ -8816,7 +8816,7 @@ var require_packer_async = __commonJS({
     "use strict";
     var util2 = require("util");
     var Stream = require("stream");
-    var constants2 = require_constants();
+    var constants4 = require_constants();
     var Packer = require_packer();
     var PackerAsync = module2.exports = function(opt) {
       Stream.call(this);
@@ -8827,7 +8827,7 @@ var require_packer_async = __commonJS({
     };
     util2.inherits(PackerAsync, Stream);
     PackerAsync.prototype.pack = function(data, width, height, gamma) {
-      this.emit("data", Buffer.from(constants2.PNG_SIGNATURE));
+      this.emit("data", Buffer.from(constants4.PNG_SIGNATURE));
       this.emit("data", this._packer.packIHDR(width, height));
       if (gamma) {
         this.emit("data", this._packer.packGAMA(gamma));
@@ -9155,7 +9155,7 @@ var require_packer_sync = __commonJS({
     if (!zlib4.deflateSync) {
       hasSyncZlib = false;
     }
-    var constants2 = require_constants();
+    var constants4 = require_constants();
     var Packer = require_packer();
     module2.exports = function(metaData, opt) {
       if (!hasSyncZlib) {
@@ -9166,7 +9166,7 @@ var require_packer_sync = __commonJS({
       let options = opt || {};
       let packer = new Packer(options);
       let chunks = [];
-      chunks.push(Buffer.from(constants2.PNG_SIGNATURE));
+      chunks.push(Buffer.from(constants4.PNG_SIGNATURE));
       chunks.push(packer.packIHDR(metaData.width, metaData.height));
       if (metaData.gamma) {
         chunks.push(packer.packGAMA(metaData.gamma));
@@ -9717,8 +9717,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path5, errorMaps, issueData } = params;
-  const fullPath = [...path5, ...issueData.path || []];
+  const { data, path: path7, errorMaps, issueData } = params;
+  const fullPath = [...path7, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -9833,11 +9833,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path5, key) {
+  constructor(parent, value, path7, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path5;
+    this._path = path7;
     this._key = key;
   }
   get path() {
@@ -13792,10 +13792,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path5) {
-  if (!path5)
+function getElementAtPath(obj, path7) {
+  if (!path7)
     return obj;
-  return path5.reduce((acc, key) => acc?.[key], obj);
+  return path7.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -14135,11 +14135,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path5, issues) {
+function prefixIssues(path7, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path5);
+    iss.path.unshift(path7);
     return iss;
   });
 }
@@ -14601,16 +14601,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path5 = []) => {
+  const processError = (error63, path7 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path5, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path7, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
       } else {
-        const fullpath = [...path5, ...issue2.path];
+        const fullpath = [...path7, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -14649,17 +14649,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path5 = []) => {
+  const processError = (error63, path7 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path5, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path7, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
       } else {
-        const fullpath = [...path5, ...issue2.path];
+        const fullpath = [...path7, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -14698,8 +14698,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path5 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path5) {
+  const path7 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path7) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -30250,11 +30250,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path5) {
-  if (path5.length === 0) {
+function getDotPath(path7) {
+  if (path7.length === 0) {
     return "object root";
   }
-  return path5.reduce((acc, seg, index) => {
+  return path7.reduce((acc, seg, index) => {
     if (index === 0) {
       return String(seg);
     }
@@ -32481,13 +32481,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path5 = ref.slice(1).split("/").filter(Boolean);
-  if (path5.length === 0) {
+  const path7 = ref.slice(1).split("/").filter(Boolean);
+  if (path7.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path5[0] === defsKey) {
-    const key = path5[1] === void 0 ? void 0 : decodeJSONPointerSegment(path5[1]);
+  if (path7[0] === defsKey) {
+    const key = path7[1] === void 0 ? void 0 : decodeJSONPointerSegment(path7[1]);
     if (!key || !ctx.defs[key]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -38745,10 +38745,58 @@ var StdioServerTransport = class {
 // src/workstation.mjs
 var import_node_child_process = require("node:child_process");
 var import_node_util = require("node:util");
-var import_promises = __toESM(require("node:fs/promises"), 1);
-var import_node_path = __toESM(require("node:path"), 1);
-var import_node_os = __toESM(require("node:os"), 1);
+var import_promises2 = __toESM(require("node:fs/promises"), 1);
+var import_node_path2 = __toESM(require("node:path"), 1);
 var import_node_net = require("node:net");
+
+// src/host-platform.mjs
+var import_promises = __toESM(require("node:fs/promises"), 1);
+var import_node_fs = require("node:fs");
+var import_node_os = __toESM(require("node:os"), 1);
+var import_node_path = __toESM(require("node:path"), 1);
+function inventoryPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
+  return env.VMWARE_INVENTORY_PATH || (platform === "win32" ? import_node_path.default.join(env.APPDATA || import_node_path.default.join(home, "AppData", "Roaming"), "VMware", "inventory.vmls") : import_node_path.default.join(home, ".vmware", "inventory.vmls"));
+}
+function credentialsPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
+  if (env.VMWARE_CREDENTIALS_FILE) return env.VMWARE_CREDENTIALS_FILE;
+  if (platform === "win32") return env.APPDATA ? import_node_path.default.join(env.APPDATA, "VMwareWorkstationPlugin", "credentials.json") : null;
+  const base = env.XDG_CONFIG_HOME && import_node_path.default.isAbsolute(env.XDG_CONFIG_HOME) ? env.XDG_CONFIG_HOME : import_node_path.default.join(home, ".config");
+  return import_node_path.default.join(base, "vmware-workstation-mcp", "credentials.json");
+}
+async function findVMwareExecutable(name2, { env = process.env, platform = process.platform, beside } = {}) {
+  if (!["win32", "linux"].includes(platform)) throw new Error("VMware Workstation hosts supported by this plugin are Windows and Linux.");
+  const filename = `${name2}${platform === "win32" ? ".exe" : ""}`;
+  const setting = name2 === "vmrun" ? "VMRUN_PATH" : "VMWARE_VDISKMANAGER_PATH";
+  const validFile = async (candidate) => {
+    if (!import_node_path.default.isAbsolute(candidate) || !(await import_promises.default.stat(candidate)).isFile()) return false;
+    if (platform !== "win32") await import_promises.default.access(candidate, import_node_fs.constants.X_OK);
+    return true;
+  };
+  if (env[setting]) {
+    const configured = env[setting];
+    const actualName = import_node_path.default.basename(configured);
+    if (!import_node_path.default.isAbsolute(configured) || (platform === "win32" ? actualName.toLowerCase() !== filename : actualName !== filename)) throw new Error(`${setting} must be an absolute path to ${filename}.`);
+    if (!await validFile(configured)) throw new Error(`${setting} is not an executable file.`);
+    return configured;
+  }
+  const directories = [
+    ...beside ? [import_node_path.default.dirname(beside)] : [],
+    ...platform === "win32" ? [env.ProgramFiles, env["ProgramFiles(x86)"]].filter(Boolean).map((root) => import_node_path.default.join(root, "VMware", "VMware Workstation")) : [],
+    ...(env.PATH || env.Path || "").split(import_node_path.default.delimiter).filter(Boolean),
+    ...platform === "linux" ? ["/usr/bin", "/usr/local/bin", "/usr/lib/vmware/bin"] : []
+  ];
+  for (const directory of new Set(directories)) {
+    const candidate = import_node_path.default.join(directory, filename);
+    try {
+      if (await validFile(candidate)) return candidate;
+    } catch (error62) {
+      if (!["ENOENT", "ENOTDIR", "EACCES"].includes(error62.code)) throw error62;
+    }
+  }
+  throw new Error(`${filename} was not found. Install VMware Workstation on this host or set ${setting}.`);
+}
+
+// src/workstation.mjs
 var execute = (0, import_node_util.promisify)(import_node_child_process.execFile);
 function parseAssignments(text) {
   const values = {};
@@ -38766,35 +38814,18 @@ function parseCountedList(text) {
   return lines;
 }
 function isWithin(root, target) {
-  const relative = import_node_path.default.relative(root, target);
-  return relative === "" || !relative.startsWith(`..${import_node_path.default.sep}`) && relative !== ".." && !import_node_path.default.isAbsolute(relative);
+  const relative = import_node_path2.default.relative(root, target);
+  return relative === "" || !relative.startsWith(`..${import_node_path2.default.sep}`) && relative !== ".." && !import_node_path2.default.isAbsolute(relative);
 }
 var Workstation = class {
   constructor({ env = process.env, run = execute } = {}) {
     this.env = env;
     this.execute = run;
     this.tail = Promise.resolve();
-    this.inventoryPath = env.VMWARE_INVENTORY_PATH || import_node_path.default.join(env.APPDATA || import_node_path.default.join(import_node_os.default.homedir(), "AppData", "Roaming"), "VMware", "inventory.vmls");
+    this.inventoryPath = inventoryPath(env);
   }
   async executable() {
-    if (this.env.VMRUN_PATH) {
-      const configured = this.env.VMRUN_PATH;
-      if (!import_node_path.default.isAbsolute(configured) || !/vmrun\.exe$/i.test(import_node_path.default.basename(configured))) throw new Error("VMRUN_PATH must be an absolute path to vmrun.exe.");
-      if (!(await import_promises.default.stat(configured)).isFile()) throw new Error("VMRUN_PATH is not a file.");
-      return configured;
-    }
-    const candidates = [
-      ...[this.env.ProgramFiles, this.env["ProgramFiles(x86)"]].filter(Boolean).map((root) => import_node_path.default.join(root, "VMware", "VMware Workstation", "vmrun.exe")),
-      ...(this.env.PATH || this.env.Path || "").split(import_node_path.default.delimiter).filter(Boolean).map((root) => import_node_path.default.join(root, "vmrun.exe"))
-    ];
-    for (const candidate of candidates) {
-      try {
-        if (import_node_path.default.isAbsolute(candidate) && (await import_promises.default.stat(candidate)).isFile()) return candidate;
-      } catch (error62) {
-        if (!["ENOENT", "ENOTDIR"].includes(error62.code)) throw error62;
-      }
-    }
-    throw new Error("vmrun.exe was not found. Install VMware Workstation or set VMRUN_PATH.");
+    return findVMwareExecutable("vmrun", { env: this.env });
   }
   async run(args, { mutation = false, authentication = [], timeout = 12e4 } = {}) {
     const job = this.tail.then(async () => {
@@ -38830,56 +38861,56 @@ var Workstation = class {
     }
   }
   async hostPath(input2, kind, overwrite = false) {
-    if (typeof input2 !== "string" || !import_node_path.default.isAbsolute(input2) || /[\x00-\x1f]/.test(input2)) throw new Error("Host paths must be absolute and contain no control characters.");
-    const absolute = import_node_path.default.resolve(input2);
+    if (typeof input2 !== "string" || !import_node_path2.default.isAbsolute(input2) || /[\x00-\x1f]/.test(input2)) throw new Error("Host paths must be absolute and contain no control characters.");
+    const absolute = import_node_path2.default.resolve(input2);
     let stat;
     try {
-      stat = await import_promises.default.stat(absolute);
+      stat = await import_promises2.default.stat(absolute);
     } catch (error62) {
       if (error62.code !== "ENOENT") throw error62;
     }
     if (kind === "input-file" && !stat?.isFile()) throw new Error("Host source must be an existing file.");
     if (kind === "directory" && !stat?.isDirectory()) throw new Error("Host directory must already exist.");
-    if (kind === "new-vmx" && (stat || import_node_path.default.extname(absolute).toLowerCase() !== ".vmx")) throw new Error("Clone destination must be a new .vmx file.");
+    if (kind === "new-vmx" && (stat || import_node_path2.default.extname(absolute).toLowerCase() !== ".vmx")) throw new Error("Clone destination must be a new .vmx file.");
     if (kind === "output-file" && (stat?.isDirectory() || stat && !overwrite)) throw new Error("Host destination exists; choose another file or explicitly set overwrite=true.");
     if (kind === "destination-directory" && stat && !stat.isDirectory()) throw new Error("Destination must be a directory path.");
     let ancestor = absolute;
     const missing = [];
     while (true) {
       try {
-        ancestor = await import_promises.default.realpath(ancestor);
+        ancestor = await import_promises2.default.realpath(ancestor);
         break;
       } catch (error62) {
         if (error62.code !== "ENOENT") throw error62;
-        const entry = await import_promises.default.lstat(ancestor).catch((missingError) => {
+        const entry = await import_promises2.default.lstat(ancestor).catch((missingError) => {
           if (missingError.code !== "ENOENT") throw missingError;
           return null;
         });
         if (entry?.isSymbolicLink()) throw new Error("Destination contains a dangling link.");
-        const parent = import_node_path.default.dirname(ancestor);
+        const parent = import_node_path2.default.dirname(ancestor);
         if (parent === ancestor) throw error62;
-        missing.unshift(import_node_path.default.basename(ancestor));
+        missing.unshift(import_node_path2.default.basename(ancestor));
         ancestor = parent;
       }
     }
-    const resolved = import_node_path.default.join(ancestor, ...missing);
+    const resolved = import_node_path2.default.join(ancestor, ...missing);
     const rootSetting = kind === "new-vmx" || kind === "destination-directory" ? this.env.VMWARE_ALLOWED_ROOTS : this.env.VMWARE_ALLOWED_HOST_ROOTS;
     if (rootSetting) {
-      const roots = rootSetting.split(import_node_path.default.delimiter).filter(Boolean);
-      if (!roots.length || roots.some((root) => !import_node_path.default.isAbsolute(root))) throw new Error("Allowed host roots must be absolute.");
-      const canonical = await Promise.all(roots.map((root) => import_promises.default.realpath(root)));
+      const roots = rootSetting.split(import_node_path2.default.delimiter).filter(Boolean);
+      if (!roots.length || roots.some((root) => !import_node_path2.default.isAbsolute(root))) throw new Error("Allowed host roots must be absolute.");
+      const canonical = await Promise.all(roots.map((root) => import_promises2.default.realpath(root)));
       if (!canonical.some((root) => isWithin(root, resolved))) throw new Error("Host path is outside the configured allowed roots.");
     }
     return resolved;
   }
   async vmx(input2) {
-    if (typeof input2 !== "string" || !import_node_path.default.isAbsolute(input2) || import_node_path.default.extname(input2).toLowerCase() !== ".vmx" || /[\x00-\x1f]/.test(input2)) throw new Error("Provide an absolute path to an existing .vmx file.");
-    const resolved = await import_promises.default.realpath(input2);
-    if (import_node_path.default.extname(resolved).toLowerCase() !== ".vmx" || !(await import_promises.default.stat(resolved)).isFile()) throw new Error("VM target must resolve to a .vmx file.");
+    if (typeof input2 !== "string" || !import_node_path2.default.isAbsolute(input2) || import_node_path2.default.extname(input2).toLowerCase() !== ".vmx" || /[\x00-\x1f]/.test(input2)) throw new Error("Provide an absolute path to an existing .vmx file.");
+    const resolved = await import_promises2.default.realpath(input2);
+    if (import_node_path2.default.extname(resolved).toLowerCase() !== ".vmx" || !(await import_promises2.default.stat(resolved)).isFile()) throw new Error("VM target must resolve to a .vmx file.");
     if (this.env.VMWARE_ALLOWED_ROOTS) {
-      const roots = this.env.VMWARE_ALLOWED_ROOTS.split(import_node_path.default.delimiter).filter(Boolean);
-      if (!roots.length || roots.some((root) => !import_node_path.default.isAbsolute(root))) throw new Error("VMWARE_ALLOWED_ROOTS must contain absolute directories.");
-      const canonicalRoots = await Promise.all(roots.map((root) => import_promises.default.realpath(root)));
+      const roots = this.env.VMWARE_ALLOWED_ROOTS.split(import_node_path2.default.delimiter).filter(Boolean);
+      if (!roots.length || roots.some((root) => !import_node_path2.default.isAbsolute(root))) throw new Error("VMWARE_ALLOWED_ROOTS must contain absolute directories.");
+      const canonicalRoots = await Promise.all(roots.map((root) => import_promises2.default.realpath(root)));
       if (!canonicalRoots.some((root) => isWithin(root, resolved))) throw new Error("VM is outside VMWARE_ALLOWED_ROOTS.");
     }
     return resolved;
@@ -38891,11 +38922,11 @@ var Workstation = class {
   }
   async resolveVM(vmID, { aliases = {}, restInventory } = {}) {
     if (typeof vmID !== "string" || !vmID.trim() || /[\x00-\x1f]/.test(vmID)) throw new Error("Provide a VMX path, unique inventory name, console profile alias, or REST VM ID.");
-    if (import_node_path.default.isAbsolute(vmID)) return this.vmx(vmID);
+    if (import_node_path2.default.isAbsolute(vmID)) return this.vmx(vmID);
     if (Object.hasOwn(aliases, vmID)) return this.vmx(aliases[vmID]);
     const { vms } = await this.listVMs();
     const normalize = (value) => process.platform === "win32" ? value.toLowerCase() : value;
-    const matches = vms.filter((vm2) => [vm2.displayName, import_node_path.default.basename(vm2.vmx, ".vmx")].some((name2) => normalize(name2) === normalize(vmID)));
+    const matches = vms.filter((vm2) => [vm2.displayName, import_node_path2.default.basename(vm2.vmx, ".vmx")].some((name2) => normalize(name2) === normalize(vmID)));
     if (matches.length > 1) throw new Error("VM name is ambiguous. Use the exact VMX path.");
     if (matches.length === 1) return this.vmx(matches[0].vmx);
     if (restInventory) {
@@ -38910,24 +38941,24 @@ var Workstation = class {
     let entries = {};
     const warnings = [];
     try {
-      entries = parseAssignments(await import_promises.default.readFile(this.inventoryPath, "utf8"));
+      entries = parseAssignments(await import_promises2.default.readFile(this.inventoryPath, "utf8"));
     } catch (error62) {
       warnings.push(`Inventory unavailable (${error62.code || error62.message}); showing running VMs only.`);
     }
-    const key = (value) => process.platform === "win32" ? import_node_path.default.normalize(value).toLowerCase() : import_node_path.default.normalize(value);
+    const key = (value) => process.platform === "win32" ? import_node_path2.default.normalize(value).toLowerCase() : import_node_path2.default.normalize(value);
     const records = /* @__PURE__ */ new Map();
     for (const [name2, vmx2] of Object.entries(entries)) {
-      if (/^vmlist\d+\.config$/.test(name2) && vmx2 && import_node_path.default.extname(vmx2).toLowerCase() === ".vmx") {
-        records.set(key(vmx2), { vmx: vmx2, displayName: entries[name2.replace(/\.config$/, ".DisplayName")] || import_node_path.default.basename(vmx2, import_node_path.default.extname(vmx2)), registered: true, running: false });
+      if (/^vmlist\d+\.config$/.test(name2) && vmx2 && import_node_path2.default.extname(vmx2).toLowerCase() === ".vmx") {
+        records.set(key(vmx2), { vmx: vmx2, displayName: entries[name2.replace(/\.config$/, ".DisplayName")] || import_node_path2.default.basename(vmx2, import_node_path2.default.extname(vmx2)), registered: true, running: false });
       }
     }
     for (const vmx2 of running) {
-      const record2 = records.get(key(vmx2)) || { vmx: vmx2, displayName: import_node_path.default.basename(vmx2, import_node_path.default.extname(vmx2)), registered: false };
+      const record2 = records.get(key(vmx2)) || { vmx: vmx2, displayName: import_node_path2.default.basename(vmx2, import_node_path2.default.extname(vmx2)), registered: false };
       records.set(key(vmx2), { ...record2, running: true });
     }
     const vms = await Promise.all([...records.values()].map(async (record2) => {
       try {
-        await import_promises.default.access(record2.vmx);
+        await import_promises2.default.access(record2.vmx);
         return { ...record2, exists: true };
       } catch {
         return { ...record2, exists: false };
@@ -38937,9 +38968,9 @@ var Workstation = class {
   }
   async details(input2) {
     const vmx2 = await this.vmx(input2);
-    const config2 = parseAssignments(await import_promises.default.readFile(vmx2, "utf8"));
+    const config2 = parseAssignments(await import_promises2.default.readFile(vmx2, "utf8"));
     const running = parseCountedList(await this.run(["list"]));
-    const realRunning = await Promise.all(running.map(async (file2) => import_promises.default.realpath(file2).catch(() => file2)));
+    const realRunning = await Promise.all(running.map(async (file2) => import_promises2.default.realpath(file2).catch(() => file2)));
     const compare = (file2) => process.platform === "win32" ? file2.toLowerCase() : file2;
     const hardware = Object.fromEntries(Object.entries(config2).filter(([key]) => /^(displayName|guestOS|memsize|numvcpus|virtualHW.version|ethernet\d+\.(present|connectionType|vnet)|(?:scsi|sata|ide|nvme)\d+:\d+\.(present|fileName|deviceType))$/.test(key)));
     return { vmx: vmx2, running: realRunning.some((file2) => compare(file2) === compare(vmx2)), hardware };
@@ -38977,23 +39008,63 @@ var Workstation = class {
 };
 
 // src/credentials.mjs
-var import_promises2 = __toESM(require("node:fs/promises"), 1);
-var import_node_path2 = __toESM(require("node:path"), 1);
+var import_promises4 = __toESM(require("node:fs/promises"), 1);
+var import_node_path4 = __toESM(require("node:path"), 1);
+
+// src/local-file-security.mjs
+var import_node_path3 = __toESM(require("node:path"), 1);
+var import_promises3 = __toESM(require("node:fs/promises"), 1);
+var import_node_fs2 = require("node:fs");
+async function openPrivateFile(filename, flags = import_node_fs2.constants.O_RDONLY) {
+  const handle = await import_promises3.default.open(filename, flags | import_node_fs2.constants.O_NOFOLLOW | import_node_fs2.constants.O_NONBLOCK, 384);
+  try {
+    const stat = await handle.stat();
+    if (!stat.isFile() || stat.uid !== process.getuid() || stat.nlink !== 1) throw new Error("Sensitive files must be regular files owned by the current user with exactly one hard link.");
+    return handle;
+  } catch (error62) {
+    await handle.close();
+    throw error62;
+  }
+}
+async function readPrivateFile(filename) {
+  const handle = await openPrivateFile(filename);
+  try {
+    if ((await handle.stat()).mode & 63) throw new Error("Credentials file must be private (chmod 600).");
+    return await handle.readFile("utf8");
+  } finally {
+    await handle.close();
+  }
+}
+function localFileProtector(backend2) {
+  if (process.platform === "linux") return async (filename) => {
+    const handle = await openPrivateFile(filename);
+    try {
+      await handle.chmod(384);
+      if ((await handle.stat()).mode & 63) throw new Error("This filesystem does not enforce private Linux file permissions. Use a native Linux filesystem for sensitive files.");
+    } finally {
+      await handle.close();
+    }
+  };
+  const root = import_node_path3.default.resolve(import_node_path3.default.dirname(process.argv[1]), "..");
+  return (filename) => backend2.execute("pwsh", ["-NoProfile", "-File", import_node_path3.default.join(root, "scripts", "Protect-LocalFile.ps1"), "-LiteralPath", filename], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
+}
+
+// src/credentials.mjs
 var Credentials = class {
   constructor(env = process.env) {
     this.env = env;
     this.secrets = /* @__PURE__ */ new Set();
-    this.filename = env.VMWARE_CREDENTIALS_FILE || (env.APPDATA ? import_node_path2.default.join(env.APPDATA, "VMwareWorkstationPlugin", "credentials.json") : null);
+    this.filename = credentialsPath(env);
   }
   async load() {
     if (!this.filename) return {};
     try {
-      const result = JSON.parse(await import_promises2.default.readFile(this.filename, "utf8"));
+      const result = JSON.parse(process.platform === "linux" ? await readPrivateFile(this.filename) : await import_promises4.default.readFile(this.filename, "utf8"));
       if (!result || typeof result !== "object" || Array.isArray(result)) throw new Error();
       return result;
     } catch (error62) {
       if (!this.env.VMWARE_CREDENTIALS_FILE && error62.code === "ENOENT") return {};
-      throw new Error("Cannot read local VMware credentials as a JSON object. Check VMWARE_CREDENTIALS_FILE or the default credentials file, permissions, and format.");
+      throw new Error("Cannot read local VMware credentials as a JSON object. Check VMWARE_CREDENTIALS_FILE or the default credentials file, permissions, and format. On Linux use an owned regular file with mode 600.");
     }
   }
   profile(value = "default") {
@@ -39027,9 +39098,9 @@ var Credentials = class {
   }
   async console(vmx2, requestedProfile) {
     const file2 = await this.load();
-    const canonical = (value) => process.platform === "win32" ? import_node_path2.default.resolve(value).toLowerCase() : import_node_path2.default.resolve(value);
+    const canonical = (value) => process.platform === "win32" ? import_node_path4.default.resolve(value).toLowerCase() : import_node_path4.default.resolve(value);
     const profiles = file2.console || {};
-    const resolved = await Promise.all(Object.entries(profiles).map(async ([name3, entry2]) => [name3, typeof entry2?.vmx === "string" ? await import_promises2.default.realpath(entry2.vmx).catch(() => entry2.vmx) : null]));
+    const resolved = await Promise.all(Object.entries(profiles).map(async ([name3, entry2]) => [name3, typeof entry2?.vmx === "string" ? await import_promises4.default.realpath(entry2.vmx).catch(() => entry2.vmx) : null]));
     const matches = resolved.filter(([, target]) => target && canonical(target) === canonical(vmx2));
     if (!requestedProfile && matches.length > 1) throw new Error("Multiple console profiles identify this VM. Use its configured profile alias as vm_id.");
     const name2 = this.profile(requestedProfile || matches[0]?.[0] || "default");
@@ -40353,9 +40424,9 @@ var vmrun_help_default = {
 };
 
 // src/vm-files.mjs
-var import_promises3 = __toESM(require("node:fs/promises"), 1);
-var import_node_fs = require("node:fs");
-var import_node_path3 = __toESM(require("node:path"), 1);
+var import_promises5 = __toESM(require("node:fs/promises"), 1);
+var import_node_fs3 = require("node:fs");
+var import_node_path5 = __toESM(require("node:path"), 1);
 var import_node_crypto = require("node:crypto");
 var createVMSchema = external_exports.object({
   directory: external_exports.string().min(1).describe("Absolute NEW VM directory; its parent must exist. Existing directories are never overwritten."),
@@ -40394,14 +40465,13 @@ var VMFiles = class {
       const directory = await this.backend.hostPath(a.directory, "destination-directory");
       const iso = a.iso_path ? await this.backend.hostPath(a.iso_path, "input-file") : null;
       const vmrun = await this.backend.executable();
-      const diskManager = this.backend.env.VMWARE_VDISKMANAGER_PATH || import_node_path3.default.join(import_node_path3.default.dirname(vmrun), "vmware-vdiskmanager.exe");
-      if (!import_node_path3.default.isAbsolute(diskManager) || import_node_path3.default.basename(diskManager).toLowerCase() !== "vmware-vdiskmanager.exe" || !(await import_promises3.default.stat(diskManager)).isFile()) throw new Error("VMware Virtual Disk Manager was not found beside vmrun; set VMWARE_VDISKMANAGER_PATH.");
-      await import_promises3.default.mkdir(directory);
-      const vmx2 = import_node_path3.default.join(directory, "machine.vmx");
-      const disk = import_node_path3.default.join(directory, "disk.vmdk");
+      const diskManager = await findVMwareExecutable("vmware-vdiskmanager", { env: this.backend.env, beside: vmrun });
+      await import_promises5.default.mkdir(directory);
+      const vmx2 = import_node_path5.default.join(directory, "machine.vmx");
+      const disk = import_node_path5.default.join(directory, "disk.vmdk");
       try {
         await this.backend.execute(diskManager, ["-c", "-s", `${a.disk_gb}GB`, "-a", "lsilogic", "-t", "0", disk], { windowsHide: true, shell: false, timeout: a.timeout_seconds * 1e3, maxBuffer: 1024 * 1024, encoding: "utf8" });
-        if (!(await import_promises3.default.stat(disk)).isFile()) throw new Error("Disk manager did not create the VMDK.");
+        if (!(await import_promises5.default.stat(disk)).isFile()) throw new Error("Disk manager did not create the VMDK.");
         const settings = {
           ".encoding": "UTF-8",
           "config.version": "8",
@@ -40427,7 +40497,7 @@ var VMFiles = class {
         if (a.network === "custom") settings["ethernet0.vnet"] = a.vmnet;
         if (iso) Object.assign(settings, { "sata0.present": "TRUE", "sata0:0.present": "TRUE", "sata0:0.deviceType": "cdrom-image", "sata0:0.fileName": iso });
         const text = Object.entries(settings).map(([key, value]) => `${key} = "${encodeVMX(value)}"`).join("\n") + "\n";
-        await import_promises3.default.writeFile(vmx2, text, { flag: "wx", encoding: "utf8" });
+        await import_promises5.default.writeFile(vmx2, text, { flag: "wx", encoding: "utf8" });
         return { created: true, vmx: vmx2, disk, directory, registered: false, poweredOn: false, guestOSInstalled: false, note: "Blank VM and sparse disk created. Open the VMX in Workstation or register through REST; install a guest OS separately." };
       } catch (error62) {
         throw new Error(`VM creation failed (${error62.code || "disk/configuration error"}). Partial files may remain in ${directory}; inspect before retrying. No existing VM was overwritten.`);
@@ -40442,19 +40512,19 @@ var VMFiles = class {
       if (details.running) throw new Error("Power off the VM before editing its VMX.");
       const lock = `${vmx2}.lck`;
       try {
-        await import_promises3.default.access(lock);
+        await import_promises5.default.access(lock);
         throw new Error("VMware holds a VMX lock; close or power off the VM before editing.");
       } catch (error62) {
         if (error62.code !== "ENOENT") throw error62;
       }
-      const original = await import_promises3.default.readFile(vmx2, "utf8");
+      const original = await import_promises5.default.readFile(vmx2, "utf8");
       const config2 = parseAssignments(original);
       const sensitiveKeys = Object.entries(config2).some(([key, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key) && value) || Object.entries(a.settings).some(([key, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key) && value);
       if (!protectFile && sensitiveKeys) protectFile = this.protectSensitiveFile;
       if (config2[".encoding"] && !/^utf-?8$/i.test(config2[".encoding"])) throw new Error("Local VMX editing supports UTF-8 only. Use REST or convert the VMX encoding explicitly.");
       for (const value of [config2["checkpoint.vmState"], config2["suspend.filename"]].filter(Boolean)) {
         try {
-          await import_promises3.default.access(import_node_path3.default.resolve(import_node_path3.default.dirname(vmx2), value));
+          await import_promises5.default.access(import_node_path5.default.resolve(import_node_path5.default.dirname(vmx2), value));
           throw new Error("VM has a saved/suspended state; fully power it off before editing hardware.");
         } catch (error62) {
           if (error62.code !== "ENOENT") throw error62;
@@ -40480,32 +40550,33 @@ var VMFiles = class {
         seen.add(key);
       }
       for (const [key, update] of updates) if (!seen.has(key) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
+      const mode = (await import_promises5.default.stat(vmx2)).mode & 511;
       const backup = `${vmx2}.backup-${(0, import_node_crypto.randomUUID)()}`;
       if (protectFile) {
-        await import_promises3.default.writeFile(backup, "", { flag: "wx" });
+        await import_promises5.default.writeFile(backup, "", { flag: "wx", mode: 384 });
         await protectFile(backup);
-        await import_promises3.default.writeFile(backup, original);
-      } else await import_promises3.default.copyFile(vmx2, backup, import_node_fs.constants.COPYFILE_EXCL);
+        await import_promises5.default.writeFile(backup, original);
+      } else await import_promises5.default.copyFile(vmx2, backup, import_node_fs3.constants.COPYFILE_EXCL);
       const temporary = `${vmx2}.edit-${(0, import_node_crypto.randomUUID)()}`;
       if (protectFile) {
-        await import_promises3.default.writeFile(temporary, "", { flag: "wx" });
+        await import_promises5.default.writeFile(temporary, "", { flag: "wx", mode: 384 });
         await protectFile(temporary);
       }
-      await import_promises3.default.writeFile(temporary, lines.join("\n").replace(/\n*$/, "\n"), { flag: protectFile ? "w" : "wx" });
-      if (await import_promises3.default.readFile(vmx2, "utf8") !== original) {
-        await import_promises3.default.unlink(temporary);
+      await import_promises5.default.writeFile(temporary, lines.join("\n").replace(/\n*$/, "\n"), { flag: protectFile ? "w" : "wx", mode });
+      if (await import_promises5.default.readFile(vmx2, "utf8") !== original) {
+        await import_promises5.default.unlink(temporary);
         throw new Error(`VMX changed during editing; original retained. Backup: ${backup}`);
       }
-      await import_promises3.default.rename(temporary, vmx2);
+      await import_promises5.default.rename(temporary, vmx2);
       return { vmx: vmx2, updated: true, backup, changedSettings: Object.keys(a.settings), note: "VMX saved while VM was not running and had no detected saved state/VMX lock. Close/reopen its Workstation tab if it has cached settings." };
     });
   }
 };
 
 // src/console.mjs
-var import_promises4 = __toESM(require("node:fs/promises"), 1);
+var import_promises7 = __toESM(require("node:fs/promises"), 1);
 var import_node_crypto4 = require("node:crypto");
-var import_promises5 = require("node:timers/promises");
+var import_promises8 = require("node:timers/promises");
 
 // node_modules/rfb2/dist/client.js
 var import_node_buffer2 = __toESM(require("node:buffer"), 1);
@@ -44851,6 +44922,81 @@ function keysymFromChar(char) {
 
 // src/console.mjs
 var import_pngjs = __toESM(require_png(), 1);
+
+// src/linux-listener.mjs
+var import_promises6 = __toESM(require("node:fs/promises"), 1);
+var import_node_path6 = __toESM(require("node:path"), 1);
+var import_node_os2 = __toESM(require("node:os"), 1);
+function procAddress(hex3, endian = import_node_os2.default.endianness()) {
+  if (!/^(?:[0-9A-F]{8}|[0-9A-F]{32})$/i.test(hex3)) throw new Error("Unrecognized Linux TCP address.");
+  const bytes = Buffer.from(hex3, "hex");
+  if (endian === "LE") for (let i = 0; i < bytes.length; i += 4) bytes.subarray(i, i + 4).reverse();
+  if (bytes.length === 4) return [...bytes].join(".");
+  if (bytes.every((byte) => byte === 0)) return "::";
+  if (bytes.subarray(0, 15).every((byte) => byte === 0) && bytes[15] === 1) return "::1";
+  return Array.from({ length: 8 }, (_, i) => bytes.readUInt16BE(i * 2).toString(16)).join(":");
+}
+function parseProcListeners(text, port) {
+  const result = [];
+  for (const line of text.trim().split("\n").slice(1)) {
+    const columns = line.trim().split(/\s+/);
+    if (columns.length < 10) throw new Error("Cannot parse Linux TCP listener metadata.");
+    const [hex3, portHex] = columns[1].split(":");
+    if (columns[3] !== "0A" || Number.parseInt(portHex, 16) !== port) continue;
+    if (!/^\d+$/.test(columns[9])) throw new Error("Cannot identify Linux listener socket inode.");
+    result.push({ address: procAddress(hex3), port, inode: columns[9] });
+  }
+  return result;
+}
+async function inspectLinuxListener(port, { procRoot = "/proc" } = {}) {
+  if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("Invalid VNC listener port.");
+  const tcp = await import_promises6.default.readFile(import_node_path6.default.join(procRoot, "net/tcp"), "utf8");
+  const tcp6 = await import_promises6.default.readFile(import_node_path6.default.join(procRoot, "net/tcp6"), "utf8").catch((error62) => {
+    if (error62.code === "ENOENT") return "";
+    throw error62;
+  });
+  const listeners = [...parseProcListeners(tcp, port), ...parseProcListeners(tcp6, port)];
+  if (!listeners.length) return [];
+  const owners = /* @__PURE__ */ new Map();
+  const inodes = new Set(listeners.map((item) => item.inode));
+  for (const pid of (await import_promises6.default.readdir(procRoot)).filter((name2) => /^\d+$/.test(name2))) {
+    const directory = import_node_path6.default.join(procRoot, pid);
+    let descriptors;
+    try {
+      descriptors = await import_promises6.default.readdir(import_node_path6.default.join(directory, "fd"));
+    } catch (error62) {
+      if (["ENOENT", "ESRCH", "EACCES", "EPERM"].includes(error62.code)) continue;
+      throw error62;
+    }
+    const owned = /* @__PURE__ */ new Set();
+    for (const fd of descriptors) {
+      const link = await import_promises6.default.readlink(import_node_path6.default.join(directory, "fd", fd)).catch((error62) => {
+        if (["ENOENT", "ESRCH", "EACCES", "EPERM", "EINVAL"].includes(error62.code)) return "";
+        throw error62;
+      });
+      const inode = link.match(/^socket:\[(\d+)\]$/)?.[1];
+      if (inodes.has(inode)) owned.add(inode);
+    }
+    if (!owned.size) continue;
+    let owner;
+    try {
+      const executable = await import_promises6.default.readlink(import_node_path6.default.join(directory, "exe"));
+      const args = (await import_promises6.default.readFile(import_node_path6.default.join(directory, "cmdline"), "utf8")).split("\0").filter(Boolean);
+      owner = { pid: Number(pid), processName: import_node_path6.default.basename(executable), arguments: args, commandLine: args.join(" ") };
+    } catch (error62) {
+      if (!["ENOENT", "ESRCH", "EACCES", "EPERM"].includes(error62.code)) throw error62;
+      continue;
+    }
+    for (const inode of owned) {
+      const list = owners.get(inode) || [];
+      list.push(owner);
+      owners.set(inode, list);
+    }
+  }
+  return listeners.flatMap(({ inode, ...listener }) => (owners.get(inode) || [{ processName: null, commandLine: null }]).map((owner) => ({ ...listener, ...owner })));
+}
+
+// src/console.mjs
 var consoleSchemas = {
   console_screenshot: external_exports.object({ vm_id: external_exports.string().min(1) }).strict(),
   console_click: external_exports.object({ vm_id: external_exports.string().min(1), x: external_exports.number().int().min(0), y: external_exports.number().int().min(0), button: external_exports.enum(["left", "middle", "right"]).default("left") }).strict(),
@@ -44881,7 +45027,8 @@ function keySequence(key) {
   return sequence;
 }
 async function inspectNativeListener(backend2, endpoint) {
-  if (process.platform !== "win32") throw new Error("Native listener verification currently requires Windows.");
+  if (process.platform === "linux") return inspectLinuxListener(endpoint.port);
+  if (process.platform !== "win32") throw new Error("Native listener verification requires Windows or Linux.");
   const port = endpoint.port;
   if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("Invalid VNC listener port.");
   const command = `$ErrorActionPreference='Stop'; $connections=@(Get-NetTCPConnection -State Listen -LocalPort ${port} -ErrorAction SilentlyContinue); @($connections | ForEach-Object { $owner=Get-CimInstance Win32_Process -Filter ('ProcessId='+$_.OwningProcess); [pscustomobject]@{address=$_.LocalAddress;port=$_.LocalPort;processName=$owner.Name;commandLine=$owner.CommandLine} }) | ConvertTo-Json -Compress`;
@@ -44910,7 +45057,7 @@ var ConsoleManager = class {
       if (!Array.isArray(response.data)) throw new Error("REST inventory did not return VM IDs and paths.");
       return response.data;
     } : void 0 });
-    const config2 = Object.fromEntries(Object.entries(parseAssignments(await import_promises4.default.readFile(vmx2, "utf8"))).map(([key2, value]) => [key2.toLowerCase(), value]));
+    const config2 = Object.fromEntries(Object.entries(parseAssignments(await import_promises7.default.readFile(vmx2, "utf8"))).map(([key2, value]) => [key2.toLowerCase(), value]));
     if (String(config2["remotedisplay.vnc.enabled"]).toLowerCase() !== "true") throw new Error("Native VNC is disabled for this VM. Configure it while powered off; console calls never enable VNC or start a VM automatically.");
     const host2 = config2["remotedisplay.vnc.ip"];
     if (!["127.0.0.1", "::1"].includes(host2)) throw new Error("VNC must explicitly bind to 127.0.0.1 or ::1 in the VMX. Wildcard/external listeners are refused.");
@@ -44929,7 +45076,10 @@ var ConsoleManager = class {
     if (!listeners.length) throw new Error("No native VNC listener is running. Power on this VM headlessly after configuring VNC.");
     if (listeners.some((item) => !["127.0.0.1", "::1"].includes(item.address))) throw new Error("VNC port is exposed beyond loopback. Stop the VM and fix its native listener configuration.");
     const canonical = (value) => process.platform === "win32" ? value.replace(/\//g, "\\").toLowerCase() : value;
-    const matches = listeners.filter((item) => item.address === endpoint.host && /^vmware-vmx(?:\.exe)?$/i.test(item.processName || "") && typeof item.commandLine === "string" && canonical(item.commandLine).includes(canonical(endpoint.vmx)));
+    const matchesVM = (item) => Array.isArray(item.arguments) ? item.arguments.some((argument) => canonical(argument) === canonical(endpoint.vmx)) : typeof item.commandLine === "string" && canonical(item.commandLine).includes(canonical(endpoint.vmx));
+    const candidates = listeners.filter((item) => item.address === endpoint.host);
+    const matches = candidates.filter((item) => /^vmware-vmx(?:\.exe)?$/i.test(item.processName || "") && matchesVM(item));
+    if (candidates.some((item) => Array.isArray(item.arguments)) && matches.length !== candidates.length) throw new Error("The Linux VNC listener owner or exact VMX argument could not be verified. Run the plugin as the VM owner in the same PID/network namespace.");
     if (matches.length) return "native worker command line and loopback listener";
     const native = listeners.filter((item) => item.address === endpoint.host && /^vmware-vmx(?:\.exe)?$/i.test(item.processName || ""));
     if (!native.length || native.some((item) => item.commandLine)) throw new Error("The VNC listener does not belong to the selected VMware VM. Refusing a possible cross-VM connection.");
@@ -44939,8 +45089,8 @@ var ConsoleManager = class {
       let config2;
       let vmx2;
       try {
-        vmx2 = await import_promises4.default.realpath(vm2.vmx);
-        config2 = Object.fromEntries(Object.entries(parseAssignments(await import_promises4.default.readFile(vmx2, "utf8"))).map(([key, value]) => [key.toLowerCase(), value]));
+        vmx2 = await import_promises7.default.realpath(vm2.vmx);
+        config2 = Object.fromEntries(Object.entries(parseAssignments(await import_promises7.default.readFile(vmx2, "utf8"))).map(([key, value]) => [key.toLowerCase(), value]));
       } catch {
         throw new Error("Cannot verify VNC port ownership because a running VMX is unreadable.");
       }
@@ -45093,7 +45243,7 @@ var ConsoleManager = class {
       session.pointer = { x, y };
       try {
         session.client.pointerEvent(x, y, buttons[button]);
-        await (0, import_promises5.setTimeout)(this.keyDelayMs);
+        await (0, import_promises8.setTimeout)(this.keyDelayMs);
       } finally {
         if (!session.closed) session.client.pointerEvent(x, y, 0);
       }
@@ -45108,7 +45258,7 @@ var ConsoleManager = class {
         session.client.keyEvent(code, true);
         down.push(code);
       }
-      await (0, import_promises5.setTimeout)(this.keyDelayMs);
+      await (0, import_promises8.setTimeout)(this.keyDelayMs);
     } finally {
       for (const code of down.reverse()) if (!session.closed) session.client.keyEvent(code, false);
     }
@@ -45138,7 +45288,7 @@ var ConsoleManager = class {
       for (let i = 0; i < amount; i++) {
         try {
           session.client.pointerEvent(point.x, point.y, mask);
-          await (0, import_promises5.setTimeout)(this.keyDelayMs);
+          await (0, import_promises8.setTimeout)(this.keyDelayMs);
         } finally {
           if (!session.closed) session.client.pointerEvent(point.x, point.y, 0);
         }
@@ -45149,20 +45299,13 @@ var ConsoleManager = class {
   }
 };
 
-// src/local-file-security.mjs
-var import_node_path4 = __toESM(require("node:path"), 1);
-function localFileProtector(backend2) {
-  const root = import_node_path4.default.resolve(import_node_path4.default.dirname(process.argv[1]), "..");
-  return (filename) => backend2.execute("pwsh", ["-NoProfile", "-File", import_node_path4.default.join(root, "scripts", "Protect-LocalFile.ps1"), "-LiteralPath", filename], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
-}
-
 // src/server.mjs
 var backend = new Workstation();
 var credentials = new Credentials();
 var rest = new RestClient({ credentials, backend });
 var vmFiles = new VMFiles(backend, { protectSensitiveFile: localFileProtector(backend) });
 var consoles = new ConsoleManager({ backend, credentials, rest });
-var server = new McpServer({ name: "vmware-workstation", version: "0.2.0" });
+var server = new McpServer({ name: "vmware-workstation", version: "0.3.0" });
 var vmx = external_exports.string().min(1).describe("Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.");
 var name = external_exports.string().min(1).max(256).describe("Exact snapshot name.");
 function tool(name2, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false) {

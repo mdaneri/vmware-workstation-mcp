@@ -1,13 +1,13 @@
 # Contributing
 
-Use Node.js 22.12 or newer and PowerShell 7 on Windows. Install dependencies with `npm ci`, then run:
+Use Node.js 22.12 or newer and PowerShell 7 on Windows or Linux. In WSL use native Linux Node/npm and a separate Linux checkout. Install dependencies with `npm ci`, then run:
 
 ```powershell
 npm test
 npm run package
 ```
 
-The package command builds both bundled entrypoints, refreshes the operation reference and dependency notices, validates portable manifests and all MCP tool schemas, checks compatibility with the original 87 tools, verifies Windows credential-file protection, and creates the plugin ZIP.
+The package command builds all bundled entrypoints, refreshes the operation reference and dependency notices, validates portable manifests and all MCP tool schemas, checks compatibility with the original 87 tools, verifies platform credential-file protection, and creates the plugin ZIP. CI performs these checks on Windows and Ubuntu. Run `npm run build` before testing changes to bundled helpers or the Linux MCP integration test.
 
 Commit source changes together with updated generated files under `vmware-workstation/`. The repository includes built entrypoints so Git-backed plugin installation does not require an npm install. CI checks that a fresh build reproduces the committed generated files.
 

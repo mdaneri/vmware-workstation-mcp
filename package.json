@@ -1,9 +1,12 @@
 {
   "name": "vmware-workstation-plugin-dev",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "license": "MIT",
-  "repository": { "type": "git", "url": "git+https://github.com/mdaneri/vmware-workstation-mcp.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mdaneri/vmware-workstation-mcp.git"
+  },
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
@@ -11,9 +14,9 @@
     "smoke": "node scripts/smoke.mjs",
     "smoke:rest": "node scripts/smoke-rest.mjs",
     "test:console:live": "node scripts/live-console.mjs",
-    "validate": "node scripts/validate-package.mjs && pwsh -NoProfile -File scripts/validate-credentials.ps1",
+    "validate": "node scripts/validate-package.mjs && node scripts/validate-credentials.mjs",
     "prepackage": "npm run build && npm run validate",
-    "package": "pwsh -NoProfile -File scripts/Package-Plugin.ps1"
+    "package": "node scripts/package-plugin.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.2",
@@ -23,7 +26,8 @@
   },
   "devDependencies": {
     "ajv": "8.20.0",
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "fflate": "0.8.3"
   },
   "engines": {
     "node": ">=22.12"

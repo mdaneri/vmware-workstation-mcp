@@ -4,6 +4,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { parseAssignments } from './workstation.mjs';
+import { findVMwareExecutable } from './host-platform.mjs';
 
 export const createVMSchema = z.object({
   directory: z.string().min(1).describe('Absolute NEW VM directory; its parent must exist. Existing directories are never overwritten.'),
@@ -38,8 +39,7 @@ export class VMFiles {
       const directory = await this.backend.hostPath(a.directory, 'destination-directory');
       const iso = a.iso_path ? await this.backend.hostPath(a.iso_path, 'input-file') : null;
       const vmrun = await this.backend.executable();
-      const diskManager = this.backend.env.VMWARE_VDISKMANAGER_PATH || path.join(path.dirname(vmrun), 'vmware-vdiskmanager.exe');
-      if (!path.isAbsolute(diskManager) || path.basename(diskManager).toLowerCase() !== 'vmware-vdiskmanager.exe' || !(await fs.stat(diskManager)).isFile()) throw new Error('VMware Virtual Disk Manager was not found beside vmrun; set VMWARE_VDISKMANAGER_PATH.');
+      const diskManager = await findVMwareExecutable('vmware-vdiskmanager', { env: this.backend.env, beside: vmrun });
       await fs.mkdir(directory); // Deliberately fails on an existing directory.
       const vmx = path.join(directory, 'machine.vmx');
       const disk = path.join(directory, 'disk.vmdk');
@@ -100,13 +100,14 @@ export class VMFiles {
         seen.add(key);
       }
       for (const [key, update] of updates) if (!seen.has(key) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
+      const mode = (await fs.stat(vmx)).mode & 0o777;
       const backup = `${vmx}.backup-${randomUUID()}`;
       if (protectFile) {
-        await fs.writeFile(backup, '', { flag: 'wx' }); await protectFile(backup); await fs.writeFile(backup, original);
+        await fs.writeFile(backup, '', { flag: 'wx', mode: 0o600 }); await protectFile(backup); await fs.writeFile(backup, original);
       } else await fs.copyFile(vmx, backup, constants.COPYFILE_EXCL);
       const temporary = `${vmx}.edit-${randomUUID()}`;
-      if (protectFile) { await fs.writeFile(temporary, '', { flag: 'wx' }); await protectFile(temporary); }
-      await fs.writeFile(temporary, lines.join('\n').replace(/\n*$/, '\n'), { flag: protectFile ? 'w' : 'wx' });
+      if (protectFile) { await fs.writeFile(temporary, '', { flag: 'wx', mode: 0o600 }); await protectFile(temporary); }
+      await fs.writeFile(temporary, lines.join('\n').replace(/\n*$/, '\n'), { flag: protectFile ? 'w' : 'wx', mode });
       // Detect another writer after we read the original before replacing it.
       if (await fs.readFile(vmx, 'utf8') !== original) { await fs.unlink(temporary); throw new Error(`VMX changed during editing; original retained. Backup: ${backup}`); }
       await fs.rename(temporary, vmx);
