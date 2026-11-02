@@ -194,6 +194,43 @@ test('destination space checks fail before creating output and failed transfers 
   done = await finish(f, await f.ovf.start('ovf_inspect', { source: f.source })); assert.equal(done.state, 'failed');
 });
 
+test('OVA exclusive publication budgets both staged and destination copies before conversion', async t => {
+  for (const operation of ['ovf_export', 'ovf_convert']) await t.test(operation, async t => {
+    const f = await fixture(t, { OVF_TEST_FLAT_BYTES: String(1024 ** 3) });
+    const source = operation === 'ovf_export' ? { vmx: f.vmx } : { source: f.source };
+    const destination = path.join(f.root, 'appliance.ova');
+    // Enough space for one estimated 1 GiB archive plus margin, but not two.
+    f.ovf.space = async () => ({ bavail: 1.5 * 1024 ** 3, bsize: 1 });
+    let done = await finish(f, await f.ovf.start(operation, { ...source, destination }));
+    assert.equal(done.state, 'failed'); assert.match(done.error, /free space/);
+    assert.equal((await f.calls()).length, 1, 'only the probe may run before the space rejection');
+    await assert.rejects(fs.stat(destination), { code: 'ENOENT' });
+    assert.ok(!(await fs.readdir(f.root)).some(name => name.startsWith('.ovf-job-')));
+
+    // Replacement renames the staged file, so it still requires just one new copy.
+    await fs.writeFile(destination, 'existing archive');
+    done = await finish(f, await f.ovf.start(operation, { ...source, destination, overwrite: true }));
+    assert.equal(done.state, 'succeeded', done.error);
+
+    // With space for both copies, exclusive publication succeeds normally.
+    f.ovf.space = async () => ({ bavail: 3 * 1024 ** 3, bsize: 1 });
+    const fresh = path.join(f.root, 'fresh.ova');
+    done = await finish(f, await f.ovf.start(operation, { ...source, destination: fresh }));
+    assert.equal(done.state, 'succeeded', done.error);
+    assert.equal(await fs.readFile(fresh, 'utf8'), 'fixture appliance');
+  });
+});
+
+test('OVF and VMX targets keep a single-copy destination-space budget', async t => {
+  const f = await fixture(t, { OVF_TEST_FLAT_BYTES: String(1024 ** 3) });
+  f.ovf.space = async () => ({ bavail: 1.5 * 1024 ** 3, bsize: 1 });
+  for (const extension of ['ovf', 'vmx']) {
+    const destination = path.join(f.root, `output-${extension}`, `appliance.${extension}`);
+    const done = await finish(f, await f.ovf.start('ovf_convert', { source: f.source, destination }));
+    assert.equal(done.state, 'succeeded', done.error);
+  }
+});
+
 test('sensitive property profiles are resolved locally and redacted from job logs and results', async t => {
   const f = await fixture(t); const secret = 'sensitive-profile-value';
   await fs.writeFile(f.credentials.filename, JSON.stringify({ ovf_properties: { lab: { password: secret } } }));

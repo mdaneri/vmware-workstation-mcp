@@ -96,7 +96,7 @@ Call `ovf_export` for a prepared, fully powered-off VM without snapshots:
 }
 ```
 
-The tool checks power, locks, saved state, snapshots, encryption/vTPM, local disk/media backings and free space. An OVA is first produced in a new staging directory beside the destination. An existing OVA remains intact until the transfer succeeds. `overwrite: true` explicitly permits replacing that one regular OVA file; links and directories are refused. No generic OVF Tool overwrite flag is passed.
+The tool checks power, locks, saved state, snapshots, encryption/vTPM, local disk/media backings and free space. An OVA is first produced in a new staging directory beside the destination. With `overwrite: false`, exclusive publication copies that archive before cleanup, so preflight budgets space for both the staged and destination copies, including margin. An existing OVA remains intact until the transfer succeeds. `overwrite: true` explicitly permits replacing that one regular OVA file by renaming the staged archive, requiring space for one new copy; links and directories are refused. No generic OVF Tool overwrite flag is passed.
 
 For an OVF target, use `D:\Appliances\router-ovf\router.ovf`, where **`router-ovf` does not yet exist**. The plugin creates it for the descriptor and companion files. Existing OVF/VMX output directories are always refused, including with `overwrite: true`; replacing companions could destroy unrelated files.
 

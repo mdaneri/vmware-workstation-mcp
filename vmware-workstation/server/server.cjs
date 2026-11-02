@@ -54969,7 +54969,8 @@ var OvfManager = class {
       const parent = a.target === "ova" ? a.directory : import_node_path9.default.dirname(a.directory);
       const flat = Number(metadata.sizes?.flat);
       if (!Number.isSafeInteger(flat) || flat < 0) throw new Error("Cannot determine the flat disk size for a conservative destination free-space check.");
-      const estimate = Math.max(sourceInfo.size, Number.isSafeInteger(flat) ? flat : 0) * 1.1 + 64 * 1024 * 1024;
+      const copies = a.target === "ova" && !a.overwrite ? 2 : 1;
+      const estimate = (Math.max(sourceInfo.size, flat) * 1.1 + 64 * 1024 * 1024) * copies;
       const capacity = await this.space(parent);
       const available = Number(capacity.bavail) * Number(capacity.bsize);
       if (!Number.isFinite(available) || !Number.isSafeInteger(Math.ceil(estimate)) || available < estimate) throw new Error("Insufficient or unknown destination free space for conservative OVF transfer estimate.");
