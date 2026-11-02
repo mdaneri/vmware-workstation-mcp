@@ -1,0 +1,1002 @@
+{
+  "source": "Installed VMware Workstation swagger.zip/json/swagger_WS.json",
+  "sha256": "71c8094a4ab765151111ac4fd68a2bf8ace1061d470ef4ac2c5dc6f86aebb3f7",
+  "operations": [
+    {
+      "id": "getAllVMs",
+      "method": "GET",
+      "path": "/api/vms",
+      "category": "VM Management",
+      "parameters": []
+    },
+    {
+      "id": "createVM",
+      "method": "POST",
+      "path": "/api/vms",
+      "category": "VM Management",
+      "parameters": [
+        {
+          "name": "params",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "required": [
+              "name",
+              "parentId"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "parentId": {
+                "type": "string"
+              }
+            }
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "getVM",
+      "method": "GET",
+      "path": "/api/vms/{id}",
+      "category": "VM Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "updateVM",
+      "method": "PUT",
+      "path": "/api/vms/{id}",
+      "category": "VM Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "parameters",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "processors": {
+                "type": "integer"
+              },
+              "memory": {
+                "type": "integer"
+              }
+            }
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "deleteVM",
+      "method": "DELETE",
+      "path": "/api/vms/{id}",
+      "category": "VM Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "getVMRestrictions",
+      "method": "GET",
+      "path": "/api/vms/{id}/restrictions",
+      "category": "VM Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "registerVM",
+      "method": "POST",
+      "path": "/api/vms/registration",
+      "category": "VM Management",
+      "parameters": [
+        {
+          "name": "parameters",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              }
+            }
+          },
+          "secret": false
+        }
+      ]
+    },
+    {
+      "id": "getVMParams",
+      "method": "GET",
+      "path": "/api/vms/{id}/params/{name}",
+      "category": "VM Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "name",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "configVMParams",
+      "method": "PUT",
+      "path": "/api/vms/{id}/configparams",
+      "category": "VM Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "parameters",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            }
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "getPowerState",
+      "method": "GET",
+      "path": "/api/vms/{id}/power",
+      "category": "VM Power Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "changePowerState",
+      "method": "PUT",
+      "path": "/api/vms/{id}/power",
+      "category": "VM Power Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "operation",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "on",
+              "off",
+              "shutdown",
+              "suspend",
+              "pause",
+              "unpause"
+            ]
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "getAllSharedFolders",
+      "method": "GET",
+      "path": "/api/vms/{id}/sharedfolders",
+      "category": "VM Shared Folders Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "createSharedFolder",
+      "method": "POST",
+      "path": "/api/vms/{id}/sharedfolders",
+      "category": "VM Shared Folders Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "parameters",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "folder_id",
+              "host_path",
+              "flags"
+            ],
+            "type": "object",
+            "properties": {
+              "folder_id": {
+                "type": "string"
+              },
+              "host_path": {
+                "type": "string"
+              },
+              "flags": {
+                "type": "integer"
+              }
+            }
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "deleteSharedFolder",
+      "method": "DELETE",
+      "path": "/api/vms/{id}/sharedfolders/{folder id}",
+      "category": "VM Shared Folders Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "folder id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "updataSharedFolder",
+      "method": "PUT",
+      "path": "/api/vms/{id}/sharedfolders/{folder id}",
+      "category": "VM Shared Folders Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "folder id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "parameters",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "host_path",
+              "flags"
+            ],
+            "type": "object",
+            "properties": {
+              "host_path": {
+                "type": "string"
+              },
+              "flags": {
+                "type": "integer"
+              }
+            }
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "getAllNICDevices",
+      "method": "GET",
+      "path": "/api/vms/{id}/nic",
+      "category": "VM Network Adapters Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "createNICDevice",
+      "method": "POST",
+      "path": "/api/vms/{id}/nic",
+      "category": "VM Network Adapters Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "parameters",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "type",
+              "vmnet"
+            ],
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "custom",
+                  "bridged",
+                  "nat",
+                  "hostonly"
+                ]
+              },
+              "vmnet": {
+                "type": "string"
+              }
+            }
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "deleteNICDevice",
+      "method": "DELETE",
+      "path": "/api/vms/{id}/nic/{index}",
+      "category": "VM Network Adapters Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "index",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "updateNICDevice",
+      "method": "PUT",
+      "path": "/api/vms/{id}/nic/{index}",
+      "category": "VM Network Adapters Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "index",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "parameters",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "type",
+              "vmnet"
+            ],
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "custom",
+                  "bridged",
+                  "nat",
+                  "hostonly"
+                ]
+              },
+              "vmnet": {
+                "type": "string"
+              }
+            }
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "getIPAddress",
+      "method": "GET",
+      "path": "/api/vms/{id}/ip",
+      "category": "VM Network Adapters Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "getNicInfo",
+      "method": "GET",
+      "path": "/api/vms/{id}/nicips",
+      "category": "VM Network Adapters Management",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "vmPassword",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "required": false,
+            "type": "string"
+          },
+          "secret": true
+        }
+      ]
+    },
+    {
+      "id": "createNetwork",
+      "method": "POST",
+      "path": "/api/vmnets",
+      "category": "Host Networks Management",
+      "parameters": [
+        {
+          "name": "parameters",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "name"
+            ],
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "nat",
+                  "hostOnly"
+                ]
+              }
+            }
+          },
+          "secret": false
+        }
+      ]
+    },
+    {
+      "id": "getAllNetworks",
+      "method": "GET",
+      "path": "/api/vmnet",
+      "category": "Host Networks Management",
+      "parameters": []
+    },
+    {
+      "id": "getPortforwards",
+      "method": "GET",
+      "path": "/api/vmnet/{vmnet}/portforward",
+      "category": "Host Networks Management",
+      "parameters": [
+        {
+          "name": "vmnet",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        }
+      ]
+    },
+    {
+      "id": "getMACToIPs",
+      "method": "GET",
+      "path": "/api/vmnet/{vmnet}/mactoip",
+      "category": "Host Networks Management",
+      "parameters": [
+        {
+          "name": "vmnet",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        }
+      ]
+    },
+    {
+      "id": "updateMacToIP",
+      "method": "PUT",
+      "path": "/api/vmnet/{vmnet}/mactoip/{mac}",
+      "category": "Host Networks Management",
+      "parameters": [
+        {
+          "name": "vmnet",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "mac",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "parameters",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "IP"
+            ],
+            "type": "object",
+            "properties": {
+              "IP": {
+                "type": "string"
+              }
+            }
+          },
+          "secret": false
+        }
+      ]
+    },
+    {
+      "id": "updatePortforward",
+      "method": "PUT",
+      "path": "/api/vmnet/{vmnet}/portforward/{protocol}/{port}",
+      "category": "Host Networks Management",
+      "parameters": [
+        {
+          "name": "vmnet",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "protocol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "port",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "integer"
+          },
+          "secret": false
+        },
+        {
+          "name": "parameters",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "guestIp",
+              "guestPort"
+            ],
+            "type": "object",
+            "properties": {
+              "guestIp": {
+                "type": "string"
+              },
+              "guestPort": {
+                "type": "integer"
+              },
+              "desc": {
+                "type": "string"
+              }
+            }
+          },
+          "secret": false
+        }
+      ]
+    },
+    {
+      "id": "deletePortforward",
+      "method": "DELETE",
+      "path": "/api/vmnet/{vmnet}/portforward/{protocol}/{port}",
+      "category": "Host Networks Management",
+      "parameters": [
+        {
+          "name": "vmnet",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "protocol",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "string"
+          },
+          "secret": false
+        },
+        {
+          "name": "port",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "required": true,
+            "type": "integer"
+          },
+          "secret": false
+        }
+      ]
+    }
+  ]
+}

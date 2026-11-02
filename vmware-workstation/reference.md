@@ -1,0 +1,117 @@
+# Complete operation reference
+
+Generated from the command implementations and installed REST contract. Source version: vmrun 1.17.0.25688693; vmrest 1.3.1 build 25688693.
+
+## New VM creation and local configuration
+
+`create_vm` creates a blank VMX and sparse VMDK in a new directory. Required: `directory`, `name`. Options: `guest_os`, `memory_mb`, `cpus`, `disk_gb`, `hardware_version`, `firmware`, `network`, `vmnet`, `iso_path`, `timeout_seconds`.
+
+`configure_vm` edits a powered-off UTF-8 VMX with a backup. Required: `vmx`, `settings` (VMX keys to string values, or null to remove). It rejects running/locked/detected suspended VMs.
+
+## vmrun commands (47)
+
+All tools accept `timeout_seconds` (default 120). VM tools require `vmx` and accept optional `vm_password_profile` and `guest_profile`. Guest operations default `guest_profile` to `default`. Output-file operations accept `overwrite` (default false). Optional arguments are marked with `?`; defaulted arguments show their defaults.
+
+| CLI command | MCP tool | Operation arguments | Guest auth | Effect |
+| --- | --- | --- | --- | --- |
+| `start` | `vmrun_start` | `mode=nogui` | Optional for VM commands | Change |
+| `stop` | `vmrun_stop` | `mode=soft` | Optional for VM commands | Change |
+| `reset` | `vmrun_reset` | `mode=soft` | Optional for VM commands | Change |
+| `suspend` | `vmrun_suspend` | `mode=soft` | Optional for VM commands | Change |
+| `pause` | `vmrun_pause` | (none) | Optional for VM commands | Change |
+| `unpause` | `vmrun_unpause` | (none) | Optional for VM commands | Change |
+| `listSnapshots` | `vmrun_list_snapshots` | `show_tree?` | Optional for VM commands | Read |
+| `snapshot` | `vmrun_snapshot` | `name` | Optional for VM commands | Change |
+| `deleteSnapshot` | `vmrun_delete_snapshot` | `name`, `delete_children?` | Optional for VM commands | Change |
+| `revertToSnapshot` | `vmrun_revert_to_snapshot` | `name` | Optional for VM commands | Change |
+| `listHostNetworks` | `vmrun_list_host_networks` | (none) | Optional for VM commands | Read |
+| `listPortForwardings` | `vmrun_list_port_forwardings` | `vmnet` | Optional for VM commands | Read |
+| `setPortForwarding` | `vmrun_set_port_forwarding` | `vmnet`, `protocol`, `host_port`, `guest_ip`, `guest_port`, `description?` | Optional for VM commands | Change |
+| `deletePortForwarding` | `vmrun_delete_port_forwarding` | `vmnet`, `protocol`, `host_port` | Optional for VM commands | Change |
+| `runProgramInGuest` | `vmrun_run_program_in_guest` | `no_wait?`, `active_window?`, `interactive?`, `program`, `arguments?` | Required | Change |
+| `fileExistsInGuest` | `vmrun_file_exists_in_guest` | `guest_path` | Required | Read |
+| `directoryExistsInGuest` | `vmrun_directory_exists_in_guest` | `guest_path` | Required | Read |
+| `setSharedFolderState` | `vmrun_set_shared_folder_state` | `share_name`, `host_path`, `access` | Optional for VM commands | Change |
+| `addSharedFolder` | `vmrun_add_shared_folder` | `share_name`, `host_path` | Optional for VM commands | Change |
+| `removeSharedFolder` | `vmrun_remove_shared_folder` | `share_name` | Optional for VM commands | Change |
+| `enableSharedFolders` | `vmrun_enable_shared_folders` | `runtime_only?` | Optional for VM commands | Change |
+| `disableSharedFolders` | `vmrun_disable_shared_folders` | (none) | Optional for VM commands | Change |
+| `listProcessesInGuest` | `vmrun_list_processes_in_guest` | (none) | Required | Read |
+| `killProcessInGuest` | `vmrun_kill_process_in_guest` | `pid` | Required | Change |
+| `runScriptInGuest` | `vmrun_run_script_in_guest` | `no_wait?`, `active_window?`, `interactive?`, `interpreter`, `script` | Required | Change |
+| `deleteFileInGuest` | `vmrun_delete_file_in_guest` | `guest_path` | Required | Change |
+| `createDirectoryInGuest` | `vmrun_create_directory_in_guest` | `guest_path` | Required | Change |
+| `deleteDirectoryInGuest` | `vmrun_delete_directory_in_guest` | `guest_path` | Required | Change |
+| `CreateTempfileInGuest` | `vmrun_create_tempfile_in_guest` | (none) | Required | Change |
+| `listDirectoryInGuest` | `vmrun_list_directory_in_guest` | `guest_path` | Required | Read |
+| `CopyFileFromHostToGuest` | `vmrun_copy_file_from_host_to_guest` | `host_path`, `guest_path` | Required | Change |
+| `CopyFileFromGuestToHost` | `vmrun_copy_file_from_guest_to_host` | `guest_path`, `host_path` | Required | Change |
+| `renameFileInGuest` | `vmrun_rename_file_in_guest` | `source_path`, `destination_path` | Required | Change |
+| `typeKeystrokesInGuest` | `vmrun_type_keystrokes_in_guest` | `text` | Required | Change |
+| `connectNamedDevice` | `vmrun_connect_named_device` | `device_name` | Optional for VM commands | Change |
+| `disconnectNamedDevice` | `vmrun_disconnect_named_device` | `device_name` | Optional for VM commands | Change |
+| `captureScreen` | `vmrun_capture_screen` | `host_path` | Optional for VM commands | Change |
+| `writeVariable` | `vmrun_write_variable` | `scope`, `name`, `value` | Optional for VM commands | Change |
+| `readVariable` | `vmrun_read_variable` | `scope`, `name` | Optional for VM commands | Read |
+| `getGuestIPAddress` | `vmrun_get_guest_ip_address` | `wait?` | Optional for VM commands | Read |
+| `list` | `vmrun_list` | (none) | Optional for VM commands | Read |
+| `upgradevm` | `vmrun_upgradevm` | (none) | Optional for VM commands | Change |
+| `installTools` | `vmrun_install_tools` | (none) | Optional for VM commands | Change |
+| `checkToolsState` | `vmrun_check_tools_state` | (none) | Optional for VM commands | Read |
+| `deleteVM` | `vmrun_delete_vm` | (none) | Optional for VM commands | Change |
+| `clone` | `vmrun_clone` | `destination_vmx`, `clone_type`, `snapshot?`, `clone_name?` | Optional for VM commands | Change |
+| `downloadPhotonVM` | `vmrun_download_photon_vm` | `destination_path` | Optional for VM commands | Change |
+
+## REST operations (28)
+
+Parameter names follow the tool schema; JSON body fields preserve VMware names such as `parentId`, `host_path`, and `guestIp`. Optional `vm_password_profile` selects the encrypted VM password. No tool accepts a raw password. All accept `timeout_seconds`.
+
+| API operation | MCP tool | Method and route | Tool arguments |
+| --- | --- | --- | --- |
+| `getAllVMs` | `rest_get_all_vms` | `GET /api/vms` | (none) |
+| `createVM` | `rest_create_vm` | `POST /api/vms` | `params`, `vm_password_profile?` |
+| `getVM` | `rest_get_vm` | `GET /api/vms/{id}` | `id`, `vm_password_profile?` |
+| `updateVM` | `rest_update_vm` | `PUT /api/vms/{id}` | `id`, `parameters`, `vm_password_profile?` |
+| `deleteVM` | `rest_delete_vm` | `DELETE /api/vms/{id}` | `id`, `vm_password_profile?` |
+| `getVMRestrictions` | `rest_get_vm_restrictions` | `GET /api/vms/{id}/restrictions` | `id`, `vm_password_profile?` |
+| `registerVM` | `rest_register_vm` | `POST /api/vms/registration` | `parameters` |
+| `getVMParams` | `rest_get_vm_params` | `GET /api/vms/{id}/params/{name}` | `id`, `name`, `vm_password_profile?` |
+| `configVMParams` | `rest_config_vm_params` | `PUT /api/vms/{id}/configparams` | `id`, `parameters`, `vm_password_profile?` |
+| `getPowerState` | `rest_get_power_state` | `GET /api/vms/{id}/power` | `id`, `vm_password_profile?` |
+| `changePowerState` | `rest_change_power_state` | `PUT /api/vms/{id}/power` | `id`, `operation`, `vm_password_profile?` |
+| `getAllSharedFolders` | `rest_get_all_shared_folders` | `GET /api/vms/{id}/sharedfolders` | `id`, `vm_password_profile?` |
+| `createSharedFolder` | `rest_create_shared_folder` | `POST /api/vms/{id}/sharedfolders` | `id`, `parameters`, `vm_password_profile?` |
+| `deleteSharedFolder` | `rest_delete_shared_folder` | `DELETE /api/vms/{id}/sharedfolders/{folder id}` | `id`, `folder_id`, `vm_password_profile?` |
+| `updataSharedFolder` | `rest_update_shared_folder` | `PUT /api/vms/{id}/sharedfolders/{folder id}` | `id`, `folder_id`, `parameters`, `vm_password_profile?` |
+| `getAllNICDevices` | `rest_get_all_nic_devices` | `GET /api/vms/{id}/nic` | `id`, `vm_password_profile?` |
+| `createNICDevice` | `rest_create_nic_device` | `POST /api/vms/{id}/nic` | `id`, `parameters`, `vm_password_profile?` |
+| `deleteNICDevice` | `rest_delete_nic_device` | `DELETE /api/vms/{id}/nic/{index}` | `id`, `index`, `vm_password_profile?` |
+| `updateNICDevice` | `rest_update_nic_device` | `PUT /api/vms/{id}/nic/{index}` | `id`, `index`, `parameters`, `vm_password_profile?` |
+| `getIPAddress` | `rest_get_ip_address` | `GET /api/vms/{id}/ip` | `id`, `vm_password_profile?` |
+| `getNicInfo` | `rest_get_nic_info` | `GET /api/vms/{id}/nicips` | `id`, `vm_password_profile?` |
+| `createNetwork` | `rest_create_network` | `POST /api/vmnets` | `parameters` |
+| `getAllNetworks` | `rest_get_all_networks` | `GET /api/vmnet` | (none) |
+| `getPortforwards` | `rest_get_portforwards` | `GET /api/vmnet/{vmnet}/portforward` | `vmnet` |
+| `getMACToIPs` | `rest_get_mac_to_ips` | `GET /api/vmnet/{vmnet}/mactoip` | `vmnet` |
+| `updateMacToIP` | `rest_update_mac_to_ip` | `PUT /api/vmnet/{vmnet}/mactoip/{mac}` | `vmnet`, `mac`, `parameters` |
+| `updatePortforward` | `rest_update_portforward` | `PUT /api/vmnet/{vmnet}/portforward/{protocol}/{port}` | `vmnet`, `protocol`, `port`, `parameters` |
+| `deletePortforward` | `rest_delete_portforward` | `DELETE /api/vmnet/{vmnet}/portforward/{protocol}/{port}` | `vmnet`, `protocol`, `port` |
+
+The vendor operation ID `updataSharedFolder` is exposed with the corrected tool name `rest_update_shared_folder`.
+
+## Direct native VNC/RFB console (6)
+
+All console tools accept `vm_id`: an absolute VMX path, a unique inventory name, a configured console profile alias, or a REST VM ID when REST is configured. The VM must be running with native VNC explicitly bound to loopback and a local password profile. VMware Tools and guest login are unnecessary. Setup: [console guide](console.md).
+
+| Tool | Arguments |
+| --- | --- |
+| `console_screenshot` | `vm_id` |
+| `console_click` | `vm_id`, `x`, `y`, `button` |
+| `console_key` | `vm_id`, `key` |
+| `console_type` | `vm_id`, `text` |
+| `console_scroll` | `vm_id`, `direction`, `amount` |
+| `console_status` | `vm_id` |
+
+## Convenience tools (9) and capabilities
+
+`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **93 MCP tools**.

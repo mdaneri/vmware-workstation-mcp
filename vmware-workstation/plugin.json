@@ -1,0 +1,25 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "vmware-workstation",
+  "version": "0.2.0",
+  "license": "MIT",
+  "repository": "https://github.com/mdaneri/vmware-workstation-mcp",
+  "author": { "name": "mdaneri", "url": "https://github.com/mdaneri" },
+  "description": "Manage VMware Workstation with vmrun, REST, and direct headless VNC/RFB console screenshots and input.",
+  "keywords": ["vmware", "workstation", "virtual-machines", "snapshots", "windows"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "VMware Workstation",
+        "shortDescription": "Manage local virtual machines",
+        "longDescription": "Create and configure VMs, use all 47 installed vmrun commands and 28 REST operations, and interact directly with native VNC consoles during firmware, boot, and installation. Console screenshots, clicks, keys, typing, scrolling, and status use loopback-only authenticated RFB sessions without host desktop capture or input. Requires Windows, Node.js 22.12+, VMware Workstation, and local credential configuration.",
+        "category": "Developer Tools",
+        "capabilities": [],
+        "logo": "./assets/icon.svg",
+        "composerIcon": "./assets/icon.svg",
+        "brandColor": "#0079B8",
+        "defaultPrompt": "List my VMware Workstation virtual machines and show which are running."
+      }
+    }
+  }
+}

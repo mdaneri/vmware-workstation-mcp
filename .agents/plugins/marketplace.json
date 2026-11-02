@@ -1,0 +1,12 @@
+{
+  "name": "vmware-local",
+  "interface": { "displayName": "VMware Workstation Local" },
+  "plugins": [
+    {
+      "name": "vmware-workstation",
+      "source": { "source": "local", "path": "./vmware-workstation" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    }
+  ]
+}
