@@ -6,6 +6,14 @@ import { Duplex } from 'node:stream';
 
 export const serialError = (code, message) => Object.assign(new Error(message), { code });
 const failure = () => serialError('SERIAL_UNAVAILABLE', 'Serial endpoint unavailable or its VMware VM owner could not be verified. Start the configured VM headlessly; run as its owner in the same namespace. No GUI fallback is available.');
+const bridgeFailures = {
+  SERIAL_BRIDGE_UNAVAILABLE: 'Windows serial bridge unavailable. Install PowerShell 7 and allow its native pipe helper to run.',
+  SERIAL_CONNECT_FAILED: 'Local serial pipe unavailable. Start the explicitly configured VM headlessly and check that its serial port is connected.',
+  SERIAL_OWNER_UNAVAILABLE: 'Serial pipe owner or exact command line unavailable. Run as the VM owner with permission to inspect the native VMware worker.',
+  SERIAL_WRONG_WORKER: 'Serial endpoint owner is not a native VMware worker.',
+  SERIAL_WRONG_VM: 'Serial endpoint owner belongs to a different VM. The exact VMX argument is required.',
+  SERIAL_IO_FAILED: 'Serial transport failed. Inspect guest state before reconnecting; input is never replayed.',
+};
 
 // Require a native VMware worker holding this listening UNIX socket, with the
 // exact VMX argv entry. A socket file alone is not evidence of a VM console.
@@ -80,6 +88,8 @@ export async function connectSerial(endpoint, { signal, timeoutMs = 10000, platf
       if (ready) return;
       stderr += chunk.toString('utf8');
       if (stderr.length > 1024) { fail(failure()); return; }
+      const code = stderr.match(/(?:^|\n)(SERIAL_[A-Z_]+)\r?\n/)?.[1];
+      if (Object.hasOwn(bridgeFailures, code)) { fail(serialError(code, bridgeFailures[code])); return; }
       if (!stderr.includes('SERIAL_READY\n')) return;
       clearTimeout(timer); signal?.removeEventListener('abort', abort);
       stream = Duplex.from({ readable: child.stdout, writable: child.stdin });

@@ -55620,6 +55620,14 @@ var import_node_child_process3 = require("node:child_process");
 var import_node_stream = require("node:stream");
 var serialError = (code, message) => Object.assign(new Error(message), { code });
 var failure2 = () => serialError("SERIAL_UNAVAILABLE", "Serial endpoint unavailable or its VMware VM owner could not be verified. Start the configured VM headlessly; run as its owner in the same namespace. No GUI fallback is available.");
+var bridgeFailures = {
+  SERIAL_BRIDGE_UNAVAILABLE: "Windows serial bridge unavailable. Install PowerShell 7 and allow its native pipe helper to run.",
+  SERIAL_CONNECT_FAILED: "Local serial pipe unavailable. Start the explicitly configured VM headlessly and check that its serial port is connected.",
+  SERIAL_OWNER_UNAVAILABLE: "Serial pipe owner or exact command line unavailable. Run as the VM owner with permission to inspect the native VMware worker.",
+  SERIAL_WRONG_WORKER: "Serial endpoint owner is not a native VMware worker.",
+  SERIAL_WRONG_VM: "Serial endpoint owner belongs to a different VM. The exact VMX argument is required.",
+  SERIAL_IO_FAILED: "Serial transport failed. Inspect guest state before reconnecting; input is never replayed."
+};
 async function verifyUnixSerial(endpoint, { procRoot = "/proc" } = {}) {
   const stat = await import_promises14.default.lstat(endpoint.path);
   if (!stat.isSocket() || stat.uid !== process.getuid()) throw failure2();
@@ -55718,6 +55726,11 @@ async function connectSerial(endpoint, { signal, timeoutMs = 1e4, platform = pro
       stderr += chunk.toString("utf8");
       if (stderr.length > 1024) {
         fail2(failure2());
+        return;
+      }
+      const code = stderr.match(/(?:^|\n)(SERIAL_[A-Z_]+)\r?\n/)?.[1];
+      if (Object.hasOwn(bridgeFailures, code)) {
+        fail2(serialError(code, bridgeFailures[code]));
         return;
       }
       if (!stderr.includes("SERIAL_READY\n")) return;

@@ -6,6 +6,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $serialPipe = $null
+$serialFailure = 'SERIAL_BRIDGE_UNAVAILABLE'
 try {
     Add-Type -TypeDefinition @'
 using System;
@@ -27,16 +28,23 @@ public static class SerialNative {
     }
 }
 '@
+    $serialFailure = 'SERIAL_CONNECT_FAILED'
     $serialPipe = [System.IO.Pipes.NamedPipeClientStream]::new('.', $PipeName, [System.IO.Pipes.PipeDirection]::InOut, [System.IO.Pipes.PipeOptions]::Asynchronous)
     $serialPipe.Connect($ConnectTimeoutMs)
+    $serialFailure = 'SERIAL_OWNER_UNAVAILABLE'
     [uint32]$serialOwner = 0
     if (-not [SerialNative]::GetNamedPipeServerProcessId($serialPipe.SafePipeHandle.DangerousGetHandle(), [ref]$serialOwner)) { throw 'Unverified owner' }
     $serialProcess = Get-CimInstance Win32_Process -Filter "ProcessId=$serialOwner"
-    if ($serialProcess.Name -ine 'vmware-vmx.exe' -or -not $serialProcess.CommandLine) { throw 'Unverified worker' }
+    if (-not $serialProcess.CommandLine) { throw 'Unverified arguments' }
+    $serialFailure = 'SERIAL_WRONG_WORKER'
+    if ($serialProcess.Name -ine 'vmware-vmx.exe') { throw 'Unverified worker' }
+    $serialFailure = 'SERIAL_OWNER_UNAVAILABLE'
     $serialArgs = [SerialNative]::Arguments($serialProcess.CommandLine)
     $serialMatch = @($serialArgs | Where-Object { [string]::Equals($_.Replace('/', '\'), $VMX.Replace('/', '\'), [StringComparison]::OrdinalIgnoreCase) })
+    $serialFailure = 'SERIAL_WRONG_VM'
     if ($serialMatch.Count -ne 1) { throw 'Different VM' }
     [Console]::Error.Write("SERIAL_READY`n")
+    $serialFailure = 'SERIAL_IO_FAILED'
     $serialInput = [Console]::OpenStandardInput()
     $serialOutput = [Console]::OpenStandardOutput()
     $serialRead = $serialPipe.CopyToAsync($serialOutput, 4096)
@@ -45,7 +53,7 @@ public static class SerialNative {
     # Finishing either direction closes the session. Never echo bytes to stderr.
     if ($serialRead.IsFaulted -or $serialWrite.IsFaulted) { throw 'Disconnected' }
 } catch {
-    [Console]::Error.Write("SERIAL_UNAVAILABLE`n")
+    [Console]::Error.Write("$serialFailure`n")
     exit 1
 } finally {
     if ($null -ne $serialPipe) { $serialPipe.Dispose() }

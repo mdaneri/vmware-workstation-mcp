@@ -13,7 +13,10 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { connectSerial } from '../src/serial-transport.mjs';
 
 test('bundled MCP serial uses native local streams, exact worker ownership and two isolated VMs', { timeout: 60000 }, async t => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'ser-i-'));
+  // Hosted Windows TEMP uses an 8.3 alias. Launch the worker with the same
+  // canonical VMX spelling returned by Workstation.resolveVM, so strict argv
+  // verification measures VM isolation rather than a fixture path mismatch.
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'ser-i-')));
   const clients = []; const workers = [];
   t.after(async () => {
     await Promise.all(clients.map(client => client.close()));
@@ -66,7 +69,7 @@ test('bundled MCP serial uses native local streams, exact worker ownership and t
   assert.equal((await call('serial_read', { ...targets[1], encoding: 'utf8', timeout_ms: 5000 })).data, 'other-vm\r\n');
   for (const target of targets) assert.equal((await call('serial_status', target)).runtime_verified, true);
   for (const target of targets) await call('serial_disconnect', target);
-  await assert.rejects(connectSerial({ path: endpoints[0], vmx: paths[0] + '.other' }, { timeoutMs: 5000, bridgeScript: path.resolve('vmware-workstation/scripts/Serial-Bridge.ps1') }), /unavailable|owner/);
+  await assert.rejects(connectSerial({ path: endpoints[0], vmx: paths[0] + '.other' }, { timeoutMs: 5000, bridgeScript: path.resolve('vmware-workstation/scripts/Serial-Bridge.ps1') }), { code: process.platform === 'win32' ? 'SERIAL_WRONG_VM' : 'SERIAL_UNAVAILABLE' });
   const result = await client.callTool({ name: 'serial_read', arguments: targets[0] }); assert.equal(result.isError, true);
 });
 
@@ -76,5 +79,5 @@ test('native serial refuses an unrelated local listener; no arbitrary host servi
   const sockets = new Set(); const server = net.createServer(socket => { sockets.add(socket); socket.on('error', () => {}); socket.on('close', () => sockets.delete(socket)); });
   t.after(async () => { for (const socket of sockets) socket.destroy(); await new Promise(resolve => server.close(resolve)); await fs.rm(root, { recursive: true, force: true }); });
   server.listen(endpoint); await once(server, 'listening');
-  await assert.rejects(connectSerial({ vmx, path: endpoint }, { timeoutMs: 5000, bridgeScript: path.resolve('vmware-workstation/scripts/Serial-Bridge.ps1') }), /unavailable|owner/);
+  await assert.rejects(connectSerial({ vmx, path: endpoint }, { timeoutMs: 5000, bridgeScript: path.resolve('vmware-workstation/scripts/Serial-Bridge.ps1') }), { code: process.platform === 'win32' ? 'SERIAL_WRONG_WORKER' : 'SERIAL_UNAVAILABLE' });
 });

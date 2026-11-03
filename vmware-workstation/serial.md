@@ -17,6 +17,8 @@ The [VMware Workstation Pro 17 guide](https://techdocs2-prod.adobecqms.net/conte
 
 Windows requires PowerShell 7 for the packaged binary pipe bridge. The bridge fails closed if Windows hides the worker command line; run the plugin as the VM owner with permission to inspect that worker. Linux requires a native filesystem with UNIX sockets, owner permissions and readable `/proc` in the VM's PID/network namespace. WSL tests exercise Linux test doubles and do not establish native VMware support in WSL.
 
+Windows reports safe stage codes: `SERIAL_BRIDGE_UNAVAILABLE` for PowerShell/native-helper setup, `SERIAL_CONNECT_FAILED` for an unavailable pipe, `SERIAL_OWNER_UNAVAILABLE` for inaccessible worker metadata, and `SERIAL_WRONG_WORKER` / `SERIAL_WRONG_VM` for rejected ownership. Raw worker command lines and bridge errors are never returned. Start the VM through its canonical VMX path; alternate short-path spellings may fail strict argument verification.
+
 ## Configure and connect
 
 These examples are MCP tool arguments. Replace the VMX with a user-selected, approved local VM. `vm_id` also accepts a unique inventory name, console profile alias, or REST ID using the existing VM resolver. `port` is zero-based, 0–3 (`0` typically corresponds to COM1 / ttyS0).
