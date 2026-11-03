@@ -173,7 +173,7 @@ var Workstation = class {
       } catch (error62) {
         const details = [error62.stderr, error62.stdout].filter(Boolean).join("\n").trim().slice(0, 4e3);
         const uncertain = mutation ? " The operation may have taken effect; inspect the VM before retrying." : "";
-        throw new Error(`vmrun ${args[0] || "help"} failed (${error62.killed ? "timeout" : error62.code || "unknown error"}).${uncertain}${details ? ` ${details}` : ""}`);
+        throw Object.assign(new Error(`vmrun ${args[0] || "help"} failed (${error62.killed ? "timeout" : error62.code || "unknown error"}).${uncertain}${details ? ` ${details}` : ""}`), { code: error62.killed ? "VMRUN_TIMEOUT" : "VMRUN_FAILED" });
       }
     });
     this.tail = job.catch(() => {

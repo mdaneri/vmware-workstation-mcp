@@ -3262,8 +3262,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path16) {
-      let input2 = path16;
+    function removeDotSegments(path17) {
+      let input2 = path17;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -3337,11 +3337,11 @@ var require_utils = __commonJS({
       }
       return output2.join("");
     }
-    function removeDotSegmentsRelative(path16) {
-      if (path16 === "" || path16[0] === "/") {
-        return removeDotSegments(path16);
+    function removeDotSegmentsRelative(path17) {
+      if (path17 === "" || path17[0] === "/") {
+        return removeDotSegments(path17);
       }
-      const segments = path16.split("/");
+      const segments = path17.split("/");
       const last = segments.length - 1;
       const output2 = [];
       let trailingDirectory = false;
@@ -3704,8 +3704,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path16 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path16 && path16 !== "/" ? path16 : void 0;
+        const path17 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path17 && path17 !== "/" ? path17 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -4681,7 +4681,7 @@ var require_core = __commonJS({
       errorsText(errors = this.errors, { separator = ", ", dataVar = "data" } = {}) {
         if (!errors || errors.length === 0)
           return "No errors";
-        return errors.map((e2) => `${dataVar}${e2.instancePath} ${e2.message}`).reduce((text2, msg) => text2 + separator + msg);
+        return errors.map((e2) => `${dataVar}${e2.instancePath} ${e2.message}`).reduce((text3, msg) => text3 + separator + msg);
       }
       $dataMetaSchema(metaSchema, keywordsJsonPointers) {
         const rules = this.RULES.all;
@@ -7242,12 +7242,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name2}"`);
       return f;
     };
-    function addFormats(ajv, list, fs15, exportName) {
+    function addFormats(ajv, list, fs16, exportName) {
       var _a3;
       var _b;
       (_a3 = (_b = ajv.opts.code).formats) !== null && _a3 !== void 0 ? _a3 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
-        ajv.addFormat(f, fs15[f]);
+        ajv.addFormat(f, fs16[f]);
     }
     module2.exports = exports2 = formatsPlugin;
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -14429,23 +14429,23 @@ var require_dom = __commonJS({
       substringData: function(offset, count) {
         return this.data.substring(offset, offset + count);
       },
-      appendData: function(text2) {
-        text2 = this.data + text2;
-        this.nodeValue = this.data = text2;
-        this.length = text2.length;
+      appendData: function(text3) {
+        text3 = this.data + text3;
+        this.nodeValue = this.data = text3;
+        this.length = text3.length;
       },
-      insertData: function(offset, text2) {
-        this.replaceData(offset, 0, text2);
+      insertData: function(offset, text3) {
+        this.replaceData(offset, 0, text3);
       },
       deleteData: function(offset, count) {
         this.replaceData(offset, count, "");
       },
-      replaceData: function(offset, count, text2) {
+      replaceData: function(offset, count, text3) {
         var start = this.data.substring(0, offset);
         var end = this.data.substring(offset + count);
-        text2 = start + text2 + end;
-        this.nodeValue = this.data = text2;
-        this.length = text2.length;
+        text3 = start + text3 + end;
+        this.nodeValue = this.data = text3;
+        this.length = text3.length;
       }
     };
     _extends(CharacterData, Node);
@@ -14456,11 +14456,11 @@ var require_dom = __commonJS({
       nodeName: "#text",
       nodeType: TEXT_NODE,
       splitText: function(offset) {
-        var text2 = this.data;
-        var newText = text2.substring(offset);
-        text2 = text2.substring(0, offset);
-        this.data = this.nodeValue = text2;
-        this.length = text2.length;
+        var text3 = this.data;
+        var newText = text3.substring(offset);
+        text3 = text3.substring(0, offset);
+        this.data = this.nodeValue = text3;
+        this.length = text3.length;
         var newNode = this.ownerDocument.createTextNode(newText);
         if (this.parentNode) {
           this.parentNode.insertBefore(newNode, this.nextSibling);
@@ -17255,12 +17255,12 @@ var require_sax = __commonJS({
             }
             if (!source3.substring(start).match(/^\s*$/)) {
               var doc = domBuilder.doc;
-              var text2 = doc.createTextNode(source3.substring(start));
+              var text3 = doc.createTextNode(source3.substring(start));
               if (doc.documentElement) {
                 return errorHandler.error("Extra content at the end of the document");
               }
-              doc.appendChild(text2);
-              domBuilder.currentElement = text2;
+              doc.appendChild(text3);
+              domBuilder.currentElement = text3;
             }
             return;
           }
@@ -17645,11 +17645,11 @@ var require_sax = __commonJS({
         if (elEndStart < 0) {
           return elStartEnd + 1;
         }
-        var text2 = source3.substring(elStartEnd + 1, elEndStart);
+        var text3 = source3.substring(elStartEnd + 1, elEndStart);
         if (isEscapableRaw) {
-          text2 = text2.replace(ENTITY_REG, entityReplacer);
+          text3 = text3.replace(ENTITY_REG, entityReplacer);
         }
-        domBuilder.characters(text2, 0, text2.length);
+        domBuilder.characters(text3, 0, text3.length);
         return elEndStart;
       }
       return elStartEnd + 1;
@@ -17686,11 +17686,11 @@ var require_sax = __commonJS({
       function substringFromIndex() {
         return source3.substring(index);
       }
-      function substringStartsWith(text2) {
-        return source3.substring(index, index + text2.length) === text2;
+      function substringStartsWith(text3) {
+        return source3.substring(index, index + text3.length) === text3;
       }
-      function substringStartsWithCaseInsensitive(text2) {
-        return source3.substring(index, index + text2.length).toUpperCase() === text2.toUpperCase();
+      function substringStartsWithCaseInsensitive(text3) {
+        return source3.substring(index, index + text3.length).toUpperCase() === text3.toUpperCase();
       }
       function getMatch(args) {
         var expr = g.reg("^", args);
@@ -18622,8 +18622,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path16, errorMaps, issueData } = params;
-  const fullPath = [...path16, ...issueData.path || []];
+  const { data, path: path17, errorMaps, issueData } = params;
+  const fullPath = [...path17, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -18738,11 +18738,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path16, key3) {
+  constructor(parent, value, path17, key3) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path16;
+    this._path = path17;
     this._key = key3;
   }
   get path() {
@@ -22697,10 +22697,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path16) {
-  if (!path16)
+function getElementAtPath(obj, path17) {
+  if (!path17)
     return obj;
-  return path16.reduce((acc, key3) => acc?.[key3], obj);
+  return path17.reduce((acc, key3) => acc?.[key3], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -23040,11 +23040,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path16, issues) {
+function prefixIssues(path17, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path16);
+    iss.path.unshift(path17);
     return iss;
   });
 }
@@ -23506,16 +23506,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path16 = []) => {
+  const processError = (error63, path17 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path16, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path17, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path16, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path17, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path16, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path17, ...issue2.path]);
       } else {
-        const fullpath = [...path16, ...issue2.path];
+        const fullpath = [...path17, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -23554,17 +23554,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path16 = []) => {
+  const processError = (error63, path17 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path16, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path17, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path16, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path17, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path16, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path17, ...issue2.path]);
       } else {
-        const fullpath = [...path16, ...issue2.path];
+        const fullpath = [...path17, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -23603,8 +23603,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path16 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path16) {
+  const path17 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path17) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -31230,8 +31230,8 @@ function ko_default() {
 }
 
 // node_modules/zod/v4/locales/lt.js
-var capitalizeFirstCharacter = (text2) => {
-  return text2.charAt(0).toUpperCase() + text2.slice(1);
+var capitalizeFirstCharacter = (text3) => {
+  return text3.charAt(0).toUpperCase() + text3.slice(1);
 };
 function getUnitTypeFromNumber(number4) {
   const abs = Math.abs(number4);
@@ -39155,11 +39155,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path16) {
-  if (path16.length === 0) {
+function getDotPath(path17) {
+  if (path17.length === 0) {
     return "object root";
   }
-  return path16.reduce((acc, seg, index) => {
+  return path17.reduce((acc, seg, index) => {
     if (index === 0) {
       return String(seg);
     }
@@ -41386,13 +41386,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path16 = ref.slice(1).split("/").filter(Boolean);
-  if (path16.length === 0) {
+  const path17 = ref.slice(1).split("/").filter(Boolean);
+  if (path17.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path16[0] === defsKey) {
-    const key3 = path16[1] === void 0 ? void 0 : decodeJSONPointerSegment(path16[1]);
+  if (path17[0] === defsKey) {
+    const key3 = path17[1] === void 0 ? void 0 : decodeJSONPointerSegment(path17[1]);
     if (!key3 || !ctx.defs[key3]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -47741,16 +47741,16 @@ var Resources = class {
 
 // src/workstation.mjs
 var execute = (0, import_node_util.promisify)(import_node_child_process.execFile);
-function parseAssignments(text2) {
+function parseAssignments(text3) {
   const values = {};
-  for (const line of text2.split(/\r?\n/)) {
+  for (const line of text3.split(/\r?\n/)) {
     const match = line.match(/^\s*([\w.:-]+)\s*=\s*"(.*)"\s*$/);
     if (match) values[match[1]] = match[2].replace(/\|([0-9a-f]{2})/gi, (_, hex3) => String.fromCharCode(parseInt(hex3, 16)));
   }
   return values;
 }
-function parseCountedList(text2) {
-  const lines = text2.split(/\r?\n/).map((s2) => s2.trim()).filter(Boolean);
+function parseCountedList(text3) {
+  const lines = text3.split(/\r?\n/).map((s2) => s2.trim()).filter(Boolean);
   if (!lines.length || !/:\s*\d+$/.test(lines[0])) throw new Error("Unrecognized vmrun list output; refusing to infer an empty list.");
   const count = Number(lines.shift().match(/(\d+)$/)[1]);
   if (count !== lines.length) throw new Error("vmrun list count does not match its output.");
@@ -47794,7 +47794,7 @@ var Workstation = class {
       } catch (error62) {
         const details = [error62.stderr, error62.stdout].filter(Boolean).join("\n").trim().slice(0, 4e3);
         const uncertain = mutation ? " The operation may have taken effect; inspect the VM before retrying." : "";
-        throw new Error(`vmrun ${args[0] || "help"} failed (${error62.killed ? "timeout" : error62.code || "unknown error"}).${uncertain}${details ? ` ${details}` : ""}`);
+        throw Object.assign(new Error(`vmrun ${args[0] || "help"} failed (${error62.killed ? "timeout" : error62.code || "unknown error"}).${uncertain}${details ? ` ${details}` : ""}`), { code: error62.killed ? "VMRUN_TIMEOUT" : "VMRUN_FAILED" });
       }
     });
     this.tail = job.catch(() => {
@@ -48098,8 +48098,8 @@ var Credentials = class {
     this.secrets.add(token);
     return { authorization: `Basic ${token}` };
   }
-  redact(text2) {
-    let result = text2;
+  redact(text3) {
+    let result = text3;
     for (const [name2, value] of Object.entries(this.env)) if (/^VMWARE_.*PASSWORD$/.test(name2)) this.remember(value);
     for (const value of [...this.secrets].sort((a, b) => b.length - a.length)) result = result.split(value).join("[REDACTED]");
     return result;
@@ -49295,14 +49295,14 @@ var RestClient = class {
           chunks.push(Buffer.from(value));
         }
       }
-      const text2 = this.credentials.redact(Buffer.concat(chunks).toString("utf8"));
-      if (!response.ok) throw Object.assign(new Error("HTTP_ERROR"), { status: response.status, details: text2.slice(0, 4e3) });
+      const text3 = this.credentials.redact(Buffer.concat(chunks).toString("utf8"));
+      if (!response.ok) throw Object.assign(new Error("HTTP_ERROR"), { status: response.status, details: text3.slice(0, 4e3) });
       let data = null;
-      if (text2) {
+      if (text3) {
         try {
-          data = JSON.parse(text2);
+          data = JSON.parse(text3);
         } catch {
-          data = text2;
+          data = text3;
         }
       }
       return { status: response.status, data };
@@ -49487,8 +49487,8 @@ var VMFiles = class {
         if (a.network !== "none") settings["ethernet0.connectionType"] = a.network;
         if (a.network === "custom") settings["ethernet0.vnet"] = a.vmnet;
         if (iso) Object.assign(settings, { "sata0.present": "TRUE", "sata0:0.present": "TRUE", "sata0:0.deviceType": "cdrom-image", "sata0:0.fileName": iso });
-        const text2 = Object.entries(settings).map(([key3, value]) => `${key3} = "${encodeVMX(value)}"`).join("\n") + "\n";
-        await import_promises5.default.writeFile(vmx3, text2, { flag: "wx", encoding: "utf8" });
+        const text3 = Object.entries(settings).map(([key3, value]) => `${key3} = "${encodeVMX(value)}"`).join("\n") + "\n";
+        await import_promises5.default.writeFile(vmx3, text3, { flag: "wx", encoding: "utf8" });
         return { created: true, vmx: vmx3, disk, directory, registered: false, poweredOn: false, guestOSInstalled: false, note: "Blank VM and sparse disk created. Open the VMX in Workstation or register through REST; install a guest OS separately." };
       } catch (error62) {
         throw new Error(`VM creation failed (${error62.code || "disk/configuration error"}). Partial files may remain in ${directory}; inspect before retrying. No existing VM was overwritten.`);
@@ -51103,8 +51103,8 @@ function pointerEvent(buttonMask, x, y, extendedButtons = false) {
   b.writeUInt16BE(u16(y, "y"), 4);
   return b;
 }
-function clientCutText(text2) {
-  const data = latin1(text2);
+function clientCutText(text3) {
+  const data = latin1(text3);
   const b = Buffer.alloc(8 + data.length);
   b[0] = clientMsgTypes.cutText;
   b.writeUInt32BE(data.length, 4);
@@ -51184,9 +51184,9 @@ function writeScreen(s2, b, offset) {
   b.writeUInt16BE(s2.height, offset + 10);
   b.writeUInt32BE(s2.flags >>> 0, offset + 12);
 }
-function latin1(text2) {
+function latin1(text3) {
   let safe = "";
-  for (const ch of text2)
+  for (const ch of text3)
     safe += ch.codePointAt(0) > 255 ? "?" : ch;
   return Buffer.from(safe, "latin1");
 }
@@ -52160,9 +52160,9 @@ async function plainAuth(ctx, type = security.Plain) {
 
 // node_modules/rfb2/dist/security/dh.js
 var import_node_crypto2 = __toESM(require("node:crypto"), 1);
-function padded(text2, size) {
+function padded(text3, size) {
   const out = import_node_crypto2.default.randomBytes(size);
-  const bytes = Buffer.from(text2, "utf8").subarray(0, size - 1);
+  const bytes = Buffer.from(text3, "utf8").subarray(0, size - 1);
   bytes.copy(out);
   out[bytes.length] = 0;
   return out;
@@ -53027,23 +53027,23 @@ var RfbClient = class extends import_node_events.EventEmitter {
    * Latin-1 (other characters become '?'). With the Extended Clipboard the client then hands the text
    * to the server on request, until the server reports a newer clipboard of its own.
    */
-  updateClipboard(text2) {
+  updateClipboard(text3) {
     if (!this.supports.extendedClipboard) {
-      this.#send(clientCutText(text2));
+      this.#send(clientCutText(text3));
       return;
     }
     const c = this.#clipboard;
-    c.text = text2;
+    c.text = text3;
     if (c.serverText)
       c.echo = true;
     c.serverText = false;
     const flags2 = c.serverFlags;
-    if (flags2 & CLIP.provide && Buffer.byteLength(text2) + 1 <= c.textLimit)
+    if (flags2 & CLIP.provide && Buffer.byteLength(text3) + 1 <= c.textLimit)
       this.#provideClipboard();
     else if (flags2 & CLIP.text && flags2 & CLIP.notify)
       this.#sendClipboard(CLIP.notify | CLIP.text);
     else
-      this.#send(clientCutText(text2));
+      this.#send(clientCutText(text3));
   }
   /** Changes the encodings offered (preference order). */
   setEncodings(list) {
@@ -53670,12 +53670,12 @@ var RfbClient = class extends import_node_events.EventEmitter {
     this.#send(clientCutTextExtended(b));
   }
   #provideClipboard() {
-    const text2 = Buffer.from(`${(this.#clipboard.text ?? "").replace(/\r?\n/g, "\r\n")}\0`, "utf8");
+    const text3 = Buffer.from(`${(this.#clipboard.text ?? "").replace(/\r?\n/g, "\r\n")}\0`, "utf8");
     const size = Buffer.alloc(4);
-    size.writeUInt32BE(text2.length);
+    size.writeUInt32BE(text3.length);
     const head = Buffer.alloc(4);
     head.writeUInt32BE((CLIP.provide | CLIP.text) >>> 0);
-    this.#send(clientCutTextExtended(Buffer.concat([head, import_node_zlib3.default.deflateSync(Buffer.concat([size, text2]))])));
+    this.#send(clientCutTextExtended(Buffer.concat([head, import_node_zlib3.default.deflateSync(Buffer.concat([size, text3]))])));
   }
   async #readFence(t) {
     const head = await t.reader.read(8);
@@ -53937,9 +53937,9 @@ function procAddress(hex3, endian = import_node_os2.default.endianness()) {
   if (bytes.subarray(0, 15).every((byte) => byte === 0) && bytes[15] === 1) return "::1";
   return Array.from({ length: 8 }, (_, i) => bytes.readUInt16BE(i * 2).toString(16)).join(":");
 }
-function parseProcListeners(text2, port) {
+function parseProcListeners(text3, port) {
   const result = [];
-  for (const line of text2.trim().split("\n").slice(1)) {
+  for (const line of text3.trim().split("\n").slice(1)) {
     const columns = line.trim().split(/\s+/);
     if (columns.length < 10) throw new Error("Cannot parse Linux TCP listener metadata.");
     const [hex3, portHex] = columns[1].split(":");
@@ -54272,9 +54272,9 @@ var ConsoleManager = class {
       return { vmx: session.vmx, sent: true, key: key3, channel: "RFB KeyEvent" };
     });
   }
-  async type(vmID, text2) {
-    consoleSchemas.console_type.parse({ vm_id: vmID, text: text2 });
-    const characters = [...text2.replace(/\r\n?/g, "\n")];
+  async type(vmID, text3) {
+    consoleSchemas.console_type.parse({ vm_id: vmID, text: text3 });
+    const characters = [...text3.replace(/\r\n?/g, "\n")];
     return this.withSession(vmID, async (session) => {
       for (const character of characters) await this.sendKeys(session, shifted.test(character) ? [keysyms.ShiftLeft, keysymFromChar(character)] : [keysymFromChar(character)]);
       return { vmx: session.vmx, sent: true, characters: characters.length, channel: "RFB KeyEvent", note: "Typed as VM keyboard events; guest layout determines rendered text. No clipboard or host input APIs were used." };
@@ -54375,16 +54375,16 @@ function parseLanPreferences(bytes, defaultEncoding = "UTF-8") {
 function renderPreferences(document, segments) {
   const bom = document.lines[0]?.startsWith("\xEF\xBB\xBF") ? "\xEF\xBB\xBF" : "";
   const lines = document.lines.map((line, index) => index === 0 ? line.replace(/^\xef\xbb\xbf/, "") : line).filter((line) => !namespace.test(line.trimStart()));
-  let text2 = bom + lines.join("");
+  let text3 = bom + lines.join("");
   const nl = document.newline;
-  if (text2 && !text2.endsWith("\n")) text2 += nl;
-  if (!document.hasEncoding) text2 += `.encoding = "${document.encoding}"${nl}`;
-  text2 += `pref.namedPVNs.count = "${segments.length}"${nl}`;
+  if (text3 && !text3.endsWith("\n")) text3 += nl;
+  if (!document.hasEncoding) text3 += `.encoding = "${document.encoding}"${nl}`;
+  text3 += `pref.namedPVNs.count = "${segments.length}"${nl}`;
   segments.forEach((entry, index) => {
-    text2 += `pref.namedPVNs${index}.name = "${document.codec.encode(entry.name)}"${nl}`;
-    text2 += `pref.namedPVNs${index}.pvnID = "${entry.id}"${nl}`;
+    text3 += `pref.namedPVNs${index}.name = "${document.codec.encode(entry.name)}"${nl}`;
+    text3 += `pref.namedPVNs${index}.pvnID = "${entry.id}"${nl}`;
   });
-  return Buffer.from(text2, "latin1");
+  return Buffer.from(text3, "latin1");
 }
 function resolveSegment(segments, selector) {
   const matches = segments.filter((entry) => entry.name.toLowerCase() === selector.toLowerCase() || entry.id === selector.toLowerCase());
@@ -54482,9 +54482,9 @@ var LanSegments = class {
   async readVM(input2) {
     const vmx3 = await this.backend.vmx(input2);
     const bytes = await import_promises9.default.readFile(vmx3);
-    const text2 = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes);
+    const text3 = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes);
     const values = /* @__PURE__ */ new Map();
-    for (const line of text2.split(/\r?\n/)) {
+    for (const line of text3.split(/\r?\n/)) {
       const match = line.replace(/^\uFEFF/, "").match(assignment);
       if (!match) {
         if (/^\s*(?:ethernet\d+\.|\.encoding|checkpoint\.vmstate|suspend\.filename)/i.test(line)) throw new Error("Malformed VM network or state setting.");
@@ -54500,7 +54500,7 @@ var LanSegments = class {
       }
     }
     if (values.has(".encoding") && !/^utf-?8$/i.test(values.get(".encoding"))) throw new Error("LAN adapter inspection and editing require a UTF-8 VMX.");
-    return { vmx: vmx3, text: text2, values };
+    return { vmx: vmx3, text: text3, values };
   }
   adapters(vm2, segments) {
     const indices = [...new Set([...vm2.values.keys()].map((key3) => key3.match(/^ethernet(\d+)\./)?.[1]).filter((value) => value !== void 0))].map(Number).sort((a, b) => a - b);
@@ -54640,11 +54640,11 @@ var import_promises11 = require("node:stream/promises");
 var import_tar_stream = __toESM(require_tar_stream(), 1);
 var import_xmldom = __toESM(require_lib(), 1);
 var OVF = "http://schemas.dmtf.org/ovf/envelope/1";
-function xml(text2) {
-  if (Buffer.byteLength(text2) > 4 * 1024 * 1024 || /<!DOCTYPE|<!ENTITY/i.test(text2)) throw new Error("XML is too large or contains a forbidden DTD/entity declaration.");
+function xml(text3) {
+  if (Buffer.byteLength(text3) > 4 * 1024 * 1024 || /<!DOCTYPE|<!ENTITY/i.test(text3)) throw new Error("XML is too large or contains a forbidden DTD/entity declaration.");
   return new import_xmldom.DOMParser({ onError: () => {
     throw new Error("Malformed XML.");
-  } }).parseFromString(text2, "application/xml");
+  } }).parseFromString(text3, "application/xml");
 }
 function localName(value) {
   let name2;
@@ -54708,17 +54708,17 @@ function checkDiskBackings(descriptor, files) {
     const offset = Number(header.readBigUInt64LE(28)) * 512;
     const size = Number(header.readBigUInt64LE(36)) * 512;
     if (!Number.isSafeInteger(offset + size) || !size || offset < 512 || offset + size > header.length) throw new Error("VMDK descriptor is outside the bounded preflight header.");
-    const text2 = header.subarray(offset, offset + size).toString("latin1");
-    if (!/createType\s*=\s*"streamOptimized"/i.test(text2) || !/parentCID\s*=\s*ffffffff/i.test(text2) || /parentFileNameHint\s*=/i.test(text2)) throw new Error("Appliance disks must be independent streamOptimized VMDKs without parents.");
-    for (const extent of text2.matchAll(/(?:^|\n)(?:RW|RDONLY|NOACCESS)\s+\d+\s+(\w+)\s+"([^"]+)"/g)) {
+    const text3 = header.subarray(offset, offset + size).toString("latin1");
+    if (!/createType\s*=\s*"streamOptimized"/i.test(text3) || !/parentCID\s*=\s*ffffffff/i.test(text3) || /parentFileNameHint\s*=/i.test(text3)) throw new Error("Appliance disks must be independent streamOptimized VMDKs without parents.");
+    for (const extent of text3.matchAll(/(?:^|\n)(?:RW|RDONLY|NOACCESS)\s+\d+\s+(\w+)\s+"([^"]+)"/g)) {
       if (extent[1] !== "SPARSE") throw new Error("External/raw disk extents are unsupported.");
       localName(extent[2]);
     }
   }
 }
-function checkManifest(text2, files) {
+function checkManifest(text3, files) {
   const seen = /* @__PURE__ */ new Set();
-  for (const line of text2.split(/\r?\n/).filter((line2) => line2.trim())) {
+  for (const line of text3.split(/\r?\n/).filter((line2) => line2.trim())) {
     const match = line.match(/^(SHA1|SHA256|SHA512)\s*\((.+)\)\s*=\s*([a-fA-F0-9]+)\s*$/);
     if (!match) throw new Error("Manifest has an unsupported algorithm or malformed entry.");
     const name2 = localName(match[2]);
@@ -55140,7 +55140,7 @@ var jobSchemas = {
 };
 var terminal = /* @__PURE__ */ new Set(["succeeded", "failed", "cancelled", "timed_out", "interrupted"]);
 var JobManager = class {
-  constructor({ redact = (text2) => text2, spawnProcess = import_node_child_process2.spawn, maxActive = 4, maxRecords = 100 } = {}) {
+  constructor({ redact = (text3) => text3, spawnProcess = import_node_child_process2.spawn, maxActive = 4, maxRecords = 100 } = {}) {
     this.session = (0, import_node_crypto7.randomUUID)();
     this.jobs = /* @__PURE__ */ new Map();
     this.redact = redact;
@@ -55168,7 +55168,7 @@ var JobManager = class {
       job.controller.abort();
     }, timeout4);
     job.done = Promise.resolve().then(async () => {
-      const context = { signal: job.controller.signal, log: (text2) => this.log(job, text2), run: (file3, args, options2) => this.run(job, file3, args, options2) };
+      const context = { signal: job.controller.signal, log: (text3) => this.log(job, text3), run: (file3, args, options2) => this.run(job, file3, args, options2) };
       try {
         context.signal.throwIfAborted();
         const result = await task(context);
@@ -55213,8 +55213,8 @@ var JobManager = class {
     }
     return { ...this.view(job), cancellation_requested: job.stopReason === "cancelled" };
   }
-  log(job, text2) {
-    job.logs += text2;
+  log(job, text3) {
+    job.logs += text3;
     if (job.logs.length > 65536) {
       job.logs = "";
       job.truncated = true;
@@ -55333,15 +55333,15 @@ var exists2 = async (file3) => {
 function fail(code, message, details = {}) {
   throw Object.assign(new Error(message), { code, details });
 }
-function vmConfig(text2) {
+function vmConfig(text3) {
   const seen = /* @__PURE__ */ new Set();
-  for (const line of text2.split(/\r?\n/)) {
+  for (const line of text3.split(/\r?\n/)) {
     if (/^\s*(?:#.*)?$/.test(line)) continue;
     const match = line.match(/^\s*([\w.:-]+)\s*=\s*".*"\s*$/);
     if (!match || seen.has(match[1].toLowerCase())) fail("UNSAFE_VM", "Malformed or duplicate VMX settings prevent safe disk editing.");
     seen.add(match[1].toLowerCase());
   }
-  const config2 = Object.fromEntries(Object.entries(parseAssignments(text2)).map(([k, v]) => [k.toLowerCase(), v]));
+  const config2 = Object.fromEntries(Object.entries(parseAssignments(text3)).map(([k, v]) => [k.toLowerCase(), v]));
   if (config2[".encoding"] && !/^utf-?8$/i.test(config2[".encoding"])) fail("UNSAFE_VM", "Disk edits require UTF-8 VMX files.");
   return config2;
 }
@@ -55367,19 +55367,19 @@ async function readDiskDescriptor(file3) {
     const buffer3 = Buffer.alloc(size);
     const read = await handle.read(buffer3, 0, size, offset);
     if (read.bytesRead !== size) fail("UNSUPPORTED_DISK", "Incomplete VMDK descriptor.");
-    const text2 = buffer3.toString("utf8").replace(/\0+$/, "");
+    const text3 = buffer3.toString("utf8").replace(/\0+$/, "");
     const field = (name2, quoted = false) => {
-      const matches = [...text2.matchAll(new RegExp(`^\\s*${name2}\\s*=\\s*${quoted ? '"([^"\\r\\n]+)"' : "([a-fA-F0-9]+)"}\\s*$`, "gm"))];
+      const matches = [...text3.matchAll(new RegExp(`^\\s*${name2}\\s*=\\s*${quoted ? '"([^"\\r\\n]+)"' : "([a-fA-F0-9]+)"}\\s*$`, "gm"))];
       if (matches.length !== 1) fail("UNSUPPORTED_DISK", `VMDK must declare exactly one ${name2}.`);
       return matches[0][1];
     };
     const createType = field("createType", true);
     const cid = field("CID");
     const parentCID = field("parentCID");
-    const adapter2 = text2.match(/^\s*ddb\.adapterType\s*=\s*"([^"]+)"\s*$/m)?.[1] || null;
-    if (!/^[a-f0-9]{8}$/i.test(cid) || !/^[a-f0-9]{8}$/i.test(parentCID) || !types.has(createType) || /encrypt|crypto|keySafe/i.test(text2)) fail("UNSUPPORTED_DISK", "Raw, encrypted or unsupported VMDK format.");
+    const adapter2 = text3.match(/^\s*ddb\.adapterType\s*=\s*"([^"]+)"\s*$/m)?.[1] || null;
+    if (!/^[a-f0-9]{8}$/i.test(cid) || !/^[a-f0-9]{8}$/i.test(parentCID) || !types.has(createType) || /encrypt|crypto|keySafe/i.test(text3)) fail("UNSUPPORTED_DISK", "Raw, encrypted or unsupported VMDK format.");
     const extents = [];
-    for (const line of text2.split(/\r?\n/)) {
+    for (const line of text3.split(/\r?\n/)) {
       if (!/^\s*(RW|RDONLY|NOACCESS)\b/.test(line)) continue;
       const match = line.match(/^\s*RW\s+(\d+)\s+(SPARSE|FLAT)\s+"([^"\r\n]+)"(?:\s+(\d+))?\s*$/);
       if (!match || !Number.isSafeInteger(Number(match[1])) || Number(match[1]) <= 0) fail("UNSUPPORTED_DISK", "Unsupported VMDK extent declaration.");
@@ -55389,7 +55389,7 @@ async function readDiskDescriptor(file3) {
     }
     const capacityBytes = extents.reduce((sum, e2) => sum + e2.sectors * 512, 0);
     if (!extents.length || !Number.isSafeInteger(capacityBytes) || capacityBytes <= 0) fail("UNSUPPORTED_DISK", "VMDK capacity cannot be established safely.");
-    return { create_type: createType, adapter: adapter2, cid, parent_cid: parentCID.toLowerCase(), has_parent_hint: /^\s*parentFileNameHint\s*=/mi.test(text2), capacity_bytes: capacityBytes, extents };
+    return { create_type: createType, adapter: adapter2, cid, parent_cid: parentCID.toLowerCase(), has_parent_hint: /^\s*parentFileNameHint\s*=/mi.test(text3), capacity_bytes: capacityBytes, extents };
   } finally {
     await handle.close();
   }
@@ -55457,8 +55457,8 @@ var DiskManager = class {
     return this.vmState(vmx3);
   }
   async vmState(vmx3) {
-    const text2 = await import_promises13.default.readFile(vmx3, "utf8");
-    const config2 = vmConfig(text2);
+    const text3 = await import_promises13.default.readFile(vmx3, "utf8");
+    const config2 = vmConfig(text3);
     if (Object.entries(config2).some(([k, v]) => /^encryption\./.test(k) && v || k === "vtpm.present" && /^true$/i.test(v))) fail("UNSAFE_VM", "Encrypted and vTPM VM configurations are unsupported for disk edits.");
     const dirs = /* @__PURE__ */ new Set([import_node_path12.default.dirname(vmx3)]);
     for (const k of ["workingdir", "snapshot.directory"]) if (config2[k]) dirs.add(await this.backend.hostPath(import_node_path12.default.resolve(import_node_path12.default.dirname(vmx3), config2[k]), "directory"));
@@ -55468,7 +55468,7 @@ var DiskManager = class {
       const metadata = vmConfig(await import_promises13.default.readFile(import_node_path12.default.join(dir, name2), "utf8"));
       if (Number(metadata["snapshot.numsnapshots"] || 0) !== 0 || Object.keys(metadata).some((k) => /^snapshot\d+\./.test(k))) fail("UNSAFE_VM", "Snapshot metadata prevents safe disk edits.");
     }
-    return { vmx: vmx3, text: text2, config: config2 };
+    return { vmx: vmx3, text: text3, config: config2 };
   }
   async references(info, extra) {
     const inventory = await this.backend.listVMs();
@@ -55494,11 +55494,11 @@ var DiskManager = class {
       const vmx3 = await this.backend.vmx(input2);
       if (seen.has(key2(vmx3))) continue;
       seen.add(key2(vmx3));
-      const text2 = await import_promises13.default.readFile(vmx3, "utf8");
-      const config2 = vmConfig(text2);
+      const text3 = await import_promises13.default.readFile(vmx3, "utf8");
+      const config2 = vmConfig(text3);
       for (const [name2, value] of Object.entries(config2)) if (/^(scsi|sata|ide|nvme)\d+:\d+\.filename$/.test(name2) && /\.vmdk$/i.test(value)) {
         const backing = await this.diskPath(import_node_path12.default.resolve(import_node_path12.default.dirname(vmx3), value));
-        if (paths.has(key2(backing))) references2.push({ vmx: vmx3, slot: name2.replace(/\.filename$/, ""), text: text2 });
+        if (paths.has(key2(backing))) references2.push({ vmx: vmx3, slot: name2.replace(/\.filename$/, ""), text: text3 });
         else {
           const other = await this.inspect({ disk: backing });
           if (other.files.some((f) => paths.has(key2(f.path)))) fail("UNSAFE_CHAIN", "Another VM references a shared disk extent.");
@@ -55795,7 +55795,7 @@ var serialSchemas = {
   serial_write: external_exports.object({ ...target, data: external_exports.string().max(87384), encoding: external_exports.enum(["base64", "utf8"]).default("utf8"), timeout_ms: timeout3 }).strict(),
   serial_disconnect: external_exports.object(target).strict()
 };
-var configOf = (text2) => Object.fromEntries(Object.entries(parseAssignments(text2)).map(([key3, value]) => [key3.toLowerCase(), value]));
+var configOf = (text3) => Object.fromEntries(Object.entries(parseAssignments(text3)).map(([key3, value]) => [key3.toLowerCase(), value]));
 var cancelled = () => serialError("SERIAL_CANCELLED", "Serial operation cancelled.");
 var disconnected = () => serialError("SERIAL_DISCONNECTED", "Serial session disconnected. Inspect state and explicitly reconnect; input is never replayed.");
 var SerialManager = class {
@@ -56099,8 +56099,8 @@ var categories = [
   ["boot_failure", /no bootable|operating system not found|boot.*(?:failed|failure)|PXE-E\d+/i, "Inspect guest-only VNC evidence and selected boot firmware/media."],
   ["capability_unavailable", /not found.*vmrun|vmrun.*not found|not supported|unsupported|not installed/i, "Inspect workstation_capabilities and install/configure the required native utility."]
 ];
-function failureCategory(text2) {
-  return categories.find(([, pattern]) => pattern.test(String(text2)))?.[0] || "observation_unavailable";
+function failureCategory(text3) {
+  return categories.find(([, pattern]) => pattern.test(String(text3)))?.[0] || "observation_unavailable";
 }
 var actionFor = (category) => categories.find(([name2]) => name2 === category)?.[2] || "Inspect the selected VM state, Tools configuration and native utility availability.";
 var same = (a, b) => process.platform === "win32" ? a.toLowerCase() === b.toLowerCase() : a === b;
@@ -56349,6 +56349,351 @@ var Readiness = class {
   }
 };
 
+// src/guest-exec.mjs
+var import_promises18 = __toESM(require("node:fs/promises"), 1);
+var import_node_os4 = __toESM(require("node:os"), 1);
+var import_node_path16 = __toESM(require("node:path"), 1);
+var import_node_crypto9 = require("node:crypto");
+var import_promises19 = require("node:timers/promises");
+
+// src/guest-exec-wrappers.mjs
+var linuxRunner = String.raw`import base64, json, os, signal, subprocess, sys, threading
+
+os.umask(0o077)
+root = os.path.dirname(os.path.abspath(__file__))
+with open(os.path.join(root, 'request.json'), encoding='utf-8') as f:
+    request = json.load(f)
+result = dict(protocol=1, nonce=request['nonce'], status='unavailable', exit_code=None, timed_out=False,
+              stdout_base64='', stderr_base64='', stdout_truncated=False, stderr_truncated=False)
+buffers = [bytearray(), bytearray()]
+truncated = [False, False]
+def drain(stream, index):
+    try:
+        while True:
+            data = stream.read(8192)
+            if not data: break
+            remaining = request['max_output_bytes'] - len(buffers[index])
+            buffers[index].extend(data[:max(0, remaining)])
+            if len(data) > remaining: truncated[index] = True
+    except (OSError, ValueError):
+        pass
+
+try:
+    command = [request['program']] + request['arguments']
+    if request.get('script') is not None:
+        script = os.path.join(root, 'command.script')
+        with open(script, 'x', encoding='utf-8', newline='') as f: f.write(request['script'])
+        command = [request['interpreter']] + request['interpreter_arguments'] + [script]
+    process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, shell=False, start_new_session=True)
+    threads = [threading.Thread(target=drain, args=(stream, index), daemon=True)
+               for index, stream in enumerate([process.stdout, process.stderr])]
+    for thread in threads: thread.start()
+    try:
+        process.wait(timeout=request['timeout_seconds'])
+        result['status'] = 'completed'
+        result['exit_code'] = process.returncode
+    except subprocess.TimeoutExpired:
+        result['status'] = 'timed_out'
+        result['timed_out'] = True
+        try: os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError: pass
+        process.wait(timeout=2)
+    for thread in threads: thread.join(timeout=1)
+    if any(thread.is_alive() for thread in threads):
+        # Descendants may hold pipes open. Completion/output cannot be verified.
+        result['status'] = 'indeterminate'
+        result['exit_code'] = None
+    for index, name in enumerate(['stdout', 'stderr']):
+        result[name + '_base64'] = base64.b64encode(bytes(buffers[index])).decode('ascii')
+        result[name + '_truncated'] = truncated[index]
+except Exception:
+    # Exceptions can contain command text or secrets. Publish only a category.
+    result['status'] = 'unavailable'
+    result['exit_code'] = None
+with open(os.path.join(root, 'result.partial'), 'x', encoding='ascii') as f:
+    json.dump(result, f, ensure_ascii=True)
+os.replace(os.path.join(root, 'result.partial'), os.path.join(root, 'result.json'))
+`;
+var windowsRunner = String.raw`$ErrorActionPreference = 'Stop'
+$root = $PSScriptRoot
+$request = Get-Content -LiteralPath (Join-Path $root 'request.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+$result = @{ protocol=1; nonce=$request.nonce; status='unavailable'; exit_code=$null; timed_out=$false; stdout_base64=''; stderr_base64=''; stdout_truncated=$false; stderr_truncated=$false }
+try {
+Add-Type -TypeDefinition @'
+using System;
+using System.IO;
+using System.Diagnostics;
+using System.Text;
+using System.Threading.Tasks;
+public class GuestExecCapture {
+    public byte[][] Data = new byte[][] { new byte[0], new byte[0] };
+    public bool[] Truncated = new bool[2];
+    public string Status = "unavailable";
+    public bool TimedOut;
+    public int? ExitCode;
+    public static string Quote(string value) {
+        var b = new StringBuilder("\""); int slashes = 0;
+        foreach (char c in value) {
+            if (c == '\\') { slashes++; continue; }
+            if (c == '"') b.Append('\\', slashes * 2 + 1);
+            else b.Append('\\', slashes);
+            b.Append(c); slashes = 0;
+        }
+        b.Append('\\', slashes * 2); return b.Append('"').ToString();
+    }
+    private async Task Drain(Stream stream, int index, int limit) {
+        using (var saved = new MemoryStream()) {
+            var buffer = new byte[8192]; int count;
+            while ((count = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0) {
+                int keep = Math.Min(count, limit - (int)saved.Length);
+                saved.Write(buffer, 0, keep);
+                if (keep < count) Truncated[index] = true;
+                // Publish bounded snapshots even if descendants keep pipes open.
+                Data[index] = saved.ToArray();
+            }
+        }
+    }
+    public void Run(string program, string[] args, int timeout, int limit) {
+        var command = new StringBuilder();
+        foreach (var arg in args) { if (command.Length > 0) command.Append(' '); command.Append(Quote(arg)); }
+        var start = new ProcessStartInfo(program, command.ToString()) {
+            UseShellExecute=false, CreateNoWindow=true, RedirectStandardInput=true,
+            RedirectStandardOutput=true, RedirectStandardError=true
+        };
+        using (var process = Process.Start(start)) {
+            process.StandardInput.Close();
+            var output = Drain(process.StandardOutput.BaseStream, 0, limit);
+            var error = Drain(process.StandardError.BaseStream, 1, limit);
+            if (process.WaitForExit(timeout)) { Status="completed"; ExitCode=process.ExitCode; }
+            else {
+                Status="timed_out";
+                TimedOut=true;
+                // Kill only the process this invocation created. Descendant
+                // termination is not guaranteed on Windows PowerShell 5.1.
+                try { process.Kill(); } catch { }
+            }
+            try {
+                if (!Task.WaitAll(new Task[] { output, error }, 2000)) { Status="indeterminate"; ExitCode=null; }
+            } catch { Status="indeterminate"; ExitCode=null; }
+        }
+    }
+}
+'@
+    $program = [string]$request.program
+    [string[]]$commandArguments = @($request.arguments)
+    if ($null -ne $request.script) {
+        $scriptPath = Join-Path $root 'command.script'
+        # PowerShell 5.1 needs a BOM to preserve non-ASCII script text.
+        if ([string]$request.interpreter -match '(?i)(?:powershell|pwsh)(?:\.exe)?$') { $scriptPath = Join-Path $root 'command.ps1' }
+        $bom = $scriptPath.EndsWith('.ps1')
+        [IO.File]::WriteAllText($scriptPath, [string]$request.script, [Text.UTF8Encoding]::new($bom))
+        $program = [string]$request.interpreter
+        $commandArguments = @($request.interpreter_arguments) + @($scriptPath)
+    }
+    $capture = New-Object GuestExecCapture
+    $capture.Run($program, $commandArguments, ([int]$request.timeout_seconds * 1000), [int]$request.max_output_bytes)
+    $result.status = $capture.Status
+    $result.exit_code = $capture.ExitCode
+    $result.timed_out = $capture.TimedOut
+    $result.stdout_base64 = [Convert]::ToBase64String($capture.Data[0])
+    $result.stderr_base64 = [Convert]::ToBase64String($capture.Data[1])
+    $result.stdout_truncated = $capture.Truncated[0]
+    $result.stderr_truncated = $capture.Truncated[1]
+} catch { $result.status = 'unavailable'; $result.exit_code = $null }
+[IO.File]::WriteAllText((Join-Path $root 'result.partial'), ($result | ConvertTo-Json -Compress), [Text.UTF8Encoding]::new($false))
+Move-Item -LiteralPath (Join-Path $root 'result.partial') -Destination (Join-Path $root 'result.json')
+`;
+
+// src/guest-exec.mjs
+var text2 = external_exports.string().max(65536).refine((value) => !value.includes("\0"), "NUL is not allowed.");
+var guestExecSchema = external_exports.object({
+  vmx: external_exports.string().min(1),
+  guest_profile: external_exports.string().min(1).describe("Explicit local guest credential profile; never a password."),
+  vm_password_profile: external_exports.string().optional(),
+  guest_os: external_exports.enum(["linux", "windows"]).describe("Explicit guest OS; independent of the host OS."),
+  program: text2.optional().describe("Absolute guest executable path. Arguments are literal, without shell expansion."),
+  arguments: external_exports.array(text2).max(256).default([]),
+  script: text2.optional().describe("Explicit script text. Requires interpreter and no program."),
+  interpreter: text2.optional().describe("Absolute guest interpreter path for script mode."),
+  interpreter_arguments: external_exports.array(text2).max(32).default([]),
+  guest_temp_directory: external_exports.string().max(512).optional().describe("Existing writable guest directory with a simple absolute path, default /tmp or C:\\Windows\\Temp."),
+  timeout_seconds: external_exports.number().int().min(1).max(600).default(60),
+  max_output_bytes: external_exports.number().int().min(1).max(262144).default(65536).describe("Maximum bytes retained per stdout/stderr stream before redaction."),
+  confirm: external_exports.literal(true).describe("Required after authorization for this exact guest command and its effects.")
+}).strict();
+function absoluteGuest(value, windows) {
+  return typeof value === "string" && !/[\x00-\x1f]/.test(value) && (windows ? /^[a-z]:\\/i.test(value) : value.startsWith("/"));
+}
+function verifyGuestResult(value, nonce, limit) {
+  if (!value || value.protocol !== 1 || value.nonce !== nonce || !["completed", "timed_out", "unavailable", "indeterminate"].includes(value.status)) throw new Error("Invalid guest completion record.");
+  if (value.status === "completed" ? !Number.isInteger(value.exit_code) || value.exit_code < -2147483648 || value.exit_code > 4294967295 : value.exit_code !== null) throw new Error("Unverified guest exit code.");
+  if (typeof value.timed_out !== "boolean" || value.status === "completed" && value.timed_out || value.status === "timed_out" && !value.timed_out) throw new Error("Invalid timeout evidence.");
+  const output2 = {};
+  for (const stream of ["stdout", "stderr"]) {
+    const encoded = value[`${stream}_base64`];
+    if (typeof encoded !== "string" || encoded.length > 4 * Math.ceil(limit / 3) || typeof value[`${stream}_truncated`] !== "boolean") throw new Error("Invalid output envelope.");
+    const bytes = Buffer.from(encoded, "base64");
+    if (bytes.toString("base64") !== encoded || bytes.length > limit) throw new Error("Invalid output encoding.");
+    output2[stream] = bytes.toString("utf8");
+    output2[`${stream}_bytes`] = bytes.length;
+    output2[`${stream}_truncated`] = value[`${stream}_truncated`];
+  }
+  return { status: value.status, exit_code: value.exit_code, timed_out: value.timed_out, ...output2 };
+}
+var GuestExec = class {
+  constructor({ backend: backend2, credentials: credentials2, protectFile }) {
+    Object.assign(this, { backend: backend2, credentials: credentials2, protectFile });
+  }
+  async execute(input2, { signal } = {}) {
+    const a = guestExecSchema.parse(input2);
+    const windows = a.guest_os === "windows";
+    const scriptMode = a.script !== void 0;
+    if (scriptMode ? a.program !== void 0 || !a.interpreter || a.arguments.length : !a.program || a.interpreter !== void 0 || a.interpreter_arguments.length) throw new Error("Select program with literal arguments, or script with interpreter/interpreter_arguments.");
+    if (!absoluteGuest(scriptMode ? a.interpreter : a.program, windows)) throw new Error("Executable/interpreter must be an absolute path in the selected guest OS.");
+    const base = a.guest_temp_directory ?? (windows ? "C:\\Windows\\Temp" : "/tmp");
+    if (!absoluteGuest(base, windows) || !/^[a-zA-Z0-9_./:\\-]+$/.test(base) || base.split(/[\\/]/).includes("..")) throw new Error("Guest temporary directory must be a simple absolute path without spaces, traversal or shell characters.");
+    const vmx3 = await this.backend.vmx(a.vmx);
+    return this.backend.resources.use([vmx3], () => this.perform(a, vmx3, base, signal));
+  }
+  async perform(a, vmx3, base, signal) {
+    const nonce = (0, import_node_crypto9.randomUUID)();
+    const guestPath2 = a.guest_os === "windows" ? import_node_path16.default.win32 : import_node_path16.default.posix;
+    const guestDirectory = guestPath2.join(base, `vmware-mcp-exec-${nonce}`);
+    const result = {
+      vmx: vmx3,
+      status: "unavailable",
+      exit_code: null,
+      timed_out: false,
+      cancelled: false,
+      transport: { status: "not_started", phase: "setup", launch_succeeded: false },
+      stdout: "",
+      stderr: "",
+      stdout_bytes: 0,
+      stderr_bytes: 0,
+      stdout_truncated: false,
+      stderr_truncated: false,
+      cleanup: { guest: "not_created", host: "not_created" },
+      note: "Only a matching completion record verifies a guest exit code. Never retry an indeterminate command automatically."
+    };
+    let hostDirectory;
+    let created = false;
+    let verified = false;
+    const deadline = performance.now() + (a.timeout_seconds + 30) * 1e3;
+    let authentication;
+    const run = async (command, args = [], mutation = false, cleanup = false) => {
+      if (!cleanup) signal?.throwIfAborted();
+      return this.backend.run([command, vmx3, ...args], {
+        authentication,
+        mutation,
+        timeout: cleanup ? 5e3 : 1e4,
+        deadline: cleanup ? performance.now() + 5e3 : deadline,
+        signal: cleanup ? void 0 : signal
+      });
+    };
+    try {
+      const guest2 = await this.credentials.guest(a.guest_profile);
+      authentication = ["-gu", guest2.username, "-gp", guest2.password];
+      if (a.vm_password_profile) authentication.unshift("-vp", await this.credentials.vm(a.vm_password_profile));
+      const scratch = await this.backend.hostPath(this.backend.env.VMWARE_GUEST_EXEC_ROOT || import_node_os4.default.tmpdir(), "directory");
+      hostDirectory = await import_promises18.default.mkdtemp(import_node_path16.default.join(scratch, "vmware-mcp-exec-"));
+      result.cleanup.host = "pending";
+      const request = {
+        nonce,
+        program: a.program || "",
+        arguments: a.arguments,
+        script: a.script ?? null,
+        interpreter: a.interpreter || "",
+        interpreter_arguments: a.interpreter_arguments,
+        timeout_seconds: a.timeout_seconds,
+        max_output_bytes: a.max_output_bytes
+      };
+      const runner = a.guest_os === "windows" ? "runner.ps1" : "runner.py";
+      for (const [name2, content] of [["request.json", JSON.stringify(request)], [runner, a.guest_os === "windows" ? windowsRunner : linuxRunner]]) {
+        const file3 = import_node_path16.default.join(hostDirectory, name2);
+        await import_promises18.default.writeFile(file3, "", { flag: "wx", mode: 384 });
+        await this.protectFile(file3);
+        await import_promises18.default.writeFile(file3, content);
+      }
+      result.transport.phase = "tools";
+      if (await run("checkToolsState") !== "running") throw new Error("Tools unavailable");
+      result.transport.phase = "create_directory";
+      result.cleanup.guest = "creation_unconfirmed";
+      result.cleanup.guest_directory = guestDirectory;
+      await run("createDirectoryInGuest", [guestDirectory], true);
+      created = true;
+      result.cleanup.guest = "pending";
+      delete result.cleanup.guest_directory;
+      result.transport.phase = "upload";
+      for (const name2 of ["request.json", runner]) await run("CopyFileFromHostToGuest", [import_node_path16.default.join(hostDirectory, name2), guestPath2.join(guestDirectory, name2)], true);
+      result.transport.phase = "launch";
+      const launch = a.guest_os === "windows" ? ["-noWait", "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", guestPath2.join(guestDirectory, runner)] : ["-noWait", "/usr/bin/python3", guestPath2.join(guestDirectory, runner)];
+      result.status = "indeterminate";
+      await run("runProgramInGuest", launch, true);
+      result.transport.launch_succeeded = true;
+      result.transport.phase = "completion";
+      while (true) {
+        const exists3 = await run("fileExistsInGuest", [guestPath2.join(guestDirectory, "result.json")]);
+        if (exists3 === "The file exists.") break;
+        if (exists3 !== "The file does not exist.") throw new Error("Unrecognized existence response");
+        if (performance.now() >= deadline) throw new Error("Completion deadline");
+        await (0, import_promises19.setTimeout)(Math.min(200, Math.max(1, deadline - performance.now())), void 0, { signal });
+      }
+      result.transport.phase = "download";
+      const output2 = import_node_path16.default.join(hostDirectory, "result.json");
+      await import_promises18.default.writeFile(output2, "", { flag: "wx", mode: 384 });
+      await this.protectFile(output2);
+      await run("CopyFileFromGuestToHost", [guestPath2.join(guestDirectory, "result.json"), output2]);
+      const handle = await import_promises18.default.open(output2, "r");
+      let bytes;
+      try {
+        const cap = 8 * Math.ceil(a.max_output_bytes / 3) + 4096;
+        if ((await handle.stat()).size > cap) throw new Error("Completion record exceeds output bounds");
+        bytes = Buffer.alloc(cap + 1);
+        const { bytesRead } = await handle.read(bytes, 0, bytes.length, 0);
+        if (bytesRead > cap) throw new Error("Completion record exceeds output bounds");
+        bytes = bytes.subarray(0, bytesRead);
+      } finally {
+        await handle.close();
+      }
+      result.transport.phase = "verify";
+      Object.assign(result, verifyGuestResult(JSON.parse(bytes.toString("utf8")), nonce, a.max_output_bytes));
+      verified = true;
+      result.transport.status = "succeeded";
+    } catch (error62) {
+      result.cancelled = !!signal?.aborted;
+      result.timed_out = !result.cancelled && (performance.now() >= deadline || ["VMRUN_TIMEOUT", "OBSERVATION_DEADLINE"].includes(error62.code));
+      result.transport.status = result.cancelled ? "cancelled" : result.timed_out ? "timed_out" : "failed";
+    } finally {
+      if (created) {
+        if (verified) {
+          try {
+            await run("deleteDirectoryInGuest", [guestDirectory], true, true);
+            result.cleanup.guest = "removed";
+          } catch {
+            result.cleanup.guest = "failed";
+            result.cleanup.guest_directory = guestDirectory;
+          }
+        } else {
+          result.cleanup.guest = "retained_outcome_unknown";
+          result.cleanup.guest_directory = guestDirectory;
+        }
+      }
+      if (hostDirectory) {
+        try {
+          await import_promises18.default.rm(hostDirectory, { recursive: true });
+          result.cleanup.host = "removed";
+        } catch {
+          result.cleanup.host = "failed";
+        }
+      }
+    }
+    result.stdout = this.credentials.redact(result.stdout);
+    result.stderr = this.credentials.redact(result.stderr);
+    return result;
+  }
+};
+
 // src/server.mjs
 var backend = new Workstation();
 var credentials = new Credentials();
@@ -56356,14 +56701,16 @@ var rest = new RestClient({ credentials, backend, coordinateDiskEdits: true });
 var vmFiles = new VMFiles(backend, { protectSensitiveFile: localFileProtector(backend) });
 var lanSegments = new LanSegments(backend, vmFiles, { protectFile: localFileProtector(backend) });
 var consoles = new ConsoleManager({ backend, credentials, rest });
-var jobs = new JobManager({ redact: (text2) => credentials.redact(text2) });
+var jobs = new JobManager({ redact: (text3) => credentials.redact(text3) });
 var ovf = new OvfManager({ backend, credentials, jobs, rest });
 var disks = new DiskManager({ backend, vmFiles });
 var serial = new SerialManager({ backend, vmFiles, credentials, rest });
 var readiness = new Readiness({ backend, credentials, consoles, protectFile: localFileProtector(backend) });
-var server = new McpServer({ name: "vmware-workstation", version: "0.8.0" });
+var guestExec = new GuestExec({ backend, credentials, protectFile: localFileProtector(backend) });
+var server = new McpServer({ name: "vmware-workstation", version: "0.9.0" });
 var vmx2 = external_exports.string().min(1).describe("Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.");
 var name = external_exports.string().min(1).max(256).describe("Exact snapshot name.");
+tool("guest_exec", "Execute an explicitly authorized guest program with literal arguments or an explicit interpreter/script using a required local credential profile. Captures bounded redacted stdout/stderr and verifies exit codes through a unique completion record. Requires Tools and Python 3 on Linux or Windows PowerShell 5.1. Transport success alone never means guest success. Timeout/cancellation may leave a running guest process; never retry automatically.", guestExecSchema, false, (a, extra) => guestExec.execute(a, extra), true, true, false);
 for (const kind of ["boot", "ip", "service"]) tool(`vm_wait_for_${kind}`, {
   boot: "Wait for VMware Tools running in the selected VM, indicating OS agent readiness only. Power-on, login and application readiness are separate. Bounded total timeout, polling and MCP cancellation; never starts a VM.",
   ip: "Wait for a valid guest IP published by VMware Tools. Does not establish network reachability or service readiness. Bounded total timeout and cancellation; never starts a VM.",
@@ -56486,6 +56833,7 @@ tool("workstation_capabilities", "Show full vmrun/REST tool coverage, compare th
     diskManager: await disks.status(),
     diskTools: Object.keys(diskSchemas),
     readinessTools: Object.keys(readinessSchemas),
+    guestExecution: { tool: "guest_exec", backend: "vmware_tools", verifiedExitCode: "matching_completion_record_only", linuxRequires: "/usr/bin/python3", windowsRequires: "Windows PowerShell 5.1", liveSupport: "unknown" },
     capabilityEvidence: { diskManager: "Installed help when available; no live disk operation is performed.", ovfTool: "Installed version/help when available; no live appliance operation is performed.", nativeHypervisor: "not_proven_by_discovery", firmwareBoot: { configurable: ["bios", "efi", "bootOrder", "bootDelay", "forceSetupOnce"], evidence: "VMX configuration implementation; not a live firmware test", liveSupport: "unknown", consoleRequires: "Explicit per-VM native VNC setup; console_status proves only that VM connection." } },
     note: "Coverage describes callable implementations. It does not prove a REST service is running, credentials work, or guest operations succeed."
   };

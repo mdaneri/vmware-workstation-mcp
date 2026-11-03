@@ -29,8 +29,11 @@ try {
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [path.join(pluginRoot, 'server/server.cjs')], stderr: 'pipe' }));
   assert.equal(client.getServerVersion().version, manifest.version, 'Bundled server version must match plugin');
   const { tools } = await client.listTools();
-  assert.equal(tools.length, 128);
-  assert.equal(new Set(tools.map(t => t.name)).size, 128);
+  assert.equal(tools.length, 129);
+  assert.equal(new Set(tools.map(t => t.name)).size, 129);
+  const preGuestExec = JSON.parse(await fs.readFile('tests/fixtures/pre-guest-exec-tool-schemas.json', 'utf8'));
+  assert.equal(preGuestExec.tools.length, 128);
+  for (const prior of preGuestExec.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Pre-guest-exec compatibility: ${prior.name}`);
   const legacy = JSON.parse(await fs.readFile('tests/fixtures/legacy-tool-schemas.json', 'utf8'));
   for (const prior of legacy.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Backward compatibility: ${prior.name}`);
   const preOvf = JSON.parse(await fs.readFile('tests/fixtures/pre-ovf-tool-schemas.json', 'utf8'));
@@ -51,5 +54,5 @@ try {
     assert.equal(typeof tool.annotations.readOnlyHint, 'boolean');
   }
   await writeGenerated('vmware-workstation/tool-schemas.json', JSON.stringify({ tools }, null, 2) + '\n');
-  console.log('Both portable manifests and all 128 MCP schemas validated; all 123 previous tool definitions are unchanged.');
+  console.log('Both portable manifests and all 129 MCP schemas validated; all 128 previous tool definitions are unchanged.');
 } finally { await client.close(); }

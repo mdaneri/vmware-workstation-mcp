@@ -61,7 +61,7 @@ export class Workstation {
       } catch (error) {
         const details = [error.stderr, error.stdout].filter(Boolean).join('\n').trim().slice(0, 4000);
         const uncertain = mutation ? ' The operation may have taken effect; inspect the VM before retrying.' : '';
-        throw new Error(`vmrun ${args[0] || 'help'} failed (${error.killed ? 'timeout' : error.code || 'unknown error'}).${uncertain}${details ? ` ${details}` : ''}`);
+        throw Object.assign(new Error(`vmrun ${args[0] || 'help'} failed (${error.killed ? 'timeout' : error.code || 'unknown error'}).${uncertain}${details ? ` ${details}` : ''}`), { code: error.killed ? 'VMRUN_TIMEOUT' : 'VMRUN_FAILED' });
       }
     });
     this.tail = job.catch(() => {});
