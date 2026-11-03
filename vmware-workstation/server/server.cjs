@@ -55467,7 +55467,8 @@ var DiskManager = class {
         if (paths.has(key2(backing))) references2.push({ vmx: vmx3, slot: name2.replace(/\.filename$/, ""), text: text2 });
         else {
           const other = await this.inspect({ disk: backing });
-          if (other.files.some((f) => paths.has(key2(f.path))) || !other.independent && other.parent_cid === info.cid.toLowerCase()) fail("UNSAFE_CHAIN", "Another VM references a shared extent or dependent disk chain.");
+          if (other.files.some((f) => paths.has(key2(f.path)))) fail("UNSAFE_CHAIN", "Another VM references a shared disk extent.");
+          if (!other.independent) fail("UNSAFE_CHAIN", "Cannot establish independence from an inventoried dependent VMDK; transitive backing chains are unsupported.", { action: "Prepare independent inventoried disks using an offline chain-aware workflow before retrying. Do not edit an ancestor while dependent disks exist." });
         }
       }
     }

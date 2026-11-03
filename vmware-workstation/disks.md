@@ -42,7 +42,9 @@ Obtain authorization for the exact disk change. Fully power off and close every 
 
 Preflight checks registered/running VMs, explicitly supplied VMX files and VMX files beside the disk. A readable inventory is required. Missing/stale inventory entries are skipped only when their VMX does not exist. Unreadable, malformed or out-of-root existing entries block the operation. Checks refuse running, locked, suspended, encrypted/vTPM or snapshot-bearing VMs, hard-linked disk files, multiple device references, shared extents and parent/linked chains. Child descriptors beside the source are checked as well. Stream-optimized source disks are refused for mutation and attachment; use a separately prepared Workstation disk.
 
-Inventory cannot discover every unregistered VM or a child chain stored elsewhere. `confirm: true` explicitly confirms authorization and exclusive access outside the checked set. Close Workstation tabs and other writers. No tool automatically powers off VMs, removes snapshots or deletes saved state to make an operation proceed.
+Inventoried disks with a non-base parent CID (`parentCID` other than `ffffffff`) or any parent hint block existing-disk operations even when their immediate extents and parent CID differ from the target. The target could be a more distant backing ancestor stored in another directory. Parent-chain traversal is unsupported, so the check fails closed rather than assuming such disks are unrelated; this can also block an operation because of an unrelated snapshot/linked disk in inventory. Prepare independent inventoried disks through a separate offline chain-aware workflow before retrying. The tools never follow untrusted parent hints or modify chain metadata to bypass this check.
+
+Inventory cannot discover every unregistered VM or a child chain stored elsewhere. `confirm: true` explicitly confirms authorization and exclusive access outside the checked set; it does not override uncertain inventoried chains. Close Workstation tabs and other writers. No tool automatically powers off VMs, removes snapshots or deletes saved state to make an operation proceed.
 
 ## Convert while preserving the original
 

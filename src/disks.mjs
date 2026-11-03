@@ -176,7 +176,11 @@ export class DiskManager {
         if (paths.has(key(backing))) references.push({ vmx, slot: name.replace(/\.filename$/, ''), text });
         else {
           const other = await this.inspect({ disk: backing });
-          if (other.files.some(f => paths.has(key(f.path))) || (!other.independent && other.parent_cid === info.cid.toLowerCase())) fail('UNSAFE_CHAIN', 'Another VM references a shared extent or dependent disk chain.');
+          if (other.files.some(f => paths.has(key(f.path)))) fail('UNSAFE_CHAIN', 'Another VM references a shared disk extent.');
+          // A disjoint immediate parent CID cannot establish independence: the
+          // selected disk may be any ancestor in a chain stored elsewhere.
+          // Chain traversal is unsupported, so never permit an uncertain edit.
+          if (!other.independent) fail('UNSAFE_CHAIN', 'Cannot establish independence from an inventoried dependent VMDK; transitive backing chains are unsupported.', { action: 'Prepare independent inventoried disks using an offline chain-aware workflow before retrying. Do not edit an ancestor while dependent disks exist.' });
         }
       }
     }

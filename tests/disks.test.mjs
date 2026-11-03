@@ -313,6 +313,45 @@ test('separate registered descriptor sharing a source extent is refused', async 
   await assert.rejects(f.disks.perform('compact', { disk: f.disk, confirm: true }), { code: 'UNSAFE_CHAIN' });
 });
 
+test('a registered running grandchild outside the target directory blocks ancestor mutations', async t => {
+  const f = await fixture(t);
+  const chain = path.join(f.root, 'external-chain'); await fs.mkdir(chain);
+  const intermediate = path.join(chain, 'intermediate.vmdk');
+  const grandchild = path.join(chain, 'grandchild.vmdk');
+  await fs.writeFile(intermediate, descriptor('intermediate.vmdk', 1, 'monolithicSparse', '12345678').replace('CID=12345678', 'CID=abcdef12') + `parentFileNameHint="../source/disk.vmdk"\n`);
+  await fs.writeFile(grandchild, descriptor('grandchild.vmdk', 1, 'monolithicSparse', 'abcdef12').replace('CID=12345678', 'CID=cdef1234') + 'parentFileNameHint="intermediate.vmdk"\n');
+  const vmx = path.join(chain, 'running.vmx');
+  await fs.writeFile(vmx, 'scsi0:0.present = "TRUE"\nscsi0:0.fileName = "grandchild.vmdk"\n');
+  await fs.writeFile(f.inventory, `vmlist0.config = "${vmx.replaceAll('\\', '/')}"\n`);
+  f.setRunning([vmx]);
+  const before = await fs.readFile(f.disk);
+  await assert.rejects(f.disks.preflight(await f.disks.inspect({ disk: f.disk }), []), { code: 'UNSAFE_CHAIN' });
+  for (const operation of ['expand', 'compact', 'defragment', 'convert']) {
+    await assert.rejects(f.disks.perform(operation, { disk: f.disk, confirm: true, ...(operation === 'expand' ? { capacity_mb: 2 } : {}), ...(operation === 'convert' ? { destination: path.join(f.root, 'blocked-output', 'disk.vmdk') } : {}) }), { code: 'UNSAFE_CHAIN' });
+  }
+  assert.deepEqual(await fs.readFile(f.disk), before);
+  assert.equal(nativeCalls(f).length, 0);
+  await assert.rejects(fs.stat(path.join(f.root, 'blocked-output')), { code: 'ENOENT' });
+  await f.attach(); const vmBefore = await fs.readFile(f.vmx);
+  for (const detach of [false, true]) await assert.rejects(f.disks.edit({ vmx: f.vmx, disk: f.disk, controller: 'scsi', controller_index: 0, unit: 0, confirm: true }, detach), { code: 'UNSAFE_CHAIN' });
+  assert.deepEqual(await fs.readFile(f.vmx), vmBefore);
+});
+
+test('dependent inventoried disks with unknown parent paths fail closed; independent disks remain usable', async t => {
+  const f = await fixture(t); const otherDir = path.join(f.root, 'other'); await fs.mkdir(otherDir);
+  const disk = path.join(otherDir, 'other.vmdk'); const vmx = path.join(otherDir, 'other.vmx');
+  await fs.writeFile(vmx, 'scsi0:0.fileName = "other.vmdk"\n');
+  await fs.writeFile(f.inventory, `vmlist0.config = "${vmx.replaceAll('\\', '/')}"\n`);
+  f.setRunning([vmx]);
+  for (const hint of ['', 'parentFileNameHint="missing.vmdk"\n', 'parentFileNameHint="../../outside.vmdk"\n']) {
+    await fs.writeFile(disk, descriptor('other.vmdk', 1, 'monolithicSparse', 'abcdef12') + hint);
+    await assert.rejects(f.disks.perform('compact', { disk: f.disk, confirm: true }), { code: 'UNSAFE_CHAIN' });
+  }
+  assert.equal(nativeCalls(f).length, 0);
+  await fs.writeFile(disk, descriptor('other.vmdk').replace('CID=12345678', 'CID=abcdef12'));
+  assert.equal((await f.disks.perform('compact', { disk: f.disk, confirm: true })).operation, 'compact');
+});
+
 test('remote REST origins retain their prior request contract without local VMX resolution', async t => {
   const f = await fixture(t); const requests = [];
   const client = new RestClient({ env: { VMWARE_REST_URL: 'https://example.invalid' }, backend: f.backend, coordinateDiskEdits: true });
