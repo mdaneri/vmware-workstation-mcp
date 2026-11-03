@@ -93,6 +93,27 @@ REST VM IDs are separate from VMX paths: call `rest_get_all_vms` to obtain IDs, 
 
 ## Practical guest workflows
 
+To discover a guest address without credentials, call `get_guest_ip` with its `vmx`. A successful result remains `{ "vmx": "...", "address": "..." }`. On failure it returns an MCP error with code `GUEST_IP_UNAVAILABLE`, the original native error in `message`, `addressAvailable: false`, and a separate `toolsState` observation. The diagnostic calls `checkToolsState` once with a five-second process timeout; if that call fails, times out, or returns an unfamiliar value, its state is `unknown` and its output/error is retained. Target validation failures are returned before either query.
+
+The recognized Tools states are `running`, `installed`, and `unknown`, as documented in the [VMware Workstation vmrun reference](https://techdocs2-prod.adobecqms.net/content/dam/broadcom/techdocs/us/en/pdf/vmware/desktop-hypervisors/workstation/vmware-workstation-pro-17-0.pdf#page=197).
+
+`toolsState.state: "running"` can accompany an IP lookup error saying Tools is not running. These are separate observations: neither the native error nor the later Tools check establishes the underlying cause. Running Tools does not establish IP publication, network reachability, or guest application readiness. Inspect networking and IP publication before considering a service restart or power change. The plugin does not retry the query or replay a mutation automatically.
+
+For a bounded read-only wait during startup, use the existing native wait option with an explicit timeout:
+
+```json
+{
+  "tool": "vmrun_get_guest_ip_address",
+  "arguments": {
+    "vmx": "C:/VMs/Linux/Linux.vmx",
+    "wait": true,
+    "timeout_seconds": 60
+  }
+}
+```
+
+Allow a matching client timeout. VMware can return immediately when networking is unavailable, so `wait` does not guarantee recovery. This low-level tool returns native command status/output; it does not add the convenience tool's Tools cross-check. A timeout remains a failed observation and does not authorize replaying an earlier power or configuration operation.
+
 After configuring guest credentials, ask: "Run uname on my Linux lab and copy the output to my host." The corresponding tool arguments are shown below. Replace VMX and host paths with your actual paths; create the host transfer directory first.
 
 Run a Linux guest script:

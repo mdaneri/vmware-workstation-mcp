@@ -106,12 +106,78 @@ test('mutation failure reports uncertain outcome and never retries with hard mod
 });
 test('guest IP validates IPv4/IPv6 and rejects error-looking success output', async t => {
   let stdout = '192.0.2.10';
-  const f = await fixture(t, async () => ({ stdout }));
-  assert.equal((await f.backend.guestIP(f.vmx)).address, stdout);
+  const calls = [];
+  const f = await fixture(t, async (_, args) => { calls.push(args); return { stdout }; });
+  assert.deepEqual(await f.backend.guestIP(f.vmx), { vmx: await fs.realpath(f.vmx), address: stdout });
   stdout = '2001:db8::1';
   assert.equal((await f.backend.guestIP(f.vmx)).address, stdout);
+  assert.deepEqual(calls.map(args => args[2]), ['getGuestIPAddress', 'getGuestIPAddress']);
   stdout = 'Error: VMware Tools is not running';
-  await assert.rejects(f.backend.guestIP(f.vmx), /valid guest IP/);
+  await assert.rejects(f.backend.guestIP(f.vmx), error => {
+    assert.match(error.message, /valid guest IP/);
+    assert.ok(error.message.includes(stdout));
+    assert.equal(error.code, 'GUEST_IP_UNAVAILABLE');
+    assert.equal(error.details.toolsState.state, 'unknown');
+    return true;
+  });
+});
+
+for (const state of ['running', 'installed', 'unknown', 'unexpected status']) {
+  test(`guest IP preserves native failure and separately observes Tools state: ${state}`, async t => {
+    const calls = [];
+    const nativeError = 'Error: The VMware Tools are not running in the virtual machine';
+    const f = await fixture(t, async (_, args, options) => {
+      calls.push({ args, options });
+      if (args[2] === 'getGuestIPAddress') throw Object.assign(new Error('native failure'), { code: 4294967295, stderr: nativeError });
+      return { stdout: `${state}\r\n` };
+    });
+    const target = await fs.realpath(f.vmx);
+    await assert.rejects(f.backend.guestIP(f.vmx), error => {
+      assert.equal(error.message, `vmrun getGuestIPAddress failed (4294967295). ${nativeError}`);
+      assert.equal(error.cause.message, error.message);
+      assert.equal(error.code, 'GUEST_IP_UNAVAILABLE');
+      assert.equal(error.details.vmx, target);
+      assert.equal(error.details.addressAvailable, false);
+      assert.deepEqual(error.details.toolsState, { state: state === 'unexpected status' ? 'unknown' : state, output: state });
+      assert.match(error.details.note, /separate, later observation/);
+      assert.match(error.details.action, /wait=true.*timeout_seconds/);
+      return true;
+    });
+    assert.deepEqual(calls.map(call => call.args), [['-T', 'ws', 'getGuestIPAddress', target], ['-T', 'ws', 'checkToolsState', target]]);
+    assert.equal(calls[1].options.timeout, 5000);
+    assert.ok(calls.every(call => call.options.shell === false));
+  });
+}
+
+for (const killed of [false, true]) {
+  test(`guest IP retains the original failure when the Tools cross-check ${killed ? 'times out' : 'fails'}`, async t => {
+    const calls = [];
+    const f = await fixture(t, async (_, args) => {
+      calls.push(args[2]);
+      throw Object.assign(new Error('native failure'), args[2] === 'getGuestIPAddress'
+        ? { code: 1, stdout: 'original IP failure' }
+        : { code: 2, killed, stderr: 'Tools probe failure' });
+    });
+    await assert.rejects(f.backend.guestIP(f.vmx), error => {
+      assert.match(error.message, /original IP failure/);
+      assert.doesNotMatch(error.message, /Tools probe failure/);
+      assert.equal(error.details.toolsState.state, 'unknown');
+      assert.match(error.details.toolsState.error, /Tools probe failure/);
+      assert.match(error.details.toolsState.error, killed ? /timeout/ : /failed \(2\)/);
+      return true;
+    });
+    assert.deepEqual(calls, ['getGuestIPAddress', 'checkToolsState']);
+  });
+}
+
+test('guest IP target validation fails before either native query', async t => {
+  let calls = 0;
+  const f = await fixture(t, async () => { calls++; throw new Error('must not execute'); });
+  await assert.rejects(f.backend.guestIP('relative.vmx'), /absolute path/);
+  const allowed = path.join(f.root, 'allowed'); await fs.mkdir(allowed);
+  f.env.VMWARE_ALLOWED_ROOTS = allowed;
+  await assert.rejects(f.backend.guestIP(f.vmx), /outside/);
+  assert.equal(calls, 0);
 });
 test('concurrent invocations are serialized even after failure', async t => {
   let active = 0;

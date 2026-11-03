@@ -205,8 +205,28 @@ export class Workstation {
 
   async guestIP(input) {
     const vmx = await this.vmx(input);
-    const address = (await this.run(['getGuestIPAddress', vmx])).trim();
-    if (!isIP(address)) throw new Error('vmrun did not return a valid guest IP address. The VM must be running with VMware Tools available.');
-    return { vmx, address };
+    try {
+      const address = (await this.run(['getGuestIPAddress', vmx])).trim();
+      if (!isIP(address)) throw new Error(`vmrun did not return a valid guest IP address. Output: ${address.slice(0, 4000) || '(empty)'}`);
+      return { vmx, address };
+    } catch (error) {
+      // IP publication and Tools state can disagree transiently. Observe once,
+      // without retrying the IP query or treating Tools state as guest readiness.
+      let toolsState;
+      try {
+        const output = await this.run(['checkToolsState', vmx], { timeout: 5000 });
+        toolsState = { state: ['running', 'installed', 'unknown'].includes(output) ? output : 'unknown', output: output.slice(0, 4000) };
+      } catch (checkError) {
+        toolsState = { state: 'unknown', error: checkError.message };
+      }
+      throw Object.assign(new Error(error.message, { cause: error }), {
+        code: 'GUEST_IP_UNAVAILABLE',
+        details: {
+          vmx, addressAvailable: false, toolsState,
+          note: 'The IP lookup failed. checkToolsState is a separate, later observation; even running Tools does not establish IP publication, network reachability, or guest readiness. The lookup error alone does not establish that Tools is stopped.',
+          action: 'Use vmrun_get_guest_ip_address with wait=true and an explicit timeout_seconds for a bounded read-only wait. Inspect guest networking and IP publication before considering service or power changes.',
+        },
+      });
+    }
   }
 }
