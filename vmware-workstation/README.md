@@ -189,6 +189,8 @@ Open the returned VMX in Workstation, or call `rest_register_vm` when REST is co
 
 Use `configure_vm` to edit an existing powered-off VM locally. The tool creates a uniquely named VMX backup, preserves comments and other settings, removes duplicate versions of changed keys, and saves the updated file. It rejects running, locked, detected suspended, and non-UTF-8 VMs. VMX values are strings; null removes a setting. Close/reopen the VM's Workstation tab if it cached the previous configuration.
 
+After a plugin update, an existing chat may still be connected to the previous server. If a protected VMX edit reports `PLUGIN_RUNTIME_MISSING`, reconnect the plugin or open a fresh chat to use the installed version; reinstall/reimport if the error persists. The server checks for its Windows file-protection helper before creating a backup. Failed preparation removes incomplete backup/edit files, retains any completed backup, and leaves the original VMX in place. A network-only edit can require protection when the VMX contains a VNC password/key.
+
 ```json
 {
   "tool": "configure_vm",

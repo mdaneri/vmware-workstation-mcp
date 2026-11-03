@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { Workstation, parseAssignments } from '../src/workstation.mjs';
 import { VMFiles, encodeVMX } from '../src/vm-files.mjs';
+import { localFileProtector } from '../src/local-file-security.mjs';
 
 async function fixture(t) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'vmware-new-'));
@@ -91,4 +92,56 @@ test('protects VNC-sensitive VMX backups and replacement files before writing se
   assert.equal(protectedFiles.length, 2);
   assert.equal(protectedFiles[0], result.backup);
   assert.match(await fs.readFile(vmx, 'utf8'), /TestVNC1/);
+});
+
+test('missing runtime helper fails before VMX backup creation with reconnect guidance', async t => {
+  const f = await fixture(t);
+  const vmx = path.join(f.root, 'sensitive.vmx');
+  const original = '.encoding = "UTF-8"\nRemoteDisplay.vnc.password = "TestVNC1"\nethernet1.vnet = "VMnet2"\n';
+  await fs.writeFile(vmx, original);
+  const files = new VMFiles(f.backend, { protectSensitiveFile: localFileProtector(f.backend, { platform: 'win32', root: f.root }) });
+  await assert.rejects(files.configure({ vmx, settings: { 'ethernet1.vnet': 'VMnet3' } }), error => {
+    assert.equal(error.code, 'PLUGIN_RUNTIME_MISSING');
+    assert.match(error.message, /Reconnect.*fresh chat/);
+    return true;
+  });
+  assert.equal(await fs.readFile(vmx, 'utf8'), original);
+  assert.deepEqual((await fs.readdir(f.root)).filter(name => /\.(backup|edit)-/.test(name)), []);
+  assert.equal(f.calls.filter(call => call.file === 'pwsh').length, 0);
+});
+
+for (const failAt of [1, 2]) test(`protection failure at file ${failAt} removes incomplete artifacts and retains completed backups`, async t => {
+  const f = await fixture(t);
+  const vmx = path.join(f.root, 'sensitive.vmx');
+  const original = '.encoding = "UTF-8"\nRemoteDisplay.vnc.password = "TestVNC1"\n';
+  await fs.writeFile(vmx, original);
+  let count = 0;
+  const failure = new Error('Protection failed');
+  const files = new VMFiles(f.backend, { protectSensitiveFile: async filename => {
+    assert.equal((await fs.stat(filename)).size, 0);
+    if (++count === failAt) throw failure;
+  } });
+  await assert.rejects(files.configure({ vmx, settings: { memsize: '1024' } }), error => error === failure);
+  assert.equal(await fs.readFile(vmx, 'utf8'), original);
+  const artifacts = (await fs.readdir(f.root)).filter(name => /\.(backup|edit)-/.test(name));
+  assert.equal(artifacts.length, failAt - 1);
+  if (failAt === 2) {
+    assert.match(artifacts[0], /\.backup-/);
+    assert.equal(await fs.readFile(path.join(f.root, artifacts[0]), 'utf8'), original);
+  }
+});
+
+test('runtime removal after preflight cleans the backup placeholder', async t => {
+  const f = await fixture(t);
+  const scripts = path.join(f.root, 'scripts'); await fs.mkdir(scripts);
+  const helper = path.join(scripts, 'Protect-LocalFile.ps1'); await fs.writeFile(helper, '# fixture');
+  const protector = localFileProtector(f.backend, { platform: 'win32', root: f.root });
+  const preflight = protector.preflight;
+  protector.preflight = async () => { await preflight(); await fs.unlink(helper); };
+  const vmx = path.join(f.root, 'sensitive.vmx');
+  const original = 'RemoteDisplay.vnc.password = "TestVNC1"\n'; await fs.writeFile(vmx, original);
+  const files = new VMFiles(f.backend, { protectSensitiveFile: protector });
+  await assert.rejects(files.configure({ vmx, settings: { memsize: '1024' } }), { code: 'PLUGIN_RUNTIME_MISSING' });
+  assert.equal(await fs.readFile(vmx, 'utf8'), original);
+  assert.deepEqual((await fs.readdir(f.root)).filter(name => /\.(backup|edit)-/.test(name)), []);
 });

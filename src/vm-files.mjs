@@ -109,19 +109,40 @@ export class VMFiles {
       for (const [key, update] of updates) if (!seen.has(key) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
       const mode = (await fs.stat(vmx)).mode & 0o777;
       if (beforeCommit) await beforeCommit();
+      await protectFile?.preflight?.();
       const backup = `${vmx}.backup-${randomUUID()}`;
-      if (protectFile) {
-        await fs.writeFile(backup, '', { flag: 'wx', mode: 0o600 }); await protectFile(backup); await fs.writeFile(backup, original);
-      } else await fs.copyFile(vmx, backup, constants.COPYFILE_EXCL);
       const temporary = `${vmx}.edit-${randomUUID()}`;
-      if (protectFile) { await fs.writeFile(temporary, '', { flag: 'wx', mode: 0o600 }); await protectFile(temporary); }
-      await fs.writeFile(temporary, lines.join('\n').replace(/\n*$/, '\n'), { flag: protectFile ? 'w' : 'wx', mode });
-      // Detect another writer after we read the original before replacing it.
-      if (await fs.readFile(vmx, 'utf8') !== original) { await fs.unlink(temporary); throw new Error(`VMX changed during editing; original retained. Backup: ${backup}`); }
-      if (beforeCommit) {
-        try { await beforeCommit(); } catch (error) { await fs.unlink(temporary); throw error; }
+      let backupCreated = false, backupComplete = false, temporaryCreated = false;
+      try {
+        if (protectFile) {
+          const handle = await fs.open(backup, 'wx', 0o600);
+          backupCreated = true;
+          await handle.close();
+          await protectFile(backup);
+          await fs.writeFile(backup, original);
+        } else await fs.copyFile(vmx, backup, constants.COPYFILE_EXCL);
+        backupComplete = true;
+        const handle = await fs.open(temporary, 'wx', mode);
+        temporaryCreated = true;
+        try {
+          if (protectFile) await protectFile(temporary);
+          await handle.writeFile(lines.join('\n').replace(/\n*$/, '\n'));
+        } finally { await handle.close(); }
+        // Detect another writer after we read the original before replacing it.
+        if (await fs.readFile(vmx, 'utf8') !== original) throw new Error(`VMX changed during editing; original retained. Backup: ${backup}`);
+        if (beforeCommit) await beforeCommit();
+        await fs.rename(temporary, vmx);
+      } catch (error) {
+        // Keep a completed recovery backup, but never leave a failed preparation
+        // looking like a usable backup. Only unlink files created by this edit.
+        const cleanup = [temporaryCreated && temporary, backupCreated && !backupComplete && backup].filter(Boolean);
+        const failed = [];
+        for (const filename of cleanup) {
+          try { await fs.unlink(filename); } catch (cause) { if (cause.code !== 'ENOENT') failed.push(filename); }
+        }
+        if (failed.length) throw Object.assign(new Error(`${error.message} Could not remove incomplete files: ${failed.join(', ')}. Inspect them before retrying.`, { cause: error }), { code: error.code });
+        throw error;
       }
-      await fs.rename(temporary, vmx);
       return { vmx, updated: true, backup, changedSettings: Object.keys(a.settings), note: 'VMX saved while VM was not running and had no detected saved state/VMX lock. Close/reopen its Workstation tab if it has cached settings.' };
     });
   }

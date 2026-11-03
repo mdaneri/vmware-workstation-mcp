@@ -396,8 +396,8 @@ async function readPrivateFile(filename) {
     await handle.close();
   }
 }
-function localFileProtector(backend) {
-  if (process.platform === "linux") return async (filename) => {
+function localFileProtector(backend, { platform = process.platform, root } = {}) {
+  if (platform === "linux") return async (filename) => {
     const handle = await openPrivateFile(filename);
     try {
       await handle.chmod(384);
@@ -406,8 +406,26 @@ function localFileProtector(backend) {
       await handle.close();
     }
   };
-  const root = import_node_path4.default.resolve(import_node_path4.default.dirname(process.argv[1]), "..");
-  return (filename) => backend.execute("pwsh", ["-NoProfile", "-File", import_node_path4.default.join(root, "scripts", "Protect-LocalFile.ps1"), "-LiteralPath", filename], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
+  const script = import_node_path4.default.join(root ?? import_node_path4.default.resolve(import_node_path4.default.dirname(process.argv[1]), ".."), "scripts", "Protect-LocalFile.ps1");
+  const preflight = async () => {
+    try {
+      if (!(await import_promises3.default.stat(script)).isFile()) throw new Error("Expected a regular helper file.");
+      await import_promises3.default.access(script, import_node_fs2.constants.R_OK);
+    } catch (cause) {
+      throw Object.assign(new Error("PLUGIN_RUNTIME_MISSING: The VMware Workstation plugin runtime is incomplete or no longer available (Protect-LocalFile.ps1). Reconnect the plugin or open a fresh chat to use the installed version. If this persists, reinstall/reimport the plugin before retrying.", { cause }), { code: "PLUGIN_RUNTIME_MISSING" });
+    }
+  };
+  const protect = async (filename) => {
+    await preflight();
+    try {
+      return await backend.execute("pwsh", ["-NoProfile", "-File", script, "-LiteralPath", filename], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
+    } catch (error) {
+      await preflight();
+      throw error;
+    }
+  };
+  protect.preflight = preflight;
+  return protect;
 }
 
 // src/credentials.mjs

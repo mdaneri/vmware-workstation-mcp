@@ -21,14 +21,33 @@ export async function readPrivateFile(filename) {
 }
 
 // The same user-only ACL policy used by the existing credentials setup script.
-export function localFileProtector(backend) {
-  if (process.platform === 'linux') return async filename => {
+export function localFileProtector(backend, { platform = process.platform, root } = {}) {
+  if (platform === 'linux') return async filename => {
     const handle = await openPrivateFile(filename);
     try {
       await handle.chmod(0o600);
       if ((await handle.stat()).mode & 0o077) throw new Error('This filesystem does not enforce private Linux file permissions. Use a native Linux filesystem for sensitive files.');
     } finally { await handle.close(); }
   };
-  const root = path.resolve(path.dirname(process.argv[1]), '..');
-  return filename => backend.execute('pwsh', ['-NoProfile', '-File', path.join(root, 'scripts', 'Protect-LocalFile.ps1'), '-LiteralPath', filename], { windowsHide: true, shell: false, encoding: 'utf8', timeout: 10000 });
+  const script = path.join(root ?? path.resolve(path.dirname(process.argv[1]), '..'), 'scripts', 'Protect-LocalFile.ps1');
+  const preflight = async () => {
+    try {
+      if (!(await fs.stat(script)).isFile()) throw new Error('Expected a regular helper file.');
+      await fs.access(script, constants.R_OK);
+    } catch (cause) {
+      throw Object.assign(new Error('PLUGIN_RUNTIME_MISSING: The VMware Workstation plugin runtime is incomplete or no longer available (Protect-LocalFile.ps1). Reconnect the plugin or open a fresh chat to use the installed version. If this persists, reinstall/reimport the plugin before retrying.', { cause }), { code: 'PLUGIN_RUNTIME_MISSING' });
+    }
+  };
+  const protect = async filename => {
+    await preflight();
+    try {
+      return await backend.execute('pwsh', ['-NoProfile', '-File', script, '-LiteralPath', filename], { windowsHide: true, shell: false, encoding: 'utf8', timeout: 10000 });
+    } catch (error) {
+      // The cache can disappear between preflight and PowerShell opening it.
+      await preflight();
+      throw error;
+    }
+  };
+  protect.preflight = preflight;
+  return protect;
 }
