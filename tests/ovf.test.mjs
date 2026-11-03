@@ -56,6 +56,7 @@ async function archive(filename, entries) {
 
 test('OVF Tool honors configurable executable path, reports version/flags, and degrades gracefully', async t => {
   const f = await fixture(t); const status = await f.ovf.status();
+  assert.equal(status.executable_discovered, true); assert.equal(status.help_verified, true); assert.equal(status.live_support, 'unknown');
   assert.equal(status.available, true); assert.equal(status.executable, f.binary); assert.match(status.version, /test-version/); assert.equal(status.supported_flags.noPrompting, true);
   f.backend.env.VMWARE_OVFTOOL_PATH = 'relative/ovftool';
   assert.equal((await f.ovf.status()).available, false);

@@ -86,9 +86,10 @@ export async function readDiskDescriptor(file) {
 export class DiskManager {
   constructor({ backend, vmFiles, space = fs.statfs } = {}) { this.backend = backend; this.vmFiles = vmFiles; this.space = space; }
   async status() {
+    let executable;
     try {
       const beside = await this.backend.executable().catch(() => undefined);
-      const executable = await findVMwareExecutable('vmware-vdiskmanager', { env: this.backend.env, beside });
+      executable = await findVMwareExecutable('vmware-vdiskmanager', { env: this.backend.env, beside });
       let output;
       const options = { shell: false, windowsHide: true, timeout: 15000, maxBuffer: 1024 * 1024, encoding: 'utf8' };
       try { const r = await this.backend.execute(executable, [], options); output = [r.stdout, r.stderr].filter(Boolean).join('\n'); }
@@ -96,8 +97,8 @@ export class DiskManager {
       if (!/Virtual Disk Manager/i.test(output || '') || !/Usage:/i.test(output)) fail('CAPABILITY_UNAVAILABLE', 'Cannot read installed disk-manager help. Check installation and permissions.');
       const supported_flags = [...output.matchAll(/^\s+(-[A-Za-z])(?:\s|$)/gm)].map(m => m[1]);
       const diskTypes = [...output.split(/Disk types:/i)[1]?.matchAll(/^\s+([0-6])\s+:\s*(.+)$/gm) || []].map(m => ({ id: m[1], description: m[2].trim() }));
-      return { available: true, executable, version: output.split(/\r?\n/)[0], supported_flags, disk_types: diskTypes, operations: Object.fromEntries(Object.entries(flags).map(([op, flag]) => [op, supported_flags.includes(flag)])) };
-    } catch (e) { return { available: false, code: 'CAPABILITY_UNAVAILABLE', message: e.message, action: 'Install native VMware Workstation or set VMWARE_VDISKMANAGER_PATH to its absolute executable path.' }; }
+      return { available: true, executable, executable_discovered: true, help_verified: true, live_support: 'unknown', version: output.split(/\r?\n/)[0], supported_flags, disk_types: diskTypes, operations: Object.fromEntries(Object.entries(flags).map(([op, flag]) => [op, supported_flags.includes(flag)])) };
+    } catch (e) { return { available: false, executable: executable || null, executable_discovered: !!executable, help_verified: false, live_support: 'unknown', code: 'CAPABILITY_UNAVAILABLE', message: e.message, action: 'Install native VMware Workstation or set VMWARE_VDISKMANAGER_PATH to its absolute executable path.' }; }
   }
   async available(operation, diskType) {
     const status = await this.status();

@@ -12,9 +12,9 @@ var __commonJS = (cb, mod) => function __require() {
     throw mod = 0, e2;
   }
 };
-var __export = (target2, all) => {
+var __export = (target3, all) => {
   for (var name2 in all)
-    __defProp(target2, name2, { get: all[name2], enumerable: true });
+    __defProp(target3, name2, { get: all[name2], enumerable: true });
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -24,12 +24,12 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+var __toESM = (mod, isNodeMode, target3) => (target3 = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
   // If the importer is in node compatibility mode or this is not an ESM
   // file that has been converted to a CommonJS file using a Babel-
   // compatible transform (i.e. "__esModule" has not been set), then set
   // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target2, "default", { value: mod, enumerable: true }) : target2,
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target3, "default", { value: mod, enumerable: true }) : target3,
   mod
 ));
 
@@ -410,11 +410,11 @@ var require_codegen = __commonJS({
         const rhs = this.rhs === void 0 ? "" : ` = ${this.rhs}`;
         return `${varKind} ${this.name}${rhs};` + _n;
       }
-      optimizeNames(names2, constants4) {
+      optimizeNames(names2, constants5) {
         if (!names2[this.name.str])
           return;
         if (this.rhs)
-          this.rhs = optimizeExpr(this.rhs, names2, constants4);
+          this.rhs = optimizeExpr(this.rhs, names2, constants5);
         return this;
       }
       get names() {
@@ -431,10 +431,10 @@ var require_codegen = __commonJS({
       render({ _n }) {
         return `${this.lhs} = ${this.rhs};` + _n;
       }
-      optimizeNames(names2, constants4) {
+      optimizeNames(names2, constants5) {
         if (this.lhs instanceof code_1.Name && !names2[this.lhs.str] && !this.sideEffects)
           return;
-        this.rhs = optimizeExpr(this.rhs, names2, constants4);
+        this.rhs = optimizeExpr(this.rhs, names2, constants5);
         return this;
       }
       get names() {
@@ -495,8 +495,8 @@ var require_codegen = __commonJS({
       optimizeNodes() {
         return `${this.code}` ? this : void 0;
       }
-      optimizeNames(names2, constants4) {
-        this.code = optimizeExpr(this.code, names2, constants4);
+      optimizeNames(names2, constants5) {
+        this.code = optimizeExpr(this.code, names2, constants5);
         return this;
       }
       get names() {
@@ -525,12 +525,12 @@ var require_codegen = __commonJS({
         }
         return nodes.length > 0 ? this : void 0;
       }
-      optimizeNames(names2, constants4) {
+      optimizeNames(names2, constants5) {
         const { nodes } = this;
         let i = nodes.length;
         while (i--) {
           const n2 = nodes[i];
-          if (n2.optimizeNames(names2, constants4))
+          if (n2.optimizeNames(names2, constants5))
             continue;
           subtractNames(names2, n2.names);
           nodes.splice(i, 1);
@@ -583,12 +583,12 @@ var require_codegen = __commonJS({
           return void 0;
         return this;
       }
-      optimizeNames(names2, constants4) {
+      optimizeNames(names2, constants5) {
         var _a3;
-        this.else = (_a3 = this.else) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names2, constants4);
-        if (!(super.optimizeNames(names2, constants4) || this.else))
+        this.else = (_a3 = this.else) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names2, constants5);
+        if (!(super.optimizeNames(names2, constants5) || this.else))
           return;
-        this.condition = optimizeExpr(this.condition, names2, constants4);
+        this.condition = optimizeExpr(this.condition, names2, constants5);
         return this;
       }
       get names() {
@@ -611,10 +611,10 @@ var require_codegen = __commonJS({
       render(opts) {
         return `for(${this.iteration})` + super.render(opts);
       }
-      optimizeNames(names2, constants4) {
-        if (!super.optimizeNames(names2, constants4))
+      optimizeNames(names2, constants5) {
+        if (!super.optimizeNames(names2, constants5))
           return;
-        this.iteration = optimizeExpr(this.iteration, names2, constants4);
+        this.iteration = optimizeExpr(this.iteration, names2, constants5);
         return this;
       }
       get names() {
@@ -650,10 +650,10 @@ var require_codegen = __commonJS({
       render(opts) {
         return `for(${this.varKind} ${this.name} ${this.loop} ${this.iterable})` + super.render(opts);
       }
-      optimizeNames(names2, constants4) {
-        if (!super.optimizeNames(names2, constants4))
+      optimizeNames(names2, constants5) {
+        if (!super.optimizeNames(names2, constants5))
           return;
-        this.iterable = optimizeExpr(this.iterable, names2, constants4);
+        this.iterable = optimizeExpr(this.iterable, names2, constants5);
         return this;
       }
       get names() {
@@ -695,11 +695,11 @@ var require_codegen = __commonJS({
         (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNodes();
         return this;
       }
-      optimizeNames(names2, constants4) {
+      optimizeNames(names2, constants5) {
         var _a3, _b;
-        super.optimizeNames(names2, constants4);
-        (_a3 = this.catch) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names2, constants4);
-        (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNames(names2, constants4);
+        super.optimizeNames(names2, constants5);
+        (_a3 = this.catch) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names2, constants5);
+        (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNames(names2, constants5);
         return this;
       }
       get names() {
@@ -1000,7 +1000,7 @@ var require_codegen = __commonJS({
     function addExprNames(names2, from) {
       return from instanceof code_1._CodeOrName ? addNames(names2, from.names) : names2;
     }
-    function optimizeExpr(expr, names2, constants4) {
+    function optimizeExpr(expr, names2, constants5) {
       if (expr instanceof code_1.Name)
         return replaceName(expr);
       if (!canOptimize(expr))
@@ -1015,14 +1015,14 @@ var require_codegen = __commonJS({
         return items;
       }, []));
       function replaceName(n2) {
-        const c = constants4[n2.str];
+        const c = constants5[n2.str];
         if (c === void 0 || names2[n2.str] !== 1)
           return n2;
         delete names2[n2.str];
         return c;
       }
       function canOptimize(e2) {
-        return e2 instanceof code_1._Code && e2._items.some((c) => c instanceof code_1.Name && names2[c.str] === 1 && constants4[c.str] !== void 0);
+        return e2 instanceof code_1._Code && e2._items.some((c) => c instanceof code_1.Name && names2[c.str] === 1 && constants5[c.str] !== void 0);
       }
     }
     function subtractNames(names2, from) {
@@ -3262,8 +3262,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path15) {
-      let input2 = path15;
+    function removeDotSegments(path16) {
+      let input2 = path16;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -3337,11 +3337,11 @@ var require_utils = __commonJS({
       }
       return output2.join("");
     }
-    function removeDotSegmentsRelative(path15) {
-      if (path15 === "" || path15[0] === "/") {
-        return removeDotSegments(path15);
+    function removeDotSegmentsRelative(path16) {
+      if (path16 === "" || path16[0] === "/") {
+        return removeDotSegments(path16);
       }
-      const segments = path15.split("/");
+      const segments = path16.split("/");
       const last = segments.length - 1;
       const output2 = [];
       let trailingDirectory = false;
@@ -3704,8 +3704,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path15 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path15 && path15 !== "/" ? path15 : void 0;
+        const path16 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path16 && path16 !== "/" ? path16 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -3764,7 +3764,7 @@ var require_schemes = __commonJS({
       urnComponent.nss = (uuidComponent.uuid || "").toLowerCase();
       return urnComponent;
     }
-    var http = (
+    var http2 = (
       /** @type {SchemeHandler} */
       {
         scheme: "http",
@@ -3773,11 +3773,11 @@ var require_schemes = __commonJS({
         serialize: httpSerialize
       }
     );
-    var https = (
+    var https2 = (
       /** @type {SchemeHandler} */
       {
         scheme: "https",
-        domainHost: http.domainHost,
+        domainHost: http2.domainHost,
         parse: httpParse,
         serialize: httpSerialize
       }
@@ -3821,8 +3821,8 @@ var require_schemes = __commonJS({
     var SCHEMES = (
       /** @type {Record<SchemeName, SchemeHandler>} */
       {
-        http,
-        https,
+        http: http2,
+        https: https2,
         ws,
         wss,
         urn,
@@ -3912,58 +3912,58 @@ var require_fast_uri = __commonJS({
       return serialize(resolved, schemelessOptions);
     }
     function resolveComponent(base, relative, options2, skipNormalization) {
-      const target2 = {};
+      const target3 = {};
       if (!skipNormalization) {
         base = parse3(serialize(base, options2), options2);
         relative = parse3(serialize(relative, options2), options2);
       }
       options2 = options2 || {};
       if (!options2.tolerant && relative.scheme) {
-        target2.scheme = relative.scheme;
-        target2.userinfo = relative.userinfo;
-        target2.host = relative.host;
-        target2.port = relative.port;
-        target2.path = removeDotSegments(relative.path || "");
-        target2.query = relative.query;
+        target3.scheme = relative.scheme;
+        target3.userinfo = relative.userinfo;
+        target3.host = relative.host;
+        target3.port = relative.port;
+        target3.path = removeDotSegments(relative.path || "");
+        target3.query = relative.query;
       } else {
         if (relative.userinfo !== void 0 || relative.host !== void 0 || relative.port !== void 0) {
-          target2.userinfo = relative.userinfo;
-          target2.host = relative.host;
-          target2.port = relative.port;
-          target2.path = removeDotSegments(relative.path || "");
-          target2.query = relative.query;
+          target3.userinfo = relative.userinfo;
+          target3.host = relative.host;
+          target3.port = relative.port;
+          target3.path = removeDotSegments(relative.path || "");
+          target3.query = relative.query;
         } else {
           if (!relative.path) {
-            target2.path = base.path;
+            target3.path = base.path;
             if (relative.query !== void 0) {
-              target2.query = relative.query;
+              target3.query = relative.query;
             } else {
-              target2.query = base.query;
+              target3.query = base.query;
             }
           } else {
             if (relative.path[0] === "/") {
-              target2.path = removeDotSegments(relative.path);
+              target3.path = removeDotSegments(relative.path);
             } else {
               const baseHasAuthority = base.userinfo !== void 0 || base.host !== void 0 || base.port !== void 0;
               if (baseHasAuthority && !base.path) {
-                target2.path = "/" + relative.path;
+                target3.path = "/" + relative.path;
               } else if (!base.path) {
-                target2.path = relative.path;
+                target3.path = relative.path;
               } else {
-                target2.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative.path;
+                target3.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative.path;
               }
-              target2.path = base.scheme === void 0 && !baseHasAuthority && target2.path[0] !== "/" ? removeDotSegmentsRelative(target2.path) : removeDotSegments(target2.path);
+              target3.path = base.scheme === void 0 && !baseHasAuthority && target3.path[0] !== "/" ? removeDotSegmentsRelative(target3.path) : removeDotSegments(target3.path);
             }
-            target2.query = relative.query;
+            target3.query = relative.query;
           }
-          target2.userinfo = base.userinfo;
-          target2.host = base.host;
-          target2.port = base.port;
+          target3.userinfo = base.userinfo;
+          target3.host = base.host;
+          target3.port = base.port;
         }
-        target2.scheme = base.scheme;
+        target3.scheme = base.scheme;
       }
-      target2.fragment = relative.fragment;
-      return target2;
+      target3.fragment = relative.fragment;
+      return target3;
     }
     function equal(uriA, uriB, options2) {
       const normalizedA = normalizeComparableURI(uriA, options2);
@@ -7242,12 +7242,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name2}"`);
       return f;
     };
-    function addFormats(ajv, list, fs14, exportName) {
+    function addFormats(ajv, list, fs15, exportName) {
       var _a3;
       var _b;
       (_a3 = (_b = ajv.opts.code).formats) !== null && _a3 !== void 0 ? _a3 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
-        ajv.addFormat(f, fs14[f]);
+        ajv.addFormat(f, fs15[f]);
     }
     module2.exports = exports2 = formatsPlugin;
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -7742,7 +7742,7 @@ var require_crc = __commonJS({
 var require_parser = __commonJS({
   "node_modules/pngjs/lib/parser.js"(exports2, module2) {
     "use strict";
-    var constants4 = require_constants();
+    var constants5 = require_constants();
     var CrcCalculator = require_crc();
     var Parser = module2.exports = function(options2, dependencies) {
       this._options = options2;
@@ -7753,12 +7753,12 @@ var require_parser = __commonJS({
       this._palette = [];
       this._colorType = 0;
       this._chunks = {};
-      this._chunks[constants4.TYPE_IHDR] = this._handleIHDR.bind(this);
-      this._chunks[constants4.TYPE_IEND] = this._handleIEND.bind(this);
-      this._chunks[constants4.TYPE_IDAT] = this._handleIDAT.bind(this);
-      this._chunks[constants4.TYPE_PLTE] = this._handlePLTE.bind(this);
-      this._chunks[constants4.TYPE_tRNS] = this._handleTRNS.bind(this);
-      this._chunks[constants4.TYPE_gAMA] = this._handleGAMA.bind(this);
+      this._chunks[constants5.TYPE_IHDR] = this._handleIHDR.bind(this);
+      this._chunks[constants5.TYPE_IEND] = this._handleIEND.bind(this);
+      this._chunks[constants5.TYPE_IDAT] = this._handleIDAT.bind(this);
+      this._chunks[constants5.TYPE_PLTE] = this._handlePLTE.bind(this);
+      this._chunks[constants5.TYPE_tRNS] = this._handleTRNS.bind(this);
+      this._chunks[constants5.TYPE_gAMA] = this._handleGAMA.bind(this);
       this.read = dependencies.read;
       this.error = dependencies.error;
       this.metadata = dependencies.metadata;
@@ -7773,10 +7773,10 @@ var require_parser = __commonJS({
       };
     };
     Parser.prototype.start = function() {
-      this.read(constants4.PNG_SIGNATURE.length, this._parseSignature.bind(this));
+      this.read(constants5.PNG_SIGNATURE.length, this._parseSignature.bind(this));
     };
     Parser.prototype._parseSignature = function(data) {
-      let signature = constants4.PNG_SIGNATURE;
+      let signature = constants5.PNG_SIGNATURE;
       for (let i = 0; i < signature.length; i++) {
         if (data[i] !== signature[i]) {
           this.error(new Error("Invalid file signature"));
@@ -7793,7 +7793,7 @@ var require_parser = __commonJS({
         name2 += String.fromCharCode(data[i]);
       }
       let ancillary = Boolean(data[4] & 32);
-      if (!this._hasIHDR && type !== constants4.TYPE_IHDR) {
+      if (!this._hasIHDR && type !== constants5.TYPE_IHDR) {
         this.error(new Error("Expected IHDR on beggining"));
         return;
       }
@@ -7841,7 +7841,7 @@ var require_parser = __commonJS({
         this.error(new Error("Unsupported bit depth " + depth));
         return;
       }
-      if (!(colorType in constants4.COLORTYPE_TO_BPP_MAP)) {
+      if (!(colorType in constants5.COLORTYPE_TO_BPP_MAP)) {
         this.error(new Error("Unsupported color type"));
         return;
       }
@@ -7858,16 +7858,16 @@ var require_parser = __commonJS({
         return;
       }
       this._colorType = colorType;
-      let bpp = constants4.COLORTYPE_TO_BPP_MAP[this._colorType];
+      let bpp = constants5.COLORTYPE_TO_BPP_MAP[this._colorType];
       this._hasIHDR = true;
       this.metadata({
         width,
         height,
         depth,
         interlace: Boolean(interlace),
-        palette: Boolean(colorType & constants4.COLORTYPE_PALETTE),
-        color: Boolean(colorType & constants4.COLORTYPE_COLOR),
-        alpha: Boolean(colorType & constants4.COLORTYPE_ALPHA),
+        palette: Boolean(colorType & constants5.COLORTYPE_PALETTE),
+        color: Boolean(colorType & constants5.COLORTYPE_COLOR),
+        alpha: Boolean(colorType & constants5.COLORTYPE_ALPHA),
         bpp,
         colorType
       });
@@ -7891,7 +7891,7 @@ var require_parser = __commonJS({
     };
     Parser.prototype._parseTRNS = function(data) {
       this._crc.write(data);
-      if (this._colorType === constants4.COLORTYPE_PALETTE_COLOR) {
+      if (this._colorType === constants5.COLORTYPE_PALETTE_COLOR) {
         if (this._palette.length === 0) {
           this.error(new Error("Transparency chunk must be after palette"));
           return;
@@ -7905,10 +7905,10 @@ var require_parser = __commonJS({
         }
         this.palette(this._palette);
       }
-      if (this._colorType === constants4.COLORTYPE_GRAYSCALE) {
+      if (this._colorType === constants5.COLORTYPE_GRAYSCALE) {
         this.transColor([data.readUInt16BE(0)]);
       }
-      if (this._colorType === constants4.COLORTYPE_COLOR) {
+      if (this._colorType === constants5.COLORTYPE_COLOR) {
         this.transColor([
           data.readUInt16BE(0),
           data.readUInt16BE(2),
@@ -7922,7 +7922,7 @@ var require_parser = __commonJS({
     };
     Parser.prototype._parseGAMA = function(data) {
       this._crc.write(data);
-      this.gamma(data.readUInt32BE(0) / constants4.GAMMA_DIVISION);
+      this.gamma(data.readUInt32BE(0) / constants5.GAMMA_DIVISION);
       this._handleChunkEnd();
     };
     Parser.prototype._handleIDAT = function(length) {
@@ -7934,7 +7934,7 @@ var require_parser = __commonJS({
     };
     Parser.prototype._parseIDAT = function(length, data) {
       this._crc.write(data);
-      if (this._colorType === constants4.COLORTYPE_PALETTE_COLOR && this._palette.length === 0) {
+      if (this._colorType === constants5.COLORTYPE_PALETTE_COLOR && this._palette.length === 0) {
         throw new Error("Expected palette not found");
       }
       this.inflateData(data);
@@ -8422,9 +8422,9 @@ var require_parser_async = __commonJS({
 var require_bitpacker = __commonJS({
   "node_modules/pngjs/lib/bitpacker.js"(exports2, module2) {
     "use strict";
-    var constants4 = require_constants();
+    var constants5 = require_constants();
     module2.exports = function(dataIn, width, height, options2) {
-      let outHasAlpha = [constants4.COLORTYPE_COLOR_ALPHA, constants4.COLORTYPE_ALPHA].indexOf(
+      let outHasAlpha = [constants5.COLORTYPE_COLOR_ALPHA, constants5.COLORTYPE_ALPHA].indexOf(
         options2.colorType
       ) !== -1;
       if (options2.colorType === options2.inputColorType) {
@@ -8444,11 +8444,11 @@ var require_bitpacker = __commonJS({
       }
       let data = options2.bitDepth !== 16 ? dataIn : new Uint16Array(dataIn.buffer);
       let maxValue = 255;
-      let inBpp = constants4.COLORTYPE_TO_BPP_MAP[options2.inputColorType];
+      let inBpp = constants5.COLORTYPE_TO_BPP_MAP[options2.inputColorType];
       if (inBpp === 4 && !options2.inputHasAlpha) {
         inBpp = 3;
       }
-      let outBpp = constants4.COLORTYPE_TO_BPP_MAP[options2.colorType];
+      let outBpp = constants5.COLORTYPE_TO_BPP_MAP[options2.colorType];
       if (options2.bitDepth === 16) {
         maxValue = 65535;
         outBpp *= 2;
@@ -8472,24 +8472,24 @@ var require_bitpacker = __commonJS({
         let blue;
         let alpha = maxValue;
         switch (options2.inputColorType) {
-          case constants4.COLORTYPE_COLOR_ALPHA:
+          case constants5.COLORTYPE_COLOR_ALPHA:
             alpha = data[inIndex + 3];
             red = data[inIndex];
             green = data[inIndex + 1];
             blue = data[inIndex + 2];
             break;
-          case constants4.COLORTYPE_COLOR:
+          case constants5.COLORTYPE_COLOR:
             red = data[inIndex];
             green = data[inIndex + 1];
             blue = data[inIndex + 2];
             break;
-          case constants4.COLORTYPE_ALPHA:
+          case constants5.COLORTYPE_ALPHA:
             alpha = data[inIndex + 1];
             red = data[inIndex];
             green = red;
             blue = red;
             break;
-          case constants4.COLORTYPE_GRAYSCALE:
+          case constants5.COLORTYPE_GRAYSCALE:
             red = data[inIndex];
             green = red;
             blue = red;
@@ -8522,8 +8522,8 @@ var require_bitpacker = __commonJS({
         for (let x = 0; x < width; x++) {
           let rgba = getRGBA(data, inIndex);
           switch (options2.colorType) {
-            case constants4.COLORTYPE_COLOR_ALPHA:
-            case constants4.COLORTYPE_COLOR:
+            case constants5.COLORTYPE_COLOR_ALPHA:
+            case constants5.COLORTYPE_COLOR:
               if (options2.bitDepth === 8) {
                 outData[outIndex] = rgba.red;
                 outData[outIndex + 1] = rgba.green;
@@ -8540,8 +8540,8 @@ var require_bitpacker = __commonJS({
                 }
               }
               break;
-            case constants4.COLORTYPE_ALPHA:
-            case constants4.COLORTYPE_GRAYSCALE: {
+            case constants5.COLORTYPE_ALPHA:
+            case constants5.COLORTYPE_GRAYSCALE: {
               let grayscale = (rgba.red + rgba.green + rgba.blue) / 3;
               if (options2.bitDepth === 8) {
                 outData[outIndex] = grayscale;
@@ -8714,7 +8714,7 @@ var require_filter_pack = __commonJS({
 var require_packer = __commonJS({
   "node_modules/pngjs/lib/packer.js"(exports2, module2) {
     "use strict";
-    var constants4 = require_constants();
+    var constants5 = require_constants();
     var CrcStream = require_crc();
     var bitPacker = require_bitpacker();
     var filter = require_filter_pack();
@@ -8727,23 +8727,23 @@ var require_packer = __commonJS({
       options2.inputHasAlpha = options2.inputHasAlpha != null ? options2.inputHasAlpha : true;
       options2.deflateFactory = options2.deflateFactory || zlib4.createDeflate;
       options2.bitDepth = options2.bitDepth || 8;
-      options2.colorType = typeof options2.colorType === "number" ? options2.colorType : constants4.COLORTYPE_COLOR_ALPHA;
-      options2.inputColorType = typeof options2.inputColorType === "number" ? options2.inputColorType : constants4.COLORTYPE_COLOR_ALPHA;
+      options2.colorType = typeof options2.colorType === "number" ? options2.colorType : constants5.COLORTYPE_COLOR_ALPHA;
+      options2.inputColorType = typeof options2.inputColorType === "number" ? options2.inputColorType : constants5.COLORTYPE_COLOR_ALPHA;
       if ([
-        constants4.COLORTYPE_GRAYSCALE,
-        constants4.COLORTYPE_COLOR,
-        constants4.COLORTYPE_COLOR_ALPHA,
-        constants4.COLORTYPE_ALPHA
+        constants5.COLORTYPE_GRAYSCALE,
+        constants5.COLORTYPE_COLOR,
+        constants5.COLORTYPE_COLOR_ALPHA,
+        constants5.COLORTYPE_ALPHA
       ].indexOf(options2.colorType) === -1) {
         throw new Error(
           "option color type:" + options2.colorType + " is not supported at present"
         );
       }
       if ([
-        constants4.COLORTYPE_GRAYSCALE,
-        constants4.COLORTYPE_COLOR,
-        constants4.COLORTYPE_COLOR_ALPHA,
-        constants4.COLORTYPE_ALPHA
+        constants5.COLORTYPE_GRAYSCALE,
+        constants5.COLORTYPE_COLOR,
+        constants5.COLORTYPE_COLOR_ALPHA,
+        constants5.COLORTYPE_ALPHA
       ].indexOf(options2.inputColorType) === -1) {
         throw new Error(
           "option input color type:" + options2.inputColorType + " is not supported at present"
@@ -8767,7 +8767,7 @@ var require_packer = __commonJS({
     };
     Packer.prototype.filterData = function(data, width, height) {
       let packedData = bitPacker(data, width, height, this._options);
-      let bpp = constants4.COLORTYPE_TO_BPP_MAP[this._options.colorType];
+      let bpp = constants5.COLORTYPE_TO_BPP_MAP[this._options.colorType];
       let filteredData = filter(packedData, width, height, this._options, bpp);
       return filteredData;
     };
@@ -8787,8 +8787,8 @@ var require_packer = __commonJS({
     };
     Packer.prototype.packGAMA = function(gamma) {
       let buf = Buffer.alloc(4);
-      buf.writeUInt32BE(Math.floor(gamma * constants4.GAMMA_DIVISION), 0);
-      return this._packChunk(constants4.TYPE_gAMA, buf);
+      buf.writeUInt32BE(Math.floor(gamma * constants5.GAMMA_DIVISION), 0);
+      return this._packChunk(constants5.TYPE_gAMA, buf);
     };
     Packer.prototype.packIHDR = function(width, height) {
       let buf = Buffer.alloc(13);
@@ -8799,13 +8799,13 @@ var require_packer = __commonJS({
       buf[10] = 0;
       buf[11] = 0;
       buf[12] = 0;
-      return this._packChunk(constants4.TYPE_IHDR, buf);
+      return this._packChunk(constants5.TYPE_IHDR, buf);
     };
     Packer.prototype.packIDAT = function(data) {
-      return this._packChunk(constants4.TYPE_IDAT, data);
+      return this._packChunk(constants5.TYPE_IDAT, data);
     };
     Packer.prototype.packIEND = function() {
-      return this._packChunk(constants4.TYPE_IEND, null);
+      return this._packChunk(constants5.TYPE_IEND, null);
     };
   }
 });
@@ -8816,7 +8816,7 @@ var require_packer_async = __commonJS({
     "use strict";
     var util2 = require("util");
     var Stream = require("stream");
-    var constants4 = require_constants();
+    var constants5 = require_constants();
     var Packer = require_packer();
     var PackerAsync = module2.exports = function(opt) {
       Stream.call(this);
@@ -8827,7 +8827,7 @@ var require_packer_async = __commonJS({
     };
     util2.inherits(PackerAsync, Stream);
     PackerAsync.prototype.pack = function(data, width, height, gamma) {
-      this.emit("data", Buffer.from(constants4.PNG_SIGNATURE));
+      this.emit("data", Buffer.from(constants5.PNG_SIGNATURE));
       this.emit("data", this._packer.packIHDR(width, height));
       if (gamma) {
         this.emit("data", this._packer.packGAMA(gamma));
@@ -9155,7 +9155,7 @@ var require_packer_sync = __commonJS({
     if (!zlib4.deflateSync) {
       hasSyncZlib = false;
     }
-    var constants4 = require_constants();
+    var constants5 = require_constants();
     var Packer = require_packer();
     module2.exports = function(metaData, opt) {
       if (!hasSyncZlib) {
@@ -9166,7 +9166,7 @@ var require_packer_sync = __commonJS({
       let options2 = opt || {};
       let packer = new Packer(options2);
       let chunks = [];
-      chunks.push(Buffer.from(constants4.PNG_SIGNATURE));
+      chunks.push(Buffer.from(constants5.PNG_SIGNATURE));
       chunks.push(packer.packIHDR(metaData.width, metaData.height));
       if (metaData.gamma) {
         chunks.push(packer.packGAMA(metaData.gamma));
@@ -9464,8 +9464,8 @@ var require_b4a = __commonJS({
     function concat(buffers, totalLength) {
       return Buffer.concat(buffers, totalLength);
     }
-    function copy(source3, target2, targetStart, start, end) {
-      return toBuffer(source3).copy(target2, targetStart, start, end);
+    function copy(source3, target3, targetStart, start, end) {
+      return toBuffer(source3).copy(target3, targetStart, start, end);
     }
     function equals(a, b) {
       return toBuffer(a).equals(b);
@@ -11510,7 +11510,7 @@ var require_extract = __commonJS({
 // node_modules/tar-stream/constants.js
 var require_constants2 = __commonJS({
   "node_modules/tar-stream/constants.js"(exports2, module2) {
-    var constants4 = {
+    var constants5 = {
       // just for envs without fs
       S_IFMT: 61440,
       S_IFDIR: 16384,
@@ -11520,9 +11520,9 @@ var require_constants2 = __commonJS({
       S_IFLNK: 40960
     };
     try {
-      module2.exports = require("fs").constants || constants4;
+      module2.exports = require("fs").constants || constants5;
     } catch {
-      module2.exports = constants4;
+      module2.exports = constants5;
     }
   }
 });
@@ -11532,7 +11532,7 @@ var require_pack = __commonJS({
   "node_modules/tar-stream/pack.js"(exports2, module2) {
     var { Readable, Writable, getStreamError } = require_streamx();
     var b4a = require_b4a();
-    var constants4 = require_constants2();
+    var constants5 = require_constants2();
     var headers = require_headers();
     var DMODE = 493;
     var FMODE = 420;
@@ -11735,16 +11735,16 @@ var require_pack = __commonJS({
       return new Pack(opts);
     };
     function modeToType(mode) {
-      switch (mode & constants4.S_IFMT) {
-        case constants4.S_IFBLK:
+      switch (mode & constants5.S_IFMT) {
+        case constants5.S_IFBLK:
           return "block-device";
-        case constants4.S_IFCHR:
+        case constants5.S_IFCHR:
           return "character-device";
-        case constants4.S_IFDIR:
+        case constants5.S_IFDIR:
           return "directory";
-        case constants4.S_IFIFO:
+        case constants5.S_IFIFO:
           return "fifo";
-        case constants4.S_IFLNK:
+        case constants5.S_IFLNK:
           return "symlink";
       }
       return "file";
@@ -11801,16 +11801,16 @@ var require_conventions = __commonJS({
     function hasOwn(object3, key3) {
       return Object.prototype.hasOwnProperty.call(object3, key3);
     }
-    function assign(target2, source3) {
-      if (target2 === null || typeof target2 !== "object") {
+    function assign(target3, source3) {
+      if (target3 === null || typeof target3 !== "object") {
         throw new TypeError("target is not an object");
       }
       for (var key3 in source3) {
         if (hasOwn(source3, key3)) {
-          target2[key3] = source3[key3];
+          target3[key3] = source3[key3];
         }
       }
-      return target2;
+      return target3;
     }
     var HTML_BOOLEAN_ATTRIBUTES = freeze({
       allowfullscreen: true,
@@ -14063,11 +14063,11 @@ var require_dom = __commonJS({
        * @see https://dom.spec.whatwg.org/#dom-document-createprocessinginstruction
        * @see https://www.w3.org/TR/DOM-Parsing/#dfn-concept-serialize-xml §3.2.1.7
        */
-      createProcessingInstruction: function(target2, data) {
+      createProcessingInstruction: function(target3, data) {
         var node2 = new ProcessingInstruction(PDC);
         node2.ownerDocument = this;
         node2.childNodes = new NodeList();
-        node2.nodeName = node2.target = target2;
+        node2.nodeName = node2.target = target3;
         node2.nodeValue = node2.data = data;
         return node2;
       },
@@ -17654,10 +17654,10 @@ var require_sax = __commonJS({
       }
       return elStartEnd + 1;
     }
-    function _copy(source3, target2) {
+    function _copy(source3, target3) {
       for (var n2 in source3) {
         if (hasOwn(source3, n2)) {
-          target2[n2] = source3[n2];
+          target3[n2] = source3[n2];
         }
       }
     }
@@ -18061,8 +18061,8 @@ var require_dom_parser = __commonJS({
       },
       endPrefixMapping: function(prefix) {
       },
-      processingInstruction: function(target2, data) {
-        var ins = this.doc.createProcessingInstruction(target2, data);
+      processingInstruction: function(target3, data) {
+        var ins = this.doc.createProcessingInstruction(target3, data);
         this.locator && position(this.locator, ins);
         appendElement(this, ins);
       },
@@ -18622,8 +18622,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path15, errorMaps, issueData } = params;
-  const fullPath = [...path15, ...issueData.path || []];
+  const { data, path: path16, errorMaps, issueData } = params;
+  const fullPath = [...path16, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -18738,11 +18738,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path15, key3) {
+  constructor(parent, value, path16, key3) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path15;
+    this._path = path16;
     this._key = key3;
   }
   get path() {
@@ -19068,8 +19068,8 @@ var ZodType = class {
       description
     });
   }
-  pipe(target2) {
-    return ZodPipeline.create(this, target2);
+  pipe(target3) {
+    return ZodPipeline.create(this, target3);
   }
   readonly() {
     return ZodReadonly.create(this);
@@ -22628,8 +22628,8 @@ function defineLazy(object3, key3, getter) {
 function objectClone(obj) {
   return Object.create(Object.getPrototypeOf(obj), Object.getOwnPropertyDescriptors(obj));
 }
-function assignProp(target2, prop, value) {
-  Object.defineProperty(target2, prop, {
+function assignProp(target3, prop, value) {
+  Object.defineProperty(target3, prop, {
     value,
     writable: true,
     enumerable: true,
@@ -22643,8 +22643,8 @@ function rawShape(def) {
 function sourceShape(schema) {
   return rawShape(schema._zod.def) ?? schema._zod.def.shape;
 }
-function deferProp(target2, key3, getter) {
-  Object.defineProperty(target2, key3, {
+function deferProp(target3, key3, getter) {
+  Object.defineProperty(target3, key3, {
     get() {
       const value = getter();
       assignProp(this, key3, value);
@@ -22654,36 +22654,36 @@ function deferProp(target2, key3, getter) {
     configurable: true
   });
 }
-function putProp(target2, key3, value) {
-  if (key3 in target2)
-    assignProp(target2, key3, value);
+function putProp(target3, key3, value) {
+  if (key3 in target3)
+    assignProp(target3, key3, value);
   else
-    target2[key3] = value;
+    target3[key3] = value;
 }
-function mirrorShape(target2, source3, keys, wrap) {
+function mirrorShape(target3, source3, keys, wrap) {
   const raw = sourceShape(source3);
   for (const key3 of keys) {
     const desc = Object.getOwnPropertyDescriptor(raw, key3);
     if (!desc.enumerable)
       continue;
     if (desc.get) {
-      deferProp(target2, key3, () => {
+      deferProp(target3, key3, () => {
         const value = source3._zod.def.shape[key3];
         return wrap ? wrap(value, key3) : value;
       });
     } else
-      putProp(target2, key3, wrap ? wrap(desc.value, key3) : desc.value);
+      putProp(target3, key3, wrap ? wrap(desc.value, key3) : desc.value);
   }
 }
-function mirrorProps(target2, source3) {
+function mirrorProps(target3, source3) {
   for (const key3 of Reflect.ownKeys(source3)) {
     const desc = Object.getOwnPropertyDescriptor(source3, key3);
     if (!desc.enumerable)
       continue;
     if (desc.get)
-      deferProp(target2, key3, () => source3[key3]);
+      deferProp(target3, key3, () => source3[key3]);
     else
-      putProp(target2, key3, desc.value);
+      putProp(target3, key3, desc.value);
   }
 }
 function mergeDefs(...defs) {
@@ -22697,10 +22697,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path15) {
-  if (!path15)
+function getElementAtPath(obj, path16) {
+  if (!path16)
     return obj;
-  return path15.reduce((acc, key3) => acc?.[key3], obj);
+  return path16.reduce((acc, key3) => acc?.[key3], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -22862,35 +22862,35 @@ function normalizeParams(_params) {
   return params;
 }
 function createTransparentProxy(getter) {
-  let target2;
+  let target3;
   return new Proxy({}, {
     get(_, prop, receiver) {
-      target2 ?? (target2 = getter());
-      return Reflect.get(target2, prop, receiver);
+      target3 ?? (target3 = getter());
+      return Reflect.get(target3, prop, receiver);
     },
     set(_, prop, value, receiver) {
-      target2 ?? (target2 = getter());
-      return Reflect.set(target2, prop, value, receiver);
+      target3 ?? (target3 = getter());
+      return Reflect.set(target3, prop, value, receiver);
     },
     has(_, prop) {
-      target2 ?? (target2 = getter());
-      return Reflect.has(target2, prop);
+      target3 ?? (target3 = getter());
+      return Reflect.has(target3, prop);
     },
     deleteProperty(_, prop) {
-      target2 ?? (target2 = getter());
-      return Reflect.deleteProperty(target2, prop);
+      target3 ?? (target3 = getter());
+      return Reflect.deleteProperty(target3, prop);
     },
     ownKeys(_) {
-      target2 ?? (target2 = getter());
-      return Reflect.ownKeys(target2);
+      target3 ?? (target3 = getter());
+      return Reflect.ownKeys(target3);
     },
     getOwnPropertyDescriptor(_, prop) {
-      target2 ?? (target2 = getter());
-      return Reflect.getOwnPropertyDescriptor(target2, prop);
+      target3 ?? (target3 = getter());
+      return Reflect.getOwnPropertyDescriptor(target3, prop);
     },
     defineProperty(_, prop, descriptor) {
-      target2 ?? (target2 = getter());
-      return Reflect.defineProperty(target2, prop, descriptor);
+      target3 ?? (target3 = getter());
+      return Reflect.defineProperty(target3, prop, descriptor);
     }
   });
 }
@@ -23040,11 +23040,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path15, issues) {
+function prefixIssues(path16, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path15);
+    iss.path.unshift(path16);
     return iss;
   });
 }
@@ -23373,10 +23373,10 @@ function $constructor(name2, initializer3, proto, params) {
       let up = own2;
       while (up && up !== ctorProto)
         up = Object.getPrototypeOf(up);
-      const target2 = up ?? own2;
-      if (!initialized.has(target2)) {
-        initialized.add(target2);
-        members(target2, protoMembers);
+      const target3 = up ?? own2;
+      if (!initialized.has(target3)) {
+        initialized.add(target3);
+        members(target3, protoMembers);
       }
     }
     const proto2 = _.prototype;
@@ -23506,16 +23506,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path15 = []) => {
+  const processError = (error63, path16 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path15, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path16, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path16, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path16, ...issue2.path]);
       } else {
-        const fullpath = [...path15, ...issue2.path];
+        const fullpath = [...path16, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -23554,17 +23554,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path15 = []) => {
+  const processError = (error63, path16 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path15, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path16, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path16, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path16, ...issue2.path]);
       } else {
-        const fullpath = [...path15, ...issue2.path];
+        const fullpath = [...path16, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -23603,8 +23603,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path15 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path15) {
+  const path16 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path16) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -34888,8 +34888,8 @@ function withParser(schema, parser) {
     installCompiledUserMethods(clone2, schema, parser);
   return clone2;
 }
-function installCompiledUserMethods(target2, source3, parser) {
-  const targetAny = target2;
+function installCompiledUserMethods(target3, source3, parser) {
+  const targetAny = target3;
   const sourceAny = source3;
   if (typeof sourceAny.safeParse === "function") {
     const originalSafeParse = sourceAny.safeParse;
@@ -37492,26 +37492,26 @@ function _stringFormat(Class2, format, fnOrRegex, _params = {}) {
 }
 
 // node_modules/zod/v4/core/to-json-schema.js
-function assignProps(target2, ...sources) {
+function assignProps(target3, ...sources) {
   for (const source3 of sources) {
     for (const key3 of Reflect.ownKeys(source3)) {
       if (Object.prototype.propertyIsEnumerable.call(source3, key3)) {
-        assignProp(target2, key3, source3[key3]);
+        assignProp(target3, key3, source3[key3]);
       }
     }
   }
-  return target2;
+  return target3;
 }
 function initializeContext(params) {
-  let target2 = params?.target ?? "draft-2020-12";
-  if (target2 === "draft-4")
-    target2 = "draft-04";
-  if (target2 === "draft-7")
-    target2 = "draft-07";
+  let target3 = params?.target ?? "draft-2020-12";
+  if (target3 === "draft-4")
+    target3 = "draft-04";
+  if (target3 === "draft-7")
+    target3 = "draft-07";
   return {
     processors: params.processors ?? {},
     metadataRegistry: params?.metadata ?? globalRegistry,
-    target: target2,
+    target: target3,
     unrepresentable: params?.unrepresentable ?? "throw",
     override: params?.override ?? (() => {
     }),
@@ -38014,8 +38014,8 @@ var createToJSONSchemaMethod = (schema, processors = {}) => (params) => {
   return finalize(ctx, schema);
 };
 var createStandardJSONSchemaMethod = (schema, io, processors = {}) => (params) => {
-  const { libraryOptions, target: target2 } = params ?? {};
-  const ctx = initializeContext({ ...libraryOptions ?? {}, target: target2, io, processors });
+  const { libraryOptions, target: target3 } = params ?? {};
+  const ctx = initializeContext({ ...libraryOptions ?? {}, target: target3, io, processors });
   processSchema(schema, ctx);
   extractDefs(ctx, schema);
   return finalize(ctx, schema);
@@ -39155,11 +39155,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path15) {
-  if (path15.length === 0) {
+function getDotPath(path16) {
+  if (path16.length === 0) {
     return "object root";
   }
-  return path15.reduce((acc, seg, index) => {
+  return path16.reduce((acc, seg, index) => {
     if (index === 0) {
       return String(seg);
     }
@@ -39853,8 +39853,8 @@ var ZodType2 = /* @__PURE__ */ $constructor("ZodType", (inst, def) => {
   catch(params) {
     return _catch2(this, params);
   },
-  pipe(target2) {
-    return pipe(this, target2);
+  pipe(target3) {
+    return pipe(this, target3);
   },
   readonly() {
     return readonly(this);
@@ -41386,13 +41386,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path15 = ref.slice(1).split("/").filter(Boolean);
-  if (path15.length === 0) {
+  const path16 = ref.slice(1).split("/").filter(Boolean);
+  if (path16.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path15[0] === defsKey) {
-    const key3 = path15[1] === void 0 ? void 0 : decodeJSONPointerSegment(path15[1]);
+  if (path16[0] === defsKey) {
+    const key3 = path16[1] === void 0 ? void 0 : decodeJSONPointerSegment(path16[1]);
     if (!key3 || !ctx.defs[key3]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -47756,8 +47756,8 @@ function parseCountedList(text2) {
   if (count !== lines.length) throw new Error("vmrun list count does not match its output.");
   return lines;
 }
-function isWithin(root, target2) {
-  const relative = import_node_path3.default.relative(root, target2);
+function isWithin(root, target3) {
+  const relative = import_node_path3.default.relative(root, target3);
   return relative === "" || !relative.startsWith(`..${import_node_path3.default.sep}`) && relative !== ".." && !import_node_path3.default.isAbsolute(relative);
 }
 var Workstation = class {
@@ -47771,16 +47771,22 @@ var Workstation = class {
   async executable() {
     return findVMwareExecutable("vmrun", { env: this.env });
   }
-  async run(args, { mutation = false, authentication = [], timeout: timeout4 = 12e4 } = {}) {
+  async run(args, { mutation = false, authentication = [], timeout: timeout4 = 12e4, deadline, signal } = {}) {
     if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
     const job = this.tail.then(async () => {
       if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
       const binary = await this.executable();
+      signal?.throwIfAborted();
+      if (deadline !== void 0) {
+        timeout4 = Math.min(timeout4, Math.floor(deadline - performance.now()));
+        if (timeout4 <= 0) throw Object.assign(new Error("Observation deadline expired while waiting for vmrun."), { code: "OBSERVATION_DEADLINE" });
+      }
       try {
         const result = await this.execute(binary, ["-T", "ws", ...authentication, ...args], {
           windowsHide: true,
           shell: false,
           timeout: timeout4,
+          signal,
           maxBuffer: 1024 * 1024,
           encoding: "utf8"
         });
@@ -47793,7 +47799,13 @@ var Workstation = class {
     });
     this.tail = job.catch(() => {
     });
-    return job;
+    if (!signal) return job;
+    return new Promise((resolve, reject) => {
+      const abort = () => reject(signal.reason || new Error("Operation cancelled."));
+      if (signal.aborted) abort();
+      else signal.addEventListener("abort", abort, { once: true });
+      job.then(resolve, reject).finally(() => signal.removeEventListener("abort", abort));
+    });
   }
   async help() {
     const binary = await this.executable();
@@ -48067,7 +48079,7 @@ var Credentials = class {
     const canonical = (value) => process.platform === "win32" ? import_node_path5.default.resolve(value).toLowerCase() : import_node_path5.default.resolve(value);
     const profiles = file3.console || {};
     const resolved = await Promise.all(Object.entries(profiles).map(async ([name3, entry2]) => [name3, typeof entry2?.vmx === "string" ? await import_promises4.default.realpath(entry2.vmx).catch(() => entry2.vmx) : null]));
-    const matches = resolved.filter(([, target2]) => target2 && canonical(target2) === canonical(vmx3));
+    const matches = resolved.filter(([, target3]) => target3 && canonical(target3) === canonical(vmx3));
     if (!requestedProfile && matches.length > 1) throw new Error("Multiple console profiles identify this VM. Use its configured profile alias as vm_id.");
     const name2 = this.profile(requestedProfile || matches[0]?.[0] || "default");
     const entry = profiles[name2];
@@ -54879,8 +54891,9 @@ var OvfManager = class {
   }
   async status() {
     let scratch;
+    let executable;
     try {
-      const executable = await this.executable();
+      executable = await this.executable();
       scratch = await import_promises12.default.mkdtemp(import_node_path10.default.join(import_node_os3.default.tmpdir(), "vmware-ovf-status-"));
       const config2 = import_node_path10.default.join(scratch, "empty.conf");
       await import_promises12.default.writeFile(config2, "", { mode: 384 });
@@ -54897,9 +54910,9 @@ var OvfManager = class {
       const flags2 = ["machineOutput", "schemaValidate", "sourceType", "targetType", "hideEula", "name", "net", "prop", "deploymentOption", "acceptAllEulas", "configFile"];
       const supported = Object.fromEntries(flags2.map((flag2) => [flag2, new RegExp(`--${flag2}\\b`).test(help)]));
       supported.noPrompting = debug.includes("--X:noPrompting");
-      return { available: true, executable, configured_path: this.backend.env.VMWARE_OVFTOOL_PATH || null, version: version2, supported_flags: supported, local_conversions: ["OVF/OVA \u2192 VMX", "VMX \u2192 OVF/OVA", "OVF/OVA \u2192 OVF/OVA"], limitations: limits };
+      return { available: true, executable, executable_discovered: true, help_verified: true, live_support: "unknown", configured_path: this.backend.env.VMWARE_OVFTOOL_PATH || null, version: version2, supported_flags: supported, local_conversions: ["OVF/OVA \u2192 VMX", "VMX \u2192 OVF/OVA", "OVF/OVA \u2192 OVF/OVA"], limitations: limits };
     } catch (error62) {
-      return { available: false, configured_path: this.backend.env.VMWARE_OVFTOOL_PATH || null, error: error62.message, setting: "VMWARE_OVFTOOL_PATH must be an absolute path to ovftool.exe (Windows) or ovftool (Linux)." };
+      return { available: false, executable: executable || null, executable_discovered: !!executable, help_verified: false, live_support: "unknown", configured_path: this.backend.env.VMWARE_OVFTOOL_PATH || null, error: error62.message, setting: "VMWARE_OVFTOOL_PATH must be an absolute path to ovftool.exe (Windows) or ovftool (Linux)." };
     } finally {
       if (scratch) await removeTemporary(scratch, import_node_os3.default.tmpdir(), "vmware-ovf-status-");
     }
@@ -54921,22 +54934,22 @@ var OvfManager = class {
     if (!["ovf", "ova", "vmx"].includes(ext) || ["ovf_inspect", "ovf_validate", "ovf_import"].includes(operation) && ext === "vmx") throw new Error("This operation requires a local OVF/OVA appliance.");
     let destination;
     let directory;
-    let target2;
+    let target3;
     if (operation === "ovf_import") {
       directory = await this.backend.hostPath(a.directory, "destination-directory");
       destination = import_node_path10.default.join(directory, "machine.vmx");
-      target2 = "vmx";
+      target3 = "vmx";
     } else if (a.destination) {
-      target2 = import_node_path10.default.extname(a.destination).slice(1).toLowerCase();
-      if (!["ovf", "ova", "vmx"].includes(target2) || ext === "vmx" && target2 === "vmx" || operation === "ovf_export" && target2 === "vmx") throw new Error("Supported targets are OVF/OVA, or VMX imported from OVF/OVA.");
+      target3 = import_node_path10.default.extname(a.destination).slice(1).toLowerCase();
+      if (!["ovf", "ova", "vmx"].includes(target3) || ext === "vmx" && target3 === "vmx" || operation === "ovf_export" && target3 === "vmx") throw new Error("Supported targets are OVF/OVA, or VMX imported from OVF/OVA.");
       destination = await this.backend.hostPath(a.destination, "output-file", a.overwrite);
       localName(import_node_path10.default.basename(destination));
       directory = import_node_path10.default.dirname(destination);
-      if (target2 === "vmx") await this.backend.hostPath(directory, "destination-directory");
+      if (target3 === "vmx") await this.backend.hostPath(directory, "destination-directory");
     }
     if (destination) {
-      if (key(destination) === key(inputPath) || target2 !== "ova" && isWithin(directory, inputPath)) throw new Error("Source must be outside the output directory.");
-      if (target2 === "ova") {
+      if (key(destination) === key(inputPath) || target3 !== "ova" && isWithin(directory, inputPath)) throw new Error("Source must be outside the output directory.");
+      if (target3 === "ova") {
         await this.backend.hostPath(directory, "directory");
         const original = await exists(a.destination || destination);
         if (original?.isSymbolicLink() || original && !original.isFile()) throw new Error("OVA overwrite requires a regular file, never a link or directory.");
@@ -54951,7 +54964,7 @@ var OvfManager = class {
       operation,
       resources: [key(import_node_path10.default.dirname(inputPath)), ...directory ? [key(directory)] : []],
       timeout: a.timeout_seconds * 1e3,
-      task: (context) => this.backend.resources.use([ext === "vmx" ? import_node_path10.default.dirname(inputPath) : inputPath, ...directory ? [directory] : []], () => this.perform(operation, { ...a, source: inputPath, destination, directory, target: target2, ext }, status, context))
+      task: (context) => this.backend.resources.use([ext === "vmx" ? import_node_path10.default.dirname(inputPath) : inputPath, ...directory ? [directory] : []], () => this.perform(operation, { ...a, source: inputPath, destination, directory, target: target3, ext }, status, context))
     });
   }
   async vmSource(vmx3) {
@@ -55388,9 +55401,10 @@ var DiskManager = class {
     this.space = space;
   }
   async status() {
+    let executable;
     try {
       const beside = await this.backend.executable().catch(() => void 0);
-      const executable = await findVMwareExecutable("vmware-vdiskmanager", { env: this.backend.env, beside });
+      executable = await findVMwareExecutable("vmware-vdiskmanager", { env: this.backend.env, beside });
       let output2;
       const options2 = { shell: false, windowsHide: true, timeout: 15e3, maxBuffer: 1024 * 1024, encoding: "utf8" };
       try {
@@ -55403,9 +55417,9 @@ var DiskManager = class {
       if (!/Virtual Disk Manager/i.test(output2 || "") || !/Usage:/i.test(output2)) fail("CAPABILITY_UNAVAILABLE", "Cannot read installed disk-manager help. Check installation and permissions.");
       const supported_flags = [...output2.matchAll(/^\s+(-[A-Za-z])(?:\s|$)/gm)].map((m) => m[1]);
       const diskTypes = [...output2.split(/Disk types:/i)[1]?.matchAll(/^\s+([0-6])\s+:\s*(.+)$/gm) || []].map((m) => ({ id: m[1], description: m[2].trim() }));
-      return { available: true, executable, version: output2.split(/\r?\n/)[0], supported_flags, disk_types: diskTypes, operations: Object.fromEntries(Object.entries(flags).map(([op, flag2]) => [op, supported_flags.includes(flag2)])) };
+      return { available: true, executable, executable_discovered: true, help_verified: true, live_support: "unknown", version: output2.split(/\r?\n/)[0], supported_flags, disk_types: diskTypes, operations: Object.fromEntries(Object.entries(flags).map(([op, flag2]) => [op, supported_flags.includes(flag2)])) };
     } catch (e2) {
-      return { available: false, code: "CAPABILITY_UNAVAILABLE", message: e2.message, action: "Install native VMware Workstation or set VMWARE_VDISKMANAGER_PATH to its absolute executable path." };
+      return { available: false, executable: executable || null, executable_discovered: !!executable, help_verified: false, live_support: "unknown", code: "CAPABILITY_UNAVAILABLE", message: e2.message, action: "Install native VMware Workstation or set VMWARE_VDISKMANAGER_PATH to its absolute executable path." };
     }
   }
   async available(operation, diskType) {
@@ -56061,6 +56075,280 @@ var SerialManager = class {
   }
 };
 
+// src/readiness.mjs
+var import_promises16 = __toESM(require("node:fs/promises"), 1);
+var import_node_fs5 = require("node:fs");
+var import_node_path15 = __toESM(require("node:path"), 1);
+var import_node_net4 = __toESM(require("node:net"), 1);
+var import_node_http = __toESM(require("node:http"), 1);
+var import_node_https = __toESM(require("node:https"), 1);
+var import_promises17 = require("node:timers/promises");
+var target2 = { vmx: external_exports.string().min(1), vm_password_profile: external_exports.string().optional() };
+var wait = { ...target2, timeout_seconds: external_exports.number().int().min(1).max(600).default(120), poll_interval_ms: external_exports.number().int().min(100).max(1e4).default(1e3) };
+var readinessSchemas = {
+  vm_wait_for_boot: external_exports.object(wait).strict(),
+  vm_wait_for_ip: external_exports.object(wait).strict(),
+  vm_wait_for_service: external_exports.object({ ...wait, port: external_exports.number().int().min(1).max(65535), protocol: external_exports.enum(["tcp", "http", "https"]).default("tcp"), path: external_exports.string().max(1024).regex(/^\/(?!\/)[^\x00-\x20#]*$/).default("/"), expected_status: external_exports.number().int().min(200).max(599).default(200) }).strict(),
+  vm_get_recent_errors: external_exports.object({ ...target2, max_bytes: external_exports.number().int().min(1024).max(262144).default(32768), max_entries: external_exports.number().int().min(1).max(200).default(50) }).strict(),
+  vm_collect_diagnostics: external_exports.object({ ...target2, destination_directory: external_exports.string().min(1), include_console: external_exports.boolean().default(false), max_log_bytes: external_exports.number().int().min(1024).max(262144).default(32768) }).strict()
+};
+var categories = [
+  ["lock_contention", /failed to lock|cannot lock|already in use|resource busy|lock contention/i, "Close competing VMware writers; inspect ownership before retrying. Never delete locks automatically."],
+  ["disk_error", /disk.*(?:error|failed|cannot|not found)|cannot open.*disk|no space|disk full|DISKLIB.*(?:error|failed)/i, "Check selected VM disk paths, free space and backing-chain access while offline."],
+  ["nic_misconfiguration", /(?:ethernet|network adapter|vnet|vmnet).*(?:failed|error|not found|not connected|invalid)/i, "Inspect the selected adapter connection, VMnet or LAN segment and guest IP configuration."],
+  ["boot_failure", /no bootable|operating system not found|boot.*(?:failed|failure)|PXE-E\d+/i, "Inspect guest-only VNC evidence and selected boot firmware/media."],
+  ["capability_unavailable", /not found.*vmrun|vmrun.*not found|not supported|unsupported|not installed/i, "Inspect workstation_capabilities and install/configure the required native utility."]
+];
+function failureCategory(text2) {
+  return categories.find(([, pattern]) => pattern.test(String(text2)))?.[0] || "observation_unavailable";
+}
+var actionFor = (category) => categories.find(([name2]) => name2 === category)?.[2] || "Inspect the selected VM state, Tools configuration and native utility availability.";
+var same = (a, b) => process.platform === "win32" ? a.toLowerCase() === b.toLowerCase() : a === b;
+function routableGuestIP(address) {
+  if (import_node_net4.default.isIPv4(address)) {
+    const parts = address.split(".").map(Number);
+    return parts[0] !== 0 && parts[0] !== 127 && parts[0] < 224 && !(parts[0] === 169 && parts[1] === 254);
+  }
+  return import_node_net4.default.isIPv6(address) && /^(?:[23][0-9a-f]{3}|f[cd][0-9a-f]{2}):/i.test(address);
+}
+async function probeService({ address, port, protocol, path: requestPath, expected_status }, { timeout: timeout4, signal }) {
+  return new Promise((resolve) => {
+    let channel;
+    let timer;
+    const finish = (result) => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", abort);
+      channel?.destroy();
+      resolve(result);
+    };
+    const abort = () => finish({ ready: false, state: "unknown", category: "observation_cancelled" });
+    if (signal?.aborted) return abort();
+    signal?.addEventListener("abort", abort, { once: true });
+    timer = setTimeout(() => finish({ ready: false, state: "application_unready", category: "service_timeout" }), timeout4);
+    if (protocol === "tcp") {
+      channel = import_node_net4.default.createConnection({ host: address, port });
+      channel.once("connect", () => finish({ ready: true, state: "running", evidence: "tcp_connection_accepted" }));
+    } else {
+      channel = (protocol === "https" ? import_node_https.default : import_node_http.default).request({ hostname: address, port, method: "GET", path: requestPath, agent: false, maxHeaderSize: 8192 }, (response) => {
+        const status = response.statusCode;
+        response.destroy();
+        finish({ ready: status === expected_status, state: status === expected_status ? "running" : "application_unready", evidence: "http_status", status });
+      });
+      channel.end();
+    }
+    channel.once("error", (error62) => finish({ ready: false, state: ["ENETUNREACH", "EHOSTUNREACH"].includes(error62.code) ? "network_unavailable" : "application_unready", category: "service_unavailable" }));
+  });
+}
+var Readiness = class {
+  constructor({ backend: backend2, credentials: credentials2, consoles: consoles2, protectFile, probe = probeService } = {}) {
+    Object.assign(this, { backend: backend2, credentials: credentials2, consoles: consoles2, protectFile, probe });
+  }
+  async config(vmx3) {
+    const handle = await import_promises16.default.open(vmx3, "r");
+    try {
+      if ((await handle.stat()).size > 1024 * 1024) throw new Error("Selected VMX exceeds diagnostic size limit.");
+      const bytes = Buffer.alloc(1024 * 1024 + 1);
+      const { bytesRead } = await handle.read(bytes, 0, bytes.length, 0);
+      if (bytesRead > 1024 * 1024) throw new Error("Selected VMX exceeds diagnostic size limit.");
+      return Object.fromEntries(Object.entries(parseAssignments(bytes.subarray(0, bytesRead).toString("utf8"))).map(([key3, value]) => [key3.toLowerCase(), value]));
+    } finally {
+      await handle.close();
+    }
+  }
+  async authentication(a) {
+    return a.vm_password_profile ? ["-vp", await this.credentials.vm(a.vm_password_profile)] : [];
+  }
+  async observation(vmx3, config2, options2, { includeIP = true } = {}) {
+    const run = (command, args = []) => this.backend.run([command, ...command === "list" ? [] : [vmx3], ...args], options2);
+    let running;
+    try {
+      running = parseCountedList(await run("list"));
+    } catch (error62) {
+      if (error62.code === "OBSERVATION_DEADLINE") return { expired: true, state: "unknown", lifecycle: "unknown", category: "observation_timeout" };
+      const category = failureCategory(error62.message);
+      return { state: "unknown", lifecycle: "unknown", category, action: actionFor(category) };
+    }
+    const paths = await Promise.all(running.map((file3) => import_promises16.default.realpath(file3).catch(() => file3)));
+    if (!paths.some((file3) => same(file3, vmx3))) {
+      for (const field of ["checkpoint.vmstate", "suspend.filename"]) {
+        const saved = config2[field];
+        if (saved) {
+          const candidate = import_node_path15.default.resolve(import_node_path15.default.dirname(vmx3), saved);
+          if (!isWithin(import_node_path15.default.dirname(vmx3), candidate)) return { state: "unknown", lifecycle: "unknown", category: "external_saved_state" };
+          const stat = await import_promises16.default.lstat(candidate).catch(() => null);
+          if (stat?.isFile() && !stat.isSymbolicLink()) return { state: "suspended", lifecycle: "suspended" };
+          return { state: "unknown", lifecycle: "unknown", category: "saved_state_unavailable" };
+        }
+      }
+      const names2 = await import_promises16.default.readdir(import_node_path15.default.dirname(vmx3));
+      if (names2.some((name2) => /\.vmss$/i.test(name2))) return { state: "unknown", lifecycle: "unknown", category: "saved_state_unattributed" };
+      if (names2.some((name2) => /\.lck$/i.test(name2))) return { state: "unknown", lifecycle: "unknown", category: "lock_contention", action: actionFor("lock_contention") };
+      return { state: "powered_off", lifecycle: "powered_off", evidence: "not_listed_no_saved_state_or_lock", confidence: "inferred" };
+    }
+    const result = { lifecycle: "running", state: "tools_unavailable", tools: "unknown", address: null };
+    try {
+      const tools = await run("checkToolsState");
+      result.tools = ["running", "installed", "unknown"].includes(tools) ? tools : "unknown";
+    } catch (error62) {
+      result.category = failureCategory(error62.message);
+    }
+    if (result.tools === "running") result.state = "running";
+    if (!includeIP) return result;
+    try {
+      const address = (await run("getGuestIPAddress")).trim();
+      if (import_node_net4.default.isIP(address)) result.address = address;
+    } catch {
+    }
+    if (result.tools === "running" && !result.address) result.state = "network_unavailable";
+    return result;
+  }
+  async wait(kind, input2, { signal } = {}) {
+    const a = readinessSchemas[`vm_wait_for_${kind}`].parse(input2);
+    const deadline = performance.now() + a.timeout_seconds * 1e3;
+    const timerController = new AbortController();
+    const timer = setTimeout(() => timerController.abort(), a.timeout_seconds * 1e3);
+    const totalSignal = AbortSignal.any([timerController.signal, ...signal ? [signal] : []]);
+    try {
+      const vmx3 = await this.backend.vmx(a.vmx);
+      const config2 = await this.config(vmx3);
+      const authentication = await this.authentication(a);
+      let attempts = 0;
+      let last = { state: "unknown", lifecycle: "unknown" };
+      let expiredAttempt = false;
+      const start = performance.now();
+      while (performance.now() < deadline && !totalSignal.aborted) {
+        attempts++;
+        const observed = await this.observation(vmx3, config2, { authentication, deadline, signal: totalSignal, timeout: Math.max(1, Math.min(5e3, Math.floor(deadline - performance.now()))) }, { includeIP: kind !== "boot" });
+        if (observed.expired) {
+          expiredAttempt = true;
+          break;
+        }
+        if (totalSignal.aborted || performance.now() >= deadline) break;
+        last = observed;
+        if (last.lifecycle === "running" && last.tools !== "running") {
+          const logs = await this.logs(vmx3, 4096, 10);
+          if (logs.boot_progress) last.state = "booting";
+        }
+        let ready = kind === "boot" ? last.tools === "running" : !!last.address;
+        if (kind === "service") {
+          ready = false;
+          if (last.address && routableGuestIP(last.address) && !totalSignal.aborted) {
+            const service = await this.probe({ ...a, address: last.address }, { timeout: Math.max(1, Math.min(3e3, Math.floor(deadline - performance.now()))), signal: totalSignal });
+            last = { ...last, state: service.state, service };
+            ready = service.ready;
+          } else if (last.address) last = { ...last, state: "network_unavailable", category: "unsafe_service_address" };
+        }
+        if (ready && !totalSignal.aborted && performance.now() < deadline) return { result: "ready", ready: true, timed_out: false, criterion: kind, attempts, elapsed_ms: Math.round(performance.now() - start), ...last };
+        if (["powered_off", "suspended"].includes(last.state)) break;
+        await (0, import_promises17.setTimeout)(Math.max(1, Math.min(a.poll_interval_ms, deadline - performance.now())), void 0, { signal: totalSignal }).catch(() => {
+        });
+      }
+      const cancelled2 = !!signal?.aborted;
+      const timedOut = !cancelled2 && (expiredAttempt || totalSignal.aborted || performance.now() >= deadline);
+      return { result: cancelled2 ? "cancelled" : timedOut ? "timed_out" : "not_ready", ready: false, timed_out: timedOut, criterion: kind, attempts, elapsed_ms: Math.round(performance.now() - start), ...last };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  async logs(vmx3, maxBytes, maxEntries) {
+    let handle;
+    try {
+      const filename = import_node_path15.default.join(import_node_path15.default.dirname(vmx3), "vmware.log");
+      const entry = await import_promises16.default.lstat(filename);
+      if (!entry.isFile() || entry.isSymbolicLink() || entry.nlink !== 1) throw new Error();
+      handle = await import_promises16.default.open(filename, import_node_fs5.constants.O_RDONLY | (import_node_fs5.constants.O_NOFOLLOW || 0) | (import_node_fs5.constants.O_NONBLOCK || 0));
+      const stat = await handle.stat();
+      if (!stat.isFile() || stat.nlink !== 1 || stat.ino !== entry.ino || process.platform !== "win32" && stat.dev !== entry.dev) throw new Error();
+      const head = Buffer.alloc(Math.min(65536, stat.size));
+      await handle.read(head, 0, head.length, 0);
+      const identities = [...head.toString("utf8").matchAll(/Config file:\s*([^\r\n]+)/gi)].map((match) => match[1].trim().replace(/^"|"$/g, ""));
+      if (!identities.length || !identities.every((value) => import_node_path15.default.isAbsolute(value) && same(import_node_path15.default.normalize(value), import_node_path15.default.normalize(vmx3)))) return { available: false, category: "log_identity_unverified", entries: [] };
+      const length = Math.min(maxBytes, stat.size);
+      const bytes = Buffer.alloc(length);
+      const offset = stat.size - length;
+      const { bytesRead } = await handle.read(bytes, 0, length, offset);
+      const lines = bytes.subarray(0, bytesRead).toString("utf8").split(/\r?\n/);
+      if (offset) lines.shift();
+      const events = [];
+      for (const line of lines) {
+        const category = failureCategory(line);
+        if (category !== "observation_unavailable" || /\b(?:error|failed|warning|panic)\b/i.test(line)) {
+          events.push({ category, excerpt: category === "observation_unavailable" ? "VMware reported an unclassified error or warning; raw text omitted." : `VMware reported ${category.replaceAll("_", " ")}.`, action: actionFor(category) });
+        }
+      }
+      return { available: true, bytes_scanned: bytesRead, truncated: offset > 0 || events.length > maxEntries, entries: events.slice(-maxEntries), boot_progress: Date.now() - stat.mtimeMs < 3e5 && lines.some((line) => /(?:BIOS|EFI|firmware).*(?:boot|start)|PowerOn.*(?:success|complete)|VMX.*powering on/i.test(line)) };
+    } catch {
+      return { available: false, category: "log_unavailable", entries: [] };
+    } finally {
+      await handle?.close();
+    }
+  }
+  async recentErrors(input2) {
+    const a = readinessSchemas.vm_get_recent_errors.parse(input2);
+    return this.logs(await this.backend.vmx(a.vmx), a.max_bytes, a.max_entries);
+  }
+  hardware(config2) {
+    const summary = {};
+    for (const [key3, value] of Object.entries(config2)) {
+      if (/^(memsize|numvcpus|virtualhw.version)$/.test(key3) && /^\d{1,9}$/.test(value)) summary[key3] = Number(value);
+      if (key3 === "firmware" && /^(bios|efi)$/i.test(value)) summary[key3] = value.toLowerCase();
+      if (/^ethernet\d{1,2}\.(present|startconnected)$/.test(key3) && /^(true|false)$/i.test(value)) summary[key3] = value.toLowerCase() === "true";
+      if (/^ethernet\d{1,2}\.connectiontype$/.test(key3) && /^(nat|bridged|hostonly|custom|pvn|none)$/i.test(value)) summary[key3] = value.toLowerCase();
+      if (/^(scsi|sata|ide|nvme)\d{1,2}:\d{1,2}\.present$/.test(key3) && /^(true|false)$/i.test(value)) summary[key3] = value.toLowerCase() === "true";
+    }
+    return summary;
+  }
+  async collect(input2, { signal } = {}) {
+    const a = readinessSchemas.vm_collect_diagnostics.parse(input2);
+    const roots = this.backend.env.VMWARE_DIAGNOSTICS_ROOTS || this.backend.env.VMWARE_ALLOWED_HOST_ROOTS;
+    if (!roots) throw new Error("Configure VMWARE_DIAGNOSTICS_ROOTS or VMWARE_ALLOWED_HOST_ROOTS before saving diagnostics.");
+    const allowed = roots.split(import_node_path15.default.delimiter).filter(Boolean);
+    if (!allowed.length || allowed.some((root) => !import_node_path15.default.isAbsolute(root))) throw new Error("Diagnostic roots must be existing absolute directories.");
+    const directory = await this.backend.hostPath(a.destination_directory, "host-destination-directory");
+    const canonical = await Promise.all(allowed.map((root) => import_promises16.default.realpath(root)));
+    if (!canonical.some((root) => isWithin(root, directory) && !same(root, directory))) throw new Error("Diagnostic destination must be a NEW directory inside an approved root.");
+    const vmx3 = await this.backend.vmx(a.vmx);
+    const config2 = await this.config(vmx3);
+    const deadline = performance.now() + 3e4;
+    const totalSignal = AbortSignal.any([AbortSignal.timeout(3e4), ...signal ? [signal] : []]);
+    const options2 = { authentication: await this.authentication(a), timeout: 5e3, deadline, signal: totalSignal };
+    const report = { format_version: 1, captured_at: (/* @__PURE__ */ new Date()).toISOString(), target: "selected-vm", hardware: this.hardware(config2), lifecycle: await this.observation(vmx3, config2, options2), logs: await this.logs(vmx3, a.max_log_bytes, 100), snapshots: { available: false }, console: { included: false }, omissions: ["Raw VMX, disk paths, snapshot names, free-form logs, guest output, credentials and host inventory are excluded."] };
+    if (report.lifecycle.lifecycle === "running" && report.lifecycle.tools !== "running" && report.logs.boot_progress) report.lifecycle.state = "booting";
+    report.application = { state: "unknown", note: "No service probe or guest command was requested by this collection." };
+    for (const [key3, value] of Object.entries(report.hardware)) if (/^ethernet\d+\.(present|startconnected)$/.test(key3) && value === false) report.logs.entries.push({ category: "nic_misconfiguration", excerpt: "Selected adapter is disabled or disconnected at power-on.", action: actionFor("nic_misconfiguration") });
+    try {
+      const snapshots = parseCountedList(await this.backend.run(["listSnapshots", vmx3], options2));
+      report.snapshots = { available: true, count: snapshots.length, entries: snapshots.slice(0, 100).map((_, index) => ({ index, name: "[REDACTED]" })), truncated: snapshots.length > 100 };
+    } catch {
+      report.snapshots = { available: false, category: "observation_unavailable" };
+    }
+    let image;
+    if (a.include_console) {
+      try {
+        if (totalSignal.aborted) throw new Error();
+        const evidence = await this.consoles.screenshot(vmx3);
+        image = evidence.content.find((block) => block.type === "image" && block.mimeType === "image/png");
+        if (!image || image.data.length > 14 * 1024 * 1024) throw new Error();
+        report.console = { included: true, file: "guest-console.png", transport: "direct RFB", redacted: false, note: "Opt-in guest pixels may contain sensitive information. Review before sharing." };
+      } catch {
+        image = void 0;
+        report.console = { included: false, category: "console_unavailable", action: "Use console_status and the offline VNC setup guide. No desktop fallback." };
+      }
+    }
+    signal?.throwIfAborted();
+    await import_promises16.default.mkdir(directory, { mode: 448 });
+    const write = async (name2, data) => {
+      if (!same(await import_promises16.default.realpath(directory), directory) || !(await import_promises16.default.lstat(directory)).isDirectory()) throw new Error("Diagnostic directory changed; no further data will be written.");
+      const filename = import_node_path15.default.join(directory, name2);
+      await import_promises16.default.writeFile(filename, data, { flag: "wx", mode: 384 });
+      await this.protectFile(filename);
+    };
+    await write("diagnostics.json", JSON.stringify(report, (key3, value) => typeof value === "string" ? this.credentials.redact(value) : value, 2) + "\n");
+    if (image) await write("guest-console.png", Buffer.from(image.data, "base64"));
+    return { directory, files: ["diagnostics.json", ...image ? ["guest-console.png"] : []], report };
+  }
+};
+
 // src/server.mjs
 var backend = new Workstation();
 var credentials = new Credentials();
@@ -56072,9 +56360,17 @@ var jobs = new JobManager({ redact: (text2) => credentials.redact(text2) });
 var ovf = new OvfManager({ backend, credentials, jobs, rest });
 var disks = new DiskManager({ backend, vmFiles });
 var serial = new SerialManager({ backend, vmFiles, credentials, rest });
-var server = new McpServer({ name: "vmware-workstation", version: "0.7.0" });
+var readiness = new Readiness({ backend, credentials, consoles, protectFile: localFileProtector(backend) });
+var server = new McpServer({ name: "vmware-workstation", version: "0.8.0" });
 var vmx2 = external_exports.string().min(1).describe("Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.");
 var name = external_exports.string().min(1).max(256).describe("Exact snapshot name.");
+for (const kind of ["boot", "ip", "service"]) tool(`vm_wait_for_${kind}`, {
+  boot: "Wait for VMware Tools running in the selected VM, indicating OS agent readiness only. Power-on, login and application readiness are separate. Bounded total timeout, polling and MCP cancellation; never starts a VM.",
+  ip: "Wait for a valid guest IP published by VMware Tools. Does not establish network reachability or service readiness. Bounded total timeout and cancellation; never starts a VM.",
+  service: "Probe only the selected VM Tools-reported IP and explicit port. TCP means connection accepted; HTTP(S) means expected status, with no redirects or retained body/headers. Does not execute guest commands. Bounded deadline and cancellation."
+}[kind], readinessSchemas[`vm_wait_for_${kind}`], true, (a, extra) => readiness.wait(kind, a, extra), false, kind === "service");
+tool("vm_get_recent_errors", "Read bounded current vmware.log data only after verifying its selected VM identity. Returns normalized error excerpts and actions; arbitrary log text/paths/secrets are omitted. No host log scan.", readinessSchemas.vm_get_recent_errors, true, (a) => readiness.recentErrors(a));
+tool("vm_collect_diagnostics", "Save selected VM allowlisted hardware, lifecycle, Tools/IP, snapshot count and normalized log excerpts into a NEW approved directory. Optional direct VNC guest pixels are unredacted: review before sharing. Never captures host desktop or executes guest commands.", readinessSchemas.vm_collect_diagnostics, false, (a, extra) => readiness.collect(a, extra), false, false, false);
 function tool(name2, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false, idempotent = readOnly) {
   server.registerTool(name2, {
     description,
@@ -56158,10 +56454,20 @@ for (const operation of restOperations) {
   tool(restToolName(operation), `${operation.category}: ${operation.id}. Calls ${operation.method} ${operation.path} on the configured Workstation REST service.`, restSchema(operation), operation.method === "GET", (a) => rest.execute(operation, a));
 }
 tool("workstation_capabilities", "Show full vmrun/REST tool coverage, compare the installed vmrun help against the implemented catalog, and report REST configuration without exposing secrets.", {}, true, async () => {
-  const help = await backend.help();
+  let help = "";
+  let executable;
+  let vmrunCapability;
+  try {
+    executable = await backend.executable();
+    help = await backend.help();
+    vmrunCapability = { executable, executable_discovered: true, help_verified: true, live_support: "unknown" };
+  } catch {
+    vmrunCapability = { executable: executable || null, executable_discovered: !!executable, help_verified: false, live_support: "unknown", category: "capability_unavailable", action: "Install native VMware Workstation or configure VMRUN_PATH; discovery does not prove hypervisor support." };
+  }
   const installed = [...help.split("Examples:")[0].matchAll(/^([A-Za-z]\w+)\s{2,}.+$/gm)].map((match) => match[1]).filter((value) => !["Usage", "COMMAND", "POWER", "SNAPSHOT", "HOST", "GUEST", "GENERAL", "Template"].includes(value));
   return {
     vmrunVersion: help.match(/vmrun version ([\w.]+)/)?.[1] || null,
+    vmrunCapability,
     referenceVersion: vmrun_help_default.version,
     vmrunCommands: commands.map((c) => ({ command: c.command, tool: `vmrun_${snake(c.command)}` })),
     unimplementedInstalledCommands: installed.filter((name2) => !commands.some((c) => c.command === name2)),
@@ -56179,6 +56485,8 @@ tool("workstation_capabilities", "Show full vmrun/REST tool coverage, compare th
     backgroundJobTools: Object.keys(jobSchemas),
     diskManager: await disks.status(),
     diskTools: Object.keys(diskSchemas),
+    readinessTools: Object.keys(readinessSchemas),
+    capabilityEvidence: { diskManager: "Installed help when available; no live disk operation is performed.", ovfTool: "Installed version/help when available; no live appliance operation is performed.", nativeHypervisor: "not_proven_by_discovery", firmwareBoot: { configurable: ["bios", "efi", "bootOrder", "bootDelay", "forceSetupOnce"], evidence: "VMX configuration implementation; not a live firmware test", liveSupport: "unknown", consoleRequires: "Explicit per-VM native VNC setup; console_status proves only that VM connection." } },
     note: "Coverage describes callable implementations. It does not prove a REST service is running, credentials work, or guest operations succeed."
   };
 });

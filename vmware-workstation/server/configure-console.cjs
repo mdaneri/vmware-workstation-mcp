@@ -150,16 +150,22 @@ var Workstation = class {
   async executable() {
     return findVMwareExecutable("vmrun", { env: this.env });
   }
-  async run(args, { mutation = false, authentication = [], timeout = 12e4 } = {}) {
+  async run(args, { mutation = false, authentication = [], timeout = 12e4, deadline, signal } = {}) {
     if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
     const job = this.tail.then(async () => {
       if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
       const binary = await this.executable();
+      signal?.throwIfAborted();
+      if (deadline !== void 0) {
+        timeout = Math.min(timeout, Math.floor(deadline - performance.now()));
+        if (timeout <= 0) throw Object.assign(new Error("Observation deadline expired while waiting for vmrun."), { code: "OBSERVATION_DEADLINE" });
+      }
       try {
         const result = await this.execute(binary, ["-T", "ws", ...authentication, ...args], {
           windowsHide: true,
           shell: false,
           timeout,
+          signal,
           maxBuffer: 1024 * 1024,
           encoding: "utf8"
         });
@@ -172,7 +178,13 @@ var Workstation = class {
     });
     this.tail = job.catch(() => {
     });
-    return job;
+    if (!signal) return job;
+    return new Promise((resolve, reject) => {
+      const abort = () => reject(signal.reason || new Error("Operation cancelled."));
+      if (signal.aborted) abort();
+      else signal.addEventListener("abort", abort, { once: true });
+      job.then(resolve, reject).finally(() => signal.removeEventListener("abort", abort));
+    });
   }
   async help() {
     const binary = await this.executable();

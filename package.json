@@ -1,6 +1,6 @@
 {
   "name": "vmware-workstation-plugin-dev",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "license": "MIT",
   "repository": {
@@ -19,7 +19,8 @@
     "prepackage": "npm run build && npm run validate",
     "package": "node scripts/package-plugin.mjs",
     "test:disk:live": "node scripts/live-disks.mjs",
-    "test:serial:live": "node scripts/live-serial.mjs"
+    "test:serial:live": "node scripts/live-serial.mjs",
+    "test:readiness:live": "node scripts/live-readiness.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.2",
