@@ -258,18 +258,9 @@ export class LabManager {
         // implicitly, recursively remove directories, or invoke deleteVM.
         const inventory = await this.backend.listVMs();
         if (inventory.warnings.length) fail('INVENTORY_UNAVAILABLE', 'Restore inventory before safe teardown.');
-        const ownedDisks = new Set(m.vms.flatMap(v => v.files.filter(f => /\.vmdk$/i.test(f.path)).map(f => this.backend.resources.key(path.resolve(root, f.path)))));
+        const labVMs = new Set(m.vms.map(v => this.backend.resources.key(path.join(root, v.id, 'machine.vmx'))));
         for (const vm of inventory.vms) {
-          if (m.vms.some(v => this.backend.resources.key(path.join(root, v.id, 'machine.vmx')) === this.backend.resources.key(vm.vmx))) {
-            if (vm.registered) fail('VM_REGISTERED', 'Unregister lab VMs explicitly before destroying their files.');
-            continue;
-          }
-          if (!vm.exists) continue;
-          const vmx = await this.backend.vmx(vm.vmx), { config } = await readHardware(vmx);
-          for (const [key, value] of Object.entries(config)) if (/\.filename$/.test(key) && /\.vmdk$/i.test(value)) {
-            const disk = await fs.realpath(path.resolve(path.dirname(vmx), value));
-            if (ownedDisks.has(this.backend.resources.key(disk))) fail('SHARED_DISK', 'Another known VM references a lab-owned disk; it was retained.');
-          }
+          if (labVMs.has(this.backend.resources.key(vm.vmx)) && vm.registered) fail('VM_REGISTERED', 'Unregister lab VMs explicitly before destroying their files.');
         }
         for (const v of m.vms) if (!['pending', 'destroyed'].includes(v.state)) {
           if (!['created', 'destroying'].includes(v.state)) fail('UNCERTAIN_RESOURCE', 'Uncertain VM creation must be inspected manually before teardown.');
@@ -282,6 +273,21 @@ export class LabManager {
           if ((await this.inventory(path.join(root, v.id), root)).some(f => !known.has(f.path) && /\.(?:vmdk|vmx)$/i.test(f.path))) fail('UNKNOWN_STORAGE', 'Unexpected VM/disk artifacts require manual inspection before teardown.');
         }
         if (m.segments.some(s => !['created', 'removed'].includes(s.state))) fail('UNCERTAIN_RESOURCE', 'Uncertain network creation must be inspected manually.');
+        // Include complete unregistered lab VMs in the disk manager's inventory
+        // checks. A different VMX can name a child/descendant or a separate
+        // descriptor sharing an extent, rather than the owned parent itself.
+        const vmxPaths = [];
+        for (const v of m.vms) {
+          const vmx = path.join(root, v.id, 'machine.vmx');
+          if (['created', 'destroying'].includes(v.state) && await exists(vmx)) vmxPaths.push(vmx);
+        }
+        for (const v of m.vms) if (['created', 'destroying'].includes(v.state)) for (const f of v.files) {
+          if (f.directory || !/\.vmdk$/i.test(f.path)) continue;
+          const disk = path.resolve(root, f.path); if (!await exists(disk)) continue;
+          const info = await this.templates.hardware.disks.inspect({ disk });
+          const references = await this.templates.hardware.disks.preflight(info, vmxPaths);
+          if (references.some(r => !labVMs.has(this.backend.resources.key(r.vmx)))) fail('SHARED_DISK', 'Another known VM references a lab-owned disk; it was retained.');
+        }
         m.state = 'destroying'; await this.save(m);
         for (const id of [...m.order].reverse()) {
           extra.signal?.throwIfAborted(); const v = m.vms.find(v => v.id === id);

@@ -72,6 +72,20 @@ require('node:child_process').execFile = stub;
     assert.ok((await call('lab_status',{directory:args.directory})).observations.every(v=>v.running));
     await call('lab_stop',{directory:args.directory,dry_run:false,confirm:true});
     const retained = path.join(args.directory,selected,'user-file.txt'); await fs.writeFile(retained,'keep');
+    if (example === 'two-vm') {
+      const parent = path.join(args.directory, selected, 'disk-0', 'disk.vmdk'), original = await fs.readFile(parent);
+      const external = path.join(root, 'external-chain'); await fs.mkdir(external);
+      const child = path.join(external, 'child.vmdk'), vmx = path.join(external, 'other.vmx');
+      await fs.writeFile(child, '# Disk DescriptorFile\nversion=1\nCID=abcdef12\nparentCID=12345678\ncreateType="monolithicSparse"\nRW 2048 SPARSE "child.vmdk"\nddb.adapterType="lsilogic"\nparentFileNameHint="'+parent.replaceAll('\\','/')+'"\n');
+      await fs.writeFile(vmx, 'scsi0:0.fileName = "child.vmdk"\n');
+      await fs.writeFile(path.join(root,'inventory'), 'vmlist0.config = "'+vmx.replaceAll('\\','/')+'"\n');
+      const blocked = await client.callTool({ name:'lab_destroy', arguments:{directory:args.directory,dry_run:false,confirm:true} });
+      assert.equal(blocked.isError,true); assert.equal(JSON.parse(blocked.content[0].text).failure.code,'UNSAFE_CHAIN');
+      assert.deepEqual(await fs.readFile(parent),original);
+      for (const v of deployed.manifest.vms) await fs.access(path.join(args.directory,v.id,'machine.vmx'));
+      const state = await call('lab_status',{directory:args.directory}); assert.ok(state.manifest.vms.every(v=>v.state==='created'));
+      await fs.writeFile(path.join(root,'inventory'),'');
+    }
     const destroyed = await call('lab_destroy',{directory:args.directory,dry_run:false,confirm:true}); assert.equal(destroyed.manifest.state,'destroyed');
     assert.equal(await fs.readFile(retained,'utf8'),'keep');
     assert.equal(await fs.readFile(iso,'utf8'),'external installer');

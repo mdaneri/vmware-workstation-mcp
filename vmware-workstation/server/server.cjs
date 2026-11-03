@@ -58355,18 +58355,9 @@ var LabManager = class {
         }
         const inventory = await this.backend.listVMs();
         if (inventory.warnings.length) fail2("INVENTORY_UNAVAILABLE", "Restore inventory before safe teardown.");
-        const ownedDisks = new Set(m.vms.flatMap((v) => v.files.filter((f) => /\.vmdk$/i.test(f.path)).map((f) => this.backend.resources.key(import_node_path24.default.resolve(root, f.path)))));
+        const labVMs = new Set(m.vms.map((v) => this.backend.resources.key(import_node_path24.default.join(root, v.id, "machine.vmx"))));
         for (const vm2 of inventory.vms) {
-          if (m.vms.some((v) => this.backend.resources.key(import_node_path24.default.join(root, v.id, "machine.vmx")) === this.backend.resources.key(vm2.vmx))) {
-            if (vm2.registered) fail2("VM_REGISTERED", "Unregister lab VMs explicitly before destroying their files.");
-            continue;
-          }
-          if (!vm2.exists) continue;
-          const vmx3 = await this.backend.vmx(vm2.vmx), { config: config2 } = await readHardware(vmx3);
-          for (const [key3, value] of Object.entries(config2)) if (/\.filename$/.test(key3) && /\.vmdk$/i.test(value)) {
-            const disk = await import_promises25.default.realpath(import_node_path24.default.resolve(import_node_path24.default.dirname(vmx3), value));
-            if (ownedDisks.has(this.backend.resources.key(disk))) fail2("SHARED_DISK", "Another known VM references a lab-owned disk; it was retained.");
-          }
+          if (labVMs.has(this.backend.resources.key(vm2.vmx)) && vm2.registered) fail2("VM_REGISTERED", "Unregister lab VMs explicitly before destroying their files.");
         }
         for (const v of m.vms) if (!["pending", "destroyed"].includes(v.state)) {
           if (!["created", "destroying"].includes(v.state)) fail2("UNCERTAIN_RESOURCE", "Uncertain VM creation must be inspected manually before teardown.");
@@ -58379,6 +58370,19 @@ var LabManager = class {
           if ((await this.inventory(import_node_path24.default.join(root, v.id), root)).some((f) => !known.has(f.path) && /\.(?:vmdk|vmx)$/i.test(f.path))) fail2("UNKNOWN_STORAGE", "Unexpected VM/disk artifacts require manual inspection before teardown.");
         }
         if (m.segments.some((s2) => !["created", "removed"].includes(s2.state))) fail2("UNCERTAIN_RESOURCE", "Uncertain network creation must be inspected manually.");
+        const vmxPaths = [];
+        for (const v of m.vms) {
+          const vmx3 = import_node_path24.default.join(root, v.id, "machine.vmx");
+          if (["created", "destroying"].includes(v.state) && await exists3(vmx3)) vmxPaths.push(vmx3);
+        }
+        for (const v of m.vms) if (["created", "destroying"].includes(v.state)) for (const f of v.files) {
+          if (f.directory || !/\.vmdk$/i.test(f.path)) continue;
+          const disk = import_node_path24.default.resolve(root, f.path);
+          if (!await exists3(disk)) continue;
+          const info = await this.templates.hardware.disks.inspect({ disk });
+          const references2 = await this.templates.hardware.disks.preflight(info, vmxPaths);
+          if (references2.some((r) => !labVMs.has(this.backend.resources.key(r.vmx)))) fail2("SHARED_DISK", "Another known VM references a lab-owned disk; it was retained.");
+        }
         m.state = "destroying";
         await this.save(m);
         for (const id of [...m.order].reverse()) {

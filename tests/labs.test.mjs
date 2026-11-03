@@ -235,3 +235,44 @@ test('stop never hard-falls back or claims power-off after an unverified native 
   assert.equal(f.running.size, 2);
   assert.equal((await f.manager.read(f.args.directory)).vms.find(v => v.id === 'client').power_intent, 'stop');
 });
+
+for (const kind of ['linked-child', 'linked-grandchild', 'unknown-parent', 'shared-extent']) test(`teardown preserves every VM/disk when an inventoried ${kind} prevents independence`, async t => {
+  const f = await fixture(t); await f.deploy();
+  const m = await f.manager.read(f.args.directory), parent = path.join(f.args.directory, 'gateway', 'disk-0', 'disk.vmdk');
+  const external = path.join(f.root, 'external'); await fs.mkdir(external);
+  let child = path.join(external, 'child.vmdk');
+  const descriptor = (name, cid, parentCID) => `# Disk DescriptorFile\nversion=1\nCID=${cid}\nparentCID=${parentCID}\ncreateType="monolithicSparse"\nRW 2048 SPARSE "${name}"\nddb.adapterType="lsilogic"\n`;
+  const extra = [];
+  if (kind === 'shared-extent') {
+    // Different descriptor in the same directory, with the original extent.
+    child = path.join(path.dirname(parent), 'shared.vmdk');
+    await fs.writeFile(child, descriptor('disk.vmdk', 'abcdef12', 'ffffffff')); extra.push(child);
+  } else {
+    await fs.writeFile(child, descriptor('child.vmdk', 'abcdef12', '12345678') + (kind === 'unknown-parent' ? '' : `parentFileNameHint="${path.relative(external, parent).replaceAll('\\', '/')}"\n`)); extra.push(child);
+    if (kind === 'linked-grandchild') {
+      const grandchild = path.join(external, 'grandchild.vmdk');
+      await fs.writeFile(grandchild, descriptor('grandchild.vmdk', 'cdef1234', 'abcdef12') + 'parentFileNameHint="child.vmdk"\n'); extra.push(grandchild); child = grandchild;
+    }
+  }
+  const vmx = path.join(external, 'other.vmx'); await fs.writeFile(vmx, `scsi0:0.fileName = "${child.replaceAll('\\', '/')}"\n`); extra.push(vmx);
+  await fs.writeFile(f.backend.inventoryPath, `vmlist0.config = "${vmx.replaceAll('\\', '/')}"\n`);
+  f.running.add(vmx);
+  const files = [...m.vms.flatMap(v => v.files.filter(f => !f.directory).map(f => path.join(m.directory, f.path))), ...extra];
+  const before = await Promise.all(files.map(file => fs.readFile(file))), catalog = await fs.readFile(f.lan.filename);
+  await assert.rejects(f.manager.action('destroy', { directory: f.args.directory, dry_run: false, confirm: true }), e => e.code === 'LAB_PARTIAL_FAILURE' && ['UNSAFE_CHAIN', 'UNKNOWN_STORAGE', 'SHARED_DISK'].includes(e.details.failure.code));
+  for (let i = 0; i < files.length; i++) assert.deepEqual(await fs.readFile(files[i]), before[i]);
+  assert.deepEqual(await fs.readFile(f.lan.filename), catalog); assert.deepEqual([...f.running], [vmx]);
+  assert.ok((await f.manager.read(m.directory)).vms.every(v => v.state === 'created'));
+});
+
+test('an unrelated inventoried independent disk stays intact while lab teardown succeeds', async t => {
+  const f = await fixture(t); await f.deploy();
+  const external = path.join(f.root, 'independent'); await fs.mkdir(external);
+  const disk = path.join(external, 'disk.vmdk'), vmx = path.join(external, 'other.vmx');
+  await fs.writeFile(disk, '# Disk DescriptorFile\nversion=1\nCID=abcdef12\nparentCID=ffffffff\ncreateType="monolithicSparse"\nRW 2048 SPARSE "disk.vmdk"\nddb.adapterType="lsilogic"\n');
+  await fs.writeFile(vmx, 'scsi0:0.fileName = "disk.vmdk"\n');
+  await fs.writeFile(f.backend.inventoryPath, `vmlist0.config = "${vmx.replaceAll('\\', '/')}"\n`); f.running.add(vmx);
+  const before = await fs.readFile(disk), beforeVM = await fs.readFile(vmx);
+  assert.equal((await f.manager.action('destroy', { directory: f.args.directory, dry_run: false, confirm: true })).manifest.state, 'destroyed');
+  assert.deepEqual(await fs.readFile(disk), before); assert.deepEqual(await fs.readFile(vmx), beforeVM); assert.deepEqual([...f.running], [vmx]);
+});

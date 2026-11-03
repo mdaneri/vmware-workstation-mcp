@@ -141,6 +141,12 @@ Teardown checks ownership identities, canonical paths, links/hard links, full
 power-off, saved state/locks, snapshots, unexpected VM/disk files, registered lab
 VMs and references to owned disks from other known VMs. Failures retain resources.
 Unregister lab VMs separately if an external workflow registered them.
+Before the first deletion, teardown also reuses the disk manager's conservative
+independence, dependent-chain and shared-extent preflight for every remaining
+tracked VMDK, including references from unregistered lab VMs. An inventoried
+linked/descendant disk with an uncertain backing chain blocks teardown even if
+its VMX does not name an owned parent directly. Unsupported or unreadable disk
+descriptors and extents are retained; no chain independence is guessed.
 
 Only recorded creation files are unlinked; no recursive directory removal or
 `deleteVM` is used. Unexpected user/runtime files are retained, including logs and
