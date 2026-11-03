@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { isIP } from 'node:net';
 import { inventoryPath, findVMwareExecutable } from './host-platform.mjs';
+import { Resources } from './resources.mjs';
 
 const execute = promisify(execFile);
 
@@ -35,6 +36,7 @@ export class Workstation {
     this.execute = run;
     this.tail = Promise.resolve();
     this.inventoryPath = inventoryPath(env);
+    this.resources = new Resources();
   }
 
   async executable() {
@@ -42,7 +44,9 @@ export class Workstation {
   }
 
   async run(args, { mutation = false, authentication = [], timeout = 120000 } = {}) {
+    if (mutation && args[1] && path.isAbsolute(args[1])) this.resources.assert([args[1]]);
     const job = this.tail.then(async () => {
+      if (mutation && args[1] && path.isAbsolute(args[1])) this.resources.assert([args[1]]);
       const binary = await this.executable();
       try {
         const result = await this.execute(binary, ['-T', 'ws', ...authentication, ...args], {
@@ -78,7 +82,7 @@ export class Workstation {
     if (kind === 'directory' && !stat?.isDirectory()) throw new Error('Host directory must already exist.');
     if (kind === 'new-vmx' && (stat || path.extname(absolute).toLowerCase() !== '.vmx')) throw new Error('Clone destination must be a new .vmx file.');
     if (kind === 'output-file' && (stat?.isDirectory() || (stat && !overwrite))) throw new Error('Host destination exists; choose another file or explicitly set overwrite=true.');
-    if (kind === 'destination-directory' && stat && !stat.isDirectory()) throw new Error('Destination must be a directory path.');
+    if (['destination-directory', 'host-destination-directory'].includes(kind) && stat && !stat.isDirectory()) throw new Error('Destination must be a directory path.');
     let ancestor = absolute;
     const missing = [];
     while (true) {

@@ -45,9 +45,10 @@ export function restSchema(operation) {
 }
 
 export class RestClient {
-  constructor({ env = process.env, credentials, backend, fetcher = fetch } = {}) {
+  constructor({ env = process.env, credentials, backend, fetcher = fetch, coordinateDiskEdits = false } = {}) {
     this.env = env; this.credentials = credentials; this.backend = backend; this.fetcher = fetcher;
     this.tail = Promise.resolve();
+    this.coordinateDiskEdits = coordinateDiskEdits;
   }
   baseURL() {
     const url = new URL(this.env.VMWARE_REST_URL || 'http://127.0.0.1:8697');
@@ -113,7 +114,19 @@ export class RestClient {
       if (operation.id === 'createVM' && body?.parentId) await this.assertVM(body.parentId);
       if (operation.id === 'registerVM' && body?.path) body.path = await this.backend.vmx(body.path);
       if (body?.host_path) body.host_path = await this.backend.hostPath(body.host_path, 'directory');
-      const result = await this.request(operation.method, route, { body, password, timeout: a.timeout_seconds * 1000 });
+      const request = () => this.request(operation.method, route, { body, password, timeout: a.timeout_seconds * 1000 });
+      let result;
+      const id = a.id ?? (operation.id === 'createVM' ? body?.parentId : undefined);
+      const coordinate = this.coordinateDiskEdits && ['127.0.0.1', 'localhost', '[::1]'].includes(new URL(this.baseURL()).hostname);
+      if (coordinate && operation.method !== 'GET' && id !== undefined) {
+        const inventory = await this.request('GET', '/api/vms');
+        const record = Array.isArray(inventory.data) && inventory.data.find(vm => vm.id === id);
+        if (!record?.path) throw new Error('Cannot resolve REST VM ID to coordinate safe disk edits. Refresh REST inventory.');
+        const vmx = await this.backend.vmx(record.path);
+        result = await this.backend.resources.use([vmx], request);
+      } else if (coordinate && operation.id === 'registerVM' && body?.path) {
+        result = await this.backend.resources.use([body.path], request);
+      } else result = await request();
       return { operation: operation.id, ...result };
     });
     this.tail = job.catch(() => {});

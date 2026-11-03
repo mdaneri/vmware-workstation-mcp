@@ -69,8 +69,8 @@ export class VMFiles {
   }
   async configure(input, { protectFile, expectedOriginal, beforeCommit } = {}) {
     const a = configureVMSchema.parse(input);
-    return this.exclusive(async () => {
-      const vmx = await this.backend.vmx(a.vmx);
+    const vmx = await this.backend.vmx(a.vmx);
+    return this.backend.resources.use([vmx], async () => {
       const details = await this.backend.details(vmx);
       if (details.running) throw new Error('Power off the VM before editing its VMX.');
       const lock = `${vmx}.lck`;

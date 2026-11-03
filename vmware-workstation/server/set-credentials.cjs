@@ -31,7 +31,7 @@ var import_node_readline = require("node:readline");
 var import_node_child_process = require("node:child_process");
 var import_node_util = require("node:util");
 var import_promises2 = __toESM(require("node:fs/promises"), 1);
-var import_node_path2 = __toESM(require("node:path"), 1);
+var import_node_path3 = __toESM(require("node:path"), 1);
 var import_node_net = require("node:net");
 
 // src/host-platform.mjs
@@ -85,6 +85,37 @@ async function findVMwareExecutable(name, { env = process.env, platform = proces
   throw new Error(`${filename} was not found. Install ${name === "ovftool" ? "VMware OVF Tool" : "VMware Workstation on this host"} or set ${setting}.`);
 }
 
+// src/resources.mjs
+var import_node_async_hooks = require("node:async_hooks");
+var import_node_path2 = __toESM(require("node:path"), 1);
+var Resources = class {
+  constructor() {
+    this.active = /* @__PURE__ */ new Map();
+    this.context = new import_node_async_hooks.AsyncLocalStorage();
+  }
+  key(file) {
+    return process.platform === "win32" ? import_node_path2.default.resolve(file).toLowerCase() : import_node_path2.default.resolve(file);
+  }
+  assert(files) {
+    const owner = this.context.getStore();
+    const overlaps = (a, b) => a === b || a.startsWith(b + import_node_path2.default.sep) || b.startsWith(a + import_node_path2.default.sep);
+    for (const file of files.map((file2) => this.key(file2))) for (const [held, token] of this.active) {
+      if (token !== owner && overlaps(file, held)) throw Object.assign(new Error("A conflicting operation holds this VM or disk path. Wait for it to finish, inspect state, then retry."), { code: "RESOURCE_BUSY" });
+    }
+  }
+  async use(files, callback) {
+    this.assert(files);
+    const token = this.context.getStore() || /* @__PURE__ */ Symbol("resource-owner");
+    const added = files.map((file) => this.key(file)).filter((file) => !this.active.has(file));
+    for (const file of added) this.active.set(file, token);
+    try {
+      return await this.context.run(token, callback);
+    } finally {
+      for (const file of added) this.active.delete(file);
+    }
+  }
+};
+
 // src/workstation.mjs
 var execute = (0, import_node_util.promisify)(import_node_child_process.execFile);
 function parseAssignments(text) {
@@ -103,8 +134,8 @@ function parseCountedList(text) {
   return lines;
 }
 function isWithin(root, target) {
-  const relative = import_node_path2.default.relative(root, target);
-  return relative === "" || !relative.startsWith(`..${import_node_path2.default.sep}`) && relative !== ".." && !import_node_path2.default.isAbsolute(relative);
+  const relative = import_node_path3.default.relative(root, target);
+  return relative === "" || !relative.startsWith(`..${import_node_path3.default.sep}`) && relative !== ".." && !import_node_path3.default.isAbsolute(relative);
 }
 var Workstation = class {
   constructor({ env = process.env, run = execute } = {}) {
@@ -112,12 +143,15 @@ var Workstation = class {
     this.execute = run;
     this.tail = Promise.resolve();
     this.inventoryPath = inventoryPath(env);
+    this.resources = new Resources();
   }
   async executable() {
     return findVMwareExecutable("vmrun", { env: this.env });
   }
   async run(args, { mutation = false, authentication = [], timeout = 12e4 } = {}) {
+    if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
     const job = this.tail.then(async () => {
+      if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
       const binary = await this.executable();
       try {
         const result = await this.execute(binary, ["-T", "ws", ...authentication, ...args], {
@@ -150,8 +184,8 @@ var Workstation = class {
     }
   }
   async hostPath(input, kind, overwrite = false) {
-    if (typeof input !== "string" || !import_node_path2.default.isAbsolute(input) || /[\x00-\x1f]/.test(input)) throw new Error("Host paths must be absolute and contain no control characters.");
-    const absolute = import_node_path2.default.resolve(input);
+    if (typeof input !== "string" || !import_node_path3.default.isAbsolute(input) || /[\x00-\x1f]/.test(input)) throw new Error("Host paths must be absolute and contain no control characters.");
+    const absolute = import_node_path3.default.resolve(input);
     let stat;
     try {
       stat = await import_promises2.default.stat(absolute);
@@ -160,9 +194,9 @@ var Workstation = class {
     }
     if (kind === "input-file" && !stat?.isFile()) throw new Error("Host source must be an existing file.");
     if (kind === "directory" && !stat?.isDirectory()) throw new Error("Host directory must already exist.");
-    if (kind === "new-vmx" && (stat || import_node_path2.default.extname(absolute).toLowerCase() !== ".vmx")) throw new Error("Clone destination must be a new .vmx file.");
+    if (kind === "new-vmx" && (stat || import_node_path3.default.extname(absolute).toLowerCase() !== ".vmx")) throw new Error("Clone destination must be a new .vmx file.");
     if (kind === "output-file" && (stat?.isDirectory() || stat && !overwrite)) throw new Error("Host destination exists; choose another file or explicitly set overwrite=true.");
-    if (kind === "destination-directory" && stat && !stat.isDirectory()) throw new Error("Destination must be a directory path.");
+    if (["destination-directory", "host-destination-directory"].includes(kind) && stat && !stat.isDirectory()) throw new Error("Destination must be a directory path.");
     let ancestor = absolute;
     const missing = [];
     while (true) {
@@ -176,29 +210,29 @@ var Workstation = class {
           return null;
         });
         if (entry?.isSymbolicLink()) throw new Error("Destination contains a dangling link.");
-        const parent = import_node_path2.default.dirname(ancestor);
+        const parent = import_node_path3.default.dirname(ancestor);
         if (parent === ancestor) throw error;
-        missing.unshift(import_node_path2.default.basename(ancestor));
+        missing.unshift(import_node_path3.default.basename(ancestor));
         ancestor = parent;
       }
     }
-    const resolved = import_node_path2.default.join(ancestor, ...missing);
+    const resolved = import_node_path3.default.join(ancestor, ...missing);
     const rootSetting = kind === "new-vmx" || kind === "destination-directory" ? this.env.VMWARE_ALLOWED_ROOTS : this.env.VMWARE_ALLOWED_HOST_ROOTS;
     if (rootSetting) {
-      const roots = rootSetting.split(import_node_path2.default.delimiter).filter(Boolean);
-      if (!roots.length || roots.some((root) => !import_node_path2.default.isAbsolute(root))) throw new Error("Allowed host roots must be absolute.");
+      const roots = rootSetting.split(import_node_path3.default.delimiter).filter(Boolean);
+      if (!roots.length || roots.some((root) => !import_node_path3.default.isAbsolute(root))) throw new Error("Allowed host roots must be absolute.");
       const canonical = await Promise.all(roots.map((root) => import_promises2.default.realpath(root)));
       if (!canonical.some((root) => isWithin(root, resolved))) throw new Error("Host path is outside the configured allowed roots.");
     }
     return resolved;
   }
   async vmx(input) {
-    if (typeof input !== "string" || !import_node_path2.default.isAbsolute(input) || import_node_path2.default.extname(input).toLowerCase() !== ".vmx" || /[\x00-\x1f]/.test(input)) throw new Error("Provide an absolute path to an existing .vmx file.");
+    if (typeof input !== "string" || !import_node_path3.default.isAbsolute(input) || import_node_path3.default.extname(input).toLowerCase() !== ".vmx" || /[\x00-\x1f]/.test(input)) throw new Error("Provide an absolute path to an existing .vmx file.");
     const resolved = await import_promises2.default.realpath(input);
-    if (import_node_path2.default.extname(resolved).toLowerCase() !== ".vmx" || !(await import_promises2.default.stat(resolved)).isFile()) throw new Error("VM target must resolve to a .vmx file.");
+    if (import_node_path3.default.extname(resolved).toLowerCase() !== ".vmx" || !(await import_promises2.default.stat(resolved)).isFile()) throw new Error("VM target must resolve to a .vmx file.");
     if (this.env.VMWARE_ALLOWED_ROOTS) {
-      const roots = this.env.VMWARE_ALLOWED_ROOTS.split(import_node_path2.default.delimiter).filter(Boolean);
-      if (!roots.length || roots.some((root) => !import_node_path2.default.isAbsolute(root))) throw new Error("VMWARE_ALLOWED_ROOTS must contain absolute directories.");
+      const roots = this.env.VMWARE_ALLOWED_ROOTS.split(import_node_path3.default.delimiter).filter(Boolean);
+      if (!roots.length || roots.some((root) => !import_node_path3.default.isAbsolute(root))) throw new Error("VMWARE_ALLOWED_ROOTS must contain absolute directories.");
       const canonicalRoots = await Promise.all(roots.map((root) => import_promises2.default.realpath(root)));
       if (!canonicalRoots.some((root) => isWithin(root, resolved))) throw new Error("VM is outside VMWARE_ALLOWED_ROOTS.");
     }
@@ -211,11 +245,11 @@ var Workstation = class {
   }
   async resolveVM(vmID, { aliases = {}, restInventory } = {}) {
     if (typeof vmID !== "string" || !vmID.trim() || /[\x00-\x1f]/.test(vmID)) throw new Error("Provide a VMX path, unique inventory name, console profile alias, or REST VM ID.");
-    if (import_node_path2.default.isAbsolute(vmID)) return this.vmx(vmID);
+    if (import_node_path3.default.isAbsolute(vmID)) return this.vmx(vmID);
     if (Object.hasOwn(aliases, vmID)) return this.vmx(aliases[vmID]);
     const { vms } = await this.listVMs();
     const normalize = (value) => process.platform === "win32" ? value.toLowerCase() : value;
-    const matches = vms.filter((vm) => [vm.displayName, import_node_path2.default.basename(vm.vmx, ".vmx")].some((name) => normalize(name) === normalize(vmID)));
+    const matches = vms.filter((vm) => [vm.displayName, import_node_path3.default.basename(vm.vmx, ".vmx")].some((name) => normalize(name) === normalize(vmID)));
     if (matches.length > 1) throw new Error("VM name is ambiguous. Use the exact VMX path.");
     if (matches.length === 1) return this.vmx(matches[0].vmx);
     if (restInventory) {
@@ -234,15 +268,15 @@ var Workstation = class {
     } catch (error) {
       warnings.push(`Inventory unavailable (${error.code || error.message}); showing running VMs only.`);
     }
-    const key = (value) => process.platform === "win32" ? import_node_path2.default.normalize(value).toLowerCase() : import_node_path2.default.normalize(value);
+    const key = (value) => process.platform === "win32" ? import_node_path3.default.normalize(value).toLowerCase() : import_node_path3.default.normalize(value);
     const records = /* @__PURE__ */ new Map();
     for (const [name, vmx] of Object.entries(entries)) {
-      if (/^vmlist\d+\.config$/.test(name) && vmx && import_node_path2.default.extname(vmx).toLowerCase() === ".vmx") {
-        records.set(key(vmx), { vmx, displayName: entries[name.replace(/\.config$/, ".DisplayName")] || import_node_path2.default.basename(vmx, import_node_path2.default.extname(vmx)), registered: true, running: false });
+      if (/^vmlist\d+\.config$/.test(name) && vmx && import_node_path3.default.extname(vmx).toLowerCase() === ".vmx") {
+        records.set(key(vmx), { vmx, displayName: entries[name.replace(/\.config$/, ".DisplayName")] || import_node_path3.default.basename(vmx, import_node_path3.default.extname(vmx)), registered: true, running: false });
       }
     }
     for (const vmx of running) {
-      const record = records.get(key(vmx)) || { vmx, displayName: import_node_path2.default.basename(vmx, import_node_path2.default.extname(vmx)), registered: false };
+      const record = records.get(key(vmx)) || { vmx, displayName: import_node_path3.default.basename(vmx, import_node_path3.default.extname(vmx)), registered: false };
       records.set(key(vmx), { ...record, running: true });
     }
     const vms = await Promise.all([...records.values()].map(async (record) => {
@@ -298,15 +332,15 @@ var Workstation = class {
 
 // src/credential-setup.mjs
 var import_promises5 = __toESM(require("node:fs/promises"), 1);
-var import_node_path5 = __toESM(require("node:path"), 1);
+var import_node_path6 = __toESM(require("node:path"), 1);
 var import_node_crypto = require("node:crypto");
 
 // src/credentials.mjs
 var import_promises4 = __toESM(require("node:fs/promises"), 1);
-var import_node_path4 = __toESM(require("node:path"), 1);
+var import_node_path5 = __toESM(require("node:path"), 1);
 
 // src/local-file-security.mjs
-var import_node_path3 = __toESM(require("node:path"), 1);
+var import_node_path4 = __toESM(require("node:path"), 1);
 var import_promises3 = __toESM(require("node:fs/promises"), 1);
 var import_node_fs2 = require("node:fs");
 async function openPrivateFile(filename, flags = import_node_fs2.constants.O_RDONLY) {
@@ -339,8 +373,8 @@ function localFileProtector(backend) {
       await handle.close();
     }
   };
-  const root = import_node_path3.default.resolve(import_node_path3.default.dirname(process.argv[1]), "..");
-  return (filename) => backend.execute("pwsh", ["-NoProfile", "-File", import_node_path3.default.join(root, "scripts", "Protect-LocalFile.ps1"), "-LiteralPath", filename], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
+  const root = import_node_path4.default.resolve(import_node_path4.default.dirname(process.argv[1]), "..");
+  return (filename) => backend.execute("pwsh", ["-NoProfile", "-File", import_node_path4.default.join(root, "scripts", "Protect-LocalFile.ps1"), "-LiteralPath", filename], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
 }
 
 // src/credentials.mjs
@@ -392,7 +426,7 @@ var Credentials = class {
   }
   async console(vmx, requestedProfile) {
     const file = await this.load();
-    const canonical = (value) => process.platform === "win32" ? import_node_path4.default.resolve(value).toLowerCase() : import_node_path4.default.resolve(value);
+    const canonical = (value) => process.platform === "win32" ? import_node_path5.default.resolve(value).toLowerCase() : import_node_path5.default.resolve(value);
     const profiles = file.console || {};
     const resolved = await Promise.all(Object.entries(profiles).map(async ([name2, entry2]) => [name2, typeof entry2?.vmx === "string" ? await import_promises4.default.realpath(entry2.vmx).catch(() => entry2.vmx) : null]));
     const matches = resolved.filter(([, target]) => target && canonical(target) === canonical(vmx));
@@ -432,7 +466,7 @@ async function saveCredential({ kind, profile = "default", vmx, username, passwo
   if (kind === "console" && !/^[\x20-\x7e]{1,8}$/.test(password)) throw new Error("Native VNC passwords must contain 1 to 8 ASCII characters.");
   const target = kind === "console" ? await backend.vmx(vmx) : void 0;
   const filename = credentials.filename;
-  if (!filename || !import_node_path5.default.isAbsolute(filename)) throw new Error("Configure an absolute VMWARE_CREDENTIALS_FILE path.");
+  if (!filename || !import_node_path6.default.isAbsolute(filename)) throw new Error("Configure an absolute VMWARE_CREDENTIALS_FILE path.");
   let data;
   try {
     await import_promises5.default.lstat(filename);
@@ -447,8 +481,8 @@ async function saveCredential({ kind, profile = "default", vmx, username, passwo
     if (data[kind] && (typeof data[kind] !== "object" || Array.isArray(data[kind]))) throw new Error("The existing credential profile section must be an object.");
     data[kind] = { ...data[kind], [name]: entry };
   }
-  await import_promises5.default.mkdir(import_node_path5.default.dirname(filename), { recursive: true, mode: 448 });
-  const temporary = import_node_path5.default.join(import_node_path5.default.dirname(filename), `.credentials-${(0, import_node_crypto.randomUUID)()}.tmp`);
+  await import_promises5.default.mkdir(import_node_path6.default.dirname(filename), { recursive: true, mode: 448 });
+  const temporary = import_node_path6.default.join(import_node_path6.default.dirname(filename), `.credentials-${(0, import_node_crypto.randomUUID)()}.tmp`);
   try {
     await import_promises5.default.writeFile(temporary, "", { flag: "wx", mode: 384 });
     await localFileProtector(backend)(temporary);

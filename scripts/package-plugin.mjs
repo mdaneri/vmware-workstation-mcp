@@ -21,7 +21,7 @@ await fs.mkdir('dist', { recursive: true });
 const archive = path.resolve('dist', `vmware-workstation-${version}.zip`);
 await fs.writeFile(archive, zipSync(files, { level: 6 }));
 const extracted = unzipSync(await fs.readFile(archive));
-for (const required of ['plugin.json', 'mcp.json', 'LICENSE', 'server/server.cjs', 'server/configure-console.cjs', 'server/set-credentials.cjs', 'skills/manage-workstation/SKILL.md', 'README.md', 'reference.md', 'console.md', 'linux.md', 'ovf.md', 'THIRD-PARTY-NOTICES.md', 'tool-schemas.json', 'assets/icon.svg', 'scripts/Set-Credentials.ps1', 'scripts/Configure-Console.ps1', 'scripts/Protect-LocalFile.ps1']) assert.ok(extracted[required], `Archive missing ${required}`);
+for (const required of ['plugin.json', 'mcp.json', 'LICENSE', 'server/server.cjs', 'server/configure-console.cjs', 'server/set-credentials.cjs', 'skills/manage-workstation/SKILL.md', 'README.md', 'reference.md', 'console.md', 'linux.md', 'ovf.md', 'disks.md', 'THIRD-PARTY-NOTICES.md', 'tool-schemas.json', 'assets/icon.svg', 'scripts/Set-Credentials.ps1', 'scripts/Configure-Console.ps1', 'scripts/Protect-LocalFile.ps1']) assert.ok(extracted[required], `Archive missing ${required}`);
 assert.equal(Object.keys(extracted).length, Object.keys(files).length);
 for (const [name, contents] of Object.entries(files)) assert.deepEqual(Buffer.from(extracted[name]), contents, `ZIP round trip: ${name}`);
 console.log(`Verified ${Object.keys(files).length} archive entries: ${archive}`);

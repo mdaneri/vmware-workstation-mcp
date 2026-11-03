@@ -18,9 +18,9 @@ var __export = (target, all) => {
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
-    for (let key2 of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key2) && key2 !== except)
-        __defProp(to, key2, { get: () => from[key2], enumerable: !(desc = __getOwnPropDesc(from, key2)) || desc.enumerable });
+    for (let key3 of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key3) && key3 !== except)
+        __defProp(to, key3, { get: () => from[key3], enumerable: !(desc = __getOwnPropDesc(from, key3)) || desc.enumerable });
   }
   return to;
 };
@@ -169,15 +169,15 @@ var require_code = __commonJS({
       return JSON.stringify(x).replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
     }
     exports2.safeStringify = safeStringify;
-    function getProperty(key2) {
-      return typeof key2 == "string" && exports2.IDENTIFIER.test(key2) ? new _Code(`.${key2}`) : _`[${key2}]`;
+    function getProperty(key3) {
+      return typeof key3 == "string" && exports2.IDENTIFIER.test(key3) ? new _Code(`.${key3}`) : _`[${key3}]`;
     }
     exports2.getProperty = getProperty;
-    function getEsmExportName(key2) {
-      if (typeof key2 == "string" && exports2.IDENTIFIER.test(key2)) {
-        return new _Code(`${key2}`);
+    function getEsmExportName(key3) {
+      if (typeof key3 == "string" && exports2.IDENTIFIER.test(key3)) {
+        return new _Code(`${key3}`);
       }
-      throw new Error(`CodeGen: invalid export name: ${key2}, use explicit $id name mapping`);
+      throw new Error(`CodeGen: invalid export name: ${key3}, use explicit $id name mapping`);
     }
     exports2.getEsmExportName = getEsmExportName;
     function regexpCode(rx) {
@@ -804,11 +804,11 @@ var require_codegen = __commonJS({
       // returns code for object literal for the passed argument list of key-value pairs
       object(...keyValues) {
         const code = ["{"];
-        for (const [key2, value] of keyValues) {
+        for (const [key3, value] of keyValues) {
           if (code.length > 1)
             code.push(",");
-          code.push(key2);
-          if (key2 !== value || this.opts.es5) {
+          code.push(key3);
+          if (key3 !== value || this.opts.es5) {
             code.push(":");
             (0, code_1.addCodeArg)(code, value);
           }
@@ -1083,17 +1083,17 @@ var require_util = __commonJS({
       if (typeof schema === "boolean")
         return;
       const rules = self.RULES.keywords;
-      for (const key2 in schema) {
-        if (!rules[key2])
-          checkStrictMode(it, `unknown keyword: "${key2}"`);
+      for (const key3 in schema) {
+        if (!rules[key3])
+          checkStrictMode(it, `unknown keyword: "${key3}"`);
       }
     }
     exports2.checkUnknownRules = checkUnknownRules;
     function schemaHasRules(schema, rules) {
       if (typeof schema == "boolean")
         return !schema;
-      for (const key2 in schema)
-        if (rules[key2])
+      for (const key3 in schema)
+        if (rules[key3])
           return true;
       return false;
     }
@@ -1101,8 +1101,8 @@ var require_util = __commonJS({
     function schemaHasRulesButRef(schema, RULES) {
       if (typeof schema == "boolean")
         return !schema;
-      for (const key2 in schema)
-        if (key2 !== "$ref" && RULES.all[key2])
+      for (const key3 in schema)
+        if (key3 !== "$ref" && RULES.all[key3])
           return true;
       return false;
     }
@@ -1502,37 +1502,37 @@ var require_dataType = __commonJS({
       DataType2[DataType2["Wrong"] = 1] = "Wrong";
     })(DataType || (exports2.DataType = DataType = {}));
     function getSchemaTypes(schema) {
-      const types = getJSONTypes(schema.type);
-      const hasNull = types.includes("null");
+      const types2 = getJSONTypes(schema.type);
+      const hasNull = types2.includes("null");
       if (hasNull) {
         if (schema.nullable === false)
           throw new Error("type: null contradicts nullable: false");
       } else {
-        if (!types.length && schema.nullable !== void 0) {
+        if (!types2.length && schema.nullable !== void 0) {
           throw new Error('"nullable" cannot be used without "type"');
         }
         if (schema.nullable === true)
-          types.push("null");
+          types2.push("null");
       }
-      return types;
+      return types2;
     }
     exports2.getSchemaTypes = getSchemaTypes;
     function getJSONTypes(ts) {
-      const types = Array.isArray(ts) ? ts : ts ? [ts] : [];
-      if (types.every(rules_1.isJSONType))
-        return types;
-      throw new Error("type must be JSONType or JSONType[]: " + types.join(","));
+      const types2 = Array.isArray(ts) ? ts : ts ? [ts] : [];
+      if (types2.every(rules_1.isJSONType))
+        return types2;
+      throw new Error("type must be JSONType or JSONType[]: " + types2.join(","));
     }
     exports2.getJSONTypes = getJSONTypes;
-    function coerceAndCheckDataType(it, types) {
+    function coerceAndCheckDataType(it, types2) {
       const { gen, data, opts } = it;
-      const coerceTo = coerceToTypes(types, opts.coerceTypes);
-      const checkTypes = types.length > 0 && !(coerceTo.length === 0 && types.length === 1 && (0, applicability_1.schemaHasRulesForType)(it, types[0]));
+      const coerceTo = coerceToTypes(types2, opts.coerceTypes);
+      const checkTypes = types2.length > 0 && !(coerceTo.length === 0 && types2.length === 1 && (0, applicability_1.schemaHasRulesForType)(it, types2[0]));
       if (checkTypes) {
-        const wrongType = checkDataTypes(types, data, opts.strictNumbers, DataType.Wrong);
+        const wrongType = checkDataTypes(types2, data, opts.strictNumbers, DataType.Wrong);
         gen.if(wrongType, () => {
           if (coerceTo.length)
-            coerceData(it, types, coerceTo);
+            coerceData(it, types2, coerceTo);
           else
             reportTypeError(it);
         });
@@ -1541,15 +1541,15 @@ var require_dataType = __commonJS({
     }
     exports2.coerceAndCheckDataType = coerceAndCheckDataType;
     var COERCIBLE = /* @__PURE__ */ new Set(["string", "number", "integer", "boolean", "null"]);
-    function coerceToTypes(types, coerceTypes) {
-      return coerceTypes ? types.filter((t) => COERCIBLE.has(t) || coerceTypes === "array" && t === "array") : [];
+    function coerceToTypes(types2, coerceTypes) {
+      return coerceTypes ? types2.filter((t) => COERCIBLE.has(t) || coerceTypes === "array" && t === "array") : [];
     }
-    function coerceData(it, types, coerceTo) {
+    function coerceData(it, types2, coerceTo) {
       const { gen, data, opts } = it;
       const dataType = gen.let("dataType", (0, codegen_1._)`typeof ${data}`);
       const coerced = gen.let("coerced", (0, codegen_1._)`undefined`);
       if (opts.coerceTypes === "array") {
-        gen.if((0, codegen_1._)`${dataType} == 'object' && Array.isArray(${data}) && ${data}.length == 1`, () => gen.assign(data, (0, codegen_1._)`${data}[0]`).assign(dataType, (0, codegen_1._)`typeof ${data}`).if(checkDataTypes(types, data, opts.strictNumbers), () => gen.assign(coerced, data)));
+        gen.if((0, codegen_1._)`${dataType} == 'object' && Array.isArray(${data}) && ${data}.length == 1`, () => gen.assign(data, (0, codegen_1._)`${data}[0]`).assign(dataType, (0, codegen_1._)`typeof ${data}`).if(checkDataTypes(types2, data, opts.strictNumbers), () => gen.assign(coerced, data)));
       }
       gen.if((0, codegen_1._)`${coerced} !== undefined`);
       for (const t of coerceTo) {
@@ -1625,19 +1625,19 @@ var require_dataType = __commonJS({
         return checkDataType(dataTypes[0], data, strictNums, correct);
       }
       let cond;
-      const types = (0, util_1.toHash)(dataTypes);
-      if (types.array && types.object) {
+      const types2 = (0, util_1.toHash)(dataTypes);
+      if (types2.array && types2.object) {
         const notObj = (0, codegen_1._)`typeof ${data} != "object"`;
-        cond = types.null ? notObj : (0, codegen_1._)`!${data} || ${notObj}`;
-        delete types.null;
-        delete types.array;
-        delete types.object;
+        cond = types2.null ? notObj : (0, codegen_1._)`!${data} || ${notObj}`;
+        delete types2.null;
+        delete types2.array;
+        delete types2.object;
       } else {
         cond = codegen_1.nil;
       }
-      if (types.number)
-        delete types.integer;
-      for (const t in types)
+      if (types2.number)
+        delete types2.integer;
+      for (const t in types2)
         cond = (0, codegen_1.and)(cond, checkDataType(t, data, strictNums, correct));
       return cond;
     }
@@ -1680,8 +1680,8 @@ var require_defaults = __commonJS({
     function assignDefaults(it, ty) {
       const { properties, items } = it.schema;
       if (ty === "object" && properties) {
-        for (const key2 in properties) {
-          assignDefault(it, key2, properties[key2].default);
+        for (const key3 in properties) {
+          assignDefault(it, key3, properties[key3].default);
         }
       } else if (ty === "array" && Array.isArray(items)) {
         items.forEach((sch, i) => assignDefault(it, i, sch.default));
@@ -2065,8 +2065,8 @@ var require_fast_deep_equal = __commonJS({
         for (i = length; i-- !== 0; )
           if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false;
         for (i = length; i-- !== 0; ) {
-          var key2 = keys[i];
-          if (!equal(a[key2], b[key2])) return false;
+          var key3 = keys[i];
+          if (!equal(a[key3], b[key3])) return false;
         }
         return true;
       }
@@ -2138,20 +2138,20 @@ var require_json_schema_traverse = __commonJS({
     function _traverse(opts, pre, post, schema, jsonPtr, rootSchema, parentJsonPtr, parentKeyword, parentSchema, keyIndex) {
       if (schema && typeof schema == "object" && !Array.isArray(schema)) {
         pre(schema, jsonPtr, rootSchema, parentJsonPtr, parentKeyword, parentSchema, keyIndex);
-        for (var key2 in schema) {
-          var sch = schema[key2];
+        for (var key3 in schema) {
+          var sch = schema[key3];
           if (Array.isArray(sch)) {
-            if (key2 in traverse.arrayKeywords) {
+            if (key3 in traverse.arrayKeywords) {
               for (var i = 0; i < sch.length; i++)
-                _traverse(opts, pre, post, sch[i], jsonPtr + "/" + key2 + "/" + i, rootSchema, jsonPtr, key2, schema, i);
+                _traverse(opts, pre, post, sch[i], jsonPtr + "/" + key3 + "/" + i, rootSchema, jsonPtr, key3, schema, i);
             }
-          } else if (key2 in traverse.propsKeywords) {
+          } else if (key3 in traverse.propsKeywords) {
             if (sch && typeof sch == "object") {
               for (var prop in sch)
-                _traverse(opts, pre, post, sch[prop], jsonPtr + "/" + key2 + "/" + escapeJsonPtr(prop), rootSchema, jsonPtr, key2, schema, prop);
+                _traverse(opts, pre, post, sch[prop], jsonPtr + "/" + key3 + "/" + escapeJsonPtr(prop), rootSchema, jsonPtr, key3, schema, prop);
             }
-          } else if (key2 in traverse.keywords || opts.allKeys && !(key2 in traverse.skipKeywords)) {
-            _traverse(opts, pre, post, sch, jsonPtr + "/" + key2, rootSchema, jsonPtr, key2, schema);
+          } else if (key3 in traverse.keywords || opts.allKeys && !(key3 in traverse.skipKeywords)) {
+            _traverse(opts, pre, post, sch, jsonPtr + "/" + key3, rootSchema, jsonPtr, key3, schema);
           }
         }
         post(schema, jsonPtr, rootSchema, parentJsonPtr, parentKeyword, parentSchema, keyIndex);
@@ -2208,10 +2208,10 @@ var require_resolve = __commonJS({
       "$dynamicAnchor"
     ]);
     function hasRef(schema) {
-      for (const key2 in schema) {
-        if (REF_KEYWORDS.has(key2))
+      for (const key3 in schema) {
+        if (REF_KEYWORDS.has(key3))
           return true;
-        const sch = schema[key2];
+        const sch = schema[key3];
         if (Array.isArray(sch) && sch.some(hasRef))
           return true;
         if (typeof sch == "object" && hasRef(sch))
@@ -2221,14 +2221,14 @@ var require_resolve = __commonJS({
     }
     function countKeys(schema) {
       let count = 0;
-      for (const key2 in schema) {
-        if (key2 === "$ref")
+      for (const key3 in schema) {
+        if (key3 === "$ref")
           return Infinity;
         count++;
-        if (SIMPLE_INLINED.has(key2))
+        if (SIMPLE_INLINED.has(key3))
           continue;
-        if (typeof schema[key2] == "object") {
-          (0, util_1.eachItem)(schema[key2], (sch) => count += countKeys(sch));
+        if (typeof schema[key3] == "object") {
+          (0, util_1.eachItem)(schema[key3], (sch) => count += countKeys(sch));
         }
         if (count === Infinity)
           return Infinity;
@@ -2417,8 +2417,8 @@ var require_validate = __commonJS({
     function schemaCxtHasRules({ schema, self }) {
       if (typeof schema == "boolean")
         return !schema;
-      for (const key2 in schema)
-        if (self.RULES.all[key2])
+      for (const key3 in schema)
+        if (self.RULES.all[key3])
           return true;
       return false;
     }
@@ -2442,9 +2442,9 @@ var require_validate = __commonJS({
     function typeAndKeywords(it, errsCount) {
       if (it.opts.jtd)
         return schemaKeywords(it, [], false, errsCount);
-      const types = (0, dataType_1.getSchemaTypes)(it.schema);
-      const checkedTypes = (0, dataType_1.coerceAndCheckDataType)(it, types);
-      schemaKeywords(it, types, !checkedTypes, errsCount);
+      const types2 = (0, dataType_1.getSchemaTypes)(it.schema);
+      const checkedTypes = (0, dataType_1.coerceAndCheckDataType)(it, types2);
+      schemaKeywords(it, types2, !checkedTypes, errsCount);
     }
     function checkRefsAndKeywords(it) {
       const { schema, errSchemaPath, opts, self } = it;
@@ -2494,7 +2494,7 @@ var require_validate = __commonJS({
       if (items instanceof codegen_1.Name)
         gen.assign((0, codegen_1._)`${evaluated}.items`, items);
     }
-    function schemaKeywords(it, types, typeErrors, errsCount) {
+    function schemaKeywords(it, types2, typeErrors, errsCount) {
       const { gen, schema, data, allErrors, opts, self } = it;
       const { RULES } = self;
       if (schema.$ref && (opts.ignoreKeywordsWithRef || !(0, util_1.schemaHasRulesButRef)(schema, RULES))) {
@@ -2502,7 +2502,7 @@ var require_validate = __commonJS({
         return;
       }
       if (!opts.jtd)
-        checkStrictTypes(it, types);
+        checkStrictTypes(it, types2);
       gen.block(() => {
         for (const group of RULES.rules)
           groupKeywords(group);
@@ -2514,7 +2514,7 @@ var require_validate = __commonJS({
         if (group.type) {
           gen.if((0, dataType_2.checkDataType)(group.type, data, opts.strictNumbers));
           iterateKeywords(it, group);
-          if (types.length === 1 && types[0] === group.type && typeErrors) {
+          if (types2.length === 1 && types2[0] === group.type && typeErrors) {
             gen.else();
             (0, dataType_2.reportTypeError)(it);
           }
@@ -2538,27 +2538,27 @@ var require_validate = __commonJS({
         }
       });
     }
-    function checkStrictTypes(it, types) {
+    function checkStrictTypes(it, types2) {
       if (it.schemaEnv.meta || !it.opts.strictTypes)
         return;
-      checkContextTypes(it, types);
+      checkContextTypes(it, types2);
       if (!it.opts.allowUnionTypes)
-        checkMultipleTypes(it, types);
+        checkMultipleTypes(it, types2);
       checkKeywordTypes(it, it.dataTypes);
     }
-    function checkContextTypes(it, types) {
-      if (!types.length)
+    function checkContextTypes(it, types2) {
+      if (!types2.length)
         return;
       if (!it.dataTypes.length) {
-        it.dataTypes = types;
+        it.dataTypes = types2;
         return;
       }
-      types.forEach((t) => {
+      types2.forEach((t) => {
         if (!includesType(it.dataTypes, t)) {
           strictTypesError(it, `type "${t}" not allowed by context "${it.dataTypes.join(",")}"`);
         }
       });
-      narrowSchemaTypes(it, types);
+      narrowSchemaTypes(it, types2);
     }
     function checkMultipleTypes(it, ts) {
       if (ts.length > 1 && !(ts.length === 2 && ts.includes("null"))) {
@@ -3262,8 +3262,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path11) {
-      let input2 = path11;
+    function removeDotSegments(path13) {
+      let input2 = path13;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -3337,11 +3337,11 @@ var require_utils = __commonJS({
       }
       return output2.join("");
     }
-    function removeDotSegmentsRelative(path11) {
-      if (path11 === "" || path11[0] === "/") {
-        return removeDotSegments(path11);
+    function removeDotSegmentsRelative(path13) {
+      if (path13 === "" || path13[0] === "/") {
+        return removeDotSegments(path13);
       }
-      const segments = path11.split("/");
+      const segments = path13.split("/");
       const last = segments.length - 1;
       const output2 = [];
       let trailingDirectory = false;
@@ -3704,8 +3704,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path11 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path11 && path11 !== "/" ? path11 : void 0;
+        const path13 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path13 && path13 !== "/" ? path13 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -4328,7 +4328,7 @@ var require_core = __commonJS({
     var util_1 = require_util();
     var $dataRefSchema = require_data();
     var uri_1 = require_uri();
-    var defaultRegExp = (str, flags) => new RegExp(str, flags);
+    var defaultRegExp = (str, flags2) => new RegExp(str, flags2);
     defaultRegExp.code = "new RegExp";
     var META_IGNORE_OPTIONS = ["removeAdditional", "useDefaults", "coerceTypes"];
     var EXT_SCOPE_NAMES = /* @__PURE__ */ new Set([
@@ -4513,7 +4513,7 @@ var require_core = __commonJS({
         }
       }
       // Adds schema to the instance
-      addSchema(schema, key2, _meta, _validateSchema = this.opts.validateSchema) {
+      addSchema(schema, key3, _meta, _validateSchema = this.opts.validateSchema) {
         if (Array.isArray(schema)) {
           for (const sch of schema)
             this.addSchema(sch, void 0, _meta, _validateSchema);
@@ -4527,15 +4527,15 @@ var require_core = __commonJS({
             throw new Error(`schema ${schemaId} must be string`);
           }
         }
-        key2 = (0, resolve_1.normalizeId)(key2 || id);
-        this._checkUnique(key2);
-        this.schemas[key2] = this._addSchema(schema, _meta, key2, _validateSchema, true);
+        key3 = (0, resolve_1.normalizeId)(key3 || id);
+        this._checkUnique(key3);
+        this.schemas[key3] = this._addSchema(schema, _meta, key3, _validateSchema, true);
         return this;
       }
       // Add schema that will be used to validate other schemas
       // options in META_IGNORE_OPTIONS are alway set to false
-      addMetaSchema(schema, key2, _validateSchema = this.opts.validateSchema) {
-        this.addSchema(schema, key2, true, _validateSchema);
+      addMetaSchema(schema, key3, _validateSchema = this.opts.validateSchema) {
+        this.addSchema(schema, key3, true, _validateSchema);
         return this;
       }
       //  Validate schema against its meta-schema
@@ -4691,14 +4691,14 @@ var require_core = __commonJS({
           let keywords = metaSchema;
           for (const seg of segments)
             keywords = keywords[seg];
-          for (const key2 in rules) {
-            const rule = rules[key2];
+          for (const key3 in rules) {
+            const rule = rules[key3];
             if (typeof rule != "object")
               continue;
             const { $data } = rule.definition;
-            const schema = keywords[key2];
+            const schema = keywords[key3];
             if ($data && schema)
-              keywords[key2] = schemaOrData(schema);
+              keywords[key3] = schemaOrData(schema);
           }
         }
         return metaSchema;
@@ -4771,10 +4771,10 @@ var require_core = __commonJS({
     Ajv2.MissingRefError = ref_error_1.default;
     exports2.default = Ajv2;
     function checkOptions(checkOpts, options2, msg, log = "error") {
-      for (const key2 in checkOpts) {
-        const opt = key2;
+      for (const key3 in checkOpts) {
+        const opt = key3;
         if (opt in options2)
-          this.logger[log](`${msg}: option ${key2}. ${checkOpts[opt]}`);
+          this.logger[log](`${msg}: option ${key3}. ${checkOpts[opt]}`);
       }
     }
     function getSchEnv(keyRef) {
@@ -4788,8 +4788,8 @@ var require_core = __commonJS({
       if (Array.isArray(optsSchemas))
         this.addSchema(optsSchemas);
       else
-        for (const key2 in optsSchemas)
-          this.addSchema(optsSchemas[key2], key2);
+        for (const key3 in optsSchemas)
+          this.addSchema(optsSchemas[key3], key3);
     }
     function addInitialFormats() {
       for (const name2 in this.opts.formats) {
@@ -5000,12 +5000,12 @@ var require_ref = __commonJS({
       function callSyncRef() {
         cxt.result((0, code_1.callValidateCode)(cxt, v, passCxt), () => addEvaluatedFrom(v), () => addErrorsFrom(v));
       }
-      function addErrorsFrom(source2) {
-        const errs = (0, codegen_1._)`${source2}.errors`;
+      function addErrorsFrom(source3) {
+        const errs = (0, codegen_1._)`${source3}.errors`;
         gen.assign(names_1.default.vErrors, (0, codegen_1._)`${names_1.default.vErrors} === null ? ${errs} : ${names_1.default.vErrors}.concat(${errs})`);
         gen.assign(names_1.default.errors, (0, codegen_1._)`${names_1.default.vErrors}.length`);
       }
-      function addEvaluatedFrom(source2) {
+      function addEvaluatedFrom(source3) {
         var _a3;
         if (!it.opts.unevaluated)
           return;
@@ -5016,7 +5016,7 @@ var require_ref = __commonJS({
               it.props = util_1.mergeEvaluated.props(gen, schEvaluated.props, it.props);
             }
           } else {
-            const props = gen.var("props", (0, codegen_1._)`${source2}.evaluated.props`);
+            const props = gen.var("props", (0, codegen_1._)`${source3}.evaluated.props`);
             it.props = util_1.mergeEvaluated.props(gen, props, it.props, codegen_1.Name);
           }
         }
@@ -5026,7 +5026,7 @@ var require_ref = __commonJS({
               it.items = util_1.mergeEvaluated.items(gen, schEvaluated.items, it.items);
             }
           } else {
-            const items = gen.var("items", (0, codegen_1._)`${source2}.evaluated.items`);
+            const items = gen.var("items", (0, codegen_1._)`${source3}.evaluated.items`);
             it.items = util_1.mergeEvaluated.items(gen, items, it.items, codegen_1.Name);
           }
         }
@@ -5837,11 +5837,11 @@ var require_dependencies = __commonJS({
     function splitDependencies({ schema }) {
       const propertyDeps = {};
       const schemaDeps = {};
-      for (const key2 in schema) {
-        if (key2 === "__proto__")
+      for (const key3 in schema) {
+        if (key3 === "__proto__")
           continue;
-        const deps = Array.isArray(schema[key2]) ? propertyDeps : schemaDeps;
-        deps[key2] = schema[key2];
+        const deps = Array.isArray(schema[key3]) ? propertyDeps : schemaDeps;
+        deps[key3] = schema[key3];
       }
       return [propertyDeps, schemaDeps];
     }
@@ -5918,13 +5918,13 @@ var require_propertyNames = __commonJS({
         if ((0, util_1.alwaysValidSchema)(it, schema))
           return;
         const valid = gen.name("valid");
-        gen.forIn("key", data, (key2) => {
-          cxt.setParams({ propertyName: key2 });
+        gen.forIn("key", data, (key3) => {
+          cxt.setParams({ propertyName: key3 });
           cxt.subschema({
             keyword: "propertyNames",
-            data: key2,
+            data: key3,
             dataTypes: ["string"],
-            propertyName: key2,
+            propertyName: key3,
             compositeRule: true
           }, valid);
           gen.if((0, codegen_1.not)(valid), () => {
@@ -5973,38 +5973,38 @@ var require_additionalProperties = __commonJS({
         checkAdditionalProperties();
         cxt.ok((0, codegen_1._)`${errsCount} === ${names_1.default.errors}`);
         function checkAdditionalProperties() {
-          gen.forIn("key", data, (key2) => {
+          gen.forIn("key", data, (key3) => {
             if (!props.length && !patProps.length)
-              additionalPropertyCode(key2);
+              additionalPropertyCode(key3);
             else
-              gen.if(isAdditional(key2), () => additionalPropertyCode(key2));
+              gen.if(isAdditional(key3), () => additionalPropertyCode(key3));
           });
         }
-        function isAdditional(key2) {
+        function isAdditional(key3) {
           let definedProp;
           if (props.length > 8) {
             const propsSchema = (0, util_1.schemaRefOrVal)(it, parentSchema.properties, "properties");
-            definedProp = (0, code_1.isOwnProperty)(gen, propsSchema, key2);
+            definedProp = (0, code_1.isOwnProperty)(gen, propsSchema, key3);
           } else if (props.length) {
-            definedProp = (0, codegen_1.or)(...props.map((p) => (0, codegen_1._)`${key2} === ${p}`));
+            definedProp = (0, codegen_1.or)(...props.map((p) => (0, codegen_1._)`${key3} === ${p}`));
           } else {
             definedProp = codegen_1.nil;
           }
           if (patProps.length) {
-            definedProp = (0, codegen_1.or)(definedProp, ...patProps.map((p) => (0, codegen_1._)`${(0, code_1.usePattern)(cxt, p)}.test(${key2})`));
+            definedProp = (0, codegen_1.or)(definedProp, ...patProps.map((p) => (0, codegen_1._)`${(0, code_1.usePattern)(cxt, p)}.test(${key3})`));
           }
           return (0, codegen_1.not)(definedProp);
         }
-        function deleteAdditional(key2) {
-          gen.code((0, codegen_1._)`delete ${data}[${key2}]`);
+        function deleteAdditional(key3) {
+          gen.code((0, codegen_1._)`delete ${data}[${key3}]`);
         }
-        function additionalPropertyCode(key2) {
+        function additionalPropertyCode(key3) {
           if (opts.removeAdditional === "all" || opts.removeAdditional && schema === false) {
-            deleteAdditional(key2);
+            deleteAdditional(key3);
             return;
           }
           if (schema === false) {
-            cxt.setParams({ additionalProperty: key2 });
+            cxt.setParams({ additionalProperty: key3 });
             cxt.error();
             if (!allErrors)
               gen.break();
@@ -6013,22 +6013,22 @@ var require_additionalProperties = __commonJS({
           if (typeof schema == "object" && !(0, util_1.alwaysValidSchema)(it, schema)) {
             const valid = gen.name("valid");
             if (opts.removeAdditional === "failing") {
-              applyAdditionalSchema(key2, valid, false);
+              applyAdditionalSchema(key3, valid, false);
               gen.if((0, codegen_1.not)(valid), () => {
                 cxt.reset();
-                deleteAdditional(key2);
+                deleteAdditional(key3);
               });
             } else {
-              applyAdditionalSchema(key2, valid);
+              applyAdditionalSchema(key3, valid);
               if (!allErrors)
                 gen.if((0, codegen_1.not)(valid), () => gen.break());
             }
           }
         }
-        function applyAdditionalSchema(key2, valid, errors) {
+        function applyAdditionalSchema(key3, valid, errors) {
           const subschema = {
             keyword: "additionalProperties",
-            dataProp: key2,
+            dataProp: key3,
             dataPropType: util_1.Type.Str
           };
           if (errors === false) {
@@ -6153,19 +6153,19 @@ var require_patternProperties = __commonJS({
           }
         }
         function validateProperties(pat) {
-          gen.forIn("key", data, (key2) => {
-            gen.if((0, codegen_1._)`${(0, code_1.usePattern)(cxt, pat)}.test(${key2})`, () => {
+          gen.forIn("key", data, (key3) => {
+            gen.if((0, codegen_1._)`${(0, code_1.usePattern)(cxt, pat)}.test(${key3})`, () => {
               const alwaysValid = alwaysValidPatterns.includes(pat);
               if (!alwaysValid) {
                 cxt.subschema({
                   keyword: "patternProperties",
                   schemaProp: pat,
-                  dataProp: key2,
+                  dataProp: key3,
                   dataPropType: util_2.Type.Str
                 }, valid);
               }
               if (it.opts.unevaluated && props !== true) {
-                gen.assign((0, codegen_1._)`${props}[${key2}]`, true);
+                gen.assign((0, codegen_1._)`${props}[${key3}]`, true);
               } else if (!alwaysValid && !it.allErrors) {
                 gen.if((0, codegen_1.not)(valid), () => gen.break());
               }
@@ -7242,12 +7242,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name2}"`);
       return f;
     };
-    function addFormats(ajv, list, fs11, exportName) {
+    function addFormats(ajv, list, fs12, exportName) {
       var _a3;
       var _b;
       (_a3 = (_b = ajv.opts.code).formats) !== null && _a3 !== void 0 ? _a3 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
-        ajv.addFormat(f, fs11[f]);
+        ajv.addFormat(f, fs12[f]);
     }
     module2.exports = exports2 = formatsPlugin;
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -9464,8 +9464,8 @@ var require_b4a = __commonJS({
     function concat(buffers, totalLength) {
       return Buffer.concat(buffers, totalLength);
     }
-    function copy(source2, target, targetStart, start, end) {
-      return toBuffer(source2).copy(target, targetStart, start, end);
+    function copy(source3, target, targetStart, start, end) {
+      return toBuffer(source3).copy(target, targetStart, start, end);
     }
     function equals(a, b) {
       return toBuffer(a).equals(b);
@@ -10924,8 +10924,8 @@ var require_headers = __commonJS({
       if (opts.linkname) result += addLength(" linkpath=" + opts.linkname + "\n");
       const pax = opts.pax;
       if (pax) {
-        for (const key2 in pax) {
-          result += addLength(" " + key2 + "=" + pax[key2] + "\n");
+        for (const key3 in pax) {
+          result += addLength(" " + key3 + "=" + pax[key3] + "\n");
         }
       }
       return b4a.from(result);
@@ -11798,16 +11798,16 @@ var require_conventions = __commonJS({
       }
       return oc && typeof oc.freeze === "function" ? oc.freeze(object3) : object3;
     }
-    function hasOwn(object3, key2) {
-      return Object.prototype.hasOwnProperty.call(object3, key2);
+    function hasOwn(object3, key3) {
+      return Object.prototype.hasOwnProperty.call(object3, key3);
     }
-    function assign(target, source2) {
+    function assign(target, source3) {
       if (target === null || typeof target !== "object") {
         throw new TypeError("target is not an object");
       }
-      for (var key2 in source2) {
-        if (hasOwn(source2, key2)) {
-          target[key2] = source2[key2];
+      for (var key3 in source3) {
+        if (hasOwn(source3, key3)) {
+          target[key3] = source3[key3];
         }
       }
       return target;
@@ -11867,12 +11867,12 @@ var require_conventions = __commonJS({
       title: true
     });
     function isHTMLRawTextElement(tagName) {
-      var key2 = tagName.toLowerCase();
-      return hasOwn(HTML_RAW_TEXT_ELEMENTS, key2) && !HTML_RAW_TEXT_ELEMENTS[key2];
+      var key3 = tagName.toLowerCase();
+      return hasOwn(HTML_RAW_TEXT_ELEMENTS, key3) && !HTML_RAW_TEXT_ELEMENTS[key3];
     }
     function isHTMLEscapableRawTextElement(tagName) {
-      var key2 = tagName.toLowerCase();
-      return hasOwn(HTML_RAW_TEXT_ELEMENTS, key2) && HTML_RAW_TEXT_ELEMENTS[key2];
+      var key3 = tagName.toLowerCase();
+      return hasOwn(HTML_RAW_TEXT_ELEMENTS, key3) && HTML_RAW_TEXT_ELEMENTS[key3];
     }
     function isHTMLMimeType(mimeType) {
       return mimeType === MIME_TYPE.HTML;
@@ -11927,8 +11927,8 @@ var require_conventions = __commonJS({
        */
       XML_SVG_IMAGE: "image/svg+xml"
     });
-    var _MIME_TYPES = Object.keys(MIME_TYPE).map(function(key2) {
-      return MIME_TYPE[key2];
+    var _MIME_TYPES = Object.keys(MIME_TYPE).map(function(key3) {
+      return MIME_TYPE[key3];
     });
     function isValidMimeType(mimeType) {
       return _MIME_TYPES.indexOf(mimeType) > -1;
@@ -12118,10 +12118,10 @@ var require_errors3 = __commonJS({
     };
     var entries = Object.entries(ExceptionCode);
     for (i = 0; i < entries.length; i++) {
-      key2 = entries[i][0];
-      DOMException[key2] = entries[i][1];
+      key3 = entries[i][0];
+      DOMException[key3] = entries[i][1];
     }
-    var key2;
+    var key3;
     var i;
     function ParseError(message, locator, cause) {
       this.message = message;
@@ -14888,8 +14888,8 @@ var require_dom = __commonJS({
       });
       return destRoot;
     }
-    function __set__(object3, key2, value) {
-      object3[key2] = value;
+    function __set__(object3, key3, value) {
+      object3[key3] = value;
     }
     function childrenRefresh(node2) {
       var ls = [];
@@ -14981,8 +14981,8 @@ var require_dom = __commonJS({
             return new LiveNodeList(this, childrenRefresh);
           }
         });
-        __set__ = function(object3, key2, value) {
-          object3["$$" + key2] = value;
+        __set__ = function(object3, key3, value) {
+          object3["$$" + key3] = value;
         };
       }
     } catch (e2) {
@@ -17179,18 +17179,18 @@ var require_sax = __commonJS({
     function XMLReader() {
     }
     XMLReader.prototype = {
-      parse: function(source2, defaultNSMap, entityMap) {
+      parse: function(source3, defaultNSMap, entityMap) {
         var domBuilder = this.domBuilder;
         domBuilder.startDocument();
         _copy(defaultNSMap, defaultNSMap = /* @__PURE__ */ Object.create(null));
-        parse3(source2, defaultNSMap, entityMap, domBuilder, this.errorHandler);
+        parse3(source3, defaultNSMap, entityMap, domBuilder, this.errorHandler);
         domBuilder.endDocument();
       }
     };
     var ENTITY_REG = /&#?\w+;?/g;
-    function parse3(source2, defaultNSMapCopy, entityMap, domBuilder, errorHandler) {
+    function parse3(source3, defaultNSMapCopy, entityMap, domBuilder, errorHandler) {
       var isHTML = isHTMLMimeType(domBuilder.mimeType);
-      if (source2.indexOf(g.UNICODE_REPLACEMENT_CHARACTER) >= 0) {
+      if (source3.indexOf(g.UNICODE_REPLACEMENT_CHARACTER) >= 0) {
         errorHandler.warning("Unicode replacement character detected, source encoding issues?");
       }
       function fixedFromCharCode(code) {
@@ -17225,7 +17225,7 @@ var require_sax = __commonJS({
       }
       function appendText(end2) {
         if (end2 > start) {
-          var xt = source2.substring(start, end2).replace(ENTITY_REG, entityReplacer);
+          var xt = source3.substring(start, end2).replace(ENTITY_REG, entityReplacer);
           locator && position(start);
           domBuilder.characters(xt, 0, end2 - start);
           start = end2;
@@ -17236,7 +17236,7 @@ var require_sax = __commonJS({
       var linePattern = /\r\n?|\n|$/g;
       var locator = domBuilder.locator;
       function position(p, m) {
-        while (p >= lineEnd && (m = linePattern.exec(source2))) {
+        while (p >= lineEnd && (m = linePattern.exec(source3))) {
           lineStart = lineEnd;
           lineEnd = m.index + m[0].length;
           locator.lineNumber++;
@@ -17248,14 +17248,14 @@ var require_sax = __commonJS({
       var start = 0;
       while (true) {
         try {
-          var tagStart = source2.indexOf("<", start);
+          var tagStart = source3.indexOf("<", start);
           if (tagStart < 0) {
             if (!isHTML && unclosedTags.length > 0) {
               return errorHandler.fatalError("unclosed xml tag(s): " + unclosedTags.join(", "));
             }
-            if (!source2.substring(start).match(/^\s*$/)) {
+            if (!source3.substring(start).match(/^\s*$/)) {
               var doc = domBuilder.doc;
-              var text2 = doc.createTextNode(source2.substring(start));
+              var text2 = doc.createTextNode(source3.substring(start));
               if (doc.documentElement) {
                 return errorHandler.error("Extra content at the end of the document");
               }
@@ -17265,17 +17265,17 @@ var require_sax = __commonJS({
             return;
           }
           if (tagStart > start) {
-            var fromSource = source2.substring(start, tagStart);
+            var fromSource = source3.substring(start, tagStart);
             if (!isHTML && unclosedTags.length === 0) {
               fromSource = fromSource.replace(new RegExp(g.S_OPT.source, "g"), "");
               fromSource && errorHandler.error("Unexpected content outside root element: '" + fromSource + "'");
             }
             appendText(tagStart);
           }
-          switch (source2.charAt(tagStart + 1)) {
+          switch (source3.charAt(tagStart + 1)) {
             case "/":
-              var end = source2.indexOf(">", tagStart + 2);
-              var tagNameRaw = source2.substring(tagStart + 2, end > 0 ? end : void 0);
+              var end = source3.indexOf(">", tagStart + 2);
+              var tagNameRaw = source3.substring(tagStart + 2, end > 0 ? end : void 0);
               if (!tagNameRaw) {
                 return errorHandler.fatalError("end tag name missing");
               }
@@ -17326,17 +17326,17 @@ var require_sax = __commonJS({
             // end element
             case "?":
               locator && position(tagStart);
-              end = parseProcessingInstruction(source2, tagStart, domBuilder, errorHandler);
+              end = parseProcessingInstruction(source3, tagStart, domBuilder, errorHandler);
               break;
             case "!":
               locator && position(tagStart);
-              end = parseDoctypeCommentOrCData(source2, tagStart, domBuilder, errorHandler, isHTML);
+              end = parseDoctypeCommentOrCData(source3, tagStart, domBuilder, errorHandler, isHTML);
               break;
             default:
               locator && position(tagStart);
               var el = new ElementAttributes();
               var currentNSMap = parseStack[parseStack.length - 1].currentNSMap;
-              var end = parseElementStartPart(source2, tagStart, el, currentNSMap, entityReplacer, errorHandler, isHTML);
+              var end = parseElementStartPart(source3, tagStart, el, currentNSMap, entityReplacer, errorHandler, isHTML);
               var len = el.length;
               if (!el.closed) {
                 if (isHTML && conventions.isHTMLVoidElement(el.tagName)) {
@@ -17363,7 +17363,7 @@ var require_sax = __commonJS({
                 }
               }
               if (isHTML && !el.closed) {
-                end = parseHtmlSpecialContent(source2, end, el.tagName, entityReplacer, domBuilder);
+                end = parseHtmlSpecialContent(source3, end, el.tagName, entityReplacer, domBuilder);
               } else {
                 end++;
               }
@@ -17389,7 +17389,7 @@ var require_sax = __commonJS({
       t.columnNumber = f.columnNumber;
       return t;
     }
-    function parseElementStartPart(source2, start, el, currentNSMap, entityReplacer, errorHandler, isHTML) {
+    function parseElementStartPart(source3, start, el, currentNSMap, entityReplacer, errorHandler, isHTML) {
       function addAttribute(qname, value2, startIndex) {
         if (hasOwn(el.attributeNames, qname)) {
           return errorHandler.fatalError("Attribute " + qname + " redefined");
@@ -17412,14 +17412,14 @@ var require_sax = __commonJS({
       var p = ++start;
       var s2 = S_TAG;
       while (true) {
-        var c = source2.charAt(p);
+        var c = source3.charAt(p);
         if (s2 === S_TAG && c === "<") {
-          throw new Error("unexpected < in tag name: " + source2.slice(start, p));
+          throw new Error("unexpected < in tag name: " + source3.slice(start, p));
         }
         switch (c) {
           case "=":
             if (s2 === S_ATTR) {
-              attrName = source2.slice(start, p);
+              attrName = source3.slice(start, p);
               s2 = S_EQ;
             } else if (s2 === S_ATTR_SPACE) {
               s2 = S_EQ;
@@ -17432,19 +17432,19 @@ var require_sax = __commonJS({
             if (s2 === S_EQ || s2 === S_ATTR) {
               if (s2 === S_ATTR) {
                 errorHandler.warning('attribute value must after "="');
-                attrName = source2.slice(start, p);
+                attrName = source3.slice(start, p);
               }
               start = p + 1;
-              p = source2.indexOf(c, start);
+              p = source3.indexOf(c, start);
               if (p > 0) {
-                value = source2.slice(start, p);
+                value = source3.slice(start, p);
                 addAttribute(attrName, value, start - 1);
                 s2 = S_ATTR_END;
               } else {
                 throw new Error("attribute value no end '" + c + "' match");
               }
             } else if (s2 == S_ATTR_NOQUOT_VALUE) {
-              value = source2.slice(start, p);
+              value = source3.slice(start, p);
               addAttribute(attrName, value, start);
               errorHandler.warning('attribute "' + attrName + '" missed start quot(' + c + ")!!");
               start = p + 1;
@@ -17456,7 +17456,7 @@ var require_sax = __commonJS({
           case "/":
             switch (s2) {
               case S_TAG:
-                el.setTagName(source2.slice(start, p));
+                el.setTagName(source3.slice(start, p));
               case S_ATTR_END:
               case S_TAG_SPACE:
               case S_TAG_CLOSE:
@@ -17476,13 +17476,13 @@ var require_sax = __commonJS({
           case "":
             errorHandler.error("unexpected end of input");
             if (s2 == S_TAG) {
-              el.setTagName(source2.slice(start, p));
+              el.setTagName(source3.slice(start, p));
             }
             return p;
           case ">":
             switch (s2) {
               case S_TAG:
-                el.setTagName(source2.slice(start, p));
+                el.setTagName(source3.slice(start, p));
               case S_ATTR_END:
               case S_TAG_SPACE:
               case S_TAG_CLOSE:
@@ -17491,7 +17491,7 @@ var require_sax = __commonJS({
               case S_ATTR_NOQUOT_VALUE:
               //Compatible state
               case S_ATTR:
-                value = source2.slice(start, p);
+                value = source3.slice(start, p);
                 if (value.slice(-1) === "/") {
                   el.closed = true;
                   value = value.slice(0, -1);
@@ -17523,15 +17523,15 @@ var require_sax = __commonJS({
             if (c <= " ") {
               switch (s2) {
                 case S_TAG:
-                  el.setTagName(source2.slice(start, p));
+                  el.setTagName(source3.slice(start, p));
                   s2 = S_TAG_SPACE;
                   break;
                 case S_ATTR:
-                  attrName = source2.slice(start, p);
+                  attrName = source3.slice(start, p);
                   s2 = S_ATTR_SPACE;
                   break;
                 case S_ATTR_NOQUOT_VALUE:
-                  var value = source2.slice(start, p);
+                  var value = source3.slice(start, p);
                   errorHandler.warning('attribute "' + value + '" missed quot(")!!');
                   addAttribute(attrName, value, start);
                 case S_ATTR_END:
@@ -17635,17 +17635,17 @@ var require_sax = __commonJS({
         return true;
       }
     }
-    function parseHtmlSpecialContent(source2, elStartEnd, tagName, entityReplacer, domBuilder) {
+    function parseHtmlSpecialContent(source3, elStartEnd, tagName, entityReplacer, domBuilder) {
       var isEscapableRaw = isHTMLEscapableRawTextElement(tagName);
       if (isEscapableRaw || isHTMLRawTextElement(tagName)) {
         var closeTag = new RegExp("</" + tagName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ">", "ig");
         closeTag.lastIndex = elStartEnd;
-        var match = closeTag.exec(source2);
+        var match = closeTag.exec(source3);
         var elEndStart = match ? match.index : -1;
         if (elEndStart < 0) {
           return elStartEnd + 1;
         }
-        var text2 = source2.substring(elStartEnd + 1, elEndStart);
+        var text2 = source3.substring(elStartEnd + 1, elEndStart);
         if (isEscapableRaw) {
           text2 = text2.replace(ENTITY_REG, entityReplacer);
         }
@@ -17654,18 +17654,18 @@ var require_sax = __commonJS({
       }
       return elStartEnd + 1;
     }
-    function _copy(source2, target) {
-      for (var n2 in source2) {
-        if (hasOwn(source2, n2)) {
-          target[n2] = source2[n2];
+    function _copy(source3, target) {
+      for (var n2 in source3) {
+        if (hasOwn(source3, n2)) {
+          target[n2] = source3[n2];
         }
       }
     }
-    function parseUtils(source2, start) {
+    function parseUtils(source3, start) {
       var index = start;
       function char(n2) {
         n2 = n2 || 0;
-        return source2.charAt(index + n2);
+        return source3.charAt(index + n2);
       }
       function skip(n2) {
         n2 = n2 || 1;
@@ -17673,7 +17673,7 @@ var require_sax = __commonJS({
       }
       function skipBlanks() {
         var blanks = 0;
-        while (index < source2.length) {
+        while (index < source3.length) {
           var c = char();
           if (c !== " " && c !== "\n" && c !== "	" && c !== "\r") {
             return blanks;
@@ -17684,13 +17684,13 @@ var require_sax = __commonJS({
         return -1;
       }
       function substringFromIndex() {
-        return source2.substring(index);
+        return source3.substring(index);
       }
       function substringStartsWith(text2) {
-        return source2.substring(index, index + text2.length) === text2;
+        return source3.substring(index, index + text2.length) === text2;
       }
       function substringStartsWithCaseInsensitive(text2) {
-        return source2.substring(index, index + text2.length).toUpperCase() === text2.toUpperCase();
+        return source3.substring(index, index + text2.length).toUpperCase() === text2.toUpperCase();
       }
       function getMatch(args) {
         var expr = g.reg("^", args);
@@ -17708,7 +17708,7 @@ var require_sax = __commonJS({
         },
         getMatch,
         getSource: function() {
-          return source2;
+          return source3;
         },
         skip,
         skipBlanks,
@@ -17731,14 +17731,14 @@ var require_sax = __commonJS({
         p2.skip(match[0].length);
         return match[0];
       }
-      var source2 = p.getSource();
+      var source3 = p.getSource();
       if (p.char() === "[") {
         p.skip(1);
         var intSubsetStart = p.getIndex();
-        while (p.getIndex() < source2.length) {
+        while (p.getIndex() < source3.length) {
           p.skipBlanks();
           if (p.char() === "]") {
-            var internalSubset = source2.substring(intSubsetStart, p.getIndex());
+            var internalSubset = source3.substring(intSubsetStart, p.getIndex());
             p.skip(1);
             return internalSubset;
           }
@@ -17776,8 +17776,8 @@ var require_sax = __commonJS({
         return errorHandler.fatalError("doctype internal subset is not well-formed, missing ]");
       }
     }
-    function parseDoctypeCommentOrCData(source2, start, domBuilder, errorHandler, isHTML) {
-      var p = parseUtils(source2, start);
+    function parseDoctypeCommentOrCData(source3, start, domBuilder, errorHandler, isHTML) {
+      var p = parseUtils(source3, start);
       switch (isHTML ? p.char(2).toUpperCase() : p.char(2)) {
         case "-":
           var comment = p.getMatch(g.Comment);
@@ -17868,8 +17868,8 @@ var require_sax = __commonJS({
           return errorHandler.fatalError('Not well-formed XML starting with "<!" at position ' + start);
       }
     }
-    function parseProcessingInstruction(source2, start, domBuilder, errorHandler) {
-      var match = source2.substring(start).match(g.PI);
+    function parseProcessingInstruction(source3, start, domBuilder, errorHandler) {
+      var match = source3.substring(start).match(g.PI);
       if (!match) {
         return errorHandler.fatalError("Invalid processing instruction starting at position " + start);
       }
@@ -17879,7 +17879,7 @@ var require_sax = __commonJS({
             "processing instruction at position " + start + " is an xml declaration which is only at the start of the document"
           );
         }
-        if (!g.XMLDecl.test(source2.substring(start))) {
+        if (!g.XMLDecl.test(source3.substring(start))) {
           return errorHandler.fatalError("xml declaration is not well-formed");
         }
       }
@@ -17973,7 +17973,7 @@ var require_dom_parser = __commonJS({
       this.locator = !!options2.locator;
       this.xmlns = this.assign(/* @__PURE__ */ Object.create(null), options2.xmlns);
     }
-    DOMParser2.prototype.parseFromString = function(source2, mimeType) {
+    DOMParser2.prototype.parseFromString = function(source3, mimeType) {
       if (!isValidMimeType(mimeType)) {
         throw new TypeError('DOMParser.parseFromString: the provided mimeType "' + mimeType + '" is not valid.');
       }
@@ -18001,10 +18001,10 @@ var require_dom_parser = __commonJS({
       sax2.errorHandler = domBuilder;
       sax2.domBuilder = domBuilder;
       var isXml = !conventions.isHTMLMimeType(mimeType);
-      if (isXml && typeof source2 !== "string") {
+      if (isXml && typeof source3 !== "string") {
         sax2.errorHandler.fatalError("source is not a string");
       }
-      sax2.parse(this.normalizeLineEndings(String(source2)), defaultNSMap, entityMap);
+      sax2.parse(this.normalizeLineEndings(String(source3)), defaultNSMap, entityMap);
       if (!domBuilder.doc.documentElement) {
         sax2.errorHandler.fatalError("missing root element");
       }
@@ -18177,8 +18177,8 @@ var require_dom_parser = __commonJS({
     }
     "endDTD,startEntity,endEntity,attributeDecl,elementDecl,externalEntityDecl,internalEntityDecl,resolveEntity,getExternalSubset,notationDecl,unparsedEntityDecl".replace(
       /\w+/g,
-      function(key2) {
-        DOMHandler.prototype[key2] = function() {
+      function(key3) {
+        DOMHandler.prototype[key3] = function() {
           return null;
         };
       }
@@ -18282,9 +18282,9 @@ var util;
   };
   util2.objectKeys = typeof Object.keys === "function" ? (obj) => Object.keys(obj) : (object3) => {
     const keys = [];
-    for (const key2 in object3) {
-      if (Object.prototype.hasOwnProperty.call(object3, key2)) {
-        keys.push(key2);
+    for (const key3 in object3) {
+      if (Object.prototype.hasOwnProperty.call(object3, key3)) {
+        keys.push(key3);
       }
     }
     return keys;
@@ -18622,8 +18622,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path11, errorMaps, issueData } = params;
-  const fullPath = [...path11, ...issueData.path || []];
+  const { data, path: path13, errorMaps, issueData } = params;
+  const fullPath = [...path13, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -18691,10 +18691,10 @@ var ParseStatus = class _ParseStatus {
   static async mergeObjectAsync(status, pairs) {
     const syncPairs = [];
     for (const pair of pairs) {
-      const key2 = await pair.key;
+      const key3 = await pair.key;
       const value = await pair.value;
       syncPairs.push({
-        key: key2,
+        key: key3,
         value
       });
     }
@@ -18703,17 +18703,17 @@ var ParseStatus = class _ParseStatus {
   static mergeObjectSync(status, pairs) {
     const finalObject = {};
     for (const pair of pairs) {
-      const { key: key2, value } = pair;
-      if (key2.status === "aborted")
+      const { key: key3, value } = pair;
+      if (key3.status === "aborted")
         return INVALID;
       if (value.status === "aborted")
         return INVALID;
-      if (key2.status === "dirty")
+      if (key3.status === "dirty")
         status.dirty();
       if (value.status === "dirty")
         status.dirty();
-      if (key2.value !== "__proto__" && (typeof value.value !== "undefined" || pair.alwaysSet)) {
-        finalObject[key2.value] = value.value;
+      if (key3.value !== "__proto__" && (typeof value.value !== "undefined" || pair.alwaysSet)) {
+        finalObject[key3.value] = value.value;
       }
     }
     return { status: status.value, value: finalObject };
@@ -18738,12 +18738,12 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path11, key2) {
+  constructor(parent, value, path13, key3) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path11;
-    this._key = key2;
+    this._path = path13;
+    this._key = key3;
   }
   get path() {
     if (!this._cachedPath.length) {
@@ -20488,9 +20488,9 @@ ZodArray.create = (schema, params) => {
 function deepPartialify(schema) {
   if (schema instanceof ZodObject) {
     const newShape = {};
-    for (const key2 in schema.shape) {
-      const fieldSchema = schema.shape[key2];
-      newShape[key2] = ZodOptional.create(deepPartialify(fieldSchema));
+    for (const key3 in schema.shape) {
+      const fieldSchema = schema.shape[key3];
+      newShape[key3] = ZodOptional.create(deepPartialify(fieldSchema));
     }
     return new ZodObject({
       ...schema._def,
@@ -20541,29 +20541,29 @@ var ZodObject = class _ZodObject extends ZodType {
     const { shape, keys: shapeKeys } = this._getCached();
     const extraKeys = [];
     if (!(this._def.catchall instanceof ZodNever && this._def.unknownKeys === "strip")) {
-      for (const key2 in ctx.data) {
-        if (!shapeKeys.includes(key2)) {
-          extraKeys.push(key2);
+      for (const key3 in ctx.data) {
+        if (!shapeKeys.includes(key3)) {
+          extraKeys.push(key3);
         }
       }
     }
     const pairs = [];
-    for (const key2 of shapeKeys) {
-      const keyValidator = shape[key2];
-      const value = ctx.data[key2];
+    for (const key3 of shapeKeys) {
+      const keyValidator = shape[key3];
+      const value = ctx.data[key3];
       pairs.push({
-        key: { status: "valid", value: key2 },
-        value: keyValidator._parse(new ParseInputLazyPath(ctx, value, ctx.path, key2)),
-        alwaysSet: key2 in ctx.data
+        key: { status: "valid", value: key3 },
+        value: keyValidator._parse(new ParseInputLazyPath(ctx, value, ctx.path, key3)),
+        alwaysSet: key3 in ctx.data
       });
     }
     if (this._def.catchall instanceof ZodNever) {
       const unknownKeys = this._def.unknownKeys;
       if (unknownKeys === "passthrough") {
-        for (const key2 of extraKeys) {
+        for (const key3 of extraKeys) {
           pairs.push({
-            key: { status: "valid", value: key2 },
-            value: { status: "valid", value: ctx.data[key2] }
+            key: { status: "valid", value: key3 },
+            value: { status: "valid", value: ctx.data[key3] }
           });
         }
       } else if (unknownKeys === "strict") {
@@ -20580,15 +20580,15 @@ var ZodObject = class _ZodObject extends ZodType {
       }
     } else {
       const catchall = this._def.catchall;
-      for (const key2 of extraKeys) {
-        const value = ctx.data[key2];
+      for (const key3 of extraKeys) {
+        const value = ctx.data[key3];
         pairs.push({
-          key: { status: "valid", value: key2 },
+          key: { status: "valid", value: key3 },
           value: catchall._parse(
-            new ParseInputLazyPath(ctx, value, ctx.path, key2)
+            new ParseInputLazyPath(ctx, value, ctx.path, key3)
             //, ctx.child(key), value, getParsedType(value)
           ),
-          alwaysSet: key2 in ctx.data
+          alwaysSet: key3 in ctx.data
         });
       }
     }
@@ -20596,10 +20596,10 @@ var ZodObject = class _ZodObject extends ZodType {
       return Promise.resolve().then(async () => {
         const syncPairs = [];
         for (const pair of pairs) {
-          const key2 = await pair.key;
+          const key3 = await pair.key;
           const value = await pair.value;
           syncPairs.push({
-            key: key2,
+            key: key3,
             value,
             alwaysSet: pair.alwaysSet
           });
@@ -20724,8 +20724,8 @@ var ZodObject = class _ZodObject extends ZodType {
   //   }) as any;
   //   return merged;
   // }
-  setKey(key2, schema) {
-    return this.augment({ [key2]: schema });
+  setKey(key3, schema) {
+    return this.augment({ [key3]: schema });
   }
   // merge<Incoming extends AnyZodObject>(
   //   merging: Incoming
@@ -20756,9 +20756,9 @@ var ZodObject = class _ZodObject extends ZodType {
   }
   pick(mask) {
     const shape = {};
-    for (const key2 of util.objectKeys(mask)) {
-      if (mask[key2] && this.shape[key2]) {
-        shape[key2] = this.shape[key2];
+    for (const key3 of util.objectKeys(mask)) {
+      if (mask[key3] && this.shape[key3]) {
+        shape[key3] = this.shape[key3];
       }
     }
     return new _ZodObject({
@@ -20768,9 +20768,9 @@ var ZodObject = class _ZodObject extends ZodType {
   }
   omit(mask) {
     const shape = {};
-    for (const key2 of util.objectKeys(this.shape)) {
-      if (!mask[key2]) {
-        shape[key2] = this.shape[key2];
+    for (const key3 of util.objectKeys(this.shape)) {
+      if (!mask[key3]) {
+        shape[key3] = this.shape[key3];
       }
     }
     return new _ZodObject({
@@ -20786,12 +20786,12 @@ var ZodObject = class _ZodObject extends ZodType {
   }
   partial(mask) {
     const newShape = {};
-    for (const key2 of util.objectKeys(this.shape)) {
-      const fieldSchema = this.shape[key2];
-      if (mask && !mask[key2]) {
-        newShape[key2] = fieldSchema;
+    for (const key3 of util.objectKeys(this.shape)) {
+      const fieldSchema = this.shape[key3];
+      if (mask && !mask[key3]) {
+        newShape[key3] = fieldSchema;
       } else {
-        newShape[key2] = fieldSchema.optional();
+        newShape[key3] = fieldSchema.optional();
       }
     }
     return new _ZodObject({
@@ -20801,16 +20801,16 @@ var ZodObject = class _ZodObject extends ZodType {
   }
   required(mask) {
     const newShape = {};
-    for (const key2 of util.objectKeys(this.shape)) {
-      if (mask && !mask[key2]) {
-        newShape[key2] = this.shape[key2];
+    for (const key3 of util.objectKeys(this.shape)) {
+      if (mask && !mask[key3]) {
+        newShape[key3] = this.shape[key3];
       } else {
-        const fieldSchema = this.shape[key2];
+        const fieldSchema = this.shape[key3];
         let newField = fieldSchema;
         while (newField instanceof ZodOptional) {
           newField = newField._def.innerType;
         }
-        newShape[key2] = newField;
+        newShape[key3] = newField;
       }
     }
     return new _ZodObject({
@@ -20933,9 +20933,9 @@ var ZodUnion = class extends ZodType {
     return this._def.options;
   }
 };
-ZodUnion.create = (types, params) => {
+ZodUnion.create = (types2, params) => {
   return new ZodUnion({
-    options: types,
+    options: types2,
     typeName: ZodFirstPartyTypeKind.ZodUnion,
     ...processCreateParams(params)
   });
@@ -21054,18 +21054,18 @@ function mergeValues(a, b) {
     return { valid: true, data: a };
   } else if (aType === ZodParsedType.object && bType === ZodParsedType.object) {
     const bKeys = util.objectKeys(b);
-    const sharedKeys = util.objectKeys(a).filter((key2) => bKeys.indexOf(key2) !== -1);
+    const sharedKeys = util.objectKeys(a).filter((key3) => bKeys.indexOf(key3) !== -1);
     const newObj = { ...a, ...b };
     if (Object.prototype.hasOwnProperty.call(newObj, "__proto__"))
       delete newObj.__proto__;
-    for (const key2 of sharedKeys) {
-      if (key2 === "__proto__")
+    for (const key3 of sharedKeys) {
+      if (key3 === "__proto__")
         continue;
-      const sharedValue = mergeValues(a[key2], b[key2]);
+      const sharedValue = mergeValues(a[key3], b[key3]);
       if (!sharedValue.valid) {
         return { valid: false };
       }
-      newObj[key2] = sharedValue.data;
+      newObj[key3] = sharedValue.data;
     }
     return { valid: true, data: newObj };
   } else if (aType === ZodParsedType.array && bType === ZodParsedType.array) {
@@ -21229,11 +21229,11 @@ var ZodRecord = class _ZodRecord extends ZodType {
     const pairs = [];
     const keyType = this._def.keyType;
     const valueType = this._def.valueType;
-    for (const key2 in ctx.data) {
+    for (const key3 in ctx.data) {
       pairs.push({
-        key: keyType._parse(new ParseInputLazyPath(ctx, key2, ctx.path, key2)),
-        value: valueType._parse(new ParseInputLazyPath(ctx, ctx.data[key2], ctx.path, key2)),
-        alwaysSet: key2 in ctx.data
+        key: keyType._parse(new ParseInputLazyPath(ctx, key3, ctx.path, key3)),
+        value: valueType._parse(new ParseInputLazyPath(ctx, ctx.data[key3], ctx.path, key3)),
+        alwaysSet: key3 in ctx.data
       });
     }
     if (ctx.common.async) {
@@ -21281,9 +21281,9 @@ var ZodMap = class extends ZodType {
     }
     const keyType = this._def.keyType;
     const valueType = this._def.valueType;
-    const pairs = [...ctx.data.entries()].map(([key2, value], index) => {
+    const pairs = [...ctx.data.entries()].map(([key3, value], index) => {
       return {
-        key: keyType._parse(new ParseInputLazyPath(ctx, key2, ctx.path, [index, "key"])),
+        key: keyType._parse(new ParseInputLazyPath(ctx, key3, ctx.path, [index, "key"])),
         value: valueType._parse(new ParseInputLazyPath(ctx, value, ctx.path, [index, "value"]))
       };
     });
@@ -21291,30 +21291,30 @@ var ZodMap = class extends ZodType {
       const finalMap = /* @__PURE__ */ new Map();
       return Promise.resolve().then(async () => {
         for (const pair of pairs) {
-          const key2 = await pair.key;
+          const key3 = await pair.key;
           const value = await pair.value;
-          if (key2.status === "aborted" || value.status === "aborted") {
+          if (key3.status === "aborted" || value.status === "aborted") {
             return INVALID;
           }
-          if (key2.status === "dirty" || value.status === "dirty") {
+          if (key3.status === "dirty" || value.status === "dirty") {
             status.dirty();
           }
-          finalMap.set(key2.value, value.value);
+          finalMap.set(key3.value, value.value);
         }
         return { status: status.value, value: finalMap };
       });
     } else {
       const finalMap = /* @__PURE__ */ new Map();
       for (const pair of pairs) {
-        const key2 = pair.key;
+        const key3 = pair.key;
         const value = pair.value;
-        if (key2.status === "aborted" || value.status === "aborted") {
+        if (key3.status === "aborted" || value.status === "aborted") {
           return INVALID;
         }
-        if (key2.status === "dirty" || value.status === "dirty") {
+        if (key3.status === "dirty" || value.status === "dirty") {
           status.dirty();
         }
-        finalMap.set(key2.value, value.value);
+        finalMap.set(key3.value, value.value);
       }
       return { status: status.value, value: finalMap };
     }
@@ -22589,10 +22589,10 @@ function cached(getter) {
 function nullish(input2) {
   return input2 === null || input2 === void 0;
 }
-function cleanRegex(source2) {
-  const start = source2.startsWith("^") ? 1 : 0;
-  const end = source2.endsWith("$") ? source2.length - 1 : source2.length;
-  return source2.slice(start, end);
+function cleanRegex(source3) {
+  const start = source3.startsWith("^") ? 1 : 0;
+  const end = source3.endsWith("$") ? source3.length - 1 : source3.length;
+  return source3.slice(start, end);
 }
 function floatSafeRemainder2(val, step) {
   const ratio = val / step;
@@ -22603,9 +22603,9 @@ function floatSafeRemainder2(val, step) {
   return ratio - roundedRatio;
 }
 var EVALUATING = /* @__PURE__ */ Symbol("evaluating");
-function defineLazy(object3, key2, getter) {
+function defineLazy(object3, key3, getter) {
   let value = void 0;
-  Object.defineProperty(object3, key2, {
+  Object.defineProperty(object3, key3, {
     get() {
       if (value === EVALUATING) {
         return void 0;
@@ -22617,7 +22617,7 @@ function defineLazy(object3, key2, getter) {
       return value;
     },
     set(v) {
-      Object.defineProperty(object3, key2, {
+      Object.defineProperty(object3, key3, {
         value: v
         // configurable: true,
       });
@@ -22643,47 +22643,47 @@ function rawShape(def) {
 function sourceShape(schema) {
   return rawShape(schema._zod.def) ?? schema._zod.def.shape;
 }
-function deferProp(target, key2, getter) {
-  Object.defineProperty(target, key2, {
+function deferProp(target, key3, getter) {
+  Object.defineProperty(target, key3, {
     get() {
       const value = getter();
-      assignProp(this, key2, value);
+      assignProp(this, key3, value);
       return value;
     },
     enumerable: true,
     configurable: true
   });
 }
-function putProp(target, key2, value) {
-  if (key2 in target)
-    assignProp(target, key2, value);
+function putProp(target, key3, value) {
+  if (key3 in target)
+    assignProp(target, key3, value);
   else
-    target[key2] = value;
+    target[key3] = value;
 }
-function mirrorShape(target, source2, keys, wrap) {
-  const raw = sourceShape(source2);
-  for (const key2 of keys) {
-    const desc = Object.getOwnPropertyDescriptor(raw, key2);
+function mirrorShape(target, source3, keys, wrap) {
+  const raw = sourceShape(source3);
+  for (const key3 of keys) {
+    const desc = Object.getOwnPropertyDescriptor(raw, key3);
     if (!desc.enumerable)
       continue;
     if (desc.get) {
-      deferProp(target, key2, () => {
-        const value = source2._zod.def.shape[key2];
-        return wrap ? wrap(value, key2) : value;
+      deferProp(target, key3, () => {
+        const value = source3._zod.def.shape[key3];
+        return wrap ? wrap(value, key3) : value;
       });
     } else
-      putProp(target, key2, wrap ? wrap(desc.value, key2) : desc.value);
+      putProp(target, key3, wrap ? wrap(desc.value, key3) : desc.value);
   }
 }
-function mirrorProps(target, source2) {
-  for (const key2 of Reflect.ownKeys(source2)) {
-    const desc = Object.getOwnPropertyDescriptor(source2, key2);
+function mirrorProps(target, source3) {
+  for (const key3 of Reflect.ownKeys(source3)) {
+    const desc = Object.getOwnPropertyDescriptor(source3, key3);
     if (!desc.enumerable)
       continue;
     if (desc.get)
-      deferProp(target, key2, () => source2[key2]);
+      deferProp(target, key3, () => source3[key3]);
     else
-      putProp(target, key2, desc.value);
+      putProp(target, key3, desc.value);
   }
 }
 function mergeDefs(...defs) {
@@ -22697,14 +22697,14 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path11) {
-  if (!path11)
+function getElementAtPath(obj, path13) {
+  if (!path13)
     return obj;
-  return path11.reduce((acc, key2) => acc?.[key2], obj);
+  return path13.reduce((acc, key3) => acc?.[key3], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
-  const promises = keys.map((key2) => promisesObj[key2]);
+  const promises = keys.map((key3) => promisesObj[key3]);
   return Promise.all(promises).then((results) => {
     const resolvedObj = {};
     for (let i = 0; i < keys.length; i++) {
@@ -22776,8 +22776,8 @@ function shallowClone(o) {
 }
 function numKeys(data) {
   let keyCount = 0;
-  for (const key2 in data) {
-    if (Object.prototype.hasOwnProperty.call(data, key2)) {
+  for (const key3 in data) {
+    if (Object.prototype.hasOwnProperty.call(data, key3)) {
       keyCount++;
     }
   }
@@ -22931,12 +22931,12 @@ function pick(schema, mask) {
 function maskedKeys(schema, mask) {
   const raw = sourceShape(schema);
   const keys = [];
-  for (const key2 of Reflect.ownKeys(mask)) {
-    if (!Object.getOwnPropertyDescriptor(raw, key2)?.enumerable) {
-      throw new Error(`Unrecognized key: "${String(key2)}"`);
+  for (const key3 of Reflect.ownKeys(mask)) {
+    if (!Object.getOwnPropertyDescriptor(raw, key3)?.enumerable) {
+      throw new Error(`Unrecognized key: "${String(key3)}"`);
     }
-    if (mask[key2])
-      keys.push(key2);
+    if (mask[key3])
+      keys.push(key3);
   }
   return keys;
 }
@@ -22949,7 +22949,7 @@ function omit(schema, mask) {
   }
   const omitted = new Set(maskedKeys(schema, mask));
   const newShape = {};
-  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)).filter((key2) => !omitted.has(key2)));
+  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)).filter((key3) => !omitted.has(key3)));
   return clone(schema, mergeDefs(currDef, { shape: newShape, checks: [] }));
 }
 function extend(schema, shape) {
@@ -22960,8 +22960,8 @@ function extend(schema, shape) {
   const hasChecks = checks && checks.length > 0;
   if (hasChecks) {
     const existingShape = sourceShape(schema);
-    for (const key2 of Reflect.ownKeys(shape)) {
-      if (Object.getOwnPropertyDescriptor(existingShape, key2) !== void 0) {
+    for (const key3 of Reflect.ownKeys(shape)) {
+      if (Object.getOwnPropertyDescriptor(existingShape, key3) !== void 0) {
         throw new Error("Cannot overwrite keys on object schemas containing refinements. Use `.safeExtend()` instead.");
       }
     }
@@ -23008,15 +23008,15 @@ function partial(Class2, schema, mask, name2 = "partial") {
   }
   const selected = mask ? new Set(maskedKeys(schema, mask)) : void 0;
   const newShape = {};
-  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)), Class2 && ((value, key2) => selected && !selected.has(key2) ? value : new Class2({ type: "optional", innerType: value })));
+  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)), Class2 && ((value, key3) => selected && !selected.has(key3) ? value : new Class2({ type: "optional", innerType: value })));
   return clone(schema, mergeDefs(schema._zod.def, { shape: newShape, checks: [] }));
 }
 function required(Class2, schema, mask) {
   const selected = mask ? new Set(maskedKeys(schema, mask)) : void 0;
   const newShape = {};
-  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)), (value, key2) => (
+  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)), (value, key3) => (
     // overwrite with non-optional
-    selected && !selected.has(key2) ? value : new Class2({ type: "nonoptional", innerType: value })
+    selected && !selected.has(key3) ? value : new Class2({ type: "nonoptional", innerType: value })
   ));
   return clone(schema, mergeDefs(schema._zod.def, { shape: newShape }));
 }
@@ -23040,11 +23040,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path11, issues) {
+function prefixIssues(path13, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path11);
+    iss.path.unshift(path13);
     return iss;
   });
 }
@@ -23203,46 +23203,46 @@ var Class = class {
   }
 };
 function members(proto, table) {
-  for (const key2 in table) {
-    const desc = Object.getOwnPropertyDescriptor(table, key2);
+  for (const key3 in table) {
+    const desc = Object.getOwnPropertyDescriptor(table, key3);
     if (desc.get)
-      Object.defineProperty(proto, key2, { ...desc, enumerable: false });
+      Object.defineProperty(proto, key3, { ...desc, enumerable: false });
     else
-      defineBound(proto, key2, desc.value);
+      defineBound(proto, key3, desc.value);
   }
 }
-function own(inst, key2, value, enumerable = true) {
-  Object.defineProperty(inst, key2, { configurable: true, writable: true, enumerable, value });
+function own(inst, key3, value, enumerable = true) {
+  Object.defineProperty(inst, key3, { configurable: true, writable: true, enumerable, value });
   return value;
 }
-function hide(inst, key2, value) {
-  return own(inst, key2, value, false);
+function hide(inst, key3, value) {
+  return own(inst, key3, value, false);
 }
 // @__NO_SIDE_EFFECTS__
 function derived(computes, table) {
-  for (const key2 in computes) {
-    const compute = computes[key2];
-    Object.defineProperty(table, key2, {
+  for (const key3 in computes) {
+    const compute = computes[key3];
+    Object.defineProperty(table, key3, {
       configurable: true,
       enumerable: true,
       get() {
-        return own(this, key2, compute(this));
+        return own(this, key3, compute(this));
       },
       set(value) {
-        own(this, key2, value);
+        own(this, key3, value);
       }
     });
   }
   return table;
 }
-function defineBound(proto, key2, fn) {
-  Object.defineProperty(proto, key2, {
+function defineBound(proto, key3, fn) {
+  Object.defineProperty(proto, key3, {
     configurable: true,
     get() {
-      return this == null ? fn : own(this, key2, fn.bind(this));
+      return this == null ? fn : own(this, key3, fn.bind(this));
     },
     set(value) {
-      own(this, key2, value);
+      own(this, key3, value);
     }
   });
 }
@@ -23259,53 +23259,53 @@ var breaker = {
     return void 0;
   }
 };
-function defineLazyInternal(inst, key2, compute) {
+function defineLazyInternal(inst, key3, compute) {
   const proto = Object.getPrototypeOf(inst._zod);
-  if (key2 in proto && installing !== inst._zod) {
+  if (key3 in proto && installing !== inst._zod) {
     installing = void 0;
     return;
   }
   installing = inst._zod;
-  Object.defineProperty(proto, key2, {
+  Object.defineProperty(proto, key3, {
     configurable: true,
     get() {
-      Object.defineProperty(this, key2, breaker);
+      Object.defineProperty(this, key3, breaker);
       const outer = broke;
       broke = false;
       try {
         const value = compute(this);
         if (broke)
-          delete this[key2];
+          delete this[key3];
         else
-          Object.defineProperty(this, key2, { configurable: true, writable: true, value });
+          Object.defineProperty(this, key3, { configurable: true, writable: true, value });
         broke = broke || outer;
         return value;
       } catch (err) {
-        delete this[key2];
+        delete this[key3];
         broke = broke || outer;
         throw err;
       }
     },
     set(value) {
-      Object.defineProperty(this, key2, { configurable: true, writable: true, value });
+      Object.defineProperty(this, key3, { configurable: true, writable: true, value });
     }
   });
 }
-function installLazyProp(inst, key2, make, enumerable) {
-  const proto = claim(inst, key2);
+function installLazyProp(inst, key3, make, enumerable) {
+  const proto = claim(inst, key3);
   if (!proto)
     return;
-  Object.defineProperty(proto, key2, {
+  Object.defineProperty(proto, key3, {
     configurable: true,
     get() {
       const desc = { configurable: true, writable: true, enumerable, value: void 0 };
-      Object.defineProperty(this, key2, desc);
+      Object.defineProperty(this, key3, desc);
       desc.value = make(this);
-      Object.defineProperty(this, key2, desc);
+      Object.defineProperty(this, key3, desc);
       return desc.value;
     },
     set(value) {
-      Object.defineProperty(this, key2, { configurable: true, writable: true, enumerable, value });
+      Object.defineProperty(this, key3, { configurable: true, writable: true, enumerable, value });
     }
   });
 }
@@ -23482,15 +23482,15 @@ var $ZodError = $constructor("$ZodError", initializer);
 var $ZodRealError = $constructor("$ZodError", initializer, void 0, {
   Parent: Error
 });
-function node(obj, key2, make) {
-  if (!Object.prototype.hasOwnProperty.call(obj, key2)) {
-    if (key2 === "__proto__") {
-      Object.defineProperty(obj, key2, { value: make(), writable: true, enumerable: true, configurable: true });
+function node(obj, key3, make) {
+  if (!Object.prototype.hasOwnProperty.call(obj, key3)) {
+    if (key3 === "__proto__") {
+      Object.defineProperty(obj, key3, { value: make(), writable: true, enumerable: true, configurable: true });
     } else {
-      obj[key2] = make();
+      obj[key3] = make();
     }
   }
-  return obj[key2];
+  return obj[key3];
 }
 function flattenError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = {};
@@ -23506,16 +23506,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path11 = []) => {
+  const processError = (error63, path13 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path11, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path13, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path11, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path13, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path11, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path13, ...issue2.path]);
       } else {
-        const fullpath = [...path11, ...issue2.path];
+        const fullpath = [...path13, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -23554,17 +23554,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path11 = []) => {
+  const processError = (error63, path13 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path11, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path13, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path11, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path13, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path11, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path13, ...issue2.path]);
       } else {
-        const fullpath = [...path11, ...issue2.path];
+        const fullpath = [...path13, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -23603,8 +23603,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path11 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path11) {
+  const path13 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path13) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -23906,8 +23906,8 @@ var creditCard = /^\d(?:[ -]?\d){11,18}$/;
 var currencyCode = /^(?:AED|AFN|ALL|AMD|AOA|ARS|AUD|AWG|AZN|BAM|BBD|BDT|BHD|BIF|BMD|BND|BOB|BOV|BRL|BSD|BTN|BWP|BYN|BZD|CAD|CDF|CHE|CHF|CHW|CLF|CLP|CNY|COP|COU|CRC|CUP|CVE|CZK|DJF|DKK|DOP|DZD|EGP|ERN|ETB|EUR|FJD|FKP|GBP|GEL|GHS|GIP|GMD|GNF|GTQ|GYD|HKD|HNL|HTG|HUF|IDR|ILS|INR|IQD|IRR|ISK|JMD|JOD|JPY|KES|KGS|KHR|KMF|KPW|KRW|KWD|KYD|KZT|LAK|LBP|LKR|LRD|LSL|LYD|MAD|MDL|MGA|MKD|MMK|MNT|MOP|MRU|MUR|MVR|MWK|MXN|MXV|MYR|MZN|NAD|NGN|NIO|NOK|NPR|NZD|OMR|PAB|PEN|PGK|PHP|PKR|PLN|PYG|QAR|RON|RSD|RUB|RWF|SAR|SBD|SCR|SDG|SEK|SGD|SHP|SLE|SOS|SRD|SSP|STN|SVC|SYP|SZL|THB|TJS|TMT|TND|TOP|TRY|TTD|TWD|TZS|UAH|UGX|USD|USN|UYI|UYU|UYW|UZS|VED|VES|VND|VUV|WST|XAD|XAF|XAG|XAU|XBA|XBB|XBC|XBD|XCD|XCG|XDR|XOF|XPD|XPF|XPT|XSU|XTS|XUA|XXX|YER|ZAR|ZMW|ZWG)$/;
 var iban = /^[A-Z]{2}(?!00|01|99)\d{2}[A-Z0-9]{11,30}$/;
 var dateSource = `(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))`;
-function anchor(source2) {
-  return new RegExp(`^${source2}$`);
+function anchor(source3) {
+  return new RegExp(`^${source3}$`);
 }
 var date = /* @__PURE__ */ anchor(dateSource);
 function timeSource(args) {
@@ -24399,16 +24399,16 @@ var $ZodCheckProperties = /* @__PURE__ */ $constructor("$ZodCheckProperties", (i
       payload.issues.push({ expected: "object", code: "invalid_type", input: payload.value, inst });
       return void 0;
     }
-    entries ?? (entries = Reflect.ownKeys(def.shape).map((key2) => [key2, def.shape[key2]]));
+    entries ?? (entries = Reflect.ownKeys(def.shape).map((key3) => [key3, def.shape[key3]]));
     const input2 = payload.value;
     let proms;
-    for (const [key2, schema] of entries) {
-      const result = schema._zod.run({ value: input2[key2], issues: [] }, {});
+    for (const [key3, schema] of entries) {
+      const result = schema._zod.run({ value: input2[key3], issues: [] }, {});
       if (result instanceof Promise) {
         proms ?? (proms = []);
-        proms.push(result.then((result2) => handleCheckPropertyResult(result2, payload, key2)));
+        proms.push(result.then((result2) => handleCheckPropertyResult(result2, payload, key3)));
       } else {
-        handleCheckPropertyResult(result, payload, key2);
+        handleCheckPropertyResult(result, payload, key3);
       }
     }
     if (proms)
@@ -25309,8 +25309,8 @@ var $ZodArray = /* @__PURE__ */ $constructor("$ZodArray", (inst, def) => {
   };
   capSize(inst, arraySize);
 });
-function handlePropertyResult(result, final, key2, input2, optin, optout) {
-  const isPresent = key2 in input2;
+function handlePropertyResult(result, final, key3, input2, optin, optout) {
+  const isPresent = key3 in input2;
   const isOptionalOut = optout === "optional";
   if (!isPresent && isOptionalOut && optin === "optional") {
     return;
@@ -25319,7 +25319,7 @@ function handlePropertyResult(result, final, key2, input2, optin, optout) {
     if (optin !== void 0 && isOptionalOut && !isPresent) {
       return;
     }
-    final.issues.push(...prefixIssues(key2, result.issues));
+    final.issues.push(...prefixIssues(key3, result.issues));
   }
   if (!isPresent && optin === void 0) {
     if (!result.issues.length) {
@@ -25327,17 +25327,17 @@ function handlePropertyResult(result, final, key2, input2, optin, optout) {
         code: "invalid_type",
         expected: "nonoptional",
         input: void 0,
-        path: [key2]
+        path: [key3]
       });
     }
     return;
   }
   if (result.value === void 0) {
     if (isPresent || optin === "defaulted" && !isOptionalOut) {
-      final.value[key2] = void 0;
+      final.value[key3] = void 0;
     }
   } else {
-    final.value[key2] = result.value;
+    final.value[key3] = result.value;
   }
 }
 var NO_SYMBOL_KEYS = [];
@@ -25370,28 +25370,28 @@ function handleCatchall(proms, input2, payload, ctx, def, inst, abortEarly) {
   const optin = _catchall.optin;
   const optout = _catchall.optout;
   let seen = 0;
-  for (const key2 in input2) {
+  for (const key3 in input2) {
     if (abortEarly && payload.issues.length !== seen) {
       if (aborted(payload, seen))
         break;
       seen = payload.issues.length;
     }
-    if (keySet.has(key2))
+    if (keySet.has(key3))
       continue;
-    if (key2 === "__proto__") {
+    if (key3 === "__proto__") {
       if (t === "never")
-        unrecognized.push(key2);
+        unrecognized.push(key3);
       continue;
     }
     if (t === "never") {
-      unrecognized.push(key2);
+      unrecognized.push(key3);
       continue;
     }
-    const r = _catchall.run({ value: input2[key2], issues: [] }, ctx);
+    const r = _catchall.run({ value: input2[key3], issues: [] }, ctx);
     if (r instanceof Promise) {
-      proms.push(r.then((r2) => handlePropertyResult(r2, payload, key2, input2, optin, optout)));
+      proms.push(r.then((r2) => handlePropertyResult(r2, payload, key3, input2, optin, optout)));
     } else {
-      handlePropertyResult(r, payload, key2, input2, optin, optout);
+      handlePropertyResult(r, payload, key3, input2, optin, optout);
     }
   }
   if (unrecognized.length) {
@@ -25428,16 +25428,16 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
   defineLazyInternal(inst, "propValues", (zod) => {
     const shape = zod.def.shape;
     const propValues = {};
-    for (const key2 in shape) {
-      const field = shape[key2]._zod;
+    for (const key3 in shape) {
+      const field = shape[key3]._zod;
       if (field.values) {
-        if (!Object.prototype.hasOwnProperty.call(propValues, key2)) {
-          assignProp(propValues, key2, /* @__PURE__ */ new Set());
+        if (!Object.prototype.hasOwnProperty.call(propValues, key3)) {
+          assignProp(propValues, key3, /* @__PURE__ */ new Set());
         }
         for (const v of field.values)
-          propValues[key2].add(v);
+          propValues[key3].add(v);
         if (field.optin !== void 0)
-          propValues[key2].add(void 0);
+          propValues[key3].add(void 0);
       }
     }
     return propValues;
@@ -25464,22 +25464,22 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
     const shape = value.shape;
     const abortEarly = ctx?.abortEarly;
     let seen = payload.issues.length;
-    for (const key2 of value.allKeys) {
+    for (const key3 of value.allKeys) {
       if (abortEarly && payload.issues.length !== seen) {
         if (aborted(payload, seen))
           break;
         seen = payload.issues.length;
       }
-      if (key2 === "__proto__")
+      if (key3 === "__proto__")
         continue;
-      const el = shape[key2];
+      const el = shape[key3];
       const optin = el._zod.optin;
       const optout = el._zod.optout;
-      const r = el._zod.run({ value: input2[key2], issues: [] }, ctx);
+      const r = el._zod.run({ value: input2[key3], issues: [] }, ctx);
       if (r instanceof Promise) {
-        proms.push(r.then((r2) => handlePropertyResult(r2, payload, key2, input2, optin, optout)));
+        proms.push(r.then((r2) => handlePropertyResult(r2, payload, key3, input2, optin, optout)));
       } else {
-        handlePropertyResult(r, payload, key2, input2, optin, optout);
+        handlePropertyResult(r, payload, key3, input2, optin, optout);
       }
     }
     if (!catchall) {
@@ -25513,17 +25513,17 @@ var $ZodObjectJIT = /* @__PURE__ */ $constructor("$ZodObjectJIT", (inst, def) =>
     doc.write(`const input = payload.value;`);
     const ids = /* @__PURE__ */ Object.create(null);
     let counter = 0;
-    for (const key2 of normalized.allKeys) {
-      ids[key2] = `key_${counter++}`;
+    for (const key3 of normalized.allKeys) {
+      ids[key3] = `key_${counter++}`;
     }
     doc.write(memo2 ? `const newResult = memo.alloc(inst, payload, {}, ctx);` : `const newResult = {};`);
-    for (const key2 of normalized.allKeys) {
-      if (key2 === "__proto__")
+    for (const key3 of normalized.allKeys) {
+      if (key3 === "__proto__")
         continue;
-      const id = ids[key2];
-      const k = typeof key2 === "symbol" ? `syms[${syms.indexOf(key2)}]` : esc(key2);
+      const id = ids[key3];
+      const k = typeof key3 === "symbol" ? `syms[${syms.indexOf(key3)}]` : esc(key3);
       const isPresent = `${k} in input`;
-      const schema = shape[key2];
+      const schema = shape[key3];
       const optin = schema?._zod?.optin;
       const isOptionalIn = optin !== void 0;
       const isOptionalOut = schema?._zod?.optout === "optional";
@@ -25857,21 +25857,21 @@ function mergeValues2(a, b) {
   }
   if (isPlainObject(a) && isPlainObject(b)) {
     const bKeys = Object.keys(b);
-    const sharedKeys = Object.keys(a).filter((key2) => bKeys.indexOf(key2) !== -1);
+    const sharedKeys = Object.keys(a).filter((key3) => bKeys.indexOf(key3) !== -1);
     const newObj = { ...a, ...b };
     if (Object.prototype.hasOwnProperty.call(newObj, "__proto__"))
       delete newObj.__proto__;
-    for (const key2 of sharedKeys) {
-      if (key2 === "__proto__")
+    for (const key3 of sharedKeys) {
+      if (key3 === "__proto__")
         continue;
-      const sharedValue = mergeValues2(a[key2], b[key2]);
+      const sharedValue = mergeValues2(a[key3], b[key3]);
       if (!sharedValue.valid) {
         return {
           valid: false,
-          mergeErrorPath: [key2, ...sharedValue.mergeErrorPath]
+          mergeErrorPath: [key3, ...sharedValue.mergeErrorPath]
         };
       }
-      newObj[key2] = sharedValue.data;
+      newObj[key3] = sharedValue.data;
     }
     return { valid: true, data: newObj };
   }
@@ -26030,9 +26030,9 @@ var $ZodTuple = /* @__PURE__ */ $constructor("$ZodTuple", (inst, def) => {
     return handleTupleResults(itemResults, payload, items, input2, optoutStart);
   };
 });
-function getTupleOptStart(items, key2) {
+function getTupleOptStart(items, key3) {
   for (let i = items.length - 1; i >= 0; i--) {
-    const omittable = key2 === "optin" ? items[i]._zod.optin !== void 0 : items[i]._zod.optout === "optional";
+    const omittable = key3 === "optin" ? items[i]._zod.optin !== void 0 : items[i]._zod.optout === "optional";
     if (!omittable)
       return i + 1;
   }
@@ -26090,12 +26090,12 @@ var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
     if (values && !def.partial) {
       payload.value = memo2 ? memo2.alloc(inst, payload, {}, ctx) : {};
       const recordKeys = /* @__PURE__ */ new Set();
-      for (const key2 of values) {
-        if (typeof key2 === "string" || typeof key2 === "number" || typeof key2 === "symbol") {
-          recordKeys.add(typeof key2 === "number" ? key2.toString() : key2);
-          if (key2 === "__proto__")
+      for (const key3 of values) {
+        if (typeof key3 === "string" || typeof key3 === "number" || typeof key3 === "symbol") {
+          recordKeys.add(typeof key3 === "number" ? key3.toString() : key3);
+          if (key3 === "__proto__")
             continue;
-          const keyResult = def.keyType._zod.run({ value: key2, issues: [] }, ctx);
+          const keyResult = def.keyType._zod.run({ value: key3, issues: [] }, ctx);
           if (keyResult instanceof Promise) {
             throw new Error("Async schemas not supported in object keys currently");
           }
@@ -26104,8 +26104,8 @@ var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
               code: "invalid_key",
               origin: "record",
               issues: keyResult.issues.map((iss) => finalizeIssue(iss, ctx, config())),
-              input: key2,
-              path: [key2],
+              input: key3,
+              path: [key3],
               inst
             });
             continue;
@@ -26113,32 +26113,32 @@ var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
           const outKey = keyResult.value;
           if (outKey === "__proto__")
             continue;
-          const result = def.valueType._zod.run({ value: input2[key2], issues: [] }, ctx);
+          const result = def.valueType._zod.run({ value: input2[key3], issues: [] }, ctx);
           if (result instanceof Promise) {
             proms.push(result.then((result2) => {
               if (result2.issues.length) {
-                payload.issues.push(...prefixIssues(key2, result2.issues));
+                payload.issues.push(...prefixIssues(key3, result2.issues));
               }
               payload.value[outKey] = result2.value;
             }));
           } else {
             if (result.issues.length) {
-              payload.issues.push(...prefixIssues(key2, result.issues));
+              payload.issues.push(...prefixIssues(key3, result.issues));
             }
             payload.value[outKey] = result.value;
           }
         }
       }
       let unrecognized;
-      for (const key2 in input2) {
-        if (!recordKeys.has(key2)) {
+      for (const key3 in input2) {
+        if (!recordKeys.has(key3)) {
           if (def.mode === "loose") {
-            if (key2 === "__proto__")
+            if (key3 === "__proto__")
               continue;
-            payload.value[key2] = input2[key2];
+            payload.value[key3] = input2[key3];
           } else {
             unrecognized = unrecognized ?? [];
-            unrecognized.push(key2);
+            unrecognized.push(key3);
           }
         }
       }
@@ -26154,18 +26154,18 @@ var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
     } else {
       payload.value = memo2 ? memo2.alloc(inst, payload, {}, ctx) : {};
       let unrecognized;
-      for (const key2 of Reflect.ownKeys(input2)) {
-        if (key2 === "__proto__")
+      for (const key3 of Reflect.ownKeys(input2)) {
+        if (key3 === "__proto__")
           continue;
-        if (!Object.prototype.propertyIsEnumerable.call(input2, key2))
+        if (!Object.prototype.propertyIsEnumerable.call(input2, key3))
           continue;
-        let keyResult = def.keyType._zod.run({ value: key2, issues: [] }, ctx);
+        let keyResult = def.keyType._zod.run({ value: key3, issues: [] }, ctx);
         if (keyResult instanceof Promise) {
           throw new Error("Async schemas not supported in object keys currently");
         }
-        const checkNumericKey = typeof key2 === "string" && number.test(key2) && keyResult.issues.length;
+        const checkNumericKey = typeof key3 === "string" && number.test(key3) && keyResult.issues.length;
         if (checkNumericKey) {
-          const retryResult = def.keyType._zod.run({ value: Number(key2), issues: [] }, ctx);
+          const retryResult = def.keyType._zod.run({ value: Number(key3), issues: [] }, ctx);
           if (retryResult instanceof Promise) {
             throw new Error("Async schemas not supported in object keys currently");
           }
@@ -26175,17 +26175,17 @@ var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
         }
         if (keyResult.issues.length) {
           if (def.mode === "loose") {
-            payload.value[key2] = input2[key2];
+            payload.value[key3] = input2[key3];
           } else if (values) {
             unrecognized = unrecognized ?? [];
-            unrecognized.push(key2);
+            unrecognized.push(key3);
           } else {
             payload.issues.push({
               code: "invalid_key",
               origin: "record",
               issues: keyResult.issues.map((iss) => finalizeIssue(iss, ctx, config())),
-              input: key2,
-              path: [key2],
+              input: key3,
+              path: [key3],
               inst
             });
           }
@@ -26194,17 +26194,17 @@ var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
         const outKey = keyResult.value;
         if (outKey === "__proto__")
           continue;
-        const result = def.valueType._zod.run({ value: input2[key2], issues: [] }, ctx);
+        const result = def.valueType._zod.run({ value: input2[key3], issues: [] }, ctx);
         if (result instanceof Promise) {
           proms.push(result.then((result2) => {
             if (result2.issues.length) {
-              payload.issues.push(...prefixIssues(key2, result2.issues));
+              payload.issues.push(...prefixIssues(key3, result2.issues));
             }
             payload.value[outKey] = result2.value;
           }));
         } else {
           if (result.issues.length) {
-            payload.issues.push(...prefixIssues(key2, result.issues));
+            payload.issues.push(...prefixIssues(key3, result.issues));
           }
           payload.value[outKey] = result.value;
         }
@@ -26244,20 +26244,20 @@ var $ZodMap = /* @__PURE__ */ $constructor("$ZodMap", (inst, def) => {
     payload.value = memo2 ? memo2.alloc(inst, payload, /* @__PURE__ */ new Map(), ctx) : /* @__PURE__ */ new Map();
     const abortEarly = ctx?.abortEarly;
     let seen = payload.issues.length;
-    for (const [key2, value] of input2) {
+    for (const [key3, value] of input2) {
       if (abortEarly && payload.issues.length !== seen) {
         if (aborted(payload, seen))
           break;
         seen = payload.issues.length;
       }
-      const keyResult = def.keyType._zod.run({ value: key2, issues: [] }, ctx);
+      const keyResult = def.keyType._zod.run({ value: key3, issues: [] }, ctx);
       const valueResult = def.valueType._zod.run({ value, issues: [] }, ctx);
       if (keyResult instanceof Promise || valueResult instanceof Promise) {
         proms.push(Promise.all([keyResult, valueResult]).then(([keyResult2, valueResult2]) => {
-          handleMapResult(keyResult2, valueResult2, payload, key2, input2, inst, ctx);
+          handleMapResult(keyResult2, valueResult2, payload, key3, input2, inst, ctx);
         }));
       } else {
-        handleMapResult(keyResult, valueResult, payload, key2, input2, inst, ctx);
+        handleMapResult(keyResult, valueResult, payload, key3, input2, inst, ctx);
       }
     }
     if (proms.length)
@@ -26266,10 +26266,10 @@ var $ZodMap = /* @__PURE__ */ $constructor("$ZodMap", (inst, def) => {
   };
   capSize(inst, mapSize);
 });
-function handleMapResult(keyResult, valueResult, final, key2, input2, inst, ctx) {
+function handleMapResult(keyResult, valueResult, final, key3, input2, inst, ctx) {
   if (keyResult.issues.length) {
-    if (propertyKeyTypes.has(typeof key2)) {
-      final.issues.push(...prefixIssues(key2, keyResult.issues));
+    if (propertyKeyTypes.has(typeof key3)) {
+      final.issues.push(...prefixIssues(key3, keyResult.issues));
     } else {
       final.issues.push({
         code: "invalid_key",
@@ -26281,15 +26281,15 @@ function handleMapResult(keyResult, valueResult, final, key2, input2, inst, ctx)
     }
   }
   if (valueResult.issues.length) {
-    if (propertyKeyTypes.has(typeof key2)) {
-      final.issues.push(...prefixIssues(key2, valueResult.issues));
+    if (propertyKeyTypes.has(typeof key3)) {
+      final.issues.push(...prefixIssues(key3, valueResult.issues));
     } else {
       final.issues.push({
         origin: "map",
         code: "invalid_element",
         input: input2,
         inst,
-        key: key2,
+        key: key3,
         issues: valueResult.issues.map((iss) => finalizeIssue(iss, ctx, config()))
       });
     }
@@ -26758,11 +26758,11 @@ var $ZodTemplateLiteral = /* @__PURE__ */ $constructor("$ZodTemplateLiteral", (i
   const regexParts = [];
   for (const part of def.parts) {
     if (typeof part === "object" && part !== null) {
-      const source2 = partPattern(part);
-      if (!source2) {
+      const source3 = partPattern(part);
+      if (!source3) {
         throw new Error(`Invalid template literal part, no pattern found: ${[...part._zod.traits].shift()}`);
       }
-      regexParts.push(cleanRegex(source2));
+      regexParts.push(cleanRegex(source3));
     } else if (part === null || primitiveTypes.has(typeof part)) {
       regexParts.push(escapeRegex(`${part}`));
     } else {
@@ -26964,8 +26964,8 @@ function isRecursive(inst, stack, resolve) {
   };
   const shape = (sh, spread) => {
     let answer = NONE;
-    for (const key2 of Reflect.ownKeys(sh)) {
-      const desc = Object.getOwnPropertyDescriptor(sh, key2);
+    for (const key3 of Reflect.ownKeys(sh)) {
+      const desc = Object.getOwnPropertyDescriptor(sh, key3);
       if (spread && !desc.enumerable)
         continue;
       const child = desc.get ? ASSUMED : desc.value?._zod ? isRecursive(desc.value, stack, resolve) : NONE;
@@ -27061,8 +27061,8 @@ function isRecursive(inst, stack, resolve) {
       break;
     default: {
       kind;
-      for (const key2 in def) {
-        const desc = Object.getOwnPropertyDescriptor(def, key2);
+      for (const key3 in def) {
+        const desc = Object.getOwnPropertyDescriptor(def, key3);
         if (!desc || desc.get)
           continue;
         const value = desc.value;
@@ -34888,9 +34888,9 @@ function withParser(schema, parser) {
     installCompiledUserMethods(clone2, schema, parser);
   return clone2;
 }
-function installCompiledUserMethods(target, source2, parser) {
+function installCompiledUserMethods(target, source3, parser) {
   const targetAny = target;
-  const sourceAny = source2;
+  const sourceAny = source3;
   if (typeof sourceAny.safeParse === "function") {
     const originalSafeParse = sourceAny.safeParse;
     targetAny.safeParse = (data, params) => {
@@ -35195,11 +35195,11 @@ function generatePropertiesChecks(doc, ctx, def, accessor) {
   }
   doc.write(`if (${accessor} == null) return INVALID;`);
   const shape = def.shape;
-  for (const key2 of Reflect.ownKeys(shape)) {
-    const keyExpr = typeof key2 === "symbol" ? addConstant(ctx, key2) : esc(key2);
+  for (const key3 of Reflect.ownKeys(shape)) {
+    const keyExpr = typeof key3 === "symbol" ? addConstant(ctx, key3) : esc(key3);
     const inputVar = newVar(ctx);
     doc.write(`const ${inputVar} = ${accessor}[${keyExpr}];`);
-    compileChild(doc, ctx, shape[key2], inputVar, false);
+    compileChild(doc, ctx, shape[key3], inputVar, false);
   }
 }
 function generatePropertyCheck(doc, ctx, def, accessor) {
@@ -35592,9 +35592,9 @@ function generateObjectCheck(doc, ctx, schema, accessor, buildsValue = true) {
     throw new ZodCompileUnsupportedError('object shape key "__proto__"');
   }
   const propOutputs = /* @__PURE__ */ new Map();
-  for (const key2 of allKeys) {
-    const propSchema = propShape[key2];
-    const kx = keyExpr(key2);
+  for (const key3 of allKeys) {
+    const propSchema = propShape[key3];
+    const kx = keyExpr(key3);
     const inputVar = newVar(ctx);
     doc.write(`const ${inputVar} = ${accessor}[${kx}];`);
     if (propSchema._zod.optin !== void 0) {
@@ -35615,14 +35615,14 @@ function generateObjectCheck(doc, ctx, schema, accessor, buildsValue = true) {
       } else {
         doc.write(`if (${outputVar2} === INVALID) return INVALID;`);
       }
-      propOutputs.set(key2, outputVar2);
+      propOutputs.set(key3, outputVar2);
     } else {
       if (requiresPresenceCheck(propSchema)) {
         doc.write(`if (!(${kx} in ${accessor})) return INVALID;`);
       }
       const outputAccessor = compileChild(doc, ctx, propSchema, inputVar, buildsValue);
       if (outputAccessor !== null)
-        propOutputs.set(key2, outputAccessor);
+        propOutputs.set(key3, outputAccessor);
     }
   }
   const catchall = def.catchall;
@@ -36043,9 +36043,9 @@ function generateTupleCheck(doc, ctx, schema, accessor) {
   }
   return outputVar;
 }
-function getTupleOptStart2(items, key2) {
+function getTupleOptStart2(items, key3) {
   for (let i = items.length - 1; i >= 0; i--) {
-    const omittable = key2 === "optin" ? items[i]._zod.optin !== void 0 : items[i]._zod.optout === "optional";
+    const omittable = key3 === "optin" ? items[i]._zod.optin !== void 0 : items[i]._zod.optout === "optional";
     if (!omittable)
       return i + 1;
   }
@@ -36175,16 +36175,16 @@ function generateRecordCheck(doc, ctx, schema, accessor) {
   const keyValues = recordDef.partial ? void 0 : def.keyType._zod.values;
   if (keyValues) {
     const inputKeys = [];
-    for (const key2 of keyValues) {
-      if (!(typeof key2 === "string" || typeof key2 === "number" || typeof key2 === "symbol")) {
-        throw new ZodCompileUnsupportedError(`record key value ${String(key2)}`);
+    for (const key3 of keyValues) {
+      if (!(typeof key3 === "string" || typeof key3 === "number" || typeof key3 === "symbol")) {
+        throw new ZodCompileUnsupportedError(`record key value ${String(key3)}`);
       }
-      const inputKey = typeof key2 === "number" ? key2.toString() : key2;
+      const inputKey = typeof key3 === "number" ? key3.toString() : key3;
       if (inputKey === "__proto__") {
         throw new ZodCompileUnsupportedError('record key "__proto__"');
       }
       inputKeys.push(inputKey);
-      const keyConst = addConstant(ctx, key2);
+      const keyConst = addConstant(ctx, key3);
       const outKey = generateCheck(doc, ctx, def.keyType, keyConst);
       const valueVar = newVar(ctx);
       doc.write(`const ${valueVar} = ${accessor}[${literalPropertyKey(ctx, inputKey)}];`);
@@ -36262,10 +36262,10 @@ function emitOwnKeys(doc, ctx, accessor, kVar, body, onSymbol) {
   });
   doc.write(`}`);
 }
-function literalPropertyKey(ctx, key2) {
-  if (typeof key2 === "string")
-    return esc(key2);
-  return addConstant(ctx, key2);
+function literalPropertyKey(ctx, key3) {
+  if (typeof key3 === "string")
+    return esc(key3);
+  return addConstant(ctx, key3);
 }
 function generateMapCheck(doc, ctx, schema, accessor) {
   const def = schema._zod.def;
@@ -37102,10 +37102,10 @@ function _properties(shape, params) {
   });
 }
 // @__NO_SIDE_EFFECTS__
-function _mime(types, params) {
+function _mime(types2, params) {
   return new $ZodCheckMimeType({
     check: "mime_type",
-    mime: types,
+    mime: types2,
     ...normalizeParams(params)
   });
 }
@@ -37493,10 +37493,10 @@ function _stringFormat(Class2, format, fnOrRegex, _params = {}) {
 
 // node_modules/zod/v4/core/to-json-schema.js
 function assignProps(target, ...sources) {
-  for (const source2 of sources) {
-    for (const key2 of Reflect.ownKeys(source2)) {
-      if (Object.prototype.propertyIsEnumerable.call(source2, key2)) {
-        assignProp(target, key2, source2[key2]);
+  for (const source3 of sources) {
+    for (const key3 of Reflect.ownKeys(source3)) {
+      if (Object.prototype.propertyIsEnumerable.call(source3, key3)) {
+        assignProp(target, key3, source3[key3]);
       }
     }
   }
@@ -37642,8 +37642,8 @@ function extractDefs(ctx, schema) {
     if (defId)
       seen.defId = defId;
     const schema2 = seen.schema;
-    for (const key2 in schema2) {
-      delete schema2[key2];
+    for (const key3 in schema2) {
+      delete schema2[key3];
     }
     schema2.$ref = ref;
   };
@@ -37692,7 +37692,7 @@ function compactTypeUnion(schema) {
   const options2 = schema.anyOf;
   if (!Array.isArray(options2) || options2.length === 0 || schema.type !== void 0)
     return;
-  const types = [];
+  const types2 = [];
   for (const option of options2) {
     if (!option || typeof option !== "object")
       return;
@@ -37704,12 +37704,12 @@ function compactTypeUnion(schema) {
     for (const member of Array.isArray(type) ? type : [type]) {
       if (typeof member !== "string")
         return;
-      if (!types.includes(member))
-        types.push(member);
+      if (!types2.includes(member))
+        types2.push(member);
     }
   }
   delete schema.anyOf;
-  schema.type = types.length === 1 ? types[0] : types;
+  schema.type = types2.length === 1 ? types2[0] : types2;
 }
 var FOLDABLE_KEYS = /* @__PURE__ */ new Set(["type", "properties", "required", "additionalProperties"]);
 var UNION_KEYS = ["oneOf", "anyOf"];
@@ -37724,8 +37724,8 @@ function foldObjects(members2) {
   for (const member of members2) {
     if (typeof member !== "object" || member.type !== "object")
       return null;
-    for (const key2 in member) {
-      if (!FOLDABLE_KEYS.has(key2))
+    for (const key3 in member) {
+      if (!FOLDABLE_KEYS.has(key3))
         return null;
     }
     objects.push(member);
@@ -37733,22 +37733,22 @@ function foldObjects(members2) {
   const properties = {};
   const required2 = /* @__PURE__ */ new Set();
   for (const object3 of objects) {
-    for (const key2 in object3.properties) {
-      if (Object.prototype.hasOwnProperty.call(properties, key2))
+    for (const key3 in object3.properties) {
+      if (Object.prototype.hasOwnProperty.call(properties, key3))
         continue;
       const parts = [];
       for (const other of objects) {
-        const part = other.properties?.[key2] ?? undeclaredConstraint(other);
+        const part = other.properties?.[key3] ?? undeclaredConstraint(other);
         if (part === null || part === void 0)
           continue;
         if (!parts.some((seen) => JSON.stringify(seen) === JSON.stringify(part)))
           parts.push(part);
       }
       const merged = parts.length === 1 ? parts[0] : foldObjects(parts) ?? { allOf: parts };
-      assignProp(properties, key2, merged);
+      assignProp(properties, key3, merged);
     }
-    for (const key2 of object3.required ?? [])
-      required2.add(key2);
+    for (const key3 of object3.required ?? [])
+      required2.add(key3);
   }
   const folded = { type: "object", properties };
   if (required2.size)
@@ -37773,8 +37773,8 @@ function foldIntersection(json2) {
   const allOf = json2.allOf;
   if (!Array.isArray(allOf) || allOf.length < 2)
     return;
-  for (const key2 of FOLDABLE_KEYS)
-    if (key2 in json2)
+  for (const key3 of FOLDABLE_KEYS)
+    if (key3 in json2)
       return;
   const unions = allOf.filter((m) => UNION_KEYS.some((k) => Array.isArray(m[k])));
   let folded = null;
@@ -37821,20 +37821,20 @@ function finalize(ctx, schema) {
       assignProps(schema2, _cached);
       const isParentRef = zodSchema._zod.parent === ref;
       if (isParentRef) {
-        for (const key2 in schema2) {
-          if (key2 === "$ref" || key2 === "allOf")
+        for (const key3 in schema2) {
+          if (key3 === "$ref" || key3 === "allOf")
             continue;
-          if (!(key2 in _cached)) {
-            delete schema2[key2];
+          if (!(key3 in _cached)) {
+            delete schema2[key3];
           }
         }
       }
       if (refSchema.$ref && refSeen.def) {
-        for (const key2 in schema2) {
-          if (key2 === "$ref" || key2 === "allOf")
+        for (const key3 in schema2) {
+          if (key3 === "$ref" || key3 === "allOf")
             continue;
-          if (key2 in refSeen.def && JSON.stringify(schema2[key2]) === JSON.stringify(refSeen.def[key2])) {
-            delete schema2[key2];
+          if (key3 in refSeen.def && JSON.stringify(schema2[key3]) === JSON.stringify(refSeen.def[key3])) {
+            delete schema2[key3];
           }
         }
       }
@@ -37846,11 +37846,11 @@ function finalize(ctx, schema) {
       if (parentSeen?.schema.$ref) {
         schema2.$ref = parentSeen.schema.$ref;
         if (parentSeen.def) {
-          for (const key2 in schema2) {
-            if (key2 === "$ref" || key2 === "allOf")
+          for (const key3 in schema2) {
+            if (key3 === "$ref" || key3 === "allOf")
               continue;
-            if (key2 in parentSeen.def && JSON.stringify(schema2[key2]) === JSON.stringify(parentSeen.def[key2])) {
-              delete schema2[key2];
+            if (key3 in parentSeen.def && JSON.stringify(schema2[key3]) === JSON.stringify(parentSeen.def[key3])) {
+              delete schema2[key3];
             }
           }
         }
@@ -37983,8 +37983,8 @@ function isTransforming(_schema, _ctx) {
     return isTransforming(def.in, ctx) || isTransforming(def.out, ctx);
   }
   if (def.type === "object") {
-    for (const key2 in def.shape) {
-      if (isTransforming(def.shape[key2], ctx))
+    for (const key3 in def.shape) {
+      if (isTransforming(def.shape[key3], ctx))
         return true;
     }
     return false;
@@ -38022,13 +38022,13 @@ var createStandardJSONSchemaMethod = (schema, io, processors = {}) => (params) =
 };
 
 // node_modules/zod/v4/core/json-schema-processors.js
-var narrowMin = (agg, key2, value) => {
-  if (agg[key2] === void 0 || value > agg[key2])
-    agg[key2] = value;
+var narrowMin = (agg, key3, value) => {
+  if (agg[key3] === void 0 || value > agg[key3])
+    agg[key3] = value;
 };
-var narrowMax = (agg, key2, value) => {
-  if (agg[key2] === void 0 || value < agg[key2])
-    agg[key2] = value;
+var narrowMax = (agg, key3, value) => {
+  if (agg[key3] === void 0 || value < agg[key3])
+    agg[key3] = value;
 };
 var narrowBoth = (agg, value) => {
   narrowMin(agg, "minimum", value);
@@ -38366,17 +38366,17 @@ var objectProcessor = (schema, ctx, _json, params) => {
   }
   json2.type = "object";
   json2.properties = {};
-  for (const key2 in shape) {
-    assignProp(json2.properties, key2, processSchema(shape[key2], ctx, {
+  for (const key3 in shape) {
+    assignProp(json2.properties, key3, processSchema(shape[key3], ctx, {
       ...params,
-      path: [...params.path, "properties", key2]
+      path: [...params.path, "properties", key3]
     }));
   }
   const requiredKeys = [];
-  for (const key2 of Object.keys(shape)) {
-    const field = def.shape[key2];
+  for (const key3 of Object.keys(shape)) {
+    const field = def.shape[key3];
     if (ctx.io === "input" ? inputOptin(field) === void 0 : field._zod.optout === void 0) {
-      requiredKeys.push(key2);
+      requiredKeys.push(key3);
     }
   }
   if (requiredKeys.length > 0) {
@@ -38508,8 +38508,8 @@ function stringifyKeyNames(bySchema, json2, visited) {
     if (mapped.some((branch, i) => branch !== branches[i]))
       json2 = { ...json2, [keyword]: mapped };
   }
-  const types = Array.isArray(json2.type) ? json2.type : [json2.type];
-  const numericType = !types.includes("string") && types.some((t) => t === "number" || t === "integer");
+  const types2 = Array.isArray(json2.type) ? json2.type : [json2.type];
+  const numericType = !types2.includes("string") && types2.some((t) => t === "number" || t === "integer");
   const values = json2.enum ?? (json2.const !== void 0 ? [json2.const] : void 0);
   if (!numericType && !values?.some((v) => typeof v === "number"))
     return json2;
@@ -38522,7 +38522,7 @@ function stringifyKeyNames(bySchema, json2, visited) {
     return rest2;
   rest2.type = "string";
   if (!values)
-    rest2.pattern = (types.includes("number") ? number : integer).source;
+    rest2.pattern = (types2.includes("number") ? number : integer).source;
   return rest2;
 }
 var pendingRecords = /* @__PURE__ */ new WeakMap();
@@ -38751,9 +38751,9 @@ function toJSONSchema(input2, params) {
     };
     ctx2.external = external;
     for (const entry of registry2._idmap.entries()) {
-      const [key2, schema] = entry;
+      const [key3, schema] = entry;
       extractDefs(ctx2, schema);
-      assignProp(schemas, key2, finalize(ctx2, schema));
+      assignProp(schemas, key3, finalize(ctx2, schema));
     }
     if (Object.keys(defs).length > 0) {
       const defsSegment = ctx2.target === "draft-2020-12" ? "$defs" : "definitions";
@@ -39155,11 +39155,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path11) {
-  if (path11.length === 0) {
+function getDotPath(path13) {
+  if (path13.length === 0) {
     return "object root";
   }
-  return path11.reduce((acc, seg, index) => {
+  return path13.reduce((acc, seg, index) => {
     if (index === 0) {
       return String(seg);
     }
@@ -39712,17 +39712,17 @@ __export(checks_exports2, {
 
 // node_modules/zod/v4/classic/errors.js
 var _installedErrorProtos = /* @__PURE__ */ new WeakSet([Object.prototype, Error.prototype]);
-function _lazyMethod(proto, key2, make) {
-  Object.defineProperty(proto, key2, {
+function _lazyMethod(proto, key3, make) {
+  Object.defineProperty(proto, key3, {
     configurable: true,
     enumerable: false,
     get() {
       const value = make(this);
-      Object.defineProperty(this, key2, { value, configurable: true, writable: true });
+      Object.defineProperty(this, key3, { value, configurable: true, writable: true });
       return value;
     },
     set(value) {
-      Object.defineProperty(this, key2, { value, configurable: true, writable: true });
+      Object.defineProperty(this, key3, { value, configurable: true, writable: true });
     }
   });
 }
@@ -40899,7 +40899,7 @@ var ZodFile = /* @__PURE__ */ $constructor("ZodFile", (inst, def) => {
   inst._zod.processJSONSchema = (ctx, json2, params) => fileProcessor(inst, ctx, json2, params);
   inst.min = (size, params) => inst.check(_minSize(size, params));
   inst.max = (size, params) => inst.check(_maxSize(size, params));
-  inst.mime = (types, params) => inst.check(_mime(Array.isArray(types) ? types : [types], params));
+  inst.mime = (types2, params) => inst.check(_mime(Array.isArray(types2) ? types2 : [types2], params));
 });
 function file(params) {
   return _file(ZodFile, params);
@@ -41386,17 +41386,17 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path11 = ref.slice(1).split("/").filter(Boolean);
-  if (path11.length === 0) {
+  const path13 = ref.slice(1).split("/").filter(Boolean);
+  if (path13.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path11[0] === defsKey) {
-    const key2 = path11[1] === void 0 ? void 0 : decodeJSONPointerSegment(path11[1]);
-    if (!key2 || !ctx.defs[key2]) {
+  if (path13[0] === defsKey) {
+    const key3 = path13[1] === void 0 ? void 0 : decodeJSONPointerSegment(path13[1]);
+    if (!key3 || !ctx.defs[key3]) {
       throw new Error(`Reference not found: ${ref}`);
     }
-    return ctx.defs[key2];
+    return ctx.defs[key3];
   }
   throw new Error(`Reference not found: ${ref}`);
 }
@@ -41431,16 +41431,16 @@ function checkObjectGuards(objectSchema, guards) {
       });
     }
     if (guards.keySchema) {
-      for (const key2 of keys) {
-        const result = guards.keySchema.safeParse(key2);
+      for (const key3 of keys) {
+        const result = guards.keySchema.safeParse(key3);
         if (result.success)
           continue;
         payload.issues.push({
           code: "invalid_key",
           origin: "record",
           issues: result.error.issues,
-          input: key2,
-          path: [key2],
+          input: key3,
+          path: [key3],
           continue: true
         });
       }
@@ -41465,20 +41465,20 @@ function canonicalKey(value, seen) {
     if (Array.isArray(value)) {
       const parts2 = [];
       for (const item of value) {
-        const key2 = canonicalKey(item, seen);
-        if (key2 === null)
+        const key3 = canonicalKey(item, seen);
+        if (key3 === null)
           return null;
-        parts2.push(key2);
+        parts2.push(key3);
       }
       return `a${parts2.length}:[${parts2.join(",")}]`;
     }
     const keys = Object.keys(value).sort();
     const parts = [];
     for (const k of keys) {
-      const key2 = canonicalKey(value[k], seen);
-      if (key2 === null)
+      const key3 = canonicalKey(value[k], seen);
+      if (key3 === null)
         return null;
-      parts.push(`${k.length}:${k}=${key2}`);
+      parts.push(`${k.length}:${k}=${key3}`);
     }
     return `o${parts.length}:{${parts.join(",")}}`;
   } finally {
@@ -41518,10 +41518,10 @@ function containsRef(value) {
     return value.some(containsRef);
   if (typeof value.$ref === "string")
     return true;
-  return Object.entries(value).some(([key2, sub]) => {
-    if (SCHEMA_KEYWORDS.has(key2))
+  return Object.entries(value).some(([key3, sub]) => {
+    if (SCHEMA_KEYWORDS.has(key3))
       return containsRef(sub);
-    if (!SCHEMA_MAP_KEYWORDS.has(key2) || typeof sub !== "object" || sub === null)
+    if (!SCHEMA_MAP_KEYWORDS.has(key3) || typeof sub !== "object" || sub === null)
       return false;
     return Object.values(sub).some(containsRef);
   });
@@ -41537,12 +41537,12 @@ function checkArrayGuards(arraySchema, guards) {
     if (guards.uniqueItems === true) {
       const firstSeen = /* @__PURE__ */ new Map();
       for (let i = 0; i < items.length; i++) {
-        const key2 = canonicalKey(items[i], /* @__PURE__ */ new Set());
-        if (key2 === null)
+        const key3 = canonicalKey(items[i], /* @__PURE__ */ new Set());
+        if (key3 === null)
           continue;
-        const first = firstSeen.get(key2);
+        const first = firstSeen.get(key3);
         if (first === void 0) {
-          firstSeen.set(key2, i);
+          firstSeen.set(key3, i);
           continue;
         }
         payload.issues.push({
@@ -41781,9 +41781,9 @@ function convertBaseSchema(schema, ctx) {
       const properties = schema.properties || {};
       const requiredSet = new Set(schema.required || []);
       const additionalSchema = typeof schema.additionalProperties === "object" ? convertSchema(schema.additionalProperties, ctx) : void 0;
-      for (const [key2, propSchema] of Object.entries(properties)) {
+      for (const [key3, propSchema] of Object.entries(properties)) {
         const propZodSchema = convertSchema(propSchema, ctx);
-        assignProp(shape, key2, requiredSet.has(key2) ? propZodSchema : propZodSchema.optional());
+        assignProp(shape, key3, requiredSet.has(key3) ? propZodSchema : propZodSchema.optional());
       }
       if (schema.patternProperties) {
         const patternProps = schema.patternProperties;
@@ -41818,12 +41818,12 @@ function convertBaseSchema(schema, ctx) {
             if (!isPlainObject(payload.value))
               return;
             const unrecognized = [];
-            for (const key2 of Object.keys(payload.value)) {
-              if (propertyKeys.includes(key2))
+            for (const key3 of Object.keys(payload.value)) {
+              if (propertyKeys.includes(key3))
                 continue;
-              if (patterns.some((regex) => regex.test(key2)))
+              if (patterns.some((regex) => regex.test(key3)))
                 continue;
-              unrecognized.push(key2);
+              unrecognized.push(key3);
             }
             if (unrecognized.length) {
               payload.issues.push({
@@ -41954,38 +41954,38 @@ function convertSchema(schema, ctx) {
   }
   const extraMeta = {};
   const coreMetadataKeys = ["$id", "id", "$comment", "$anchor", "$vocabulary", "$dynamicRef", "$dynamicAnchor"];
-  for (const key2 of coreMetadataKeys) {
-    if (key2 in schema) {
-      extraMeta[key2] = schema[key2];
+  for (const key3 of coreMetadataKeys) {
+    if (key3 in schema) {
+      extraMeta[key3] = schema[key3];
     }
   }
   const contentMetadataKeys = ["contentEncoding", "contentMediaType", "contentSchema"];
-  for (const key2 of contentMetadataKeys) {
-    if (key2 in schema) {
-      extraMeta[key2] = schema[key2];
+  for (const key3 of contentMetadataKeys) {
+    if (key3 in schema) {
+      extraMeta[key3] = schema[key3];
     }
   }
   if (schema.type === "object" && schema.$ref === void 0) {
     if (schema.propertyNames !== void 0 && !containsRef(schema.propertyNames)) {
       extraMeta.propertyNames = schema.propertyNames;
     }
-    for (const key2 of ["minProperties", "maxProperties"]) {
-      if (schema[key2] !== void 0)
-        extraMeta[key2] = schema[key2];
+    for (const key3 of ["minProperties", "maxProperties"]) {
+      if (schema[key3] !== void 0)
+        extraMeta[key3] = schema[key3];
     }
   }
   if (schema.type === "array" && schema.$ref === void 0) {
     if (schema.contains !== void 0 && !containsRef(schema.contains)) {
       extraMeta.contains = schema.contains;
     }
-    for (const key2 of ["uniqueItems", "minContains", "maxContains"]) {
-      if (schema[key2] !== void 0)
-        extraMeta[key2] = schema[key2];
+    for (const key3 of ["uniqueItems", "minContains", "maxContains"]) {
+      if (schema[key3] !== void 0)
+        extraMeta[key3] = schema[key3];
     }
   }
-  for (const key2 of Object.keys(schema)) {
-    if (!RECOGNIZED_KEYS.has(key2)) {
-      assignProp(extraMeta, key2, schema[key2]);
+  for (const key3 of Object.keys(schema)) {
+    if (!RECOGNIZED_KEYS.has(key3)) {
+      assignProp(extraMeta, key3, schema[key3]);
     }
   }
   if (Object.keys(extraMeta).length > 0) {
@@ -43678,19 +43678,19 @@ var getRefs = (options2) => {
 };
 
 // node_modules/zod-to-json-schema/dist/esm/errorMessages.js
-function addErrorMessage(res, key2, errorMessage, refs) {
+function addErrorMessage(res, key3, errorMessage, refs) {
   if (!refs?.errorMessages)
     return;
   if (errorMessage) {
     res.errorMessage = {
       ...res.errorMessage,
-      [key2]: errorMessage
+      [key3]: errorMessage
     };
   }
 }
-function setResponseValueAndErrors(res, key2, value, errorMessage, refs) {
-  res[key2] = value;
-  addErrorMessage(res, key2, errorMessage, refs);
+function setResponseValueAndErrors(res, key3, value, errorMessage, refs) {
+  res[key3] = value;
+  addErrorMessage(res, key3, errorMessage, refs);
 }
 
 // node_modules/zod-to-json-schema/dist/esm/getRelativePath.js
@@ -44131,13 +44131,13 @@ function escapeLiteralCheckValue(literal2, refs) {
   return refs.patternStrategy === "escape" ? escapeNonAlphaNumeric(literal2) : literal2;
 }
 var ALPHA_NUMERIC = new Set("ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0123456789");
-function escapeNonAlphaNumeric(source2) {
+function escapeNonAlphaNumeric(source3) {
   let result = "";
-  for (let i = 0; i < source2.length; i++) {
-    if (!ALPHA_NUMERIC.has(source2[i])) {
+  for (let i = 0; i < source3.length; i++) {
+    if (!ALPHA_NUMERIC.has(source3[i])) {
       result += "\\";
     }
-    result += source2[i];
+    result += source3[i];
   }
   return result;
 }
@@ -44201,66 +44201,66 @@ function stringifyRegExpWithFlags(regex, refs) {
   if (!refs.applyRegexFlags || !regex.flags) {
     return regex.source;
   }
-  const flags = {
+  const flags2 = {
     i: regex.flags.includes("i"),
     m: regex.flags.includes("m"),
     s: regex.flags.includes("s")
     // `.` matches newlines
   };
-  const source2 = flags.i ? regex.source.toLowerCase() : regex.source;
+  const source3 = flags2.i ? regex.source.toLowerCase() : regex.source;
   let pattern = "";
   let isEscaped = false;
   let inCharGroup = false;
   let inCharRange = false;
-  for (let i = 0; i < source2.length; i++) {
+  for (let i = 0; i < source3.length; i++) {
     if (isEscaped) {
-      pattern += source2[i];
+      pattern += source3[i];
       isEscaped = false;
       continue;
     }
-    if (flags.i) {
+    if (flags2.i) {
       if (inCharGroup) {
-        if (source2[i].match(/[a-z]/)) {
+        if (source3[i].match(/[a-z]/)) {
           if (inCharRange) {
-            pattern += source2[i];
-            pattern += `${source2[i - 2]}-${source2[i]}`.toUpperCase();
+            pattern += source3[i];
+            pattern += `${source3[i - 2]}-${source3[i]}`.toUpperCase();
             inCharRange = false;
-          } else if (source2[i + 1] === "-" && source2[i + 2]?.match(/[a-z]/)) {
-            pattern += source2[i];
+          } else if (source3[i + 1] === "-" && source3[i + 2]?.match(/[a-z]/)) {
+            pattern += source3[i];
             inCharRange = true;
           } else {
-            pattern += `${source2[i]}${source2[i].toUpperCase()}`;
+            pattern += `${source3[i]}${source3[i].toUpperCase()}`;
           }
           continue;
         }
-      } else if (source2[i].match(/[a-z]/)) {
-        pattern += `[${source2[i]}${source2[i].toUpperCase()}]`;
+      } else if (source3[i].match(/[a-z]/)) {
+        pattern += `[${source3[i]}${source3[i].toUpperCase()}]`;
         continue;
       }
     }
-    if (flags.m) {
-      if (source2[i] === "^") {
+    if (flags2.m) {
+      if (source3[i] === "^") {
         pattern += `(^|(?<=[\r
 ]))`;
         continue;
-      } else if (source2[i] === "$") {
+      } else if (source3[i] === "$") {
         pattern += `($|(?=[\r
 ]))`;
         continue;
       }
     }
-    if (flags.s && source2[i] === ".") {
-      pattern += inCharGroup ? `${source2[i]}\r
-` : `[${source2[i]}\r
+    if (flags2.s && source3[i] === ".") {
+      pattern += inCharGroup ? `${source3[i]}\r
+` : `[${source3[i]}\r
 ]`;
       continue;
     }
-    pattern += source2[i];
-    if (source2[i] === "\\") {
+    pattern += source3[i];
+    if (source3[i] === "\\") {
       isEscaped = true;
-    } else if (inCharGroup && source2[i] === "]") {
+    } else if (inCharGroup && source3[i] === "]") {
       inCharGroup = false;
-    } else if (!inCharGroup && source2[i] === "[") {
+    } else if (!inCharGroup && source3[i] === "[") {
       inCharGroup = true;
     }
   }
@@ -44282,11 +44282,11 @@ function parseRecordDef(def, refs) {
     return {
       type: "object",
       required: def.keyType._def.values,
-      properties: def.keyType._def.values.reduce((acc, key2) => ({
+      properties: def.keyType._def.values.reduce((acc, key3) => ({
         ...acc,
-        [key2]: parseDef(def.valueType._def, {
+        [key3]: parseDef(def.valueType._def, {
           ...refs,
-          currentPath: [...refs.currentPath, "properties", key2]
+          currentPath: [...refs.currentPath, "properties", key3]
         }) ?? parseAnyDef(refs)
       }), {}),
       additionalProperties: refs.rejectedAdditionalProperties
@@ -44353,10 +44353,10 @@ function parseMapDef(def, refs) {
 // node_modules/zod-to-json-schema/dist/esm/parsers/nativeEnum.js
 function parseNativeEnumDef(def) {
   const object3 = def.values;
-  const actualKeys = Object.keys(def.values).filter((key2) => {
-    return typeof object3[object3[key2]] !== "number";
+  const actualKeys = Object.keys(def.values).filter((key3) => {
+    return typeof object3[object3[key3]] !== "number";
   });
-  const actualValues = actualKeys.map((key2) => object3[key2]);
+  const actualValues = actualKeys.map((key3) => object3[key3]);
   const parsedTypes = Array.from(new Set(actualValues.map((values) => typeof values)));
   return {
     type: parsedTypes.length === 1 ? parsedTypes[0] === "string" ? "string" : "number" : ["string", "number"],
@@ -44397,15 +44397,15 @@ function parseUnionDef(def, refs) {
     return asAnyOf(def, refs);
   const options2 = def.options instanceof Map ? Array.from(def.options.values()) : def.options;
   if (options2.every((x) => x._def.typeName in primitiveMappings && (!x._def.checks || !x._def.checks.length))) {
-    const types = options2.reduce((types2, x) => {
+    const types2 = options2.reduce((types3, x) => {
       const type = primitiveMappings[x._def.typeName];
-      return type && !types2.includes(type) ? [...types2, type] : types2;
+      return type && !types3.includes(type) ? [...types3, type] : types3;
     }, []);
     return {
-      type: types.length > 1 ? types : types[0]
+      type: types2.length > 1 ? types2 : types2[0]
     };
   } else if (options2.every((x) => x._def.typeName === "ZodLiteral" && !x.description)) {
-    const types = options2.reduce((acc, x) => {
+    const types2 = options2.reduce((acc, x) => {
       const type = typeof x._def.value;
       switch (type) {
         case "string":
@@ -44424,8 +44424,8 @@ function parseUnionDef(def, refs) {
           return acc;
       }
     }, []);
-    if (types.length === options2.length) {
-      const uniqueTypes = types.filter((x, i, a) => a.indexOf(x) === i);
+    if (types2.length === options2.length) {
+      const uniqueTypes = types2.filter((x, i, a) => a.indexOf(x) === i);
       return {
         type: uniqueTypes.length > 1 ? uniqueTypes : uniqueTypes[0],
         enum: options2.reduce((acc, x) => {
@@ -45089,11 +45089,11 @@ var Protocol = class {
     const controller = this._requestHandlerAbortControllers.get(notification.params.requestId);
     controller?.abort(notification.params.reason);
   }
-  _setupTimeout(messageId, timeout2, maxTotalTimeout, onTimeout, resetTimeoutOnProgress = false) {
+  _setupTimeout(messageId, timeout3, maxTotalTimeout, onTimeout, resetTimeoutOnProgress = false) {
     this._timeoutInfo.set(messageId, {
-      timeoutId: setTimeout(onTimeout, timeout2),
+      timeoutId: setTimeout(onTimeout, timeout3),
       startTime: Date.now(),
-      timeout: timeout2,
+      timeout: timeout3,
       maxTotalTimeout,
       resetTimeoutOnProgress,
       onTimeout
@@ -45574,9 +45574,9 @@ var Protocol = class {
       options2?.signal?.addEventListener("abort", () => {
         cancel(options2?.signal?.reason);
       });
-      const timeout2 = options2?.timeout ?? DEFAULT_REQUEST_TIMEOUT_MSEC;
-      const timeoutHandler = () => cancel(McpError.fromError(ErrorCode.RequestTimeout, "Request timed out", { timeout: timeout2 }));
-      this._setupTimeout(messageId, timeout2, options2?.maxTotalTimeout, timeoutHandler, options2?.resetTimeoutOnProgress ?? false);
+      const timeout3 = options2?.timeout ?? DEFAULT_REQUEST_TIMEOUT_MSEC;
+      const timeoutHandler = () => cancel(McpError.fromError(ErrorCode.RequestTimeout, "Request timed out", { timeout: timeout3 }));
+      this._setupTimeout(messageId, timeout3, options2?.maxTotalTimeout, timeoutHandler, options2?.resetTimeoutOnProgress ?? false);
       const relatedTaskId = relatedTask?.taskId;
       if (relatedTaskId) {
         const responseResolver = (response) => {
@@ -45910,8 +45910,8 @@ function isPlainObject2(value) {
 }
 function mergeCapabilities(base, additional) {
   const result = { ...base };
-  for (const key2 in additional) {
-    const k = key2;
+  for (const key3 in additional) {
+    const k = key3;
     const addValue = additional[k];
     if (addValue === void 0)
       continue;
@@ -46715,12 +46715,12 @@ function toolInputElementCount(value, max) {
           stack.push(child);
       }
     } else {
-      for (const key2 in node2) {
-        if (!Object.prototype.hasOwnProperty.call(node2, key2))
+      for (const key3 in node2) {
+        if (!Object.prototype.hasOwnProperty.call(node2, key3))
           continue;
         if (++count > max)
           return count;
-        const child = node2[key2];
+        const child = node2[key3];
         if (child !== null && typeof child === "object")
           stack.push(child);
       }
@@ -47651,7 +47651,7 @@ var StdioServerTransport = class {
 var import_node_child_process = require("node:child_process");
 var import_node_util = require("node:util");
 var import_promises2 = __toESM(require("node:fs/promises"), 1);
-var import_node_path2 = __toESM(require("node:path"), 1);
+var import_node_path3 = __toESM(require("node:path"), 1);
 var import_node_net = require("node:net");
 
 // src/host-platform.mjs
@@ -47708,6 +47708,37 @@ async function findVMwareExecutable(name2, { env = process.env, platform = proce
   throw new Error(`${filename} was not found. Install ${name2 === "ovftool" ? "VMware OVF Tool" : "VMware Workstation on this host"} or set ${setting}.`);
 }
 
+// src/resources.mjs
+var import_node_async_hooks = require("node:async_hooks");
+var import_node_path2 = __toESM(require("node:path"), 1);
+var Resources = class {
+  constructor() {
+    this.active = /* @__PURE__ */ new Map();
+    this.context = new import_node_async_hooks.AsyncLocalStorage();
+  }
+  key(file3) {
+    return process.platform === "win32" ? import_node_path2.default.resolve(file3).toLowerCase() : import_node_path2.default.resolve(file3);
+  }
+  assert(files) {
+    const owner = this.context.getStore();
+    const overlaps = (a, b) => a === b || a.startsWith(b + import_node_path2.default.sep) || b.startsWith(a + import_node_path2.default.sep);
+    for (const file3 of files.map((file4) => this.key(file4))) for (const [held, token] of this.active) {
+      if (token !== owner && overlaps(file3, held)) throw Object.assign(new Error("A conflicting operation holds this VM or disk path. Wait for it to finish, inspect state, then retry."), { code: "RESOURCE_BUSY" });
+    }
+  }
+  async use(files, callback) {
+    this.assert(files);
+    const token = this.context.getStore() || /* @__PURE__ */ Symbol("resource-owner");
+    const added = files.map((file3) => this.key(file3)).filter((file3) => !this.active.has(file3));
+    for (const file3 of added) this.active.set(file3, token);
+    try {
+      return await this.context.run(token, callback);
+    } finally {
+      for (const file3 of added) this.active.delete(file3);
+    }
+  }
+};
+
 // src/workstation.mjs
 var execute = (0, import_node_util.promisify)(import_node_child_process.execFile);
 function parseAssignments(text2) {
@@ -47726,8 +47757,8 @@ function parseCountedList(text2) {
   return lines;
 }
 function isWithin(root, target) {
-  const relative = import_node_path2.default.relative(root, target);
-  return relative === "" || !relative.startsWith(`..${import_node_path2.default.sep}`) && relative !== ".." && !import_node_path2.default.isAbsolute(relative);
+  const relative = import_node_path3.default.relative(root, target);
+  return relative === "" || !relative.startsWith(`..${import_node_path3.default.sep}`) && relative !== ".." && !import_node_path3.default.isAbsolute(relative);
 }
 var Workstation = class {
   constructor({ env = process.env, run = execute } = {}) {
@@ -47735,18 +47766,21 @@ var Workstation = class {
     this.execute = run;
     this.tail = Promise.resolve();
     this.inventoryPath = inventoryPath(env);
+    this.resources = new Resources();
   }
   async executable() {
     return findVMwareExecutable("vmrun", { env: this.env });
   }
-  async run(args, { mutation = false, authentication = [], timeout: timeout2 = 12e4 } = {}) {
+  async run(args, { mutation = false, authentication = [], timeout: timeout3 = 12e4 } = {}) {
+    if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
     const job = this.tail.then(async () => {
+      if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
       const binary = await this.executable();
       try {
         const result = await this.execute(binary, ["-T", "ws", ...authentication, ...args], {
           windowsHide: true,
           shell: false,
-          timeout: timeout2,
+          timeout: timeout3,
           maxBuffer: 1024 * 1024,
           encoding: "utf8"
         });
@@ -47773,8 +47807,8 @@ var Workstation = class {
     }
   }
   async hostPath(input2, kind, overwrite = false) {
-    if (typeof input2 !== "string" || !import_node_path2.default.isAbsolute(input2) || /[\x00-\x1f]/.test(input2)) throw new Error("Host paths must be absolute and contain no control characters.");
-    const absolute = import_node_path2.default.resolve(input2);
+    if (typeof input2 !== "string" || !import_node_path3.default.isAbsolute(input2) || /[\x00-\x1f]/.test(input2)) throw new Error("Host paths must be absolute and contain no control characters.");
+    const absolute = import_node_path3.default.resolve(input2);
     let stat;
     try {
       stat = await import_promises2.default.stat(absolute);
@@ -47783,9 +47817,9 @@ var Workstation = class {
     }
     if (kind === "input-file" && !stat?.isFile()) throw new Error("Host source must be an existing file.");
     if (kind === "directory" && !stat?.isDirectory()) throw new Error("Host directory must already exist.");
-    if (kind === "new-vmx" && (stat || import_node_path2.default.extname(absolute).toLowerCase() !== ".vmx")) throw new Error("Clone destination must be a new .vmx file.");
+    if (kind === "new-vmx" && (stat || import_node_path3.default.extname(absolute).toLowerCase() !== ".vmx")) throw new Error("Clone destination must be a new .vmx file.");
     if (kind === "output-file" && (stat?.isDirectory() || stat && !overwrite)) throw new Error("Host destination exists; choose another file or explicitly set overwrite=true.");
-    if (kind === "destination-directory" && stat && !stat.isDirectory()) throw new Error("Destination must be a directory path.");
+    if (["destination-directory", "host-destination-directory"].includes(kind) && stat && !stat.isDirectory()) throw new Error("Destination must be a directory path.");
     let ancestor = absolute;
     const missing = [];
     while (true) {
@@ -47799,29 +47833,29 @@ var Workstation = class {
           return null;
         });
         if (entry?.isSymbolicLink()) throw new Error("Destination contains a dangling link.");
-        const parent = import_node_path2.default.dirname(ancestor);
+        const parent = import_node_path3.default.dirname(ancestor);
         if (parent === ancestor) throw error62;
-        missing.unshift(import_node_path2.default.basename(ancestor));
+        missing.unshift(import_node_path3.default.basename(ancestor));
         ancestor = parent;
       }
     }
-    const resolved = import_node_path2.default.join(ancestor, ...missing);
+    const resolved = import_node_path3.default.join(ancestor, ...missing);
     const rootSetting = kind === "new-vmx" || kind === "destination-directory" ? this.env.VMWARE_ALLOWED_ROOTS : this.env.VMWARE_ALLOWED_HOST_ROOTS;
     if (rootSetting) {
-      const roots = rootSetting.split(import_node_path2.default.delimiter).filter(Boolean);
-      if (!roots.length || roots.some((root) => !import_node_path2.default.isAbsolute(root))) throw new Error("Allowed host roots must be absolute.");
+      const roots = rootSetting.split(import_node_path3.default.delimiter).filter(Boolean);
+      if (!roots.length || roots.some((root) => !import_node_path3.default.isAbsolute(root))) throw new Error("Allowed host roots must be absolute.");
       const canonical = await Promise.all(roots.map((root) => import_promises2.default.realpath(root)));
       if (!canonical.some((root) => isWithin(root, resolved))) throw new Error("Host path is outside the configured allowed roots.");
     }
     return resolved;
   }
   async vmx(input2) {
-    if (typeof input2 !== "string" || !import_node_path2.default.isAbsolute(input2) || import_node_path2.default.extname(input2).toLowerCase() !== ".vmx" || /[\x00-\x1f]/.test(input2)) throw new Error("Provide an absolute path to an existing .vmx file.");
+    if (typeof input2 !== "string" || !import_node_path3.default.isAbsolute(input2) || import_node_path3.default.extname(input2).toLowerCase() !== ".vmx" || /[\x00-\x1f]/.test(input2)) throw new Error("Provide an absolute path to an existing .vmx file.");
     const resolved = await import_promises2.default.realpath(input2);
-    if (import_node_path2.default.extname(resolved).toLowerCase() !== ".vmx" || !(await import_promises2.default.stat(resolved)).isFile()) throw new Error("VM target must resolve to a .vmx file.");
+    if (import_node_path3.default.extname(resolved).toLowerCase() !== ".vmx" || !(await import_promises2.default.stat(resolved)).isFile()) throw new Error("VM target must resolve to a .vmx file.");
     if (this.env.VMWARE_ALLOWED_ROOTS) {
-      const roots = this.env.VMWARE_ALLOWED_ROOTS.split(import_node_path2.default.delimiter).filter(Boolean);
-      if (!roots.length || roots.some((root) => !import_node_path2.default.isAbsolute(root))) throw new Error("VMWARE_ALLOWED_ROOTS must contain absolute directories.");
+      const roots = this.env.VMWARE_ALLOWED_ROOTS.split(import_node_path3.default.delimiter).filter(Boolean);
+      if (!roots.length || roots.some((root) => !import_node_path3.default.isAbsolute(root))) throw new Error("VMWARE_ALLOWED_ROOTS must contain absolute directories.");
       const canonicalRoots = await Promise.all(roots.map((root) => import_promises2.default.realpath(root)));
       if (!canonicalRoots.some((root) => isWithin(root, resolved))) throw new Error("VM is outside VMWARE_ALLOWED_ROOTS.");
     }
@@ -47834,11 +47868,11 @@ var Workstation = class {
   }
   async resolveVM(vmID, { aliases = {}, restInventory } = {}) {
     if (typeof vmID !== "string" || !vmID.trim() || /[\x00-\x1f]/.test(vmID)) throw new Error("Provide a VMX path, unique inventory name, console profile alias, or REST VM ID.");
-    if (import_node_path2.default.isAbsolute(vmID)) return this.vmx(vmID);
+    if (import_node_path3.default.isAbsolute(vmID)) return this.vmx(vmID);
     if (Object.hasOwn(aliases, vmID)) return this.vmx(aliases[vmID]);
     const { vms } = await this.listVMs();
     const normalize = (value) => process.platform === "win32" ? value.toLowerCase() : value;
-    const matches = vms.filter((vm2) => [vm2.displayName, import_node_path2.default.basename(vm2.vmx, ".vmx")].some((name2) => normalize(name2) === normalize(vmID)));
+    const matches = vms.filter((vm2) => [vm2.displayName, import_node_path3.default.basename(vm2.vmx, ".vmx")].some((name2) => normalize(name2) === normalize(vmID)));
     if (matches.length > 1) throw new Error("VM name is ambiguous. Use the exact VMX path.");
     if (matches.length === 1) return this.vmx(matches[0].vmx);
     if (restInventory) {
@@ -47857,16 +47891,16 @@ var Workstation = class {
     } catch (error62) {
       warnings.push(`Inventory unavailable (${error62.code || error62.message}); showing running VMs only.`);
     }
-    const key2 = (value) => process.platform === "win32" ? import_node_path2.default.normalize(value).toLowerCase() : import_node_path2.default.normalize(value);
+    const key3 = (value) => process.platform === "win32" ? import_node_path3.default.normalize(value).toLowerCase() : import_node_path3.default.normalize(value);
     const records = /* @__PURE__ */ new Map();
     for (const [name2, vmx3] of Object.entries(entries)) {
-      if (/^vmlist\d+\.config$/.test(name2) && vmx3 && import_node_path2.default.extname(vmx3).toLowerCase() === ".vmx") {
-        records.set(key2(vmx3), { vmx: vmx3, displayName: entries[name2.replace(/\.config$/, ".DisplayName")] || import_node_path2.default.basename(vmx3, import_node_path2.default.extname(vmx3)), registered: true, running: false });
+      if (/^vmlist\d+\.config$/.test(name2) && vmx3 && import_node_path3.default.extname(vmx3).toLowerCase() === ".vmx") {
+        records.set(key3(vmx3), { vmx: vmx3, displayName: entries[name2.replace(/\.config$/, ".DisplayName")] || import_node_path3.default.basename(vmx3, import_node_path3.default.extname(vmx3)), registered: true, running: false });
       }
     }
     for (const vmx3 of running) {
-      const record2 = records.get(key2(vmx3)) || { vmx: vmx3, displayName: import_node_path2.default.basename(vmx3, import_node_path2.default.extname(vmx3)), registered: false };
-      records.set(key2(vmx3), { ...record2, running: true });
+      const record2 = records.get(key3(vmx3)) || { vmx: vmx3, displayName: import_node_path3.default.basename(vmx3, import_node_path3.default.extname(vmx3)), registered: false };
+      records.set(key3(vmx3), { ...record2, running: true });
     }
     const vms = await Promise.all([...records.values()].map(async (record2) => {
       try {
@@ -47882,10 +47916,10 @@ var Workstation = class {
     const vmx3 = await this.vmx(input2);
     const config2 = parseAssignments(await import_promises2.default.readFile(vmx3, "utf8"));
     const running = parseCountedList(await this.run(["list"]));
-    const realRunning = await Promise.all(running.map(async (file2) => import_promises2.default.realpath(file2).catch(() => file2)));
-    const compare = (file2) => process.platform === "win32" ? file2.toLowerCase() : file2;
-    const hardware = Object.fromEntries(Object.entries(config2).filter(([key2]) => /^(displayName|guestOS|memsize|numvcpus|virtualHW.version|ethernet\d+\.(present|connectionType|vnet)|(?:scsi|sata|ide|nvme)\d+:\d+\.(present|fileName|deviceType))$/.test(key2)));
-    return { vmx: vmx3, running: realRunning.some((file2) => compare(file2) === compare(vmx3)), hardware };
+    const realRunning = await Promise.all(running.map(async (file3) => import_promises2.default.realpath(file3).catch(() => file3)));
+    const compare = (file3) => process.platform === "win32" ? file3.toLowerCase() : file3;
+    const hardware = Object.fromEntries(Object.entries(config2).filter(([key3]) => /^(displayName|guestOS|memsize|numvcpus|virtualHW.version|ethernet\d+\.(present|connectionType|vnet)|(?:scsi|sata|ide|nvme)\d+:\d+\.(present|fileName|deviceType))$/.test(key3)));
+    return { vmx: vmx3, running: realRunning.some((file3) => compare(file3) === compare(vmx3)), hardware };
   }
   async power(input2, action, mode = "soft", gui = false) {
     if (!["start", "stop", "reset", "suspend", "pause", "unpause"].includes(action)) throw new Error("Unsupported power action.");
@@ -47921,14 +47955,14 @@ var Workstation = class {
 
 // src/credentials.mjs
 var import_promises4 = __toESM(require("node:fs/promises"), 1);
-var import_node_path4 = __toESM(require("node:path"), 1);
+var import_node_path5 = __toESM(require("node:path"), 1);
 
 // src/local-file-security.mjs
-var import_node_path3 = __toESM(require("node:path"), 1);
+var import_node_path4 = __toESM(require("node:path"), 1);
 var import_promises3 = __toESM(require("node:fs/promises"), 1);
 var import_node_fs2 = require("node:fs");
-async function openPrivateFile(filename, flags = import_node_fs2.constants.O_RDONLY) {
-  const handle = await import_promises3.default.open(filename, flags | import_node_fs2.constants.O_NOFOLLOW | import_node_fs2.constants.O_NONBLOCK, 384);
+async function openPrivateFile(filename, flags2 = import_node_fs2.constants.O_RDONLY) {
+  const handle = await import_promises3.default.open(filename, flags2 | import_node_fs2.constants.O_NOFOLLOW | import_node_fs2.constants.O_NONBLOCK, 384);
   try {
     const stat = await handle.stat();
     if (!stat.isFile() || stat.uid !== process.getuid() || stat.nlink !== 1) throw new Error("Sensitive files must be regular files owned by the current user with exactly one hard link.");
@@ -47957,8 +47991,8 @@ function localFileProtector(backend2) {
       await handle.close();
     }
   };
-  const root = import_node_path3.default.resolve(import_node_path3.default.dirname(process.argv[1]), "..");
-  return (filename) => backend2.execute("pwsh", ["-NoProfile", "-File", import_node_path3.default.join(root, "scripts", "Protect-LocalFile.ps1"), "-LiteralPath", filename], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
+  const root = import_node_path4.default.resolve(import_node_path4.default.dirname(process.argv[1]), "..");
+  return (filename) => backend2.execute("pwsh", ["-NoProfile", "-File", import_node_path4.default.join(root, "scripts", "Protect-LocalFile.ps1"), "-LiteralPath", filename], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
 }
 
 // src/credentials.mjs
@@ -47994,24 +48028,24 @@ var Credentials = class {
   }
   async guest(profile = "default") {
     const name2 = this.profile(profile);
-    const file2 = await this.load();
+    const file3 = await this.load();
     const prefix = `VMWARE_GUEST_${name2.toUpperCase()}`;
-    const username = this.env[`${prefix}_USERNAME`] ?? file2.guest?.[name2]?.username;
-    const password = this.remember(this.env[`${prefix}_PASSWORD`] ?? file2.guest?.[name2]?.password);
+    const username = this.env[`${prefix}_USERNAME`] ?? file3.guest?.[name2]?.username;
+    const password = this.remember(this.env[`${prefix}_PASSWORD`] ?? file3.guest?.[name2]?.password);
     if (typeof username !== "string" || !username || typeof password !== "string" || !password) throw new Error(`Guest credential profile '${name2}' is not configured. Use VMWARE_CREDENTIALS_FILE or ${prefix}_USERNAME/PASSWORD; never paste passwords into chat.`);
     return { username, password };
   }
   async vm(profile) {
     const name2 = this.profile(profile);
-    const file2 = await this.load();
-    const password = this.remember(this.env[`VMWARE_VM_${name2.toUpperCase()}_PASSWORD`] ?? file2.vm?.[name2]?.password);
+    const file3 = await this.load();
+    const password = this.remember(this.env[`VMWARE_VM_${name2.toUpperCase()}_PASSWORD`] ?? file3.vm?.[name2]?.password);
     if (typeof password !== "string" || !password) throw new Error(`Encrypted VM password profile '${name2}' is not configured.`);
     return password;
   }
   async console(vmx3, requestedProfile) {
-    const file2 = await this.load();
-    const canonical = (value) => process.platform === "win32" ? import_node_path4.default.resolve(value).toLowerCase() : import_node_path4.default.resolve(value);
-    const profiles = file2.console || {};
+    const file3 = await this.load();
+    const canonical = (value) => process.platform === "win32" ? import_node_path5.default.resolve(value).toLowerCase() : import_node_path5.default.resolve(value);
+    const profiles = file3.console || {};
     const resolved = await Promise.all(Object.entries(profiles).map(async ([name3, entry2]) => [name3, typeof entry2?.vmx === "string" ? await import_promises4.default.realpath(entry2.vmx).catch(() => entry2.vmx) : null]));
     const matches = resolved.filter(([, target]) => target && canonical(target) === canonical(vmx3));
     if (!requestedProfile && matches.length > 1) throw new Error("Multiple console profiles identify this VM. Use its configured profile alias as vm_id.");
@@ -48024,9 +48058,9 @@ var Credentials = class {
     return { profile: name2, password };
   }
   async rest() {
-    const file2 = await this.load();
-    const username = this.env.VMWARE_REST_USERNAME ?? file2.rest?.username;
-    const password = this.remember(this.env.VMWARE_REST_PASSWORD ?? file2.rest?.password);
+    const file3 = await this.load();
+    const username = this.env.VMWARE_REST_USERNAME ?? file3.rest?.username;
+    const password = this.remember(this.env.VMWARE_REST_PASSWORD ?? file3.rest?.password);
     if (typeof username !== "string" || !username || typeof password !== "string" || !password || username.includes(":")) throw new Error("REST credentials are not configured. Set VMWARE_REST_USERNAME/PASSWORD or VMWARE_CREDENTIALS_FILE. REST usernames cannot contain colons.");
     const token = Buffer.from(`${username}:${password}`, "utf8").toString("base64");
     this.secrets.add(token);
@@ -49155,10 +49189,10 @@ function schemaFromAPI(schema) {
   if (schema.enum) result = external_exports.union(schema.enum.map((value) => external_exports.literal(value)));
   else if (schema.type === "object") {
     const shape = {};
-    for (const [key2, value] of Object.entries(schema.properties || {})) {
+    for (const [key3, value] of Object.entries(schema.properties || {})) {
       let field = schemaFromAPI(value);
-      if (!schema.required?.includes(key2)) field = field.optional();
-      shape[key2] = field;
+      if (!schema.required?.includes(key3)) field = field.optional();
+      shape[key3] = field;
     }
     result = external_exports.object(shape).strict();
   } else if (schema.type === "array") result = external_exports.array(schemaFromAPI(schema.items)).max(1e4);
@@ -49186,12 +49220,13 @@ function restSchema(operation) {
   return external_exports.object(fields).strict();
 }
 var RestClient = class {
-  constructor({ env = process.env, credentials: credentials2, backend: backend2, fetcher = fetch } = {}) {
+  constructor({ env = process.env, credentials: credentials2, backend: backend2, fetcher = fetch, coordinateDiskEdits = false } = {}) {
     this.env = env;
     this.credentials = credentials2;
     this.backend = backend2;
     this.fetcher = fetcher;
     this.tail = Promise.resolve();
+    this.coordinateDiskEdits = coordinateDiskEdits;
   }
   baseURL() {
     const url2 = new URL(this.env.VMWARE_REST_URL || "http://127.0.0.1:8697");
@@ -49200,7 +49235,7 @@ var RestClient = class {
     if (url2.protocol !== "https:" && !loopback) throw new Error("Remote REST connections require HTTPS. Plain HTTP is limited to loopback.");
     return url2.origin;
   }
-  async request(method, route, { body, password, timeout: timeout2 = 12e4 } = {}) {
+  async request(method, route, { body, password, timeout: timeout3 = 12e4 } = {}) {
     const url2 = new URL(route, this.baseURL());
     if (url2.origin !== this.baseURL() || !url2.pathname.startsWith("/api/")) throw new Error("REST route is outside the Workstation API.");
     if (password) url2.searchParams.set("vmPassword", password);
@@ -49211,7 +49246,7 @@ var RestClient = class {
         headers: { Authorization: auth.authorization, Accept: "application/vnd.vmware.vmw.rest-v1+json", ...body !== void 0 ? { "Content-Type": "application/vnd.vmware.vmw.rest-v1+json" } : {} },
         body: body === void 0 ? void 0 : typeof body === "string" ? body : JSON.stringify(body),
         redirect: "error",
-        signal: AbortSignal.timeout(timeout2)
+        signal: AbortSignal.timeout(timeout3)
       });
       const reader = response.body?.getReader();
       const chunks = [];
@@ -49272,7 +49307,19 @@ var RestClient = class {
       if (operation.id === "createVM" && body?.parentId) await this.assertVM(body.parentId);
       if (operation.id === "registerVM" && body?.path) body.path = await this.backend.vmx(body.path);
       if (body?.host_path) body.host_path = await this.backend.hostPath(body.host_path, "directory");
-      const result = await this.request(operation.method, route, { body, password, timeout: a.timeout_seconds * 1e3 });
+      const request = () => this.request(operation.method, route, { body, password, timeout: a.timeout_seconds * 1e3 });
+      let result;
+      const id = a.id ?? (operation.id === "createVM" ? body?.parentId : void 0);
+      const coordinate = this.coordinateDiskEdits && ["127.0.0.1", "localhost", "[::1]"].includes(new URL(this.baseURL()).hostname);
+      if (coordinate && operation.method !== "GET" && id !== void 0) {
+        const inventory = await this.request("GET", "/api/vms");
+        const record2 = Array.isArray(inventory.data) && inventory.data.find((vm2) => vm2.id === id);
+        if (!record2?.path) throw new Error("Cannot resolve REST VM ID to coordinate safe disk edits. Refresh REST inventory.");
+        const vmx3 = await this.backend.vmx(record2.path);
+        result = await this.backend.resources.use([vmx3], request);
+      } else if (coordinate && operation.id === "registerVM" && body?.path) {
+        result = await this.backend.resources.use([body.path], request);
+      } else result = await request();
       return { operation: operation.id, ...result };
     });
     this.tail = job.catch(() => {
@@ -49338,7 +49385,7 @@ var vmrun_help_default = {
 // src/vm-files.mjs
 var import_promises5 = __toESM(require("node:fs/promises"), 1);
 var import_node_fs3 = require("node:fs");
-var import_node_path5 = __toESM(require("node:path"), 1);
+var import_node_path6 = __toESM(require("node:path"), 1);
 var import_node_crypto = require("node:crypto");
 var createVMSchema = external_exports.object({
   directory: external_exports.string().min(1).describe("Absolute NEW VM directory; its parent must exist. Existing directories are never overwritten."),
@@ -49379,8 +49426,8 @@ var VMFiles = class {
       const vmrun = await this.backend.executable();
       const diskManager = await findVMwareExecutable("vmware-vdiskmanager", { env: this.backend.env, beside: vmrun });
       await import_promises5.default.mkdir(directory);
-      const vmx3 = import_node_path5.default.join(directory, "machine.vmx");
-      const disk = import_node_path5.default.join(directory, "disk.vmdk");
+      const vmx3 = import_node_path6.default.join(directory, "machine.vmx");
+      const disk = import_node_path6.default.join(directory, "disk.vmdk");
       try {
         await this.backend.execute(diskManager, ["-c", "-s", `${a.disk_gb}GB`, "-a", "lsilogic", "-t", "0", disk], { windowsHide: true, shell: false, timeout: a.timeout_seconds * 1e3, maxBuffer: 1024 * 1024, encoding: "utf8" });
         if (!(await import_promises5.default.stat(disk)).isFile()) throw new Error("Disk manager did not create the VMDK.");
@@ -49408,7 +49455,7 @@ var VMFiles = class {
         if (a.network !== "none") settings["ethernet0.connectionType"] = a.network;
         if (a.network === "custom") settings["ethernet0.vnet"] = a.vmnet;
         if (iso) Object.assign(settings, { "sata0.present": "TRUE", "sata0:0.present": "TRUE", "sata0:0.deviceType": "cdrom-image", "sata0:0.fileName": iso });
-        const text2 = Object.entries(settings).map(([key2, value]) => `${key2} = "${encodeVMX(value)}"`).join("\n") + "\n";
+        const text2 = Object.entries(settings).map(([key3, value]) => `${key3} = "${encodeVMX(value)}"`).join("\n") + "\n";
         await import_promises5.default.writeFile(vmx3, text2, { flag: "wx", encoding: "utf8" });
         return { created: true, vmx: vmx3, disk, directory, registered: false, poweredOn: false, guestOSInstalled: false, note: "Blank VM and sparse disk created. Open the VMX in Workstation or register through REST; install a guest OS separately." };
       } catch (error62) {
@@ -49418,8 +49465,8 @@ var VMFiles = class {
   }
   async configure(input2, { protectFile, expectedOriginal, beforeCommit } = {}) {
     const a = configureVMSchema.parse(input2);
-    return this.exclusive(async () => {
-      const vmx3 = await this.backend.vmx(a.vmx);
+    const vmx3 = await this.backend.vmx(a.vmx);
+    return this.backend.resources.use([vmx3], async () => {
       const details = await this.backend.details(vmx3);
       if (details.running) throw new Error("Power off the VM before editing its VMX.");
       const lock = `${vmx3}.lck`;
@@ -49432,37 +49479,37 @@ var VMFiles = class {
       const original = await import_promises5.default.readFile(vmx3, "utf8");
       if (expectedOriginal !== void 0 && original !== expectedOriginal) throw new Error("VMX changed before editing; inspect and retry.");
       const config2 = parseAssignments(original);
-      const sensitiveKeys = Object.entries(config2).some(([key2, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key2) && value) || Object.entries(a.settings).some(([key2, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key2) && value);
+      const sensitiveKeys = Object.entries(config2).some(([key3, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key3) && value) || Object.entries(a.settings).some(([key3, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key3) && value);
       if (!protectFile && sensitiveKeys) protectFile = this.protectSensitiveFile;
       if (config2[".encoding"] && !/^utf-?8$/i.test(config2[".encoding"])) throw new Error("Local VMX editing supports UTF-8 only. Use REST or convert the VMX encoding explicitly.");
       for (const value of [config2["checkpoint.vmState"], config2["suspend.filename"]].filter(Boolean)) {
         try {
-          await import_promises5.default.access(import_node_path5.default.resolve(import_node_path5.default.dirname(vmx3), value));
+          await import_promises5.default.access(import_node_path6.default.resolve(import_node_path6.default.dirname(vmx3), value));
           throw new Error("VM has a saved/suspended state; fully power it off before editing hardware.");
         } catch (error62) {
           if (error62.code !== "ENOENT") throw error62;
         }
       }
       const updates = /* @__PURE__ */ new Map();
-      for (const [key2, value] of Object.entries(a.settings)) {
-        if (updates.has(key2.toLowerCase())) throw new Error("Duplicate VMX setting names differ only by case.");
+      for (const [key3, value] of Object.entries(a.settings)) {
+        if (updates.has(key3.toLowerCase())) throw new Error("Duplicate VMX setting names differ only by case.");
         if (value?.includes("\0")) throw new Error("VMX settings cannot contain NUL.");
-        if (key2.toLowerCase() === ".encoding" && value !== "UTF-8") throw new Error("The .encoding setting must remain UTF-8.");
-        updates.set(key2.toLowerCase(), { key: key2, value });
+        if (key3.toLowerCase() === ".encoding" && value !== "UTF-8") throw new Error("The .encoding setting must remain UTF-8.");
+        updates.set(key3.toLowerCase(), { key: key3, value });
       }
       const lines = [];
       const seen = /* @__PURE__ */ new Set();
       for (const line of original.split(/\r?\n/)) {
-        const key2 = line.match(/^\s*([A-Za-z_.][A-Za-z0-9_.:-]*)\s*=/)?.[1]?.toLowerCase();
-        if (!updates.has(key2)) {
+        const key3 = line.match(/^\s*([A-Za-z_.][A-Za-z0-9_.:-]*)\s*=/)?.[1]?.toLowerCase();
+        if (!updates.has(key3)) {
           lines.push(line);
           continue;
         }
-        const update = updates.get(key2);
-        if (!seen.has(key2) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
-        seen.add(key2);
+        const update = updates.get(key3);
+        if (!seen.has(key3) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
+        seen.add(key3);
       }
-      for (const [key2, update] of updates) if (!seen.has(key2) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
+      for (const [key3, update] of updates) if (!seen.has(key3) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
       const mode = (await import_promises5.default.stat(vmx3)).mode & 511;
       if (beforeCommit) await beforeCommit();
       const backup = `${vmx3}.backup-${(0, import_node_crypto.randomUUID)()}`;
@@ -49712,11 +49759,11 @@ function bytesPerPixel(pf) {
   return pf.bitsPerPixel >> 3;
 }
 function validatePixelFormat(pf, fromServer = false) {
-  const fail = (why) => {
+  const fail2 = (why) => {
     throw new RfbError(fromServer ? "PROTOCOL_ERROR" : "INVALID_ARGUMENT", `invalid pixel format: ${why}`);
   };
   if (pf.bitsPerPixel !== 8 && pf.bitsPerPixel !== 16 && pf.bitsPerPixel !== 32) {
-    fail(`bitsPerPixel must be 8, 16 or 32, not ${pf.bitsPerPixel}`);
+    fail2(`bitsPerPixel must be 8, 16 or 32, not ${pf.bitsPerPixel}`);
   }
   if (!pf.trueColor)
     return;
@@ -49724,10 +49771,10 @@ function validatePixelFormat(pf, fromServer = false) {
     const max = pf[`${c}Max`];
     const shift = pf[`${c}Shift`];
     if (!Number.isInteger(max) || max < 1 || max > 65535 || (max & max + 1) !== 0) {
-      fail(`${c}Max must be 2^n - 1, not ${max}`);
+      fail2(`${c}Max must be 2^n - 1, not ${max}`);
     }
     if (!Number.isInteger(shift) || shift < 0 || shift + Math.log2(max + 1) > pf.bitsPerPixel) {
-      fail(`${c}Shift ${shift} puts ${c} outside the ${pf.bitsPerPixel}-bit pixel`);
+      fail2(`${c}Shift ${shift} puts ${c} outside the ${pf.bitsPerPixel}-bit pixel`);
     }
   }
 }
@@ -51049,12 +51096,12 @@ function enableContinuousUpdates(enable, x, y, width, height) {
   b.writeUInt16BE(u16(height, "height"), 8);
   return b;
 }
-function clientFence(flags, payload = Buffer.alloc(0)) {
+function clientFence(flags2, payload = Buffer.alloc(0)) {
   if (payload.length > 64)
     throw new RfbError("INVALID_ARGUMENT", "a fence payload is at most 64 bytes");
   const b = Buffer.alloc(9 + payload.length);
   b[0] = clientMsgTypes.fence;
-  b.writeUInt32BE(flags >>> 0, 4);
+  b.writeUInt32BE(flags2 >>> 0, 4);
   b[8] = payload.length;
   b.set(payload, 9);
   return b;
@@ -51961,10 +52008,10 @@ function permute(bits, table) {
 }
 var Des = class {
   #subkeys;
-  constructor(key2) {
-    if (key2.length !== 8)
+  constructor(key3) {
+    if (key3.length !== 8)
       throw new Error("a DES key is 8 bytes");
-    const cd = permute(toBits(key2), PC1);
+    const cd = permute(toBits(key3), PC1);
     let c = cd.slice(0, 28);
     let d = cd.slice(28);
     this.#subkeys = SHIFTS.map((n2) => {
@@ -52049,10 +52096,10 @@ function reverseBits(b) {
 }
 function vncKey(password) {
   const bytes = typeof password === "string" ? Buffer.from(password, "utf8") : password;
-  const key2 = new Uint8Array(8);
+  const key3 = new Uint8Array(8);
   for (let i = 0; i < 8 && i < bytes.length; i++)
-    key2[i] = reverseBits(bytes[i]);
-  return key2;
+    key3[i] = reverseBits(bytes[i]);
+  return key3;
 }
 function vncAuthResponse(challenge, password) {
   return new Des(vncKey(password)).encryptEcb(challenge);
@@ -52105,8 +52152,8 @@ async function ardAuth(ctx) {
   const dh = import_node_crypto2.default.createDiffieHellman(prime, generator);
   const clientPublic = leftPad(dh.generateKeys(), keyLength);
   const secret = leftPad(dh.computeSecret(serverPublic), keyLength);
-  const key2 = import_node_crypto2.default.createHash("md5").update(secret).digest();
-  const cipher = import_node_crypto2.default.createCipheriv("aes-128-ecb", key2, null);
+  const key3 = import_node_crypto2.default.createHash("md5").update(secret).digest();
+  const cipher = import_node_crypto2.default.createCipheriv("aes-128-ecb", key3, null);
   cipher.setAutoPadding(false);
   const plain = Buffer.concat([padded(username ?? "", 64), padded(password ?? "", 64)]);
   const encrypted = Buffer.concat([cipher.update(plain), cipher.final()]);
@@ -52152,8 +52199,8 @@ var CLIENT_KEY_BITS = 2048;
 var MIN_KEY_BITS = 1024;
 var MAX_KEY_BITS = 8192;
 var BLOCK = 16;
-function aesEcb(key2, block) {
-  const c = import_node_crypto3.default.createCipheriv(`aes-${key2.length * 8}-ecb`, key2, null);
+function aesEcb(key3, block) {
+  const c = import_node_crypto3.default.createCipheriv(`aes-${key3.length * 8}-ecb`, key3, null);
   c.setAutoPadding(false);
   return c.update(block);
 }
@@ -52173,9 +52220,9 @@ var Eax = class {
   #key;
   #k1;
   #k2;
-  constructor(key2) {
-    this.#key = key2;
-    this.#k1 = shiftLeft(aesEcb(key2, Buffer.alloc(BLOCK)));
+  constructor(key3) {
+    this.#key = key3;
+    this.#k1 = shiftLeft(aesEcb(key3, Buffer.alloc(BLOCK)));
     this.#k2 = shiftLeft(this.#k1);
   }
   /** OMAC^t(data): CMAC over a block holding `t`, then `data`. */
@@ -52958,10 +53005,10 @@ var RfbClient = class extends import_node_events.EventEmitter {
     if (c.serverText)
       c.echo = true;
     c.serverText = false;
-    const flags = c.serverFlags;
-    if (flags & CLIP.provide && Buffer.byteLength(text2) + 1 <= c.textLimit)
+    const flags2 = c.serverFlags;
+    if (flags2 & CLIP.provide && Buffer.byteLength(text2) + 1 <= c.textLimit)
       this.#provideClipboard();
-    else if (flags & CLIP.text && flags & CLIP.notify)
+    else if (flags2 & CLIP.text && flags2 & CLIP.notify)
       this.#sendClipboard(CLIP.notify | CLIP.text);
     else
       this.#send(clientCutText(text2));
@@ -52981,9 +53028,9 @@ var RfbClient = class extends import_node_events.EventEmitter {
     this.#send(enableContinuousUpdates(enable, x, y, width, height));
   }
   /** ClientFence (needs `supports.fence`): the answer arrives as a `fence` event. */
-  fence(flags, payload = Buffer.alloc(0)) {
+  fence(flags2, payload = Buffer.alloc(0)) {
     this.#require(this.supports.fence, "fences", "pseudoFence");
-    this.#send(clientFence((flags | fenceFlags.request) >>> 0, payload));
+    this.#send(clientFence((flags2 | fenceFlags.request) >>> 0, payload));
   }
   /** xvp: ask the server to shut down, reboot or reset the machine (needs `supports.xvp`). */
   xvp(operation) {
@@ -53512,9 +53559,9 @@ var RfbClient = class extends import_node_events.EventEmitter {
   #extendedClipboard(data) {
     if (data.length < 4)
       throw protocolError("a short Extended Clipboard message");
-    const flags = data.readUInt32BE(0);
-    const formats = flags & 65535;
-    if (flags & CLIP.caps) {
+    const flags2 = data.readUInt32BE(0);
+    const formats = flags2 & 65535;
+    if (flags2 & CLIP.caps) {
       const sizes = [];
       for (let bit = 0, o = 4; bit < 16; bit++) {
         if (formats & 1 << bit) {
@@ -53522,20 +53569,20 @@ var RfbClient = class extends import_node_events.EventEmitter {
           o += 4;
         }
       }
-      this.#clipboard.serverFlags = flags;
+      this.#clipboard.serverFlags = flags2;
       this.#clipboard.textLimit = formats & CLIP.text ? sizes[0] ?? 0 : 0;
       this.supports.extendedClipboard = true;
-      this.supports.unicodeClipboard = (formats & CLIP.text) !== 0 && (flags & CLIP.notify) !== 0;
+      this.supports.unicodeClipboard = (formats & CLIP.text) !== 0 && (flags2 & CLIP.notify) !== 0;
       const caps = Buffer.alloc(8);
       caps.writeUInt32BE((CLIP.caps | CLIP.text | CLIP.request | CLIP.peek | CLIP.notify | CLIP.provide) >>> 0, 0);
       caps.writeUInt32BE(this.#maxClipboard, 4);
       this.#send(clientCutTextExtended(caps));
-    } else if (flags & CLIP.request) {
+    } else if (flags2 & CLIP.request) {
       if (formats & CLIP.text && this.#clipboard.text !== null)
         this.#provideClipboard();
-    } else if (flags & CLIP.peek) {
+    } else if (flags2 & CLIP.peek) {
       this.#sendClipboard(CLIP.notify | (this.#clipboard.text !== null ? CLIP.text : 0));
-    } else if (flags & CLIP.notify) {
+    } else if (flags2 & CLIP.notify) {
       if (formats & CLIP.text) {
         this.#serverOwnsClipboard(true);
         this.#sendClipboard(CLIP.request | CLIP.text);
@@ -53546,7 +53593,7 @@ var RfbClient = class extends import_node_events.EventEmitter {
         if (!echo)
           this.emit("clipboardEmpty");
       }
-    } else if (flags & CLIP.provide) {
+    } else if (flags2 & CLIP.provide) {
       if (!(formats & CLIP.text)) {
         this.#serverOwnsClipboard(false);
         this.emit("clipboardEmpty");
@@ -53585,9 +53632,9 @@ var RfbClient = class extends import_node_events.EventEmitter {
     this.#clipboard.echo = false;
     this.#clipboard.serverText = withText;
   }
-  #sendClipboard(flags) {
+  #sendClipboard(flags2) {
     const b = Buffer.alloc(4);
-    b.writeUInt32BE(flags >>> 0);
+    b.writeUInt32BE(flags2 >>> 0);
     this.#send(clientCutTextExtended(b));
   }
   #provideClipboard() {
@@ -53600,17 +53647,17 @@ var RfbClient = class extends import_node_events.EventEmitter {
   }
   async #readFence(t) {
     const head = await t.reader.read(8);
-    const flags = head.readUInt32BE(3);
+    const flags2 = head.readUInt32BE(3);
     const length = head[7];
     if (length > 64)
       throw protocolError(`a ${length}-byte fence payload`);
     const payload = Buffer.from(await t.reader.read(length));
     this.supports.fence = true;
-    if (flags & fenceFlags.request) {
-      const answer = flags & (fenceFlags.blockBefore | fenceFlags.blockAfter | fenceFlags.syncNext);
+    if (flags2 & fenceFlags.request) {
+      const answer = flags2 & (fenceFlags.blockBefore | fenceFlags.blockAfter | fenceFlags.syncNext);
       this.#send(clientFence(answer, payload));
     } else {
-      this.emit("fence", { flags, payload });
+      this.emit("fence", { flags: flags2, payload });
     }
   }
   async #readQemu(t) {
@@ -53847,7 +53894,7 @@ var import_pngjs = __toESM(require_png(), 1);
 
 // src/linux-listener.mjs
 var import_promises6 = __toESM(require("node:fs/promises"), 1);
-var import_node_path6 = __toESM(require("node:path"), 1);
+var import_node_path7 = __toESM(require("node:path"), 1);
 var import_node_os2 = __toESM(require("node:os"), 1);
 function procAddress(hex3, endian = import_node_os2.default.endianness()) {
   if (!/^(?:[0-9A-F]{8}|[0-9A-F]{32})$/i.test(hex3)) throw new Error("Unrecognized Linux TCP address.");
@@ -53872,8 +53919,8 @@ function parseProcListeners(text2, port) {
 }
 async function inspectLinuxListener(port, { procRoot = "/proc" } = {}) {
   if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("Invalid VNC listener port.");
-  const tcp = await import_promises6.default.readFile(import_node_path6.default.join(procRoot, "net/tcp"), "utf8");
-  const tcp6 = await import_promises6.default.readFile(import_node_path6.default.join(procRoot, "net/tcp6"), "utf8").catch((error62) => {
+  const tcp = await import_promises6.default.readFile(import_node_path7.default.join(procRoot, "net/tcp"), "utf8");
+  const tcp6 = await import_promises6.default.readFile(import_node_path7.default.join(procRoot, "net/tcp6"), "utf8").catch((error62) => {
     if (error62.code === "ENOENT") return "";
     throw error62;
   });
@@ -53882,17 +53929,17 @@ async function inspectLinuxListener(port, { procRoot = "/proc" } = {}) {
   const owners = /* @__PURE__ */ new Map();
   const inodes = new Set(listeners.map((item) => item.inode));
   for (const pid of (await import_promises6.default.readdir(procRoot)).filter((name2) => /^\d+$/.test(name2))) {
-    const directory = import_node_path6.default.join(procRoot, pid);
+    const directory = import_node_path7.default.join(procRoot, pid);
     let descriptors;
     try {
-      descriptors = await import_promises6.default.readdir(import_node_path6.default.join(directory, "fd"));
+      descriptors = await import_promises6.default.readdir(import_node_path7.default.join(directory, "fd"));
     } catch (error62) {
       if (["ENOENT", "ESRCH", "EACCES", "EPERM"].includes(error62.code)) continue;
       throw error62;
     }
     const owned = /* @__PURE__ */ new Set();
     for (const fd of descriptors) {
-      const link = await import_promises6.default.readlink(import_node_path6.default.join(directory, "fd", fd)).catch((error62) => {
+      const link = await import_promises6.default.readlink(import_node_path7.default.join(directory, "fd", fd)).catch((error62) => {
         if (["ENOENT", "ESRCH", "EACCES", "EPERM", "EINVAL"].includes(error62.code)) return "";
         throw error62;
       });
@@ -53902,9 +53949,9 @@ async function inspectLinuxListener(port, { procRoot = "/proc" } = {}) {
     if (!owned.size) continue;
     let owner;
     try {
-      const executable = await import_promises6.default.readlink(import_node_path6.default.join(directory, "exe"));
-      const args = (await import_promises6.default.readFile(import_node_path6.default.join(directory, "cmdline"), "utf8")).split("\0").filter(Boolean);
-      owner = { pid: Number(pid), processName: import_node_path6.default.basename(executable), arguments: args, commandLine: args.join(" ") };
+      const executable = await import_promises6.default.readlink(import_node_path7.default.join(directory, "exe"));
+      const args = (await import_promises6.default.readFile(import_node_path7.default.join(directory, "cmdline"), "utf8")).split("\0").filter(Boolean);
+      owner = { pid: Number(pid), processName: import_node_path7.default.basename(executable), arguments: args, commandLine: args.join(" ") };
     } catch (error62) {
       if (!["ENOENT", "ESRCH", "EACCES", "EPERM"].includes(error62.code)) throw error62;
       continue;
@@ -53932,9 +53979,9 @@ var TIMEOUT_MS = 1e4;
 var keyAliases = { enter: "Return", esc: "Escape", ctrl: "ControlLeft", control: "ControlLeft", alt: "AltLeft", shift: "ShiftLeft", meta: "SuperLeft", super: "SuperLeft", win: "SuperLeft", cmd: "SuperLeft", arrowup: "Up", arrowdown: "Down", arrowleft: "Left", arrowright: "Right", backspace: "BackSpace", pgup: "PageUp", pgdn: "PageDown", plus: "Plus", space: "Space" };
 var shifted = /^[A-Z~!@#$%^&*()_+{}|:"<>?]$/;
 var modifierCodes = /* @__PURE__ */ new Set([keysyms.ControlLeft, keysyms.ControlRight, keysyms.AltLeft, keysyms.AltRight, keysyms.ShiftLeft, keysyms.ShiftRight, keysyms.SuperLeft, keysyms.SuperRight, keysyms.MetaLeft, keysyms.MetaRight]);
-function keySequence(key2) {
-  if (key2 === "+") return [keysyms.ShiftLeft, keysymFromChar("+")];
-  const parts = key2.split("+");
+function keySequence(key3) {
+  if (key3 === "+") return [keysyms.ShiftLeft, keysymFromChar("+")];
+  const parts = key3.split("+");
   if (parts.length > 5 || parts.some((part) => !part)) throw new Error("Use a key name or chord such as F2, Enter, ArrowDown, Ctrl+Alt+Delete, or Ctrl+Plus.");
   const sequence = parts.map((part) => {
     const name2 = keyAliases[part.toLowerCase()] || Object.keys(keysyms).find((name3) => name3.toLowerCase() === part.toLowerCase());
@@ -53972,14 +54019,14 @@ var ConsoleManager = class {
     this.closed = false;
   }
   async endpoint(vmID) {
-    const file2 = await this.credentials.load();
-    const aliases = Object.fromEntries(Object.entries(file2.console || {}).filter(([, entry]) => typeof entry?.vmx === "string").map(([name2, entry]) => [name2, entry.vmx]));
+    const file3 = await this.credentials.load();
+    const aliases = Object.fromEntries(Object.entries(file3.console || {}).filter(([, entry]) => typeof entry?.vmx === "string").map(([name2, entry]) => [name2, entry.vmx]));
     const vmx3 = await this.backend.resolveVM(vmID, { aliases, restInventory: this.rest ? async () => {
       const response = await this.rest.request("GET", "/api/vms");
       if (!Array.isArray(response.data)) throw new Error("REST inventory did not return VM IDs and paths.");
       return response.data;
     } : void 0 });
-    const config2 = Object.fromEntries(Object.entries(parseAssignments(await import_promises7.default.readFile(vmx3, "utf8"))).map(([key3, value]) => [key3.toLowerCase(), value]));
+    const config2 = Object.fromEntries(Object.entries(parseAssignments(await import_promises7.default.readFile(vmx3, "utf8"))).map(([key4, value]) => [key4.toLowerCase(), value]));
     if (String(config2["remotedisplay.vnc.enabled"]).toLowerCase() !== "true") throw new Error("Native VNC is disabled for this VM. Configure it while powered off; console calls never enable VNC or start a VM automatically.");
     const host2 = config2["remotedisplay.vnc.ip"];
     if (!["127.0.0.1", "::1"].includes(host2)) throw new Error("VNC must explicitly bind to 127.0.0.1 or ::1 in the VMX. Wildcard/external listeners are refused.");
@@ -53989,9 +54036,9 @@ var ConsoleManager = class {
     if (port < 1024 || port > 65535) throw new Error("VNC port must be between 1024 and 65535.");
     this.credentials.remember(config2["remotedisplay.vnc.password"]);
     const auth = await this.credentials.console(vmx3, Object.hasOwn(aliases, vmID) ? vmID : void 0);
-    const key2 = process.platform === "win32" ? vmx3.toLowerCase() : vmx3;
+    const key3 = process.platform === "win32" ? vmx3.toLowerCase() : vmx3;
     const signature = (0, import_node_crypto4.createHash)("sha256").update(`${host2}:${port}\0${auth.password}`).digest("hex");
-    return { vmx: vmx3, host: host2, port, ...auth, key: key2, signature };
+    return { vmx: vmx3, host: host2, port, ...auth, key: key3, signature };
   }
   async verify(endpoint) {
     const listeners = await this.listenerInspector(this.backend, endpoint);
@@ -54012,7 +54059,7 @@ var ConsoleManager = class {
       let vmx3;
       try {
         vmx3 = await import_promises7.default.realpath(vm2.vmx);
-        config2 = Object.fromEntries(Object.entries(parseAssignments(await import_promises7.default.readFile(vmx3, "utf8"))).map(([key2, value]) => [key2.toLowerCase(), value]));
+        config2 = Object.fromEntries(Object.entries(parseAssignments(await import_promises7.default.readFile(vmx3, "utf8"))).map(([key3, value]) => [key3.toLowerCase(), value]));
       } catch {
         throw new Error("Cannot verify VNC port ownership because a running VMX is unreadable.");
       }
@@ -54186,11 +54233,11 @@ var ConsoleManager = class {
     }
     if (session.closed) throw new Error("Console disconnected during input. Input is never automatically replayed.");
   }
-  async key(vmID, key2) {
-    const sequence = keySequence(key2);
+  async key(vmID, key3) {
+    const sequence = keySequence(key3);
     return this.withSession(vmID, async (session) => {
       await this.sendKeys(session, sequence);
-      return { vmx: session.vmx, sent: true, key: key2, channel: "RFB KeyEvent" };
+      return { vmx: session.vmx, sent: true, key: key3, channel: "RFB KeyEvent" };
     });
   }
   async type(vmID, text2) {
@@ -54223,7 +54270,7 @@ var ConsoleManager = class {
 
 // src/lan-segments.mjs
 var import_promises9 = __toESM(require("node:fs/promises"), 1);
-var import_node_path7 = __toESM(require("node:path"), 1);
+var import_node_path8 = __toESM(require("node:path"), 1);
 var import_node_crypto5 = require("node:crypto");
 var vmx = external_exports.string().min(1).describe("Absolute VMX path. Adapter changes require a powered-off, unlocked UTF-8 VM.");
 var segment = external_exports.string().min(1).max(256).describe("LAN segment name or pvnID returned by list_lan_segments. Use the ID if names are ambiguous.");
@@ -54275,9 +54322,9 @@ function parseLanPreferences(bytes, defaultEncoding = "UTF-8") {
     if (!/^\s*pref\.namedpvns/i.test(line)) continue;
     const match = line.match(assignment);
     if (!match || !/^pref\.namedpvns(?:\.count|\d+\.(?:name|pvnid))$/i.test(match[1])) throw new Error("Unrecognized LAN segment catalog entry; preferences were not changed.");
-    const key2 = match[1].toLowerCase();
-    if (values.has(key2)) throw new Error("Duplicate LAN segment preference key.");
-    values.set(key2, encodingCodec.decode(match[2]));
+    const key3 = match[1].toLowerCase();
+    if (values.has(key3)) throw new Error("Duplicate LAN segment preference key.");
+    values.set(key3, encodingCodec.decode(match[2]));
   }
   const count = values.get("pref.namedpvns.count") ?? (values.size ? null : "0");
   if (!/^\d{1,5}$/.test(count ?? "") || Number(count) > 1e4) throw new Error("Invalid LAN segment catalog count.");
@@ -54322,7 +54369,7 @@ async function assertLanGUIClosed(backend2, platform = process.platform, procRoo
     names2 = [];
     for (const pid of (await import_promises9.default.readdir(procRoot)).filter((entry) => /^\d+$/.test(entry))) {
       try {
-        names2.push((await import_promises9.default.readFile(import_node_path7.default.join(procRoot, pid, "comm"), "utf8")).trim());
+        names2.push((await import_promises9.default.readFile(import_node_path8.default.join(procRoot, pid, "comm"), "utf8")).trim());
       } catch (error62) {
         if (error62.code !== "ENOENT" && error62.code !== "ESRCH") throw error62;
       }
@@ -54340,7 +54387,7 @@ var LanSegments = class {
     this.tail = Promise.resolve();
   }
   async readCatalog() {
-    if (!import_node_path7.default.isAbsolute(this.filename) || /[\x00-\x1f]/.test(this.filename)) throw new Error("VMWARE_PREFERENCES_PATH must be an absolute path without control characters.");
+    if (!import_node_path8.default.isAbsolute(this.filename) || /[\x00-\x1f]/.test(this.filename)) throw new Error("VMWARE_PREFERENCES_PATH must be an absolute path without control characters.");
     let bytes = null;
     try {
       const stat = await import_promises9.default.lstat(this.filename);
@@ -54411,20 +54458,20 @@ var LanSegments = class {
         if (/^\s*(?:ethernet\d+\.|\.encoding|checkpoint\.vmstate|suspend\.filename)/i.test(line)) throw new Error("Malformed VM network or state setting.");
         continue;
       }
-      const key2 = match[1].toLowerCase();
-      if (key2.startsWith("encryption.")) throw new Error("Encrypted VMX files cannot be inspected safely for LAN segment references.");
-      if (/^(ethernet\d+\.|\.encoding|checkpoint\.vmstate|suspend\.filename)/.test(key2)) {
-        const index = key2.match(/^ethernet(\d+)\./)?.[1];
+      const key3 = match[1].toLowerCase();
+      if (key3.startsWith("encryption.")) throw new Error("Encrypted VMX files cannot be inspected safely for LAN segment references.");
+      if (/^(ethernet\d+\.|\.encoding|checkpoint\.vmstate|suspend\.filename)/.test(key3)) {
+        const index = key3.match(/^ethernet(\d+)\./)?.[1];
         if (index !== void 0 && (String(Number(index)) !== index || Number(index) > 255)) throw new Error("Unsupported VM adapter index; cannot verify LAN segment references.");
-        if (values.has(key2)) throw new Error("Duplicate VM network or state setting.");
-        values.set(key2, unescapeBytes(match[2]));
+        if (values.has(key3)) throw new Error("Duplicate VM network or state setting.");
+        values.set(key3, unescapeBytes(match[2]));
       }
     }
     if (values.has(".encoding") && !/^utf-?8$/i.test(values.get(".encoding"))) throw new Error("LAN adapter inspection and editing require a UTF-8 VMX.");
     return { vmx: vmx3, text: text2, values };
   }
   adapters(vm2, segments) {
-    const indices = [...new Set([...vm2.values.keys()].map((key2) => key2.match(/^ethernet(\d+)\./)?.[1]).filter((value) => value !== void 0))].map(Number).sort((a, b) => a - b);
+    const indices = [...new Set([...vm2.values.keys()].map((key3) => key3.match(/^ethernet(\d+)\./)?.[1]).filter((value) => value !== void 0))].map(Number).sort((a, b) => a - b);
     return indices.map((index) => {
       const prefix = `ethernet${index}`;
       const type = vm2.values.get(`${prefix}.connectiontype`) || null;
@@ -54466,7 +54513,7 @@ var LanSegments = class {
         if (!/^\s*vmlist\d+\.config\b/i.test(line)) continue;
         const entry = line.match(assignment);
         const value = entry && unescapeBytes(entry[2]);
-        if (!entry || value && (!import_node_path7.default.isAbsolute(value) || import_node_path7.default.extname(value).toLowerCase() !== ".vmx")) throw new Error("Malformed VM inventory; cannot verify LAN segment references.");
+        if (!entry || value && (!import_node_path8.default.isAbsolute(value) || import_node_path8.default.extname(value).toLowerCase() !== ".vmx")) throw new Error("Malformed VM inventory; cannot verify LAN segment references.");
       }
       const inventory = await this.backend.listVMs();
       if (inventory.warnings.length) throw new Error("Cannot verify segment usage because VM inventory is unavailable. Restore inventory before removal.");
@@ -54485,9 +54532,9 @@ var LanSegments = class {
           }
           throw new Error(`Cannot inspect a VM for LAN segment references: ${error62.message}`);
         }
-        const key2 = process.platform === "win32" ? vm2.vmx.toLowerCase() : vm2.vmx;
-        if (scanned.has(key2)) continue;
-        scanned.add(key2);
+        const key3 = process.platform === "win32" ? vm2.vmx.toLowerCase() : vm2.vmx;
+        if (scanned.has(key3)) continue;
+        scanned.add(key3);
         snapshots.push(vm2);
         for (const nic of this.adapters(vm2, catalog.document.segments)) {
           if (nic.segmentId === segment2.id) references2.push({ vmx: vm2.vmx, adapter: nic.adapter });
@@ -54514,11 +54561,11 @@ var LanSegments = class {
       const present = vm2.values.get(`${prefix}.present`) || "";
       if (detach ? !/^(true|false)$/i.test(present) : !/^true$/i.test(present)) throw new Error("Selected network adapter is not present. LAN tools do not create or delete adapters.");
       if (detach && vm2.values.get(`${prefix}.pvnid`)?.toLowerCase() !== segment2.id) throw new Error("Adapter is not attached to the selected LAN segment; VMX was not changed.");
-      for (const key2 of ["checkpoint.vmstate", "suspend.filename"]) {
-        const saved = vm2.values.get(key2);
+      for (const key3 of ["checkpoint.vmstate", "suspend.filename"]) {
+        const saved = vm2.values.get(key3);
         if (saved) {
           try {
-            await import_promises9.default.access(import_node_path7.default.resolve(import_node_path7.default.dirname(vm2.vmx), saved));
+            await import_promises9.default.access(import_node_path8.default.resolve(import_node_path8.default.dirname(vm2.vmx), saved));
             throw new Error("VM has a saved/suspended state; power it off first.");
           } catch (error62) {
             if (error62.code !== "ENOENT") throw error62;
@@ -54550,12 +54597,12 @@ var LanSegments = class {
 // src/ovf.mjs
 var import_promises12 = __toESM(require("node:fs/promises"), 1);
 var import_node_os3 = __toESM(require("node:os"), 1);
-var import_node_path9 = __toESM(require("node:path"), 1);
+var import_node_path10 = __toESM(require("node:path"), 1);
 
 // src/ovf-artifacts.mjs
 var import_promises10 = __toESM(require("node:fs/promises"), 1);
 var import_node_fs4 = require("node:fs");
-var import_node_path8 = __toESM(require("node:path"), 1);
+var import_node_path9 = __toESM(require("node:path"), 1);
 var import_node_crypto6 = require("node:crypto");
 var import_promises11 = require("node:stream/promises");
 var import_tar_stream = __toESM(require_tar_stream(), 1);
@@ -54652,28 +54699,28 @@ function checkManifest(text2, files) {
   if (uncovered.length) throw new Error("Manifest does not cover every appliance file.");
 }
 async function inspectArtifact(backend2, input2, { signal } = {}) {
-  const source2 = await backend2.hostPath(input2, "input-file");
-  const ext = import_node_path8.default.extname(source2).toLowerCase();
+  const source3 = await backend2.hostPath(input2, "input-file");
+  const ext = import_node_path9.default.extname(source3).toLowerCase();
   if (![".ovf", ".ova"].includes(ext)) throw new Error("Source must be a local .ovf or .ova file.");
   signal?.throwIfAborted();
   const files = /* @__PURE__ */ new Map();
   let descriptorName;
   let headerBytes = 0;
-  const add = (name2, file2) => {
-    headerBytes += file2.header.length;
+  const add = (name2, file3) => {
+    headerBytes += file3.header.length;
     if (headerBytes > 64 * 1024 * 1024) throw new Error("Appliance exceeds the 64 MiB header preflight budget.");
-    files.set(name2, file2);
+    files.set(name2, file3);
   };
   if (ext === ".ova") {
     const extract = import_tar_stream.default.extract();
-    const scan = (0, import_promises11.pipeline)((0, import_node_fs4.createReadStream)(source2), extract, { signal });
+    const scan = (0, import_promises11.pipeline)((0, import_node_fs4.createReadStream)(source3), extract, { signal });
     scan.catch(() => {
     });
     try {
       for await (const entry of extract) {
         signal?.throwIfAborted();
         const name2 = localName(entry.header.name);
-        if (entry.header.type !== "file" || files.size >= 4096 || [...files.keys()].some((key2) => key2.toLowerCase() === name2.toLowerCase())) throw new Error("OVA must contain unique flat regular files; links/directories are unsupported.");
+        if (entry.header.type !== "file" || files.size >= 4096 || [...files.keys()].some((key3) => key3.toLowerCase() === name2.toLowerCase())) throw new Error("OVA must contain unique flat regular files; links/directories are unsupported.");
         if (/\.ovf$/i.test(name2)) {
           if (descriptorName) throw new Error("OVA must contain exactly one descriptor.");
           descriptorName = name2;
@@ -54689,12 +54736,12 @@ async function inspectArtifact(backend2, input2, { signal } = {}) {
     }
     if (!descriptorName) throw new Error("OVA has no OVF descriptor.");
   } else {
-    descriptorName = import_node_path8.default.basename(source2);
-    add(descriptorName, await digest((0, import_node_fs4.createReadStream)(source2, { signal }), true));
+    descriptorName = import_node_path9.default.basename(source3);
+    add(descriptorName, await digest((0, import_node_fs4.createReadStream)(source3, { signal }), true));
     const names2 = references(files.get(descriptorName).text);
-    const manifest = `${import_node_path8.default.basename(source2, import_node_path8.default.extname(source2))}.mf`;
+    const manifest = `${import_node_path9.default.basename(source3, import_node_path9.default.extname(source3))}.mf`;
     for (const name2 of [...names2, manifest]) {
-      const filename = import_node_path8.default.join(import_node_path8.default.dirname(source2), name2);
+      const filename = import_node_path9.default.join(import_node_path9.default.dirname(source3), name2);
       if (name2 === manifest) {
         try {
           await import_promises10.default.lstat(filename);
@@ -54704,7 +54751,7 @@ async function inspectArtifact(backend2, input2, { signal } = {}) {
         }
       }
       const resolved = await backend2.hostPath(filename, "input-file");
-      if (!isWithin(import_node_path8.default.dirname(source2), resolved)) throw new Error("OVF reference escapes its source directory through a link.");
+      if (!isWithin(import_node_path9.default.dirname(source3), resolved)) throw new Error("OVF reference escapes its source directory through a link.");
       if (!files.has(name2)) add(name2, await digest((0, import_node_fs4.createReadStream)(resolved, { signal }), /\.mf$/i.test(name2)));
     }
   }
@@ -54714,7 +54761,7 @@ async function inspectArtifact(backend2, input2, { signal } = {}) {
   const manifests = [...files].filter(([name2]) => /\.mf$/i.test(name2));
   if (manifests.length > 1) throw new Error("Multiple appliance manifests are unsupported.");
   if (manifests.length) checkManifest(manifests[0][1].text, files);
-  return { source: source2, descriptorName, manifest: manifests.length ? "checksums verified (SHA1/SHA256/SHA512); signer trust is not established" : "absent", descriptor: files.get(descriptorName).text, size: [...files.values()].reduce((size, file2) => size + file2.size, 0), files: [...files.keys()] };
+  return { source: source3, descriptorName, manifest: manifests.length ? "checksums verified (SHA1/SHA256/SHA512); signer trust is not established" : "absent", descriptor: files.get(descriptorName).text, size: [...files.values()].reduce((size, file3) => size + file3.size, 0), files: [...files.keys()] };
 }
 function machineRecords(output2) {
   const records = [];
@@ -54733,11 +54780,11 @@ function elementValue(node2) {
   const result = {};
   for (const attr of Array.from(node2.attributes || [])) result[`@${attr.name}`] = /^(value|defaultValue|password|secret|token)$/i.test(attr.localName) ? "[REDACTED]" : attr.value;
   for (const child of children) {
-    const key2 = child.localName;
-    const value = /^(value|defaultValue|password|secret|token)$/i.test(key2) ? "[REDACTED]" : elementValue(child);
-    if (!Object.hasOwn(result, key2)) result[key2] = value;
-    else if (Array.isArray(result[key2])) result[key2].push(value);
-    else result[key2] = [result[key2], value];
+    const key3 = child.localName;
+    const value = /^(value|defaultValue|password|secret|token)$/i.test(key3) ? "[REDACTED]" : elementValue(child);
+    if (!Object.hasOwn(result, key3)) result[key3] = value;
+    else if (Array.isArray(result[key3])) result[key3].push(value);
+    else result[key3] = [result[key3], value];
   }
   return result;
 }
@@ -54794,7 +54841,7 @@ var exists = async (filename) => {
 async function removeTemporary(directory, parent, prefix) {
   const actual = await import_promises12.default.realpath(directory);
   const base = await import_promises12.default.realpath(parent);
-  if (!isWithin(base, actual) || actual === base || !import_node_path9.default.basename(actual).startsWith(prefix) || (await import_promises12.default.lstat(directory)).isSymbolicLink()) throw new Error("Temporary directory identity changed; retained for inspection.");
+  if (!isWithin(base, actual) || actual === base || !import_node_path10.default.basename(actual).startsWith(prefix) || (await import_promises12.default.lstat(directory)).isSymbolicLink()) throw new Error("Temporary directory identity changed; retained for inspection.");
   await import_promises12.default.rm(actual, { recursive: true, force: true });
 }
 var OvfManager = class {
@@ -54814,8 +54861,8 @@ var OvfManager = class {
     let scratch;
     try {
       const executable = await this.executable();
-      scratch = await import_promises12.default.mkdtemp(import_node_path9.default.join(import_node_os3.default.tmpdir(), "vmware-ovf-status-"));
-      const config2 = import_node_path9.default.join(scratch, "empty.conf");
+      scratch = await import_promises12.default.mkdtemp(import_node_path10.default.join(import_node_os3.default.tmpdir(), "vmware-ovf-status-"));
+      const config2 = import_node_path10.default.join(scratch, "empty.conf");
       await import_promises12.default.writeFile(config2, "", { mode: 384 });
       const run = async (args) => {
         try {
@@ -54827,8 +54874,8 @@ var OvfManager = class {
       const version2 = (await run(["--version"])).trim();
       const help = await run(["--help"]);
       const debug = await run(["--help", "debug"]);
-      const flags = ["machineOutput", "schemaValidate", "sourceType", "targetType", "hideEula", "name", "net", "prop", "deploymentOption", "acceptAllEulas", "configFile"];
-      const supported = Object.fromEntries(flags.map((flag2) => [flag2, new RegExp(`--${flag2}\\b`).test(help)]));
+      const flags2 = ["machineOutput", "schemaValidate", "sourceType", "targetType", "hideEula", "name", "net", "prop", "deploymentOption", "acceptAllEulas", "configFile"];
+      const supported = Object.fromEntries(flags2.map((flag2) => [flag2, new RegExp(`--${flag2}\\b`).test(help)]));
       supported.noPrompting = debug.includes("--X:noPrompting");
       return { available: true, executable, configured_path: this.backend.env.VMWARE_OVFTOOL_PATH || null, version: version2, supported_flags: supported, local_conversions: ["OVF/OVA \u2192 VMX", "VMX \u2192 OVF/OVA", "OVF/OVA \u2192 OVF/OVA"], limitations: limits };
     } catch (error62) {
@@ -54845,26 +54892,26 @@ var OvfManager = class {
     return status;
   }
   async sourcePath(input2) {
-    return import_node_path9.default.extname(input2).toLowerCase() === ".vmx" ? this.backend.vmx(input2) : this.backend.hostPath(input2, "input-file");
+    return import_node_path10.default.extname(input2).toLowerCase() === ".vmx" ? this.backend.vmx(input2) : this.backend.hostPath(input2, "input-file");
   }
   async start(operation, input2) {
     const a = ovfSchemas[operation].parse(input2);
     const inputPath = await this.sourcePath(a.source || a.vmx);
-    const ext = import_node_path9.default.extname(inputPath).slice(1).toLowerCase();
+    const ext = import_node_path10.default.extname(inputPath).slice(1).toLowerCase();
     if (!["ovf", "ova", "vmx"].includes(ext) || ["ovf_inspect", "ovf_validate", "ovf_import"].includes(operation) && ext === "vmx") throw new Error("This operation requires a local OVF/OVA appliance.");
     let destination;
     let directory;
     let target;
     if (operation === "ovf_import") {
       directory = await this.backend.hostPath(a.directory, "destination-directory");
-      destination = import_node_path9.default.join(directory, "machine.vmx");
+      destination = import_node_path10.default.join(directory, "machine.vmx");
       target = "vmx";
     } else if (a.destination) {
-      target = import_node_path9.default.extname(a.destination).slice(1).toLowerCase();
+      target = import_node_path10.default.extname(a.destination).slice(1).toLowerCase();
       if (!["ovf", "ova", "vmx"].includes(target) || ext === "vmx" && target === "vmx" || operation === "ovf_export" && target === "vmx") throw new Error("Supported targets are OVF/OVA, or VMX imported from OVF/OVA.");
       destination = await this.backend.hostPath(a.destination, "output-file", a.overwrite);
-      localName(import_node_path9.default.basename(destination));
-      directory = import_node_path9.default.dirname(destination);
+      localName(import_node_path10.default.basename(destination));
+      directory = import_node_path10.default.dirname(destination);
       if (target === "vmx") await this.backend.hostPath(directory, "destination-directory");
     }
     if (destination) {
@@ -54876,43 +54923,43 @@ var OvfManager = class {
       } else {
         if (a.overwrite) throw new Error("Overwrite is supported only for a single OVA file. OVF/VMX companion files require a new output directory.");
         if (await exists(directory)) throw new Error("OVF/VMX output directory must be NEW to protect companion files.");
-        await this.backend.hostPath(import_node_path9.default.dirname(directory), "directory");
+        await this.backend.hostPath(import_node_path10.default.dirname(directory), "directory");
       }
     }
     const status = await this.available(operation === "ovf_validate" ? ["schemaValidate", "hideEula"] : ["hideEula"]);
     return this.jobs.start({
       operation,
-      resources: [key(import_node_path9.default.dirname(inputPath)), ...directory ? [key(directory)] : []],
+      resources: [key(import_node_path10.default.dirname(inputPath)), ...directory ? [key(directory)] : []],
       timeout: a.timeout_seconds * 1e3,
-      task: (context) => this.perform(operation, { ...a, source: inputPath, destination, directory, target, ext }, status, context)
+      task: (context) => this.backend.resources.use([ext === "vmx" ? import_node_path10.default.dirname(inputPath) : inputPath, ...directory ? [directory] : []], () => this.perform(operation, { ...a, source: inputPath, destination, directory, target, ext }, status, context))
     });
   }
   async vmSource(vmx3) {
     vmx3 = await this.backend.vmx(vmx3);
-    const config2 = Object.fromEntries(Object.entries(parseAssignments(await import_promises12.default.readFile(vmx3, "utf8"))).map(([key2, value]) => [key2.toLowerCase(), value]));
+    const config2 = Object.fromEntries(Object.entries(parseAssignments(await import_promises12.default.readFile(vmx3, "utf8"))).map(([key3, value]) => [key3.toLowerCase(), value]));
     if (config2[".encoding"] && !/^utf-?8$/i.test(config2[".encoding"])) throw new Error("VMX export preflight supports UTF-8 configurations only. Convert the encoding explicitly before exporting.");
     if ((await this.backend.details(vmx3)).running) throw new Error("Power off the VM before exporting.");
-    const entries = await import_promises12.default.readdir(import_node_path9.default.dirname(vmx3));
+    const entries = await import_promises12.default.readdir(import_node_path10.default.dirname(vmx3));
     if (entries.some((name2) => /\.(lck|vmss|vmem|vmsn)$/i.test(name2)) || config2["checkpoint.vmstate"] || config2["suspend.filename"]) throw new Error("Locked/suspended VM sources are unsupported. Fully power off and close the VM.");
     if (Object.entries(config2).some(([name2, value]) => /^encryption\./.test(name2) && value || /^vtpm\./.test(name2) && value.toLowerCase() !== "false")) throw new Error("Encrypted VM/vTPM exports are unsupported.");
     if ((await this.backend.snapshots(vmx3)).snapshots.length) throw new Error("Snapshot sources are unsupported. Export a separately prepared VM without snapshots.");
     let size = (await import_promises12.default.stat(vmx3)).size;
     const inspectFile = async (input2) => {
-      const file2 = await this.backend.hostPath(input2, "input-file");
-      if (!isWithin(import_node_path9.default.dirname(vmx3), file2)) throw new Error("VM export backings must remain inside the VM directory. External disks/media are unsupported.");
-      size += (await import_promises12.default.stat(file2)).size;
-      return file2;
+      const file3 = await this.backend.hostPath(input2, "input-file");
+      if (!isWithin(import_node_path10.default.dirname(vmx3), file3)) throw new Error("VM export backings must remain inside the VM directory. External disks/media are unsupported.");
+      size += (await import_promises12.default.stat(file3)).size;
+      return file3;
     };
     for (const name2 of ["workingdir", "snapshot.directory"]) if (config2[name2]) {
-      const directory = await this.backend.hostPath(import_node_path9.default.resolve(import_node_path9.default.dirname(vmx3), config2[name2]), "directory");
-      if (!isWithin(import_node_path9.default.dirname(vmx3), directory)) throw new Error("External VM working/snapshot directories are unsupported.");
+      const directory = await this.backend.hostPath(import_node_path10.default.resolve(import_node_path10.default.dirname(vmx3), config2[name2]), "directory");
+      if (!isWithin(import_node_path10.default.dirname(vmx3), directory)) throw new Error("External VM working/snapshot directories are unsupported.");
     }
     if (Object.keys(config2).some((name2) => /^(bios440|efi32|efi64)\.filename$/.test(name2))) throw new Error("Custom firmware file backings are unsupported.");
     for (const [name2, value] of Object.entries(config2)) if ((/\.filename$/.test(name2) || ["nvram", "extendedconfigfile"].includes(name2)) && value && config2[name2.replace(/filename$/, "present")]?.toLowerCase() !== "false") {
       if (value.toLowerCase() === "auto detect") continue;
-      const file2 = await inspectFile(import_node_path9.default.resolve(import_node_path9.default.dirname(vmx3), value));
-      if (import_node_path9.default.extname(file2).toLowerCase() === ".vmdk") {
-        const handle = await import_promises12.default.open(file2, "r");
+      const file3 = await inspectFile(import_node_path10.default.resolve(import_node_path10.default.dirname(vmx3), value));
+      if (import_node_path10.default.extname(file3).toLowerCase() === ".vmdk") {
+        const handle = await import_promises12.default.open(file3, "r");
         let header;
         try {
           const buffer3 = Buffer.alloc(1024 * 1024);
@@ -54923,7 +54970,7 @@ var OvfManager = class {
         }
         const diskType = header.match(/createType\s*=\s*"([^"]+)"/i)?.[1];
         if (/parentFileNameHint\s*=|parentCID\s*=\s*(?!ffffffff)[a-f0-9]{8}/i.test(header) || !/^(monolithicSparse|monolithicFlat|twoGbMaxExtentSparse|twoGbMaxExtentFlat|streamOptimized)$/i.test(diskType || "")) throw new Error("Snapshot/linked/raw or unrecognized VMDK backings are unsupported.");
-        for (const extent of header.matchAll(/(?:^|\n)(?:RW|RDONLY|NOACCESS)\s+\d+\s+\w+\s+"([^"]+)"/g)) await inspectFile(import_node_path9.default.resolve(import_node_path9.default.dirname(file2), extent[1]));
+        for (const extent of header.matchAll(/(?:^|\n)(?:RW|RDONLY|NOACCESS)\s+\d+\s+\w+\s+"([^"]+)"/g)) await inspectFile(import_node_path10.default.resolve(import_node_path10.default.dirname(file3), extent[1]));
       }
     }
     return { source: vmx3, size, manifest: "not applicable" };
@@ -54933,8 +54980,8 @@ var OvfManager = class {
     if (Object.keys(values).some((name2) => /password|secret|token/i.test(name2))) throw new Error("Sensitive deployment properties must use a local property_profile, not property_mappings in tool arguments.");
     if (a.property_profile) {
       const profile = this.credentials.profile(a.property_profile);
-      const file2 = await this.credentials.load();
-      const stored = file2.ovf_properties?.[profile];
+      const file3 = await this.credentials.load();
+      const stored = file3.ovf_properties?.[profile];
       if (!stored || typeof stored !== "object" || Array.isArray(stored)) throw new Error("OVF property profile is not configured in the local credentials file.");
       const parsed = mappings.parse(stored);
       for (const value of Object.values(parsed)) this.credentials.remember(value);
@@ -54946,8 +54993,8 @@ var OvfManager = class {
     const { signal } = context;
     const sourceInfo = a.ext === "vmx" ? await this.vmSource(a.source) : await inspectArtifact(this.backend, a.source, { signal });
     const properties = await this.propertyValues(a);
-    const scratch = await import_promises12.default.mkdtemp(import_node_path9.default.join(import_node_os3.default.tmpdir(), "vmware-ovf-"));
-    const config2 = import_node_path9.default.join(scratch, "empty.conf");
+    const scratch = await import_promises12.default.mkdtemp(import_node_path10.default.join(import_node_os3.default.tmpdir(), "vmware-ovf-"));
+    const config2 = import_node_path10.default.join(scratch, "empty.conf");
     await import_promises12.default.writeFile(config2, "", { mode: 384 });
     const env = { ...this.backend.env, HOME: scratch, USERPROFILE: scratch };
     let staging;
@@ -54966,19 +55013,19 @@ var OvfManager = class {
       if (Object.keys(a.network_mappings || {}).length && !status.supported_flags.net) throw new Error("Installed OVF Tool does not support network mappings.");
       if (Object.keys(properties).length && !status.supported_flags.prop) throw new Error("Installed OVF Tool does not support property mappings.");
       if (a.accept_eulas && !status.supported_flags.acceptAllEulas) throw new Error("Installed OVF Tool does not support explicit EULA acceptance.");
-      const parent = a.target === "ova" ? a.directory : import_node_path9.default.dirname(a.directory);
+      const parent = a.target === "ova" ? a.directory : import_node_path10.default.dirname(a.directory);
       const flat = Number(metadata.sizes?.flat);
       if (!Number.isSafeInteger(flat) || flat < 0) throw new Error("Cannot determine the flat disk size for a conservative destination free-space check.");
       const copies = a.target === "ova" && !a.overwrite ? 2 : 1;
       const estimate = (Math.max(sourceInfo.size, flat) * 1.1 + 64 * 1024 * 1024) * copies;
-      const capacity = await this.space(parent);
-      const available = Number(capacity.bavail) * Number(capacity.bsize);
+      const capacity2 = await this.space(parent);
+      const available = Number(capacity2.bavail) * Number(capacity2.bsize);
       if (!Number.isFinite(available) || !Number.isSafeInteger(Math.ceil(estimate)) || available < estimate) throw new Error("Insufficient or unknown destination free space for conservative OVF transfer estimate.");
       signal.throwIfAborted();
       let output2;
       if (a.target === "ova") {
-        staging = await import_promises12.default.mkdtemp(import_node_path9.default.join(a.directory, ".ovf-job-"));
-        output2 = import_node_path9.default.join(staging, import_node_path9.default.basename(a.destination));
+        staging = await import_promises12.default.mkdtemp(import_node_path10.default.join(a.directory, ".ovf-job-"));
+        output2 = import_node_path10.default.join(staging, import_node_path10.default.basename(a.destination));
       } else {
         await import_promises12.default.mkdir(a.directory);
         output2 = a.destination;
@@ -54998,7 +55045,7 @@ var OvfManager = class {
       if (a.target === "vmx") {
         const targetID = final.find((record2) => record2.type === "TARGET_ID")?.payload;
         if (!targetID) throw new Error("OVF Tool did not identify its imported VMX. Inspect the output directory.");
-        resultPath = await this.backend.vmx(import_node_path9.default.resolve(scratch, targetID));
+        resultPath = await this.backend.vmx(import_node_path10.default.resolve(scratch, targetID));
         if (!isWithin(a.directory, resultPath)) throw new Error("Imported VMX is outside its reserved destination.");
       } else {
         if (!(await import_promises12.default.stat(output2)).isFile()) throw new Error("OVF Tool reported success but the output file is missing.");
@@ -55021,7 +55068,7 @@ Transfer succeeded at ${resultPath}
         if (a.register) {
           if (!this.rest) throw new Error("Registration requires configured Workstation REST.");
           signal.throwIfAborted();
-          await this.rest.request("POST", "/api/vms/registration", { body: { name: a.name || import_node_path9.default.basename(resultPath, ".vmx"), path: resultPath } });
+          await this.rest.request("POST", "/api/vms/registration", { body: { name: a.name || import_node_path10.default.basename(resultPath, ".vmx"), path: resultPath } });
           registered = true;
         }
         if (a.power_on) {
@@ -55050,7 +55097,7 @@ Uncommitted output retained at ${staging}
 // src/jobs.mjs
 var import_node_child_process2 = require("node:child_process");
 var import_node_crypto7 = require("node:crypto");
-var import_node_path10 = __toESM(require("node:path"), 1);
+var import_node_path11 = __toESM(require("node:path"), 1);
 var jobID = external_exports.string().min(1).max(100);
 var jobSchemas = {
   job_status: external_exports.object({ job_id: jobID }).strict(),
@@ -55069,11 +55116,11 @@ var JobManager = class {
     this.maxRecords = maxRecords;
     this.closed = false;
   }
-  start({ operation, resources = [], timeout: timeout2 = 36e5, task }) {
+  start({ operation, resources = [], timeout: timeout3 = 36e5, task }) {
     if (this.closed) throw new Error("Job manager is shutting down.");
     const active = [...this.jobs.values()].filter((job2) => !terminal.has(job2.state));
     if (active.length >= this.maxActive) throw new Error("Background job limit reached. Wait for a job to finish.");
-    const prefix = (value) => value.endsWith(import_node_path10.default.sep) ? value : value + import_node_path10.default.sep;
+    const prefix = (value) => value.endsWith(import_node_path11.default.sep) ? value : value + import_node_path11.default.sep;
     const overlaps = (a, b) => a === b || a.startsWith(prefix(b)) || b.startsWith(prefix(a));
     if (active.some((job2) => job2.resources.some((value) => resources.some((resource) => overlaps(value, resource))))) throw new Error("A background job already uses this source or destination. Wait for it to finish.");
     while (this.jobs.size >= this.maxRecords) {
@@ -55086,9 +55133,9 @@ var JobManager = class {
     job.timer = setTimeout(() => {
       job.stopReason = "timed_out";
       job.controller.abort();
-    }, timeout2);
+    }, timeout3);
     job.done = Promise.resolve().then(async () => {
-      const context = { signal: job.controller.signal, log: (text2) => this.log(job, text2), run: (file2, args, options2) => this.run(job, file2, args, options2) };
+      const context = { signal: job.controller.signal, log: (text2) => this.log(job, text2), run: (file3, args, options2) => this.run(job, file3, args, options2) };
       try {
         context.signal.throwIfAborted();
         const result = await task(context);
@@ -55140,7 +55187,7 @@ var JobManager = class {
       job.truncated = true;
     }
   }
-  run(job, file2, args, { cwd, env, logOutput = true } = {}) {
+  run(job, file3, args, { cwd, env, logOutput = true } = {}) {
     job.controller.signal.throwIfAborted();
     return new Promise((resolve, reject) => {
       let output2 = "";
@@ -55149,7 +55196,7 @@ var JobManager = class {
       let killTimer;
       let child;
       try {
-        child = this.spawnProcess(file2, args, { cwd, env, windowsHide: true, shell: false, stdio: ["ignore", "pipe", "pipe"] });
+        child = this.spawnProcess(file3, args, { cwd, env, windowsHide: true, shell: false, stdio: ["ignore", "pipe", "pipe"] });
       } catch {
         reject(new Error("Cannot start OVF Tool. Check its installation and executable permissions."));
         return;
@@ -55217,16 +55264,340 @@ var JobManager = class {
   }
 };
 
+// src/disks.mjs
+var import_promises13 = __toESM(require("node:fs/promises"), 1);
+var import_node_path12 = __toESM(require("node:path"), 1);
+var file2 = external_exports.string().min(1).max(4096).refine((value) => !/[\x00-\x1f]/.test(value));
+var timeout2 = external_exports.number().int().min(1).max(3600).default(600);
+var capacity = external_exports.number().int().min(1).max(8388608).describe("Total virtual capacity in MiB, not an increment.");
+var vmPaths = external_exports.array(file2).max(256).default([]).describe("Additional unregistered VMX files that may reference this disk. Inventory is also checked.");
+var confirm = external_exports.literal(true).describe("Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk.");
+var source2 = { disk: file2, vmx_paths: vmPaths, confirm, timeout_seconds: timeout2 };
+var slot = { vmx: file2, controller: external_exports.enum(["scsi", "sata", "ide", "nvme"]), controller_index: external_exports.number().int().min(0).max(3), unit: external_exports.number().int().min(0).max(63), confirm };
+var diskSchemas = {
+  disk_manager_status: external_exports.object({}).strict(),
+  disk_inspect: external_exports.object({ disk: file2 }).strict(),
+  disk_create: external_exports.object({ destination: file2.describe("Absolute .vmdk in a NEW parent directory; grandparent must exist."), capacity_mb: capacity, disk_type: external_exports.enum(["0", "1", "2", "3"]).default("0"), adapter: external_exports.enum(["ide", "buslogic", "lsilogic"]).default("lsilogic"), timeout_seconds: timeout2 }).strict(),
+  disk_expand: external_exports.object({ ...source2, capacity_mb: capacity }).strict(),
+  disk_convert: external_exports.object({ ...source2, destination: file2.describe("Absolute .vmdk in a NEW parent directory; source is preserved."), disk_type: external_exports.enum(["0", "1", "2", "3", "5"]).default("0") }).strict(),
+  disk_compact: external_exports.object(source2).strict(),
+  disk_defragment: external_exports.object(source2).strict(),
+  disk_attach: external_exports.object({ ...slot, disk: file2, vmx_paths: vmPaths }).strict(),
+  disk_detach: external_exports.object({ ...slot, disk: file2.describe("Expected backing disk; refuses a different disk at the selected slot."), vmx_paths: vmPaths }).strict()
+};
+var flags = { create: "-c", expand: "-x", convert: "-r", compact: "-k", defragment: "-d" };
+var types = /* @__PURE__ */ new Set(["monolithicSparse", "monolithicFlat", "twoGbMaxExtentSparse", "twoGbMaxExtentFlat", "streamOptimized"]);
+var sparse = /* @__PURE__ */ new Set(["monolithicSparse", "twoGbMaxExtentSparse"]);
+var key2 = (file3) => process.platform === "win32" ? file3.toLowerCase() : file3;
+var exists2 = async (file3) => {
+  try {
+    return await import_promises13.default.lstat(file3);
+  } catch (e2) {
+    if (e2.code === "ENOENT") return null;
+    throw e2;
+  }
+};
+function fail(code, message, details = {}) {
+  throw Object.assign(new Error(message), { code, details });
+}
+function vmConfig(text2) {
+  const seen = /* @__PURE__ */ new Set();
+  for (const line of text2.split(/\r?\n/)) {
+    if (/^\s*(?:#.*)?$/.test(line)) continue;
+    const match = line.match(/^\s*([\w.:-]+)\s*=\s*".*"\s*$/);
+    if (!match || seen.has(match[1].toLowerCase())) fail("UNSAFE_VM", "Malformed or duplicate VMX settings prevent safe disk editing.");
+    seen.add(match[1].toLowerCase());
+  }
+  const config2 = Object.fromEntries(Object.entries(parseAssignments(text2)).map(([k, v]) => [k.toLowerCase(), v]));
+  if (config2[".encoding"] && !/^utf-?8$/i.test(config2[".encoding"])) fail("UNSAFE_VM", "Disk edits require UTF-8 VMX files.");
+  return config2;
+}
+async function readDiskDescriptor(file3) {
+  const handle = await import_promises13.default.open(file3, "r");
+  try {
+    const stat = await handle.stat();
+    const header = Buffer.alloc(512);
+    const { bytesRead } = await handle.read(header, 0, header.length, 0);
+    let offset = 0;
+    let size = Math.min(stat.size, 1024 * 1024);
+    if (bytesRead >= 44 && header.toString("ascii", 0, 4) === "KDMV") {
+      const sectors = header.readBigUInt64LE(28);
+      const count = header.readBigUInt64LE(36);
+      if (!sectors || !count) fail("UNSUPPORTED_DISK", "VMDK extent has no embedded descriptor. Select its descriptor VMDK.");
+      if (sectors > BigInt(Math.floor(Number.MAX_SAFE_INTEGER / 512)) || count > 2048n) fail("UNSUPPORTED_DISK", "VMDK descriptor bounds are unsupported.");
+      offset = Number(sectors) * 512;
+      size = Number(count) * 512;
+    } else if (!header.subarray(0, bytesRead).toString("utf8").replace(/^\uFEFF/, "").startsWith("# Disk DescriptorFile")) {
+      fail("UNSUPPORTED_DISK", "Unrecognized VMDK descriptor. Raw devices, encrypted disks and extent-only inputs are unsupported.");
+    } else if (stat.size > 1024 * 1024) fail("UNSUPPORTED_DISK", "VMDK text descriptor exceeds 1 MiB.");
+    if (offset + size > stat.size) fail("UNSUPPORTED_DISK", "VMDK descriptor extends beyond its file.");
+    const buffer3 = Buffer.alloc(size);
+    const read = await handle.read(buffer3, 0, size, offset);
+    if (read.bytesRead !== size) fail("UNSUPPORTED_DISK", "Incomplete VMDK descriptor.");
+    const text2 = buffer3.toString("utf8").replace(/\0+$/, "");
+    const field = (name2, quoted = false) => {
+      const matches = [...text2.matchAll(new RegExp(`^\\s*${name2}\\s*=\\s*${quoted ? '"([^"\\r\\n]+)"' : "([a-fA-F0-9]+)"}\\s*$`, "gm"))];
+      if (matches.length !== 1) fail("UNSUPPORTED_DISK", `VMDK must declare exactly one ${name2}.`);
+      return matches[0][1];
+    };
+    const createType = field("createType", true);
+    const cid = field("CID");
+    const parentCID = field("parentCID");
+    const adapter2 = text2.match(/^\s*ddb\.adapterType\s*=\s*"([^"]+)"\s*$/m)?.[1] || null;
+    if (!/^[a-f0-9]{8}$/i.test(cid) || !/^[a-f0-9]{8}$/i.test(parentCID) || !types.has(createType) || /encrypt|crypto|keySafe/i.test(text2)) fail("UNSUPPORTED_DISK", "Raw, encrypted or unsupported VMDK format.");
+    const extents = [];
+    for (const line of text2.split(/\r?\n/)) {
+      if (!/^\s*(RW|RDONLY|NOACCESS)\b/.test(line)) continue;
+      const match = line.match(/^\s*RW\s+(\d+)\s+(SPARSE|FLAT)\s+"([^"\r\n]+)"(?:\s+(\d+))?\s*$/);
+      if (!match || !Number.isSafeInteger(Number(match[1])) || Number(match[1]) <= 0) fail("UNSUPPORTED_DISK", "Unsupported VMDK extent declaration.");
+      const name2 = match[3];
+      if (import_node_path12.default.basename(name2) !== name2 || /[\\/:\x00-\x1f]/.test(name2) || [".", ".."].includes(name2)) fail("UNSAFE_PATH", "VMDK extents must use flat local filenames.");
+      extents.push({ sectors: Number(match[1]), type: match[2], name: name2, offset_sectors: Number(match[4] || 0) });
+    }
+    const capacityBytes = extents.reduce((sum, e2) => sum + e2.sectors * 512, 0);
+    if (!extents.length || !Number.isSafeInteger(capacityBytes) || capacityBytes <= 0) fail("UNSUPPORTED_DISK", "VMDK capacity cannot be established safely.");
+    return { create_type: createType, adapter: adapter2, cid, parent_cid: parentCID.toLowerCase(), has_parent_hint: /^\s*parentFileNameHint\s*=/mi.test(text2), capacity_bytes: capacityBytes, extents };
+  } finally {
+    await handle.close();
+  }
+}
+var DiskManager = class {
+  constructor({ backend: backend2, vmFiles: vmFiles2, space = import_promises13.default.statfs } = {}) {
+    this.backend = backend2;
+    this.vmFiles = vmFiles2;
+    this.space = space;
+  }
+  async status() {
+    try {
+      const beside = await this.backend.executable().catch(() => void 0);
+      const executable = await findVMwareExecutable("vmware-vdiskmanager", { env: this.backend.env, beside });
+      let output2;
+      const options2 = { shell: false, windowsHide: true, timeout: 15e3, maxBuffer: 1024 * 1024, encoding: "utf8" };
+      try {
+        const r = await this.backend.execute(executable, [], options2);
+        output2 = [r.stdout, r.stderr].filter(Boolean).join("\n");
+      } catch (e2) {
+        output2 = [e2.stdout, e2.stderr].filter(Boolean).join("\n");
+        if (e2.killed) output2 = "";
+      }
+      if (!/Virtual Disk Manager/i.test(output2 || "") || !/Usage:/i.test(output2)) fail("CAPABILITY_UNAVAILABLE", "Cannot read installed disk-manager help. Check installation and permissions.");
+      const supported_flags = [...output2.matchAll(/^\s+(-[A-Za-z])(?:\s|$)/gm)].map((m) => m[1]);
+      const diskTypes = [...output2.split(/Disk types:/i)[1]?.matchAll(/^\s+([0-6])\s+:\s*(.+)$/gm) || []].map((m) => ({ id: m[1], description: m[2].trim() }));
+      return { available: true, executable, version: output2.split(/\r?\n/)[0], supported_flags, disk_types: diskTypes, operations: Object.fromEntries(Object.entries(flags).map(([op, flag2]) => [op, supported_flags.includes(flag2)])) };
+    } catch (e2) {
+      return { available: false, code: "CAPABILITY_UNAVAILABLE", message: e2.message, action: "Install native VMware Workstation or set VMWARE_VDISKMANAGER_PATH to its absolute executable path." };
+    }
+  }
+  async available(operation, diskType) {
+    const status = await this.status();
+    if (!status.available) fail(status.code, status.message, { action: status.action });
+    const required2 = [flags[operation], ...["create", "convert"].includes(operation) ? ["-t"] : [], ...operation === "create" ? ["-a", "-s"] : []];
+    if (required2.some((flag2) => !status.supported_flags.includes(flag2)) || diskType && !status.disk_types.some((t) => t.id === diskType)) fail("UNSUPPORTED_CAPABILITY", "Installed disk manager does not advertise the required operation or disk type.", { operation, required_flags: required2, disk_type: diskType, action: "Inspect disk_manager_status and choose an advertised local disk type or install a supported Workstation build." });
+    return status;
+  }
+  async diskPath(input2) {
+    if (import_node_path12.default.extname(input2).toLowerCase() !== ".vmdk" || /:[^\\/]/.test(input2.slice(2))) fail("UNSAFE_PATH", "Select an absolute .vmdk file, without alternate streams.");
+    return this.backend.hostPath(input2, "input-file");
+  }
+  async inspect(input2) {
+    const a = diskSchemas.disk_inspect.parse(input2);
+    const disk = await this.diskPath(a.disk);
+    const descriptor = await readDiskDescriptor(disk);
+    const files = /* @__PURE__ */ new Map();
+    for (const extent of descriptor.extents) {
+      const backing = await this.backend.hostPath(import_node_path12.default.join(import_node_path12.default.dirname(disk), extent.name), "input-file");
+      if (!isWithin(import_node_path12.default.dirname(disk), backing)) fail("UNSAFE_PATH", "VMDK extent escapes the descriptor directory.");
+      const stat2 = await import_promises13.default.stat(backing);
+      if (extent.type === "FLAT" && stat2.size < (extent.offset_sectors + extent.sectors) * 512) fail("UNSUPPORTED_DISK", "Flat extent is shorter than its declared capacity.");
+      files.set(key2(backing), { path: backing, size_bytes: stat2.size, modified_ms: stat2.mtimeMs, device: stat2.dev, inode: stat2.ino });
+    }
+    const stat = await import_promises13.default.stat(disk);
+    files.set(key2(disk), { path: disk, size_bytes: stat.size, modified_ms: stat.mtimeMs, device: stat.dev, inode: stat.ino });
+    return { disk, ...descriptor, files: [...files.values()], independent: descriptor.parent_cid === "ffffffff" && !descriptor.has_parent_hint, note: "Descriptor inspection does not verify guest filesystem integrity. Increasing VMDK capacity does not resize guest partitions or filesystems." };
+  }
+  async safeVM(input2) {
+    const vmx3 = await this.backend.vmx(input2);
+    if ((await this.backend.details(vmx3)).running) fail("UNSAFE_VM", "Power off the VM before disk edits.");
+    await this.vmState(vmx3);
+    if ((await this.backend.snapshots(vmx3)).snapshots.length) fail("UNSAFE_VM", "Snapshots prevent safe disk edits. Prepare a fully powered-off VM without snapshots.");
+    return this.vmState(vmx3);
+  }
+  async vmState(vmx3) {
+    const text2 = await import_promises13.default.readFile(vmx3, "utf8");
+    const config2 = vmConfig(text2);
+    if (Object.entries(config2).some(([k, v]) => /^encryption\./.test(k) && v || k === "vtpm.present" && /^true$/i.test(v))) fail("UNSAFE_VM", "Encrypted and vTPM VM configurations are unsupported for disk edits.");
+    const dirs = /* @__PURE__ */ new Set([import_node_path12.default.dirname(vmx3)]);
+    for (const k of ["workingdir", "snapshot.directory"]) if (config2[k]) dirs.add(await this.backend.hostPath(import_node_path12.default.resolve(import_node_path12.default.dirname(vmx3), config2[k]), "directory"));
+    for (const dir of dirs) if ((await import_promises13.default.readdir(dir)).some((name2) => /\.(lck|vmss|vmem|vmsn)$/i.test(name2))) fail("UNSAFE_VM", "Locked or suspended VM detected. Fully power off and close it before disk edits.");
+    if (config2["checkpoint.vmstate"] || config2["suspend.filename"]) fail("UNSAFE_VM", "Snapshots or saved state prevent safe disk edits. Prepare a fully powered-off VM without snapshots.");
+    for (const dir of dirs) for (const name2 of await import_promises13.default.readdir(dir)) if (/\.vmsd$/i.test(name2)) {
+      const metadata = vmConfig(await import_promises13.default.readFile(import_node_path12.default.join(dir, name2), "utf8"));
+      if (Number(metadata["snapshot.numsnapshots"] || 0) !== 0 || Object.keys(metadata).some((k) => /^snapshot\d+\./.test(k))) fail("UNSAFE_VM", "Snapshot metadata prevents safe disk edits.");
+    }
+    return { vmx: vmx3, text: text2, config: config2 };
+  }
+  async references(info, extra) {
+    const inventory = await this.backend.listVMs();
+    if (inventory.warnings.length) fail("INVENTORY_UNAVAILABLE", "Cannot verify disk references because inventory is unavailable.", { action: "Restore a readable VMware inventory; include relevant unregistered VMs in vmx_paths." });
+    const raw = await import_promises13.default.readFile(this.backend.inventoryPath, "utf8");
+    const candidates = [...inventory.vms.map((v) => v.vmx), ...extra];
+    const inventoryKeys = /* @__PURE__ */ new Set();
+    for (const line of raw.split(/\r?\n/)) if (/^\s*vmlist\d+\.config\b/i.test(line)) {
+      const match = line.match(/^\s*(vmlist\d+\.config)\s*=\s*".*"\s*$/i);
+      if (!match || inventoryKeys.has(match[1].toLowerCase())) fail("INVENTORY_UNAVAILABLE", "Malformed/duplicate VMware inventory prevents disk-reference checks.");
+      inventoryKeys.add(match[1].toLowerCase());
+      const value = parseAssignments(line)[match[1]];
+      if (!value) continue;
+      if (!import_node_path12.default.isAbsolute(value) || import_node_path12.default.extname(value).toLowerCase() !== ".vmx") fail("INVENTORY_UNAVAILABLE", "Inventory VMX paths must be absolute.");
+      candidates.push(value);
+    }
+    for (const name2 of await import_promises13.default.readdir(import_node_path12.default.dirname(info.disk))) if (/\.vmx$/i.test(name2)) candidates.push(import_node_path12.default.join(import_node_path12.default.dirname(info.disk), name2));
+    const references2 = [];
+    const seen = /* @__PURE__ */ new Set();
+    const paths = new Set(info.files.map((f) => key2(f.path)));
+    for (const input2 of candidates) {
+      if (!await exists2(input2) && !extra.includes(input2)) continue;
+      const vmx3 = await this.backend.vmx(input2);
+      if (seen.has(key2(vmx3))) continue;
+      seen.add(key2(vmx3));
+      const text2 = await import_promises13.default.readFile(vmx3, "utf8");
+      const config2 = vmConfig(text2);
+      for (const [name2, value] of Object.entries(config2)) if (/^(scsi|sata|ide|nvme)\d+:\d+\.filename$/.test(name2) && /\.vmdk$/i.test(value)) {
+        const backing = await this.diskPath(import_node_path12.default.resolve(import_node_path12.default.dirname(vmx3), value));
+        if (paths.has(key2(backing))) references2.push({ vmx: vmx3, slot: name2.replace(/\.filename$/, ""), text: text2 });
+        else {
+          const other = await this.inspect({ disk: backing });
+          if (other.files.some((f) => paths.has(key2(f.path)))) fail("UNSAFE_CHAIN", "Another VM references a shared disk extent.");
+          if (!other.independent) fail("UNSAFE_CHAIN", "Cannot establish independence from an inventoried dependent VMDK; transitive backing chains are unsupported.", { action: "Prepare independent inventoried disks using an offline chain-aware workflow before retrying. Do not edit an ancestor while dependent disks exist." });
+        }
+      }
+    }
+    return references2;
+  }
+  async preflight(info, extra) {
+    if (!info.independent || info.create_type === "streamOptimized") fail("UNSAFE_CHAIN", "Snapshots, linked/backing chains and stream-optimized source disks are refused. Prepare an independent Workstation disk.");
+    if ((await import_promises13.default.readdir(import_node_path12.default.dirname(info.disk))).some((name2) => /\.(lck|vmss|vmem|vmsn)$/i.test(name2))) fail("UNSAFE_DISK", "Disk directory contains locks or saved/snapshot state.");
+    for (const f of info.files) if ((await import_promises13.default.stat(f.path)).nlink > 1) fail("UNSAFE_DISK", "Hard-linked disk files are unsafe to modify.");
+    for (const name2 of await import_promises13.default.readdir(import_node_path12.default.dirname(info.disk))) {
+      if (!/\.vmdk$/i.test(name2) || info.files.some((f) => key2(f.path) === key2(import_node_path12.default.join(import_node_path12.default.dirname(info.disk), name2)))) continue;
+      let descriptor;
+      try {
+        descriptor = await readDiskDescriptor(await this.diskPath(import_node_path12.default.join(import_node_path12.default.dirname(info.disk), name2)));
+      } catch (e2) {
+        if (e2.code === "UNSUPPORTED_DISK" && /extent has no embedded|Unrecognized VMDK/.test(e2.message) && /-(?:flat|[sf]\d+)\.vmdk$/i.test(name2)) continue;
+        throw e2;
+      }
+      if (descriptor.parent_cid === info.cid.toLowerCase() || descriptor.has_parent_hint) fail("UNSAFE_CHAIN", "A dependent/snapshot disk descriptor is present beside this disk.");
+      for (const extent of descriptor.extents) {
+        const backing = await this.backend.hostPath(import_node_path12.default.join(import_node_path12.default.dirname(info.disk), extent.name), "input-file");
+        if (info.files.some((f) => key2(f.path) === key2(backing))) fail("SHARED_DISK", "Another local descriptor references this disk or its extents.");
+      }
+    }
+    const references2 = await this.references(info, extra);
+    if (references2.length > 1) fail("SHARED_DISK", "Disk is referenced by multiple VM devices. Detach other references before editing.");
+    for (const reference of references2) await this.safeVM(reference.vmx);
+    return references2;
+  }
+  async freeSpace(directory, bytes) {
+    const space = await this.space(directory);
+    const free = Number(space.bavail) * Number(space.bsize);
+    const required2 = Math.ceil(bytes * 1.1 + 64 * 1024 * 1024);
+    if (!Number.isSafeInteger(required2) || !Number.isFinite(free) || free < required2) fail("INSUFFICIENT_SPACE", "Insufficient or unknown free space for a conservative disk operation estimate.", { required_bytes: required2, available_bytes: free });
+  }
+  async output(input2) {
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9_.-]*\.vmdk$/i.test(import_node_path12.default.basename(input2))) fail("UNSAFE_PATH", "Destination needs a simple .vmdk filename.");
+    const disk = await this.backend.hostPath(input2, "output-file");
+    const directory = import_node_path12.default.dirname(disk);
+    await this.backend.hostPath(directory, "host-destination-directory");
+    await this.backend.hostPath(import_node_path12.default.dirname(directory), "directory");
+    if (await exists2(directory)) fail("TARGET_EXISTS", "Disk output requires a NEW parent directory to protect all companion extents.");
+    return { disk, directory };
+  }
+  async run(status, args, seconds, partial2) {
+    try {
+      await this.backend.execute(status.executable, args, { shell: false, windowsHide: true, timeout: seconds * 1e3, maxBuffer: 1024 * 1024, encoding: "utf8" });
+    } catch (e2) {
+      fail("DISK_OPERATION_FAILED", `Disk manager failed (${e2.killed ? "timeout" : e2.code || "execution error"}). Inspect state before retrying.`, { partial_output: partial2, action: "No automatic rollback or deletion. Inspect retained files; remove only the new output directory after confirming its contents are disposable. In-place operations may have partially changed the original." });
+    }
+  }
+  async perform(operation, input2) {
+    const a = diskSchemas[`disk_${operation}`].parse(input2);
+    const status = await this.available(operation, a.disk_type);
+    const output2 = a.destination ? await this.output(a.destination) : null;
+    const original = a.disk ? await this.inspect({ disk: a.disk }) : null;
+    const refs = original ? await this.references(original, a.vmx_paths) : [];
+    const resources = [...original ? [import_node_path12.default.dirname(original.disk), ...original.files.map((f) => f.path)] : [], ...refs.map((r) => r.vmx), ...output2 ? [output2.directory] : []];
+    return this.backend.resources.use(resources, async () => {
+      if (original) await this.preflight(original, a.vmx_paths);
+      if (["compact", "defragment"].includes(operation) && !sparse.has(original.create_type)) fail("UNSUPPORTED_DISK", "Compaction and defragmentation require a growable Workstation disk.");
+      const bytes = a.capacity_mb ? a.capacity_mb * 1024 * 1024 : original.capacity_bytes;
+      if (operation === "expand" && bytes <= original.capacity_bytes) fail("INVALID_CAPACITY", "New capacity must exceed the existing virtual capacity. Shrinking is unsupported.");
+      if ((a.adapter === "buslogic" || original?.adapter === "buslogic") && a.capacity_mb > 2040 * 1024) fail("INVALID_CAPACITY", "BusLogic disks are limited to 2040 GiB.");
+      await this.freeSpace(output2 ? import_node_path12.default.dirname(output2.directory) : import_node_path12.default.dirname(original.disk), bytes);
+      if (original) {
+        const current = await this.inspect({ disk: original.disk });
+        if (JSON.stringify(current) !== JSON.stringify(original)) fail("DISK_CHANGED", "Disk changed during preflight; inspect and retry.");
+        const currentRefs = await this.preflight(current, a.vmx_paths);
+        if (JSON.stringify(currentRefs) !== JSON.stringify(refs)) fail("DISK_CHANGED", "VM references changed during preflight; inspect and retry.");
+      }
+      if (output2) await import_promises13.default.mkdir(output2.directory);
+      const disk = output2?.disk || original.disk;
+      const args = operation === "create" ? ["-c", "-s", `${a.capacity_mb}MB`, "-a", a.adapter, "-t", a.disk_type, disk] : operation === "convert" ? ["-r", original.disk, "-t", a.disk_type, disk] : operation === "expand" ? ["-x", `${a.capacity_mb}MB`, disk] : [flags[operation], disk];
+      await this.run(status, args, a.timeout_seconds, output2?.directory || disk);
+      let result;
+      try {
+        result = await this.inspect({ disk });
+      } catch {
+        fail("OUTPUT_UNVERIFIED", "Disk manager returned success but the result could not be inspected.", { partial_output: output2?.directory || disk, action: "Inspect retained files before retrying. Original conversion source was preserved." });
+      }
+      if ((operation === "create" || operation === "expand") && result.capacity_bytes !== bytes) fail("OUTPUT_UNVERIFIED", "Disk manager result capacity differs from the request.", { partial_output: output2?.directory || disk });
+      return { operation, ...result, source_preserved: operation === "convert" ? true : void 0, cleanup: output2 ? "Output and any partial files are retained. No existing files were overwritten." : "In-place change; no automatic rollback.", checked_vms: refs.map((r) => r.vmx), note: "Increasing VMDK capacity does not resize guest partitions or filesystems. Reservations cover this server only; keep VMware GUIs and other disk writers closed." };
+    });
+  }
+  async edit(input2, detach) {
+    const a = diskSchemas[detach ? "disk_detach" : "disk_attach"].parse(input2);
+    const max = { scsi: 15, sata: 29, ide: 1, nvme: 14 }[a.controller];
+    if (a.unit > max || a.controller === "scsi" && a.unit === 7 || a.controller === "ide" && a.controller_index > 1) fail("INVALID_SLOT", "Invalid controller/unit index; SCSI unit 7 is reserved.");
+    const vmx3 = await this.backend.vmx(a.vmx);
+    const info = await this.inspect({ disk: a.disk });
+    return this.backend.resources.use([vmx3, import_node_path12.default.dirname(info.disk)], async () => {
+      const vm2 = await this.safeVM(vmx3);
+      const prefix = `${a.controller}${a.controller_index}:${a.unit}`;
+      if (await import_promises13.default.stat(vmx3).then((s2) => s2.nlink > 1)) fail("UNSAFE_VM", "Hard-linked VMX files cannot be edited safely.");
+      const refs = await this.preflight(info, [...a.vmx_paths, vmx3]);
+      const existing = vm2.config[`${prefix}.filename`];
+      if (detach) {
+        if (!existing || key2(await this.diskPath(import_node_path12.default.resolve(import_node_path12.default.dirname(vmx3), existing))) !== key2(info.disk)) fail("SLOT_MISMATCH", "Selected slot does not reference the expected VMDK.");
+      } else {
+        if (Object.keys(vm2.config).some((k) => k.startsWith(prefix + "."))) fail("SLOT_OCCUPIED", "Slot already has settings. Choose an unused slot.");
+        if (refs.length) fail("SHARED_DISK", "Disk is already referenced by a VM device. Detach it first.");
+        if (a.controller !== "ide" && !/^true$/i.test(vm2.config[`${a.controller}${a.controller_index}.present`] || "")) fail("CONTROLLER_MISSING", "Controller is not present. Create/configure the controller explicitly before attaching.");
+        if (a.controller === "scsi" && !["lsilogic", "lsisas1068", "pvscsi", "buslogic"].includes(vm2.config[`scsi${a.controller_index}.virtualdev`])) fail("CONTROLLER_MISSING", "SCSI controller type is missing or unsupported.");
+        const adapter2 = a.controller === "ide" ? "ide" : a.controller === "scsi" && vm2.config[`scsi${a.controller_index}.virtualdev`] === "buslogic" ? "buslogic" : "lsilogic";
+        if (info.adapter !== adapter2) fail("ADAPTER_MISMATCH", "Disk adapter metadata does not match the selected controller. Prepare a disk with the matching adapter before attaching.", { expected_adapter: adapter2, actual_adapter: info.adapter });
+      }
+      const settings = detach ? Object.fromEntries(Object.keys(vm2.config).filter((k) => k.startsWith(prefix + ".")).map((k) => [k, null])) : { [`${prefix}.present`]: "TRUE", [`${prefix}.fileName`]: info.disk };
+      const updated = await this.vmFiles.configure({ vmx: vmx3, settings }, { expectedOriginal: vm2.text, beforeCommit: async () => {
+        await this.safeVM(vmx3);
+        await this.preflight(info, [...a.vmx_paths, vmx3]);
+        if (JSON.stringify(await this.inspect({ disk: info.disk })) !== JSON.stringify(info)) fail("DISK_CHANGED", "Disk changed before VMX commit.");
+      } });
+      return { ...updated, disk: info.disk, slot: prefix, attached: !detach, disk_deleted: false, note: "Backing VMDK and all extents are preserved. VMX backup is available at the returned path." };
+    });
+  }
+};
+
 // src/server.mjs
 var backend = new Workstation();
 var credentials = new Credentials();
-var rest = new RestClient({ credentials, backend });
+var rest = new RestClient({ credentials, backend, coordinateDiskEdits: true });
 var vmFiles = new VMFiles(backend, { protectSensitiveFile: localFileProtector(backend) });
 var lanSegments = new LanSegments(backend, vmFiles, { protectFile: localFileProtector(backend) });
 var consoles = new ConsoleManager({ backend, credentials, rest });
 var jobs = new JobManager({ redact: (text2) => credentials.redact(text2) });
 var ovf = new OvfManager({ backend, credentials, jobs, rest });
-var server = new McpServer({ name: "vmware-workstation", version: "0.5.0" });
+var disks = new DiskManager({ backend, vmFiles });
+var server = new McpServer({ name: "vmware-workstation", version: "0.6.0" });
 var vmx2 = external_exports.string().min(1).describe("Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.");
 var name = external_exports.string().min(1).max(256).describe("Exact snapshot name.");
 function tool(name2, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false) {
@@ -55240,7 +55611,7 @@ function tool(name2, description, schema, readOnly, callback, destructive = !rea
       if (Array.isArray(result?.content)) return { content: result.content.map((block) => block.type === "text" ? { ...block, text: credentials.redact(block.text) } : block) };
       return { content: [{ type: "text", text: credentials.redact(JSON.stringify(result, null, 2)) }] };
     } catch (error62) {
-      return { isError: true, content: [{ type: "text", text: credentials.redact(error62.message) }] };
+      return { isError: true, content: [{ type: "text", text: credentials.redact(error62.details || name2.startsWith("disk_") ? JSON.stringify({ code: error62.code || "DISK_PREFLIGHT_FAILED", message: error62.message, action: "Inspect the target and disk_manager_status before retrying.", ...error62.details }) : error62.message) }] };
     }
   });
 }
@@ -55252,6 +55623,15 @@ tool("console_scroll", "Send RFB wheel events to the VM at the last console poin
 tool("console_status", "Check this VM native loopback-only VNC configuration and authenticated RFB session. Does not start the VM or modify its VNC settings.", consoleSchemas.console_status, true, (a) => consoles.status(a.vm_id));
 tool("create_vm", "Create a new blank VMX and sparse virtual disk in a NEW directory using VMware Virtual Disk Manager. Configure CPUs, memory, firmware, networking and optional ISO. Does not install a guest OS or power on/register the VM.", createVMSchema, false, (a) => vmFiles.create(a), false);
 tool("configure_vm", "Edit a powered-off UTF-8 VMX with a backup. Set arbitrary VMX key/value strings or null to remove keys. Refuses running, locked, or detected suspended VMs. Use for CPU, memory, boot media, network and other VMX configuration.", configureVMSchema, false, (a) => vmFiles.configure(a));
+tool("disk_manager_status", "Discover native VMware Virtual Disk Manager and the exact flags/disk types advertised by its installed help. Missing capabilities return actionable status.", diskSchemas.disk_manager_status, true, () => disks.status());
+tool("disk_inspect", "Read a local VMDK descriptor, capacity, extents and backing-chain metadata. No disk-manager repair, guest mount or filesystem access.", diskSchemas.disk_inspect, true, (a) => disks.inspect(a));
+tool("disk_create", "Create a local VMDK in a NEW parent directory to protect companion extents. Supports installed growable/preallocated single/split disk types 0-3.", diskSchemas.disk_create, false, (a) => disks.perform("create", a), false);
+tool("disk_expand", "Expand an independent offline VMDK to total capacity_mb. Requires explicit confirmation; refuses snapshots, locks, shared/backing chains. Does not resize guest partitions or filesystems.", diskSchemas.disk_expand, false, (a) => disks.perform("expand", a));
+tool("disk_convert", "Convert an independent offline local VMDK into a NEW parent directory, preserving the original. Supports advertised types 0-3 and stream-optimized output type 5. Partial output is retained on failure.", diskSchemas.disk_convert, false, (a) => disks.perform("convert", a), false);
+tool("disk_compact", "Compact an independent offline growable VMDK using installed -k capability. Requires explicit confirmation. Guest free-space preparation is separate; no guest filesystem resize.", diskSchemas.disk_compact, false, (a) => disks.perform("compact", a));
+tool("disk_defragment", "Defragment an independent offline growable VMDK using installed -d capability. Requires explicit confirmation and conservative free-space checks.", diskSchemas.disk_defragment, false, (a) => disks.perform("defragment", a));
+tool("disk_attach", "Attach an independent VMDK to an existing controller and explicit unused unit in a powered-off VMX, with a backup. Refuses snapshots, locked/suspended VMs and known shared disks. confirm requires authorization.", diskSchemas.disk_attach, false, (a) => disks.edit(a, false));
+tool("disk_detach", "Remove the explicit VMX disk slot after verifying its expected VMDK, with a backup. Never deletes the underlying VMDK or extents. Requires authorization and a powered-off snapshot-free VM.", diskSchemas.disk_detach, false, (a) => disks.edit(a, true));
 tool("ovf_tool_status", "Discover optional local VMware OVF Tool, version and supported flags. VMWARE_OVFTOOL_PATH overrides automatic discovery with an absolute executable path.", ovfSchemas.ovf_tool_status, true, () => ovf.status());
 tool("ovf_inspect", "Start a read-only background appliance probe. job_status.result reports hardware, disks, NICs, properties, deployment options and manifest checks. Local flat OVF/OVA packages only.", ovfSchemas.ovf_inspect, true, (a) => ovf.start("ovf_inspect", a));
 tool("ovf_validate", "Start read-only local OVF/OVA schema and manifest validation. Returns a job ID. Remote-host compatibility, signer trust and guest boot are not established.", ovfSchemas.ovf_validate, true, (a) => ovf.start("ovf_validate", a));
@@ -55314,7 +55694,8 @@ tool("workstation_capabilities", "Show full vmrun/REST tool coverage, compare th
     ovfTool: await ovf.status(),
     ovfTools: Object.keys(ovfSchemas),
     backgroundJobTools: Object.keys(jobSchemas),
-    diskManager: await findVMwareExecutable("vmware-vdiskmanager", { env: backend.env, beside: await backend.executable() }).then((executable) => ({ available: true, executable, features: ["create_vm sparse disk creation; advanced disk tools are not implemented"] })).catch((error62) => ({ available: false, error: error62.message })),
+    diskManager: await disks.status(),
+    diskTools: Object.keys(diskSchemas),
     note: "Coverage describes callable implementations. It does not prove a REST service is running, credentials work, or guest operations succeed."
   };
 });

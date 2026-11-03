@@ -2,6 +2,22 @@
 
 Generated from the command implementations and installed REST contract. Source version: vmrun 1.17.0.25688693; vmrest 1.3.1 build 25688693.
 
+## VMDK lifecycle (9)
+
+Read the [disk guide](disks.md) for create/inspect/expand/convert and explicit controller/slot attachment examples. Runtime help gates native operations. Output requires a NEW parent directory to protect companion files. In-place edits and attachment changes require `confirm: true`, powered-off snapshot-free VMs and independent disks. Detach preserves backing files. Capacity expansion does not resize guest partitions or filesystems.
+
+| Tool | Arguments |
+| --- | --- |
+| `disk_manager_status` | (none) |
+| `disk_inspect` | `disk` |
+| `disk_create` | `destination`, `capacity_mb`, `disk_type`, `adapter`, `timeout_seconds` |
+| `disk_expand` | `disk`, `vmx_paths`, `confirm`, `timeout_seconds`, `capacity_mb` |
+| `disk_convert` | `disk`, `vmx_paths`, `confirm`, `timeout_seconds`, `destination`, `disk_type` |
+| `disk_compact` | `disk`, `vmx_paths`, `confirm`, `timeout_seconds` |
+| `disk_defragment` | `disk`, `vmx_paths`, `confirm`, `timeout_seconds` |
+| `disk_attach` | `vmx`, `controller`, `controller_index`, `unit`, `confirm`, `disk`, `vmx_paths` |
+| `disk_detach` | `vmx`, `controller`, `controller_index`, `unit`, `confirm`, `disk`, `vmx_paths` |
+
 ## Local OVF/OVA appliances and background jobs (10)
 
 Optional VMware OVF Tool is discovered automatically or configured with an absolute `VMWARE_OVFTOOL_PATH`. `ovf_tool_status` reports executable, version and installed flags. All other OVF tools return a background job ID, including read-only inspection/validation. Poll `job_status` until terminal; inspect `result` or `error`. See the [appliance workflow guide](ovf.md) for path configuration, examples, overwrite policy and limitations.
@@ -147,4 +163,4 @@ All console tools accept `vm_id`: an absolute VMX path, a unique inventory name,
 
 ## Convenience tools (9) and capabilities
 
-`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **108 MCP tools**.
+`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **117 MCP tools**.
