@@ -1,6 +1,259 @@
 {
   "tools": [
     {
+      "name": "serial_status",
+      "description": "Inspect optional per-VM serial capability/configuration and session state without connecting or starting a VM. Only a connected session proves native endpoint ownership.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vm_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "port": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          }
+        },
+        "required": [
+          "vm_id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "serial_configure",
+      "description": "Explicitly replace or disable one serial port configuration in a powered-off unlocked VMX, with a backup. Requires confirm=true after authorization. Uses only a generated per-VM local pipe/socket; never starts a VM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vm_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "port": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "enabled": {
+            "default": true,
+            "type": "boolean"
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after authorization to replace this serial port configuration in the powered-off VM."
+          }
+        },
+        "required": [
+          "vm_id",
+          "confirm"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "serial_connect",
+      "description": "Explicitly connect to the configured VM serial pipe/socket after verifying native VMware ownership. Guest serial output must be enabled separately. No host terminal, desktop or remote TCP access.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vm_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "port": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "timeout_ms": {
+            "default": 10000,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          }
+        },
+        "required": [
+          "vm_id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "serial_read",
+      "description": "Read at most max_bytes from an explicitly connected VM serial port. Bounded wait returns timed_out with empty data. Base64 preserves bytes; UTF-8 also returns raw_base64. MCP cancellation preserves unread bytes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vm_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "port": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "max_bytes": {
+            "default": 4096,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65536
+          },
+          "encoding": {
+            "default": "base64",
+            "type": "string",
+            "enum": [
+              "base64",
+              "utf8"
+            ]
+          },
+          "timeout_ms": {
+            "default": 1000,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          }
+        },
+        "required": [
+          "vm_id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "serial_write",
+      "description": "Send 1-65536 UTF-8 or canonical base64 bytes to an explicitly connected VM serial port. Can change guest state; requires authorization for the intended input. Timeout/cancellation may leave partial input; never replay automatically.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vm_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "port": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "data": {
+            "type": "string",
+            "maxLength": 87384
+          },
+          "encoding": {
+            "default": "utf8",
+            "type": "string",
+            "enum": [
+              "base64",
+              "utf8"
+            ]
+          },
+          "timeout_ms": {
+            "default": 1000,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          }
+        },
+        "required": [
+          "vm_id",
+          "data"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "serial_disconnect",
+      "description": "Close this VM serial session, cancel pending I/O and discard its buffer. Does not stop the VM or change its serial hardware.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vm_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "port": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          }
+        },
+        "required": [
+          "vm_id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
       "name": "console_screenshot",
       "description": "Capture a fresh PNG from this VM native VNC/RFB framebuffer. Never captures the host desktop. Works during BIOS/UEFI, PXE and installation without VMware Tools.",
       "inputSchema": {

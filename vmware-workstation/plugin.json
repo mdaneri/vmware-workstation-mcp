@@ -1,18 +1,18 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "vmware-workstation",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "license": "MIT",
   "repository": "https://github.com/mdaneri/vmware-workstation-mcp",
   "author": { "name": "mdaneri", "url": "https://github.com/mdaneri" },
-  "description": "Manage VMware Workstation with vmrun, REST, LAN segments, and direct headless VNC/RFB console screenshots and input.",
+  "description": "Manage VMware Workstation with vmrun, REST, LAN segments, direct headless VNC/RFB console screenshots and input, and optional serial consoles.",
   "keywords": ["vmware", "workstation", "virtual-machines", "snapshots", "windows", "linux"],
   "extensions": {
     "com.openai": {
       "interface": {
         "displayName": "VMware Workstation",
         "shortDescription": "Manage local virtual machines",
-        "longDescription": "Create and configure VMs, use the vmrun and REST tool catalog, and interact directly with native VNC consoles during firmware, boot, and installation. Console screenshots, clicks, keys, typing, scrolling, and status use loopback-only authenticated RFB without host desktop capture or input. Supports Windows and Linux with Node.js 22.12+, PowerShell 7 setup helpers, native VMware Workstation, and local credentials.",
+        "longDescription": "Create and configure VMs, use the vmrun and REST tool catalog, and interact directly with native VNC consoles during firmware, boot, and installation. Console screenshots, clicks, keys, typing, scrolling, and status use loopback-only authenticated RFB without host desktop capture or input. Optional per-VM serial consoles use verified local named pipes or UNIX sockets with bounded byte I/O. Supports Windows and Linux with Node.js 22.12+, PowerShell 7 setup helpers, native VMware Workstation, and local credentials.",
         "category": "Developer Tools",
         "capabilities": [],
         "logo": "./assets/icon.svg",

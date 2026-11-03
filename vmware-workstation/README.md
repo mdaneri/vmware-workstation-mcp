@@ -1,6 +1,6 @@
 # VMware Workstation
 
-Local Windows and Linux MCP plugin, version 0.6.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 117 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), five [LAN segment tools](#lan-segments), ten [OVF/OVA and background job tools](ovf.md), and nine [VMDK lifecycle tools](disks.md). All 108 previous tool names, input schemas, and annotations remain unchanged. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
+Local Windows and Linux MCP plugin, version 0.7.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 123 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), five [LAN segment tools](#lan-segments), ten [OVF/OVA and background job tools](ovf.md), nine [VMDK lifecycle tools](disks.md), and six [optional serial tools](serial.md). All 117 previous tool names, input schemas, and annotations remain unchanged. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
 
 Requires VMware Workstation with vmrun, Node.js 22.12+, PowerShell 7 for setup helpers, and a host with local stdio MCP support. REST tools additionally need a running, authenticated vmrest service. Guest OS commands need VMware Tools running and a guest OS account; console tools need neither and work before the OS boots. The plugin runs as your local user and opens no HTTP listener. Native VNC listeners are configured on the VM itself and restricted to localhost.
 
@@ -17,6 +17,7 @@ See [the full command and endpoint reference](reference.md) for the exact operat
 | Guest execution | Programs, scripts, interactive/active-window/no-wait modes, processes, termination, variables, keystrokes |
 | Files and directories | Both transfer directions, existence checks, list/create/delete directories, delete/rename files, create temp files |
 | Host integration | Shared-folder add/remove/enable/disable/access changes; device connect/disconnect; screenshots |
+| Serial console | [Optional direct named-pipe/UNIX-socket byte I/O](serial.md), explicit offline configuration, bounded reads/writes and per-VM sessions |
 | Native console | Direct RFB screenshots, clicks, keys/chords, typing, scrolling and status; independent simultaneous VM sessions |
 | VM lifecycle | Full/linked clones, snapshot-based clones, deletion, hardware upgrade, Tools installation/status, Photon VM download |
 | Networking | Host networks, network creation, NAT port forwarding, DHCP MAC/IP bindings, VM NIC create/update/delete, guest address and NIC/IP-stack information |
