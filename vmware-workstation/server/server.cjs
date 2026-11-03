@@ -56447,10 +56447,12 @@ public class GuestExecCapture {
             var buffer = new byte[8192]; int count;
             while ((count = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0) {
                 int keep = Math.Min(count, limit - (int)saved.Length);
-                saved.Write(buffer, 0, keep);
+                if (keep > 0) {
+                    saved.Write(buffer, 0, keep);
+                    // Once full, drain without repeatedly copying the cap.
+                    Data[index] = saved.ToArray();
+                }
                 if (keep < count) Truncated[index] = true;
-                // Publish bounded snapshots even if descendants keep pipes open.
-                Data[index] = saved.ToArray();
             }
         }
     }
