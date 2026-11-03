@@ -26,7 +26,7 @@ export function credentialsPath(env = process.env, platform = process.platform, 
 export async function findVMwareExecutable(name, { env = process.env, platform = process.platform, beside } = {}) {
   if (!['win32', 'linux'].includes(platform)) throw new Error('VMware Workstation hosts supported by this plugin are Windows and Linux.');
   const filename = `${name}${platform === 'win32' ? '.exe' : ''}`;
-  const setting = { vmrun: 'VMRUN_PATH', 'vmware-vdiskmanager': 'VMWARE_VDISKMANAGER_PATH', ovftool: 'VMWARE_OVFTOOL_PATH' }[name];
+  const setting = { vmrun: 'VMRUN_PATH', 'vmware-vdiskmanager': 'VMWARE_VDISKMANAGER_PATH', 'vmware-vmx': 'VMWARE_VMX_PATH', ovftool: 'VMWARE_OVFTOOL_PATH' }[name];
   if (!setting) throw new Error('Unsupported VMware executable.');
   const validFile = async candidate => {
     if (!path.isAbsolute(candidate) || !(await fs.stat(candidate)).isFile()) return false;
@@ -43,6 +43,7 @@ export async function findVMwareExecutable(name, { env = process.env, platform =
   const directories = [
     ...(name === 'ovftool' && beside ? [path.join(path.dirname(beside), 'OVFTool'), path.join(path.dirname(beside), 'ovftool')] : []),
     ...(beside ? [path.dirname(beside)] : []),
+    ...(name === 'vmware-vmx' && beside && platform === 'win32' ? [path.join(path.dirname(beside), 'x64')] : []),
     ...(platform === 'win32' ? [env.ProgramFiles, env['ProgramFiles(x86)']].filter(Boolean).map(root => path.join(root, 'VMware', 'VMware Workstation')) : []),
     ...(name === 'ovftool' && platform === 'win32' ? [env.ProgramFiles, env['ProgramFiles(x86)']].filter(Boolean).flatMap(root => [path.join(root, 'VMware', 'VMware Workstation', 'OVFTool'), path.join(root, 'VMware', 'VMware OVF Tool')]) : []),
     ...(env.PATH || env.Path || '').split(path.delimiter).filter(Boolean),

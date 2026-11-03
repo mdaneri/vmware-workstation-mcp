@@ -17,6 +17,8 @@ import { SerialManager, serialSchemas } from './serial.mjs';
 import { Readiness, readinessSchemas } from './readiness.mjs';
 import { GuestExec, guestExecSchema } from './guest-exec.mjs';
 import { IsoManager, isoSchemas } from './iso.mjs';
+import { HardwareManager } from './hardware.mjs';
+import { hardwareSchemas } from './hardware-schemas.mjs';
 
 const backend = new Workstation();
 const credentials = new Credentials();
@@ -31,9 +33,14 @@ const serial = new SerialManager({ backend, vmFiles, credentials, rest });
 const readiness = new Readiness({ backend, credentials, consoles, protectFile: localFileProtector(backend) });
 const guestExec = new GuestExec({ backend, credentials, protectFile: localFileProtector(backend) });
 const media = new IsoManager({ backend, vmFiles });
-const server = new McpServer({ name: 'vmware-workstation', version: '0.10.0' });
+const hardware = new HardwareManager({ backend, vmFiles, disks, lan: lanSegments });
+const server = new McpServer({ name: 'vmware-workstation', version: '0.11.0' });
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
+
+tool('vm_hardware_capabilities', 'Inspect installed native Workstation product version and conservative typed hardware limits. No power or configuration changes. vTPM writes require an unavailable encryption backend; nested CPU and guest driver support remain unverified.', hardwareSchemas.vm_hardware_capabilities, true, () => hardware.capabilities());
+tool('vm_hardware_get', 'Read typed declared CPU topology, memory, nested virtualization, firmware/security, storage and NIC configuration. Omits unrelated VMX secrets and does not infer missing values or claim live device support.', hardwareSchemas.vm_hardware_get, true, a => hardware.get(a));
+tool('vm_hardware_set', 'Apply explicit typed offline hardware changes with VMX backup and concurrency checks. Requires confirm=true, supported installed worker, full power-off and closed VMware GUI. Preserves omitted devices and NIC identity; no disk replacement, encryption or vTPM mutation.', hardwareSchemas.vm_hardware_set, false, a => hardware.set(a));
 
 tool('iso_list', 'Inspect optical devices, ISO backings and configured connection/start-connected state. Does not claim live connection state or mount anything.', isoSchemas.iso_list, true, a => media.list(a));
 tool('iso_mount', 'Attach an existing allowlisted local ISO to an optical or unused IDE/SATA slot, with VMX backup. Requires confirm=true and fully powered-off, unlocked VM. Refuses ambiguous devices and occupied disk slots. No live hot-swap or power-on.', isoSchemas.iso_mount, false, a => media.edit(a));

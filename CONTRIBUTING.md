@@ -1,5 +1,12 @@
 # Contributing
 
+Typed hardware changes use [the hardware guide](vmware-workstation/hardware.md).
+Default tests cover mocked Windows/Linux capability evidence, nested ESXi
+layouts and bundled MCP contracts. `npm run test:hardware:live` requires
+separate disposable-workload authorization and `VMWARE_HARDWARE_LIVE=1`;
+it creates only a new powered-off VM and retains its files/evidence. It does
+not prove guest boot, ESXi installation or nested hypervisor execution.
+
 Use Node.js 22.12 or newer and PowerShell 7 on Windows or Linux. In WSL use native Linux Node/npm and a separate Linux checkout. Install dependencies with `npm ci`, then run:
 
 ```powershell

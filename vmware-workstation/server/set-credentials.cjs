@@ -51,7 +51,7 @@ function credentialsPath(env = process.env, platform = process.platform, home = 
 async function findVMwareExecutable(name, { env = process.env, platform = process.platform, beside } = {}) {
   if (!["win32", "linux"].includes(platform)) throw new Error("VMware Workstation hosts supported by this plugin are Windows and Linux.");
   const filename = `${name}${platform === "win32" ? ".exe" : ""}`;
-  const setting = { vmrun: "VMRUN_PATH", "vmware-vdiskmanager": "VMWARE_VDISKMANAGER_PATH", ovftool: "VMWARE_OVFTOOL_PATH" }[name];
+  const setting = { vmrun: "VMRUN_PATH", "vmware-vdiskmanager": "VMWARE_VDISKMANAGER_PATH", "vmware-vmx": "VMWARE_VMX_PATH", ovftool: "VMWARE_OVFTOOL_PATH" }[name];
   if (!setting) throw new Error("Unsupported VMware executable.");
   const validFile = async (candidate) => {
     if (!import_node_path.default.isAbsolute(candidate) || !(await import_promises.default.stat(candidate)).isFile()) return false;
@@ -68,6 +68,7 @@ async function findVMwareExecutable(name, { env = process.env, platform = proces
   const directories = [
     ...name === "ovftool" && beside ? [import_node_path.default.join(import_node_path.default.dirname(beside), "OVFTool"), import_node_path.default.join(import_node_path.default.dirname(beside), "ovftool")] : [],
     ...beside ? [import_node_path.default.dirname(beside)] : [],
+    ...name === "vmware-vmx" && beside && platform === "win32" ? [import_node_path.default.join(import_node_path.default.dirname(beside), "x64")] : [],
     ...platform === "win32" ? [env.ProgramFiles, env["ProgramFiles(x86)"]].filter(Boolean).map((root) => import_node_path.default.join(root, "VMware", "VMware Workstation")) : [],
     ...name === "ovftool" && platform === "win32" ? [env.ProgramFiles, env["ProgramFiles(x86)"]].filter(Boolean).flatMap((root) => [import_node_path.default.join(root, "VMware", "VMware Workstation", "OVFTool"), import_node_path.default.join(root, "VMware", "VMware OVF Tool")]) : [],
     ...(env.PATH || env.Path || "").split(import_node_path.default.delimiter).filter(Boolean),
