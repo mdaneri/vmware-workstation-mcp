@@ -44,6 +44,19 @@ test('Linux bundled MCP uses real child processes, private console setup and nat
   assert.equal((await client.listTools()).tools.length, 137);
   assert.equal(textResult(await client.callTool({ name: 'workstation_status', arguments: {} })).executable, binary);
 
+  await t.test('configure_vm replaces a read-only VMX while preserving its mode', { skip: process.getuid() === 0 }, async () => {
+    const vmx = path.join(root, 'readonly.vmx');
+    const original = '.encoding = "UTF-8"\nmemsize = "512"\n';
+    await fs.writeFile(vmx, original, { mode: 0o444 });
+    // Require real permission enforcement so running as root cannot hide a regression.
+    await assert.rejects(fs.access(vmx, constants.W_OK), { code: 'EACCES' });
+    const result = textResult(await client.callTool({ name: 'configure_vm', arguments: { vmx, settings: { memsize: '1024' } } }));
+    assert.equal(await fs.readFile(result.backup, 'utf8'), original);
+    assert.equal(await fs.readFile(vmx, 'utf8'), original.replace('512', '1024'));
+    for (const file of [vmx, result.backup]) assert.equal((await fs.stat(file)).mode & 0o777, 0o444);
+    assert.deepEqual((await fs.readdir(root)).filter(name => name.startsWith('readonly.vmx.edit-')), []);
+  });
+
   const workerBinary = path.join(root, 'vmware-vmx');
   await fs.copyFile(process.execPath, workerBinary, constants.COPYFILE_FICLONE); await fs.chmod(workerBinary, 0o755);
   const entries = { guest: { default: { username: 'tester', password: 'TestVNC1' } }, console: {} };

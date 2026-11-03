@@ -124,9 +124,10 @@ export class VMFiles {
         backupComplete = true;
         const handle = await fs.open(temporary, 'wx', mode);
         temporaryCreated = true;
-        await handle.close();
-        if (protectFile) await protectFile(temporary);
-        await fs.writeFile(temporary, lines.join('\n').replace(/\n*$/, '\n'));
+        try {
+          if (protectFile) await protectFile(temporary);
+          await handle.writeFile(lines.join('\n').replace(/\n*$/, '\n'));
+        } finally { await handle.close(); }
         // Detect another writer after we read the original before replacing it.
         if (await fs.readFile(vmx, 'utf8') !== original) throw new Error(`VMX changed during editing; original retained. Backup: ${backup}`);
         if (beforeCommit) await beforeCommit();

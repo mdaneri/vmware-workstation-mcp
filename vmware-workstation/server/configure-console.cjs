@@ -21399,9 +21399,12 @@ var VMFiles = class {
         backupComplete = true;
         const handle = await import_promises9.default.open(temporary, "wx", mode);
         temporaryCreated = true;
-        await handle.close();
-        if (protectFile) await protectFile(temporary);
-        await import_promises9.default.writeFile(temporary, lines.join("\n").replace(/\n*$/, "\n"));
+        try {
+          if (protectFile) await protectFile(temporary);
+          await handle.writeFile(lines.join("\n").replace(/\n*$/, "\n"));
+        } finally {
+          await handle.close();
+        }
         if (await import_promises9.default.readFile(vmx2, "utf8") !== original) throw new Error(`VMX changed during editing; original retained. Backup: ${backup}`);
         if (beforeCommit) await beforeCommit();
         await import_promises9.default.rename(temporary, vmx2);
