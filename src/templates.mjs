@@ -49,7 +49,7 @@ export class TemplateManager {
     if (!found) fail('TEMPLATE_NOT_FOUND', 'Unknown template ID. Use template_list or supply a portable JSON template.');
     return validateTemplate(found);
   }
-  async prepare(a) {
+  async prepare(a, planning = {}) {
     const t = this.resolve(a.template);
     const required = new Set(t.nics.map(n => n.network));
     if (Object.keys(a.networks).some(k => !required.has(k)) || [...required].some(k => !Object.hasOwn(a.networks, k))) fail('INVALID_NETWORK', 'Supply exactly one local binding for each logical network in the template.');
@@ -64,7 +64,7 @@ export class TemplateManager {
       ...t.cpu, memory_mb: t.memory_mb, firmware: t.firmware, secure_boot: t.security.secure_boot,
       controllers: t.controllers, disks: t.disks, nics: t.nics.map(n => ({ ...n, ...a.networks[n.network] })),
       ...(iso ? { iso_path: iso } : {}), timeout_seconds: a.timeout_seconds ?? 600 };
-    const internal = await this.hardware.planCreate(creation);
+    const internal = await this.hardware.planCreate(creation, planning);
     const capacity = t.disks.reduce((sum, d) => sum + d.capacity_mb * 1048576, 0);
     const directory = internal.directory;
     return { creation, plan: { schema_version: '1.0', template_id: t.id, directory, vmx: path.join(directory, 'machine.vmx'),

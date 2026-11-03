@@ -113,7 +113,7 @@ export class HardwareManager {
         address_type: config[`${p}.addresstype`] || null, mac: config[`${p}.address`] || config[`${p}.generatedaddress`] || null, start_connected: bool(config[`${p}.startconnected`]) }; }),
       note: 'Declared configuration only; omitted values are unknown, not inferred defaults. Guest driver and nested CPU support require live validation.' };
   }
-  async nicSettings(nics, config) {
+  async nicSettings(nics, config, plannedSegments = []) {
     const settings = {}, seen = new Set(), macs = new Set();
     let catalog = null;
     if (nics?.some(n => n.segment !== undefined || n.network === 'lan_segment')) catalog = await this.lan.readCatalog();
@@ -144,7 +144,7 @@ export class HardwareManager {
           settings[`${p}.vnet`] = n.vmnet;
         }
         if (network === 'lan_segment') {
-          const matches = catalog.document.segments.filter(s => s.id === n.segment?.toLowerCase() || s.name.toLowerCase() === n.segment?.toLowerCase());
+          const matches = [...catalog.document.segments, ...plannedSegments].filter(s => s.id === n.segment?.toLowerCase() || s.name.toLowerCase() === n.segment?.toLowerCase());
           if (matches.length !== 1) fail('INVALID_NETWORK', 'Select one unambiguous existing LAN segment by name or pvnID.');
           settings[`${p}.pvnID`] = matches[0].id;
         }
@@ -184,9 +184,10 @@ export class HardwareManager {
     });
   }
   // Shared read-only preflight for typed creation and declarative template plans.
-  async planCreate(a) {
+  async planCreate(a, { plannedParent, plannedSegments = [] } = {}) {
     const directory = await this.backend.hostPath(a.directory, 'destination-directory');
-    await this.backend.hostPath(path.dirname(directory), 'directory');
+    await this.backend.hostPath(plannedParent || path.dirname(directory), 'directory');
+    if (plannedParent && path.dirname(path.dirname(directory)) !== plannedParent) fail('INVALID_PATH', 'Planned VM parent must be one new child of the existing parent.');
     // New disks also need the host-file allowlist, independently of VM roots.
     await this.backend.hostPath(directory, 'host-destination-directory');
     try { await fs.lstat(directory); fail('TARGET_EXISTS', 'VM creation requires a NEW destination directory.'); }
@@ -200,7 +201,7 @@ export class HardwareManager {
       'floppy0.present': 'FALSE', 'sound.present': 'FALSE', 'usb.present': 'FALSE', ...pcieSettings({}) };
     const config = Object.fromEntries(Object.entries(base).map(([k, v]) => [k.toLowerCase(), v]));
     const settings = { ...base, ...this.settings({ ...a, controllers }, config, caps) };
-    const nic = await this.nicSettings(nics, {}); Object.assign(settings, nic.settings);
+    const nic = await this.nicSettings(nics, {}, plannedSegments); Object.assign(settings, nic.settings);
     const slots = new Set();
     for (const d of disks) {
       const p = `${d.controller}${d.controller_index}`, slot = `${p}:${d.unit}`;
@@ -217,7 +218,7 @@ export class HardwareManager {
       Object.assign(settings, { 'sata0.present': 'TRUE', [`${slot}.present`]: 'TRUE', [`${slot}.deviceType`]: 'cdrom-image', [`${slot}.fileName`]: iso });
     }
     await this.disks.available('create', '0');
-    await this.disks.freeSpace(path.dirname(directory), disks.reduce((sum, d) => sum + d.capacity_mb * 1048576, 0));
+    await this.disks.freeSpace(plannedParent || path.dirname(directory), disks.reduce((sum, d) => sum + d.capacity_mb * 1048576, 0));
     if (nic.catalog) { await this.assertGUIClosed(); await this.lan.unchanged(nic.catalog); }
     for (let i = 0; i < disks.length; i++) {
       const d = disks[i], slot = `${d.controller}${d.controller_index}:${d.unit}`;

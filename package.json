@@ -1,6 +1,6 @@
 {
   "name": "vmware-workstation-plugin-dev",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "private": true,
   "license": "MIT",
   "repository": {
@@ -25,6 +25,7 @@
     "test:iso:live": "node scripts/live-iso.mjs",
     "test:hardware:live": "node scripts/live-hardware.mjs",
     "test:jobs:live": "node scripts/live-jobs.mjs",
+    "test:labs:live": "node scripts/live-labs.mjs",
     "test:templates:live": "node scripts/live-templates.mjs"
   },
   "dependencies": {

@@ -35,7 +35,7 @@ require('node:child_process').execFile = stub;
     ...process.env, VMRUN_PATH: path.join(root, 'vmrun' + ext), VMWARE_VMX_PATH: path.join(root, 'vmware-vmx' + ext), VMWARE_VDISKMANAGER_PATH: path.join(root, 'vmware-vdiskmanager' + ext),
     VMWARE_ALLOWED_ROOTS: root, VMWARE_ALLOWED_HOST_ROOTS: root,
   } }));
-  const tools = (await client.listTools()).tools; assert.equal(tools.length, 142);
+  const tools = (await client.listTools()).tools; assert.equal(tools.length, 148);
   const previous = JSON.parse(await fs.readFile('tests/fixtures/pre-hardware-tool-schemas.json', 'utf8'));
   for (const prior of previous.tools) assertCompatibleTool(tools.find(t => t.name === prior.name), prior);
   const call = async (name, args) => { const result = await client.callTool({ name, arguments: args }); assert.ok(!result.isError, JSON.stringify(result)); return JSON.parse(result.content[0].text); };

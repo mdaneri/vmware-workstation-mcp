@@ -23,6 +23,8 @@ import { JobStore, jobDirectory } from './job-store.mjs';
 import { JobOperations, jobStartSchema } from './job-operations.mjs';
 import { TemplateManager } from './templates.mjs';
 import { templateSchemas } from './template-schemas.mjs';
+import { LabManager } from './labs.mjs';
+import { labSchemas } from './lab-schemas.mjs';
 
 const backend = new Workstation();
 const credentials = new Credentials();
@@ -41,9 +43,17 @@ const media = new IsoManager({ backend, vmFiles });
 const hardware = new HardwareManager({ backend, vmFiles, disks, lan: lanSegments });
 const jobOperations = new JobOperations({ backend, jobs, disks, ovf });
 const templates = new TemplateManager({ backend, hardware, rest });
-const server = new McpServer({ name: 'vmware-workstation', version: '0.13.0' });
+const labs = new LabManager({ backend, templates, lan: lanSegments, readiness, protectFile: localFileProtector(backend) });
+const server = new McpServer({ name: 'vmware-workstation', version: '0.14.0' });
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
+
+tool('lab_validate', 'Read-only versioned multi-VM lab validation and plan. Reuses template/hardware preflight, checks dependency graph, network/media mappings and aggregate disk space. Plans private LANs without creating them. No OS installation or readiness is implied.', labSchemas.lab_validate, true, a => labs.validate(a));
+tool('lab_deploy', 'Plan by default. Explicit dry_run=false and confirm=true create a NEW lab root, private ownership manifest, optional owned LAN segments and blank template VMs. start=true opts into headless dependency/readiness-ordered startup. resume=true requires the identical recipe and bindings; completed verified VMs are skipped and uncertain partial creation is refused. No implicit rollback, overwrite or registration.', labSchemas.lab_deploy, false, (a, extra) => labs.deploy(a, extra), false);
+tool('lab_status', 'Read the selected private lab manifest and observe VM ownership/power. Completed steps and uncertain intents are separate from live guest readiness. Does not scan for or adopt resources.', labSchemas.lab_status, true, a => labs.status(a));
+tool('lab_start', 'Plan by default; explicit dry_run=false and confirm=true start only verified lab VMs headlessly in dependency order. Bounded Tools/IP/service readiness gates dependents; retries apply only to read-only readiness observations. Already running VMs are rechecked. No automatic replay of VM creation or power commands.', labSchemas.lab_start, false, (a, extra) => labs.action('start', a, extra), false);
+tool('lab_stop', 'Plan by default; explicit dry_run=false and confirm=true stop only verified lab VMs in reverse dependency order. Soft shutdown is default, hard stop requires explicit mode=hard authorization. No hard fallback. Partial or uncertain outcomes remain in the manifest.', labSchemas.lab_stop, false, (a, extra) => labs.action('stop', a, extra));
+tool('lab_destroy', 'Plan by default; explicit dry_run=false and confirm=true remove only recorded lab files and owned LAN segments. Requires fully offline, unlocked VMs; never stops implicitly. Refuses changed identity, links, external backings and uncertain creation. Keeps unknown files, empty member directories and the recovery manifest; never deletes external networks, media or unrelated files.', labSchemas.lab_destroy, false, (a, extra) => labs.action('destroy', a, extra));
 
 tool('template_list', 'List bundled portable versioned JSON templates for Linux, Windows Server and nested ESXi. Returns complete editable recipes without reading host files or credentials.', templateSchemas.template_list, true, () => templates.list());
 tool('template_validate', 'Read-only template validation and deployment plan: checks schema, supported installed hardware/disk capabilities, explicit local network/ISO bindings, new destination, allowlists and conservative free space. Shows VMX, disk paths and resource requirements. Reserves nothing.', templateSchemas.template_validate, true, a => templates.validate(a));
@@ -79,6 +89,7 @@ function tool(name, description, schema, readOnly, callback, destructive = !read
       if (Array.isArray(result?.content)) return { content: result.content.map(block => block.type === 'text' ? { ...block, text: credentials.redact(block.text) } : block) };
       return { content: [{ type: 'text', text: credentials.redact(JSON.stringify(result, null, 2)) }] };
     } catch (error) {
+      if (name.startsWith('lab_')) return { isError: true, content: [{ type: 'text', text: credentials.redact(JSON.stringify({ code: error.code || 'LAB_PREFLIGHT_FAILED', message: error.message, ...error.details })) }] };
       if (name.startsWith('serial_')) return { isError: true, content: [{ type: 'text', text: credentials.redact(JSON.stringify({ code: error.code || 'SERIAL_SETUP_REQUIRED', message: error.message })) }] };
       return { isError: true, content: [{ type: 'text', text: credentials.redact(error.details || name.startsWith('disk_') ? JSON.stringify({ code: error.code || 'DISK_PREFLIGHT_FAILED', message: error.message, action: 'Inspect the target and disk_manager_status before retrying.', ...error.details }) : error.message) }] };
     }
