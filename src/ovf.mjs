@@ -105,7 +105,7 @@ export class OvfManager {
       }
     }
     const status = await this.available(operation === 'ovf_validate' ? ['schemaValidate', 'hideEula'] : ['hideEula']);
-    return this.jobs.start({ operation, resources: [key(path.dirname(inputPath)), ...(directory ? [key(directory)] : [])], timeout: a.timeout_seconds * 1000,
+    return this.jobs.start({ operation, resources: [path.dirname(inputPath), ...(directory ? [directory] : [])], artifacts: destination ? [destination, directory] : [], timeout: a.timeout_seconds * 1000,
       task: context => this.backend.resources.use([ext === 'vmx' ? path.dirname(inputPath) : inputPath, ...(directory ? [directory] : [])], () => this.perform(operation, { ...a, source: inputPath, destination, directory, target, ext }, status, context)) });
   }
   async vmSource(vmx) {
@@ -167,7 +167,7 @@ export class OvfManager {
     let staging; let committed = false;
     try {
       const common = [`--configFile=${config}`, '--machineOutput', '--X:noPrompting', '--hideEula', `--sourceType=${a.ext.toUpperCase()}`];
-      const probe = await context.run(status.executable, [...common, ...(operation === 'ovf_validate' ? ['--schemaValidate'] : []), a.source], { cwd: scratch, env, logOutput: false });
+      const probe = await context.run(status.executable, [...common, ...(operation === 'ovf_validate' ? ['--schemaValidate'] : []), a.source], { cwd: scratch, env, logOutput: false, progress: 'ovf', allowNonzero: true });
       const records = machineRecords(probe.output);
       const success = probe.code === 0 && records.some(record => record.type === 'RESULT' && record.payload === 'SUCCESS');
       if (!success) throw new Error(`OVF Tool ${operation === 'ovf_validate' ? 'validation' : 'probe'} failed. ${this.failure(probe.output)}`);
@@ -192,6 +192,8 @@ export class OvfManager {
       let output;
       if (a.target === 'ova') { staging = await fs.mkdtemp(path.join(a.directory, '.ovf-job-')); output = path.join(staging, path.basename(a.destination)); }
       else { await fs.mkdir(a.directory); output = a.destination; }
+      context.artifact(staging || a.directory);
+      await context.checkpoint({ transfer_started: false, destination: a.destination, staging: staging || null });
       const args = [...common, `--targetType=${a.target.toUpperCase()}`];
       if (a.name) args.push(`--name=${a.name}`);
       if (a.deployment_option) args.push(`--deploymentOption=${a.deployment_option}`);
@@ -200,7 +202,7 @@ export class OvfManager {
       for (const [name, value] of Object.entries(properties)) args.push(`--prop:${name}=${value}`);
       // Recheck power/lock/snapshot state immediately before the transfer.
       if (a.ext === 'vmx') await this.vmSource(a.source);
-      const converted = await context.run(status.executable, [...args, a.source, output], { cwd: scratch, env });
+      const converted = await context.run(status.executable, [...args, a.source, output], { cwd: scratch, env, progress: 'ovf', allowNonzero: true });
       const final = machineRecords(converted.output);
       if (converted.code !== 0 || !final.some(record => record.type === 'RESULT' && record.payload === 'SUCCESS')) throw new Error(`OVF Tool transfer failed. Partial files may remain at ${staging || a.directory}. ${this.failure(converted.output)}`);
       signal.throwIfAborted();

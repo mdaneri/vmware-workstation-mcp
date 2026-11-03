@@ -2,6 +2,14 @@
 
 Generated from the command implementations and installed REST contract. Source version: vmrun 1.17.0.25688693; vmrest 1.3.1 build 25688693.
 
+## Reusable asynchronous jobs (1 new submission tool)
+
+Read the [job guide](jobs.md) for sequential disk/clone/power steps, concurrent unrelated jobs, shared reservations, process-tree cancellation and private durable history. `job_start` requires explicit confirmation for every step. `job_status`, `job_list`, `job_logs` and `job_cancel` are shared with the OVF workflow. Progress stays null unless supplied by the native backend.
+
+| Tool | Arguments |
+| --- | --- |
+| `job_start` | `steps`, `confirm`, `timeout_seconds` |
+
 ## Verified guest execution (1)
 
 Read the [guest execution guide](guest-exec.md) for explicit profiles, program and script examples, runtime prerequisites, bounded output, transport versus guest exit status, timeout and cleanup semantics. No automatic retries or console fallback.
@@ -68,7 +76,7 @@ Optional VMware OVF Tool is discovered automatically or configured with an absol
 | `job_cancel` | `job_id` |
 | `job_logs` | `job_id` |
 
-Only flat local appliances are supported. VMX exports refuse running/locked/suspended/encrypted/vTPM/snapshot sources and external backings. OVF/VMX targets require new parent directories; only a single OVA file can be explicitly overwritten. Import registration and headless power-on default to false. Jobs are bounded and session-scoped; cancellation/timeouts/interruption may leave partial files and never imply rollback. Full cross-tool orchestration remains a later roadmap phase.
+Only flat local appliances are supported. VMX exports refuse running/locked/suspended/encrypted/vTPM/snapshot sources and external backings. OVF/VMX targets require new parent directories; only a single OVA file can be explicitly overwritten. Import registration and headless power-on default to false. Jobs use shared locks and bounded private journals; cancellation/timeouts/interruption may leave partial files and never imply rollback. See [jobs](jobs.md) for restart and retention semantics.
 
 ## ISO media and boot capabilities (5)
 
@@ -218,4 +226,4 @@ All console tools accept `vm_id`: an absolute VMX path, a unique inventory name,
 
 ## Convenience tools (9) and capabilities
 
-`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **137 MCP tools**.
+`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **138 MCP tools**.

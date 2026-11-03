@@ -19,6 +19,8 @@ import { GuestExec, guestExecSchema } from './guest-exec.mjs';
 import { IsoManager, isoSchemas } from './iso.mjs';
 import { HardwareManager } from './hardware.mjs';
 import { hardwareSchemas } from './hardware-schemas.mjs';
+import { JobStore, jobDirectory } from './job-store.mjs';
+import { JobOperations, jobStartSchema } from './job-operations.mjs';
 
 const backend = new Workstation();
 const credentials = new Credentials();
@@ -26,7 +28,8 @@ const rest = new RestClient({ credentials, backend, coordinateDiskEdits: true })
 const vmFiles = new VMFiles(backend, { protectSensitiveFile: localFileProtector(backend) });
 const lanSegments = new LanSegments(backend, vmFiles, { protectFile: localFileProtector(backend) });
 const consoles = new ConsoleManager({ backend, credentials, rest });
-const jobs = new JobManager({ redact: text => credentials.redact(text) });
+const jobs = new JobManager({ redact: text => credentials.redact(text), resources: backend.resources,
+  store: new JobStore({ directory: jobDirectory(), protectFile: localFileProtector(backend) }) });
 const ovf = new OvfManager({ backend, credentials, jobs, rest });
 const disks = new DiskManager({ backend, vmFiles });
 const serial = new SerialManager({ backend, vmFiles, credentials, rest });
@@ -34,7 +37,8 @@ const readiness = new Readiness({ backend, credentials, consoles, protectFile: l
 const guestExec = new GuestExec({ backend, credentials, protectFile: localFileProtector(backend) });
 const media = new IsoManager({ backend, vmFiles });
 const hardware = new HardwareManager({ backend, vmFiles, disks, lan: lanSegments });
-const server = new McpServer({ name: 'vmware-workstation', version: '0.11.0' });
+const jobOperations = new JobOperations({ backend, jobs, disks, ovf });
+const server = new McpServer({ name: 'vmware-workstation', version: '0.12.0' });
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
 
@@ -61,7 +65,9 @@ function tool(name, description, schema, readOnly, callback, destructive = !read
     annotations: { readOnlyHint: readOnly, destructiveHint: destructive, idempotentHint: idempotent, openWorldHint: openWorld },
   }, async (args, extra) => {
     try {
+      if (name.startsWith('job_') || name.startsWith('ovf_') && name !== 'ovf_tool_status') await jobs.initialize();
       const result = await callback(args, extra);
+      if (result?.job_id || name === 'job_list') return { content: [{ type: 'text', text: JSON.stringify(jobs.publicResult(result), null, 2) }] };
       if (Array.isArray(result?.content)) return { content: result.content.map(block => block.type === 'text' ? { ...block, text: credentials.redact(block.text) } : block) };
       return { content: [{ type: 'text', text: credentials.redact(JSON.stringify(result, null, 2)) }] };
     } catch (error) {
@@ -102,9 +108,10 @@ tool('ovf_validate', 'Start read-only local OVF/OVA schema and manifest validati
 tool('ovf_import', 'Start an OVF/OVA import into a NEW VM directory. Supports typed network/property mappings and explicit EULA acceptance. Registration through REST and headless power-on are opt-in. Returns a job ID; poll job_status.', ovfSchemas.ovf_import, false, a => ovf.start('ovf_import', a), false);
 tool('ovf_export', 'Start a powered-off VMX export to OVF/OVA. Refuses snapshots, locks, saved state, external backings, encryption and vTPM. OVF needs a new parent directory. Only OVA permits explicit overwrite=true. Returns a job ID.', ovfSchemas.ovf_export, false, a => ovf.start('ovf_export', a));
 tool('ovf_convert', 'Start a local OVF/OVA/VMX conversion using VMware OVF Tool. VMX sources require power-off and no snapshots. OVF/VMX targets need new parent directories; overwrite is limited to OVA. Returns a job ID.', ovfSchemas.ovf_convert, false, a => ovf.start('ovf_convert', a));
-tool('job_status', 'Read a background job state, observed progress and final result/error. Prior-server-session job IDs report interrupted with unknown outcome.', jobSchemas.job_status, true, a => jobs.status(a.job_id));
-tool('job_list', 'List up to 100 background jobs retained in this server session. Job results and logs are memory-only.', jobSchemas.job_list, true, () => jobs.list());
-tool('job_cancel', 'Request cancellation of a background job and its native OVF Tool process. Partial files and registration/power changes may remain; inspect before retrying.', jobSchemas.job_cancel, false, a => jobs.cancel(a.job_id));
+tool('job_start', 'Start a bounded background job of explicit disk conversion/expansion, full offline cloning or headless VM power steps. Requires confirm=true for every target and action. Steps run sequentially and stop on failure; separate unrelated jobs run concurrently. Returns a job ID; inspect status, partial results and artifact paths before retrying.', jobStartSchema, false, a => jobOperations.start(a));
+tool('job_status', 'Read background state, genuine backend progress and verified result/error from private bounded journals. Unfinished prior-session jobs report interrupted with unknown outcome and are never replayed.', jobSchemas.job_status, true, a => jobs.status(a.job_id));
+tool('job_list', 'List up to 100 current and retained historical jobs from private redacted journals, retained for at most seven days. History does not imply a previous process has stopped.', jobSchemas.job_list, true, () => jobs.list());
+tool('job_cancel', 'Request cancellation of a current job and its native process tree. Locks remain until process cleanup finishes. Partial files and VM changes may remain; inspect before retrying.', jobSchemas.job_cancel, false, a => jobs.cancel(a.job_id));
 tool('job_logs', 'Read bounded, redacted background job output. Raw probe metadata/property defaults are omitted. A truncated log is explicitly marked.', jobSchemas.job_logs, true, a => jobs.logs(a.job_id));
 
 tool('list_lan_segments', 'List the current host user LAN segment catalog. Optionally supply vmx to inspect adapter indices and segment associations, including orphaned IDs. Does not scan disks or change VMs.', lanSegmentSchemas.list_lan_segments, true, a => lanSegments.list(a));
@@ -158,6 +165,7 @@ tool('workstation_capabilities', 'Show full vmrun/REST tool coverage, compare th
     ovfTool: await ovf.status(),
     ovfTools: Object.keys(ovfSchemas),
     backgroundJobTools: Object.keys(jobSchemas),
+    jobSubmission: { tool: 'job_start', maximumConcurrent: 4, maximumSteps: 16, persistence: 'bounded private journals; no replay', locks: 'shared VM and resource reservations in this server; external writers must remain closed' },
     diskManager: await disks.status(),
     diskTools: Object.keys(diskSchemas),
     readinessTools: Object.keys(readinessSchemas),

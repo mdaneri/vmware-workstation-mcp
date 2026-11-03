@@ -3262,8 +3262,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path20) {
-      let input2 = path20;
+    function removeDotSegments(path23) {
+      let input2 = path23;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -3337,11 +3337,11 @@ var require_utils = __commonJS({
       }
       return output2.join("");
     }
-    function removeDotSegmentsRelative(path20) {
-      if (path20 === "" || path20[0] === "/") {
-        return removeDotSegments(path20);
+    function removeDotSegmentsRelative(path23) {
+      if (path23 === "" || path23[0] === "/") {
+        return removeDotSegments(path23);
       }
-      const segments = path20.split("/");
+      const segments = path23.split("/");
       const last = segments.length - 1;
       const output2 = [];
       let trailingDirectory = false;
@@ -3704,8 +3704,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path20 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path20 && path20 !== "/" ? path20 : void 0;
+        const path23 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path23 && path23 !== "/" ? path23 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -7242,12 +7242,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name2}"`);
       return f;
     };
-    function addFormats(ajv, list, fs18, exportName) {
+    function addFormats(ajv, list, fs20, exportName) {
       var _a3;
       var _b;
       (_a3 = (_b = ajv.opts.code).formats) !== null && _a3 !== void 0 ? _a3 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
-        ajv.addFormat(f, fs18[f]);
+        ajv.addFormat(f, fs20[f]);
     }
     module2.exports = exports2 = formatsPlugin;
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -18622,8 +18622,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path20, errorMaps, issueData } = params;
-  const fullPath = [...path20, ...issueData.path || []];
+  const { data, path: path23, errorMaps, issueData } = params;
+  const fullPath = [...path23, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -18738,11 +18738,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path20, key3) {
+  constructor(parent, value, path23, key3) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path20;
+    this._path = path23;
     this._key = key3;
   }
   get path() {
@@ -19707,12 +19707,12 @@ ZodString.create = (params) => {
     ...processCreateParams(params)
   });
 };
-function floatSafeRemainder(val, step) {
+function floatSafeRemainder(val, step2) {
   const valDecCount = (val.toString().split(".")[1] || "").length;
-  const stepDecCount = (step.toString().split(".")[1] || "").length;
+  const stepDecCount = (step2.toString().split(".")[1] || "").length;
   const decCount = valDecCount > stepDecCount ? valDecCount : stepDecCount;
   const valInt = Number.parseInt(val.toFixed(decCount).replace(".", ""));
-  const stepInt = Number.parseInt(step.toFixed(decCount).replace(".", ""));
+  const stepInt = Number.parseInt(step2.toFixed(decCount).replace(".", ""));
   return valInt % stepInt / 10 ** decCount;
 }
 var ZodNumber = class _ZodNumber extends ZodType {
@@ -22594,8 +22594,8 @@ function cleanRegex(source3) {
   const end = source3.endsWith("$") ? source3.length - 1 : source3.length;
   return source3.slice(start, end);
 }
-function floatSafeRemainder2(val, step) {
-  const ratio = val / step;
+function floatSafeRemainder2(val, step2) {
+  const ratio = val / step2;
   const roundedRatio = Math.round(ratio);
   const tolerance = 4 * Number.EPSILON * Math.max(Math.abs(ratio), 1);
   if (Math.abs(ratio - roundedRatio) < tolerance)
@@ -22697,10 +22697,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path20) {
-  if (!path20)
+function getElementAtPath(obj, path23) {
+  if (!path23)
     return obj;
-  return path20.reduce((acc, key3) => acc?.[key3], obj);
+  return path23.reduce((acc, key3) => acc?.[key3], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -23040,11 +23040,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path20, issues) {
+function prefixIssues(path23, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path20);
+    iss.path.unshift(path23);
     return iss;
   });
 }
@@ -23506,16 +23506,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path20 = []) => {
+  const processError = (error63, path23 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path20, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path23, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path20, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path23, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path20, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path23, ...issue2.path]);
       } else {
-        const fullpath = [...path20, ...issue2.path];
+        const fullpath = [...path23, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -23554,17 +23554,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path20 = []) => {
+  const processError = (error63, path23 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path20, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path23, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path20, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path23, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path20, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path23, ...issue2.path]);
       } else {
-        const fullpath = [...path20, ...issue2.path];
+        const fullpath = [...path23, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -23603,8 +23603,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path20 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path20) {
+  const path23 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path23) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -34848,9 +34848,9 @@ function compileValidator(schema, parser) {
 function compile(schema, options2) {
   try {
     const parser = compileFn(schema);
-    const clone2 = withParser(schema, parser);
-    clone2._zod.bag.validator = compileValidator(schema, parser);
-    return clone2;
+    const clone3 = withParser(schema, parser);
+    clone3._zod.bag.validator = compileValidator(schema, parser);
+    return clone3;
   } catch (err) {
     if (options2?.strict)
       throw err;
@@ -34861,7 +34861,7 @@ function withParser(schema, parser) {
   if (isRecursiveSchema(schema)) {
     throw new ZodCompileUnsupportedError("a schema whose subtree contains a reference cycle");
   }
-  const clone2 = clone(schema);
+  const clone3 = clone(schema);
   const liveRun = schema._zod.run;
   const originalRun = liveRun.__originalRun ?? liveRun;
   const wrapped = (payload, ctx) => {
@@ -34881,12 +34881,12 @@ function withParser(schema, parser) {
     return originalRun(payload, ctx);
   };
   wrapped.__originalRun = originalRun;
-  clone2._zod.bag.fallbackRun = originalRun;
-  clone2._zod.bag.validator = parser;
-  clone2._zod.run = wrapped;
+  clone3._zod.bag.fallbackRun = originalRun;
+  clone3._zod.bag.validator = parser;
+  clone3._zod.run = wrapped;
   if (!liveRun.__originalRun)
-    installCompiledUserMethods(clone2, schema, parser);
-  return clone2;
+    installCompiledUserMethods(clone3, schema, parser);
+  return clone3;
 }
 function installCompiledUserMethods(target3, source3, parser) {
   const targetAny = target3;
@@ -39155,11 +39155,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path20) {
-  if (path20.length === 0) {
+function getDotPath(path23) {
+  if (path23.length === 0) {
     return "object root";
   }
-  return path20.reduce((acc, seg, index) => {
+  return path23.reduce((acc, seg, index) => {
     if (index === 0) {
       return String(seg);
     }
@@ -41386,13 +41386,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path20 = ref.slice(1).split("/").filter(Boolean);
-  if (path20.length === 0) {
+  const path23 = ref.slice(1).split("/").filter(Boolean);
+  if (path23.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path20[0] === defsKey) {
-    const key3 = path20[1] === void 0 ? void 0 : decodeJSONPointerSegment(path20[1]);
+  if (path23[0] === defsKey) {
+    const key3 = path23[1] === void 0 ? void 0 : decodeJSONPointerSegment(path23[1]);
     if (!key3 || !ctx.defs[key3]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -47673,7 +47673,7 @@ function credentialsPath(env = process.env, platform = process.platform, home = 
 }
 async function findVMwareExecutable(name2, { env = process.env, platform = process.platform, beside } = {}) {
   if (!["win32", "linux"].includes(platform)) throw new Error("VMware Workstation hosts supported by this plugin are Windows and Linux.");
-  const filename = `${name2}${platform === "win32" ? ".exe" : ""}`;
+  const filename2 = `${name2}${platform === "win32" ? ".exe" : ""}`;
   const setting = { vmrun: "VMRUN_PATH", "vmware-vdiskmanager": "VMWARE_VDISKMANAGER_PATH", "vmware-vmx": "VMWARE_VMX_PATH", ovftool: "VMWARE_OVFTOOL_PATH" }[name2];
   if (!setting) throw new Error("Unsupported VMware executable.");
   const validFile = async (candidate) => {
@@ -47684,7 +47684,7 @@ async function findVMwareExecutable(name2, { env = process.env, platform = proce
   if (env[setting]) {
     const configured = env[setting];
     const actualName = import_node_path.default.basename(configured);
-    if (!import_node_path.default.isAbsolute(configured) || (platform === "win32" ? actualName.toLowerCase() !== filename : actualName !== filename)) throw new Error(`${setting} must be an absolute path to ${filename}.`);
+    if (!import_node_path.default.isAbsolute(configured) || (platform === "win32" ? actualName.toLowerCase() !== filename2 : actualName !== filename2)) throw new Error(`${setting} must be an absolute path to ${filename2}.`);
     if (!await validFile(configured)) throw new Error(`${setting} is not an executable file.`);
     return configured;
   }
@@ -47699,14 +47699,14 @@ async function findVMwareExecutable(name2, { env = process.env, platform = proce
     ...name2 === "ovftool" && platform === "linux" ? ["/usr/lib/vmware-ovftool", "/opt/vmware/ovftool"] : []
   ];
   for (const directory of new Set(directories)) {
-    const candidate = import_node_path.default.join(directory, filename);
+    const candidate = import_node_path.default.join(directory, filename2);
     try {
       if (await validFile(candidate)) return candidate;
     } catch (error62) {
       if (!["ENOENT", "ENOTDIR", "EACCES"].includes(error62.code)) throw error62;
     }
   }
-  throw new Error(`${filename} was not found. Install ${name2 === "ovftool" ? "VMware OVF Tool" : "VMware Workstation on this host"} or set ${setting}.`);
+  throw new Error(`${filename2} was not found. Install ${name2 === "ovftool" ? "VMware OVF Tool" : "VMware Workstation on this host"} or set ${setting}.`);
 }
 
 // src/resources.mjs
@@ -47717,30 +47717,47 @@ var Resources = class {
     this.active = /* @__PURE__ */ new Map();
     this.context = new import_node_async_hooks.AsyncLocalStorage();
   }
-  key(file5) {
-    return process.platform === "win32" ? import_node_path2.default.resolve(file5).toLowerCase() : import_node_path2.default.resolve(file5);
+  key(file6) {
+    return process.platform === "win32" ? import_node_path2.default.resolve(file6).toLowerCase() : import_node_path2.default.resolve(file6);
   }
   assert(files) {
     const owner = this.context.getStore();
-    const overlaps = (a, b) => a === b || a.startsWith(b + import_node_path2.default.sep) || b.startsWith(a + import_node_path2.default.sep);
-    for (const file5 of files.map((file6) => this.key(file6))) for (const [held, token] of this.active) {
-      if (token !== owner && overlaps(file5, held)) throw Object.assign(new Error("A conflicting operation holds this VM or disk path. Wait for it to finish, inspect state, then retry."), { code: "RESOURCE_BUSY" });
+    const contains = (a, b) => {
+      const relative = import_node_path2.default.relative(a, b);
+      return !relative || !relative.startsWith(".." + import_node_path2.default.sep) && relative !== ".." && !import_node_path2.default.isAbsolute(relative);
+    };
+    const overlaps = (a, b) => contains(a, b) || contains(b, a);
+    for (const file6 of files.map((file7) => this.key(file7))) for (const [held, token] of this.active) {
+      if (token !== owner && overlaps(file6, held)) throw Object.assign(new Error("A conflicting operation holds this VM or disk path. Wait for it to finish, inspect state, then retry."), { code: "RESOURCE_BUSY" });
     }
+  }
+  reserve(files) {
+    this.context.run(void 0, () => this.assert(files));
+    const token = /* @__PURE__ */ Symbol("reservation");
+    const keys = [...new Set(files.map((file6) => this.key(file6)))];
+    for (const key3 of keys) this.active.set(key3, token);
+    return {
+      run: (callback) => this.context.run(token, callback),
+      release: () => {
+        for (const key3 of keys) if (this.active.get(key3) === token) this.active.delete(key3);
+      }
+    };
   }
   async use(files, callback) {
     this.assert(files);
     const token = this.context.getStore() || /* @__PURE__ */ Symbol("resource-owner");
-    const added = files.map((file5) => this.key(file5)).filter((file5) => !this.active.has(file5));
-    for (const file5 of added) this.active.set(file5, token);
+    const added = files.map((file6) => this.key(file6)).filter((file6) => !this.active.has(file6));
+    for (const file6 of added) this.active.set(file6, token);
     try {
       return await this.context.run(token, callback);
     } finally {
-      for (const file5 of added) this.active.delete(file5);
+      for (const file6 of added) this.active.delete(file6);
     }
   }
 };
 
 // src/workstation.mjs
+var import_node_async_hooks2 = require("node:async_hooks");
 var execute = (0, import_node_util.promisify)(import_node_child_process.execFile);
 function parseAssignments(text3) {
   const values = {};
@@ -47765,7 +47782,8 @@ var Workstation = class {
   constructor({ env = process.env, run = execute } = {}) {
     this.env = env;
     this.execute = run;
-    this.tail = Promise.resolve();
+    this.queues = /* @__PURE__ */ new Map();
+    this.execution = new import_node_async_hooks2.AsyncLocalStorage();
     this.inventoryPath = inventoryPath(env);
     this.resources = new Resources();
   }
@@ -47773,8 +47791,13 @@ var Workstation = class {
     return findVMwareExecutable("vmrun", { env: this.env });
   }
   async run(args, { mutation = false, authentication = [], timeout: timeout4 = 12e4, deadline, signal } = {}) {
+    const context = this.execution.getStore();
+    signal ||= context?.signal;
+    signal?.throwIfAborted();
     if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
-    const job = this.tail.then(async () => {
+    const key3 = args[1] && import_node_path3.default.isAbsolute(args[1]) ? this.resources.key(args[1]) : `host:${args[0]}`;
+    const previous = this.queues.get(key3) || Promise.resolve();
+    const job = previous.then(async () => {
       if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
       const binary = await this.executable();
       signal?.throwIfAborted();
@@ -47783,7 +47806,7 @@ var Workstation = class {
         if (timeout4 <= 0) throw Object.assign(new Error("Observation deadline expired while waiting for vmrun."), { code: "OBSERVATION_DEADLINE" });
       }
       try {
-        const result = await this.execute(binary, ["-T", "ws", ...authentication, ...args], {
+        const invoke = () => this.nativeRun(binary, ["-T", "ws", ...authentication, ...args], {
           windowsHide: true,
           shell: false,
           timeout: timeout4,
@@ -47791,22 +47814,35 @@ var Workstation = class {
           maxBuffer: 1024 * 1024,
           encoding: "utf8"
         });
+        const result = mutation && args[1] && import_node_path3.default.isAbsolute(args[1]) ? await this.resources.use([args[1]], invoke) : await invoke();
         return result.stdout.trim();
       } catch (error62) {
         const details = [error62.stderr, error62.stdout].filter(Boolean).join("\n").trim().slice(0, 4e3);
-        const uncertain = mutation ? " The operation may have taken effect; inspect the VM before retrying." : "";
-        throw Object.assign(new Error(`vmrun ${args[0] || "help"} failed (${error62.killed ? "timeout" : error62.code || "unknown error"}).${uncertain}${details ? ` ${details}` : ""}`), { code: error62.killed ? "VMRUN_TIMEOUT" : "VMRUN_FAILED" });
+        const uncertain2 = mutation ? " The operation may have taken effect; inspect the VM before retrying." : "";
+        throw Object.assign(new Error(`vmrun ${args[0] || "help"} failed (${error62.killed ? "timeout" : error62.code || "unknown error"}).${uncertain2}${details ? ` ${details}` : ""}`), { code: error62.killed ? "VMRUN_TIMEOUT" : "VMRUN_FAILED" });
       }
     });
-    this.tail = job.catch(() => {
+    const tail = job.catch(() => {
     });
-    if (!signal) return job;
+    this.queues.set(key3, tail);
+    void tail.then(() => {
+      if (this.queues.get(key3) === tail) this.queues.delete(key3);
+    });
+    if (!signal || context) return job;
     return new Promise((resolve, reject) => {
       const abort = () => reject(signal.reason || new Error("Operation cancelled."));
       if (signal.aborted) abort();
       else signal.addEventListener("abort", abort, { once: true });
       job.then(resolve, reject).finally(() => signal.removeEventListener("abort", abort));
     });
+  }
+  async nativeRun(file6, args, options2 = {}) {
+    const context = this.execution.getStore();
+    if (!context) return this.execute(file6, args, options2);
+    context.signal.throwIfAborted();
+    const result = await context.run(file6, args, { ...options2, env: options2.env || this.env, logOutput: false, progress: null });
+    if (result.code !== 0) throw Object.assign(new Error("Native job command failed."), { code: result.code, stderr: result.output });
+    return { stdout: result.output, stderr: "" };
   }
   async help() {
     const binary = await this.executable();
@@ -47929,10 +47965,10 @@ var Workstation = class {
     const vmx3 = await this.vmx(input2);
     const config2 = parseAssignments(await import_promises2.default.readFile(vmx3, "utf8"));
     const running = parseCountedList(await this.run(["list"]));
-    const realRunning = await Promise.all(running.map(async (file5) => import_promises2.default.realpath(file5).catch(() => file5)));
-    const compare = (file5) => process.platform === "win32" ? file5.toLowerCase() : file5;
+    const realRunning = await Promise.all(running.map(async (file6) => import_promises2.default.realpath(file6).catch(() => file6)));
+    const compare = (file6) => process.platform === "win32" ? file6.toLowerCase() : file6;
     const hardware2 = Object.fromEntries(Object.entries(config2).filter(([key3]) => /^(displayName|guestOS|memsize|numvcpus|virtualHW.version|ethernet\d+\.(present|connectionType|vnet)|(?:scsi|sata|ide|nvme)\d+:\d+\.(present|fileName|deviceType))$/.test(key3)));
-    return { vmx: vmx3, running: realRunning.some((file5) => compare(file5) === compare(vmx3)), hardware: hardware2 };
+    return { vmx: vmx3, running: realRunning.some((file6) => compare(file6) === compare(vmx3)), hardware: hardware2 };
   }
   async power(input2, action, mode = "soft", gui = false) {
     if (!["start", "stop", "reset", "suspend", "pause", "unpause"].includes(action)) throw new Error("Unsupported power action.");
@@ -47994,8 +48030,8 @@ var import_node_path5 = __toESM(require("node:path"), 1);
 var import_node_path4 = __toESM(require("node:path"), 1);
 var import_promises3 = __toESM(require("node:fs/promises"), 1);
 var import_node_fs2 = require("node:fs");
-async function openPrivateFile(filename, flags2 = import_node_fs2.constants.O_RDONLY) {
-  const handle = await import_promises3.default.open(filename, flags2 | import_node_fs2.constants.O_NOFOLLOW | import_node_fs2.constants.O_NONBLOCK, 384);
+async function openPrivateFile(filename2, flags2 = import_node_fs2.constants.O_RDONLY) {
+  const handle = await import_promises3.default.open(filename2, flags2 | import_node_fs2.constants.O_NOFOLLOW | import_node_fs2.constants.O_NONBLOCK, 384);
   try {
     const stat = await handle.stat();
     if (!stat.isFile() || stat.uid !== process.getuid() || stat.nlink !== 1) throw new Error("Sensitive files must be regular files owned by the current user with exactly one hard link.");
@@ -48005,8 +48041,8 @@ async function openPrivateFile(filename, flags2 = import_node_fs2.constants.O_RD
     throw error62;
   }
 }
-async function readPrivateFile(filename) {
-  const handle = await openPrivateFile(filename);
+async function readPrivateFile(filename2) {
+  const handle = await openPrivateFile(filename2);
   try {
     if ((await handle.stat()).mode & 63) throw new Error("Credentials file must be private (chmod 600).");
     return await handle.readFile("utf8");
@@ -48015,8 +48051,8 @@ async function readPrivateFile(filename) {
   }
 }
 function localFileProtector(backend2, { platform = process.platform, root } = {}) {
-  if (platform === "linux") return async (filename) => {
-    const handle = await openPrivateFile(filename);
+  if (platform === "linux") return async (filename2) => {
+    const handle = await openPrivateFile(filename2);
     try {
       await handle.chmod(384);
       if ((await handle.stat()).mode & 63) throw new Error("This filesystem does not enforce private Linux file permissions. Use a native Linux filesystem for sensitive files.");
@@ -48033,10 +48069,10 @@ function localFileProtector(backend2, { platform = process.platform, root } = {}
       throw Object.assign(new Error("PLUGIN_RUNTIME_MISSING: The VMware Workstation plugin runtime is incomplete or no longer available (Protect-LocalFile.ps1). Reconnect the plugin or open a fresh chat to use the installed version. If this persists, reinstall/reimport the plugin before retrying.", { cause }), { code: "PLUGIN_RUNTIME_MISSING" });
     }
   };
-  const protect = async (filename) => {
+  const protect = async (filename2) => {
     await preflight();
     try {
-      return await backend2.execute("pwsh", ["-NoProfile", "-File", script, "-LiteralPath", filename], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
+      return await backend2.execute("pwsh", ["-NoProfile", "-File", script, "-LiteralPath", filename2], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
     } catch (error62) {
       await preflight();
       throw error62;
@@ -48079,24 +48115,24 @@ var Credentials = class {
   }
   async guest(profile = "default") {
     const name2 = this.profile(profile);
-    const file5 = await this.load();
+    const file6 = await this.load();
     const prefix2 = `VMWARE_GUEST_${name2.toUpperCase()}`;
-    const username = this.env[`${prefix2}_USERNAME`] ?? file5.guest?.[name2]?.username;
-    const password = this.remember(this.env[`${prefix2}_PASSWORD`] ?? file5.guest?.[name2]?.password);
+    const username = this.env[`${prefix2}_USERNAME`] ?? file6.guest?.[name2]?.username;
+    const password = this.remember(this.env[`${prefix2}_PASSWORD`] ?? file6.guest?.[name2]?.password);
     if (typeof username !== "string" || !username || typeof password !== "string" || !password) throw new Error(`Guest credential profile '${name2}' is not configured. Use VMWARE_CREDENTIALS_FILE or ${prefix2}_USERNAME/PASSWORD; never paste passwords into chat.`);
     return { username, password };
   }
   async vm(profile) {
     const name2 = this.profile(profile);
-    const file5 = await this.load();
-    const password = this.remember(this.env[`VMWARE_VM_${name2.toUpperCase()}_PASSWORD`] ?? file5.vm?.[name2]?.password);
+    const file6 = await this.load();
+    const password = this.remember(this.env[`VMWARE_VM_${name2.toUpperCase()}_PASSWORD`] ?? file6.vm?.[name2]?.password);
     if (typeof password !== "string" || !password) throw new Error(`Encrypted VM password profile '${name2}' is not configured.`);
     return password;
   }
   async console(vmx3, requestedProfile) {
-    const file5 = await this.load();
+    const file6 = await this.load();
     const canonical = (value) => process.platform === "win32" ? import_node_path5.default.resolve(value).toLowerCase() : import_node_path5.default.resolve(value);
-    const profiles = file5.console || {};
+    const profiles = file6.console || {};
     const resolved = await Promise.all(Object.entries(profiles).map(async ([name3, entry2]) => [name3, typeof entry2?.vmx === "string" ? await import_promises4.default.realpath(entry2.vmx).catch(() => entry2.vmx) : null]));
     const matches = resolved.filter(([, target3]) => target3 && canonical(target3) === canonical(vmx3));
     if (!requestedProfile && matches.length > 1) throw new Error("Multiple console profiles identify this VM. Use its configured profile alias as vm_id.");
@@ -48109,9 +48145,9 @@ var Credentials = class {
     return { profile: name2, password };
   }
   async rest() {
-    const file5 = await this.load();
-    const username = this.env.VMWARE_REST_USERNAME ?? file5.rest?.username;
-    const password = this.remember(this.env.VMWARE_REST_PASSWORD ?? file5.rest?.password);
+    const file6 = await this.load();
+    const username = this.env.VMWARE_REST_USERNAME ?? file6.rest?.username;
+    const password = this.remember(this.env.VMWARE_REST_PASSWORD ?? file6.rest?.password);
     if (typeof username !== "string" || !username || typeof password !== "string" || !password || username.includes(":")) throw new Error("REST credentials are not configured. Set VMWARE_REST_USERNAME/PASSWORD or VMWARE_CREDENTIALS_FILE. REST usernames cannot contain colons.");
     const token = Buffer.from(`${username}:${password}`, "utf8").toString("base64");
     this.secrets.add(token);
@@ -48126,6 +48162,7 @@ var Credentials = class {
 };
 
 // src/vmrun-commands.mjs
+var import_node_path6 = __toESM(require("node:path"), 1);
 var s = (name2, extra = {}) => ({ name: name2, type: "string", ...extra });
 var e = (name2, values, extra = {}) => ({ name: name2, type: "enum", values, ...extra });
 var n = (name2, minimum, maximum) => ({ name: name2, type: "integer", minimum, maximum });
@@ -48206,11 +48243,16 @@ function commandSchema(command) {
 async function executeCommand(backend2, credentials2, command, input2) {
   const a = commandSchema(command).parse(input2);
   const argv = [command.command];
+  const resources = [];
   if (command.vmx) argv.push(await backend2.vmx(a.vmx));
+  if (command.vmx) resources.push(command.command === "clone" ? import_node_path6.default.dirname(argv[1]) : argv[1]);
   for (const p of command.parameters) {
     let value = a[p.name];
     if (value === void 0 || p.type === "boolean" && !value) continue;
-    if (p.hostPath) value = await backend2.hostPath(value, p.hostPath, a.overwrite);
+    if (p.hostPath) {
+      value = await backend2.hostPath(value, p.hostPath, a.overwrite);
+      if (!command.readOnly) resources.push(p.hostPath === "new-vmx" ? import_node_path6.default.dirname(value) : value);
+    }
     if (p.flag) argv.push(p.flag);
     else if (p.prefix) argv.push(p.prefix + value);
     else if (p.type === "strings") argv.push(...value);
@@ -48222,7 +48264,8 @@ async function executeCommand(backend2, credentials2, command, input2) {
     const auth = await credentials2.guest(a.guest_profile);
     authentication.push("-gu", auth.username, "-gp", auth.password);
   }
-  const output2 = await backend2.run(argv, { mutation: !command.readOnly, authentication, timeout: a.timeout_seconds * 1e3 });
+  const run = () => backend2.run(argv, { mutation: !command.readOnly, authentication, timeout: a.timeout_seconds * 1e3 });
+  const output2 = command.readOnly || !backend2.resources ? await run() : await backend2.resources.use(resources, run);
   return { command: command.command, commandSucceeded: true, output: credentials2.redact(output2) };
 }
 
@@ -49326,9 +49369,9 @@ var RestClient = class {
       }
       return { status: response.status, data };
     } catch (error62) {
-      const uncertain = method !== "GET" ? " The operation may have taken effect; inspect state before retrying." : "";
+      const uncertain2 = method !== "GET" ? " The operation may have taken effect; inspect state before retrying." : "";
       const reason = error62.status ? `HTTP ${error62.status}` : error62.name === "TimeoutError" || error62.name === "AbortError" ? "timeout" : error62.message === "RESPONSE_TOO_LARGE" ? "response exceeded 1 MiB" : "connection, TLS, or response failure";
-      throw new Error(`Workstation REST ${method} failed (${reason}).${uncertain}${error62.details ? ` ${this.credentials.redact(error62.details)}` : ""}`);
+      throw new Error(`Workstation REST ${method} failed (${reason}).${uncertain2}${error62.details ? ` ${this.credentials.redact(error62.details)}` : ""}`);
     }
   }
   async assertVM(id) {
@@ -49436,7 +49479,7 @@ var vmrun_help_default = {
 // src/vm-files.mjs
 var import_promises9 = __toESM(require("node:fs/promises"), 1);
 var import_node_fs3 = require("node:fs");
-var import_node_path10 = __toESM(require("node:path"), 1);
+var import_node_path11 = __toESM(require("node:path"), 1);
 var import_node_crypto2 = require("node:crypto");
 
 // src/hardware-schemas.mjs
@@ -49491,11 +49534,11 @@ var usesTypedCreation = (a) => Object.keys(typedCreateFields).some((k) => a[k] !
 
 // src/hardware.mjs
 var import_promises8 = __toESM(require("node:fs/promises"), 1);
-var import_node_path9 = __toESM(require("node:path"), 1);
+var import_node_path10 = __toESM(require("node:path"), 1);
 
 // src/vm-hardware.mjs
 var import_promises5 = __toESM(require("node:fs/promises"), 1);
-var import_node_path6 = __toESM(require("node:path"), 1);
+var import_node_path7 = __toESM(require("node:path"), 1);
 function hardwareError(code, message) {
   throw Object.assign(new Error(message), { code, details: { action: "Inspect the selected VM, fully power it off and close other configuration writers before retrying." } });
 }
@@ -49518,15 +49561,15 @@ async function requireOffline(backend2, vmx3) {
   if ((await import_promises5.default.stat(vmx3)).nlink > 1) hardwareError("UNSAFE_VM", "Hard-linked VMX files cannot be edited safely.");
   if (Object.keys(vm2.config).some((k) => /^(encryption\.|managedvm\.autoaddvtpm)/i.test(k))) hardwareError("UNSAFE_VM", "Encrypted/managed VM hardware editing is unsupported.");
   if (vm2.config["checkpoint.vmstate"] || vm2.config["suspend.filename"]) hardwareError("VM_SUSPENDED", "VMX declares saved state; fully power off the VM before editing.");
-  const directories = /* @__PURE__ */ new Set([import_node_path6.default.dirname(vmx3)]);
-  for (const key3 of ["workingdir", "snapshot.directory"]) if (vm2.config[key3]) directories.add(await backend2.hostPath(import_node_path6.default.resolve(import_node_path6.default.dirname(vmx3), vm2.config[key3]), "directory"));
+  const directories = /* @__PURE__ */ new Set([import_node_path7.default.dirname(vmx3)]);
+  for (const key3 of ["workingdir", "snapshot.directory"]) if (vm2.config[key3]) directories.add(await backend2.hostPath(import_node_path7.default.resolve(import_node_path7.default.dirname(vmx3), vm2.config[key3]), "directory"));
   for (const directory of directories) if ((await import_promises5.default.readdir(directory)).some((name2) => /(?:\.lck|\.vmss|\.vmem)$/i.test(name2))) hardwareError("VM_LOCKED_OR_SUSPENDED", "VM directory contains locks or saved/suspended memory. Fully power off and close the VM; never delete locks/state to bypass this check.");
   return vm2;
 }
 
 // src/disks.mjs
 var import_promises6 = __toESM(require("node:fs/promises"), 1);
-var import_node_path7 = __toESM(require("node:path"), 1);
+var import_node_path8 = __toESM(require("node:path"), 1);
 var file3 = external_exports.string().min(1).max(4096).refine((value) => !/[\x00-\x1f]/.test(value));
 var timeout = external_exports.number().int().min(1).max(3600).default(600);
 var capacity = external_exports.number().int().min(1).max(8388608).describe("Total virtual capacity in MiB, not an increment.");
@@ -49548,10 +49591,10 @@ var diskSchemas = {
 var flags = { create: "-c", expand: "-x", convert: "-r", compact: "-k", defragment: "-d" };
 var types = /* @__PURE__ */ new Set(["monolithicSparse", "monolithicFlat", "twoGbMaxExtentSparse", "twoGbMaxExtentFlat", "streamOptimized"]);
 var sparse = /* @__PURE__ */ new Set(["monolithicSparse", "twoGbMaxExtentSparse"]);
-var key = (file5) => process.platform === "win32" ? file5.toLowerCase() : file5;
-var exists = async (file5) => {
+var key = (file6) => process.platform === "win32" ? file6.toLowerCase() : file6;
+var exists = async (file6) => {
   try {
-    return await import_promises6.default.lstat(file5);
+    return await import_promises6.default.lstat(file6);
   } catch (e2) {
     if (e2.code === "ENOENT") return null;
     throw e2;
@@ -49572,8 +49615,8 @@ function vmConfig(text3) {
   if (config2[".encoding"] && !/^utf-?8$/i.test(config2[".encoding"])) fail("UNSAFE_VM", "Disk edits require UTF-8 VMX files.");
   return config2;
 }
-async function readDiskDescriptor(file5) {
-  const handle = await import_promises6.default.open(file5, "r");
+async function readDiskDescriptor(file6) {
+  const handle = await import_promises6.default.open(file6, "r");
   try {
     const stat = await handle.stat();
     const header = Buffer.alloc(512);
@@ -49611,7 +49654,7 @@ async function readDiskDescriptor(file5) {
       const match = line.match(/^\s*RW\s+(\d+)\s+(SPARSE|FLAT)\s+"([^"\r\n]+)"(?:\s+(\d+))?\s*$/);
       if (!match || !Number.isSafeInteger(Number(match[1])) || Number(match[1]) <= 0) fail("UNSUPPORTED_DISK", "Unsupported VMDK extent declaration.");
       const name2 = match[3];
-      if (import_node_path7.default.basename(name2) !== name2 || /[\\/:\x00-\x1f]/.test(name2) || [".", ".."].includes(name2)) fail("UNSAFE_PATH", "VMDK extents must use flat local filenames.");
+      if (import_node_path8.default.basename(name2) !== name2 || /[\\/:\x00-\x1f]/.test(name2) || [".", ".."].includes(name2)) fail("UNSAFE_PATH", "VMDK extents must use flat local filenames.");
       extents.push({ sectors: Number(match[1]), type: match[2], name: name2, offset_sectors: Number(match[4] || 0) });
     }
     const capacityBytes = extents.reduce((sum, e2) => sum + e2.sectors * 512, 0);
@@ -49657,7 +49700,7 @@ var DiskManager = class {
     return status;
   }
   async diskPath(input2) {
-    if (import_node_path7.default.extname(input2).toLowerCase() !== ".vmdk" || /:[^\\/]/.test(input2.slice(2))) fail("UNSAFE_PATH", "Select an absolute .vmdk file, without alternate streams.");
+    if (import_node_path8.default.extname(input2).toLowerCase() !== ".vmdk" || /:[^\\/]/.test(input2.slice(2))) fail("UNSAFE_PATH", "Select an absolute .vmdk file, without alternate streams.");
     return this.backend.hostPath(input2, "input-file");
   }
   async inspect(input2) {
@@ -49666,8 +49709,8 @@ var DiskManager = class {
     const descriptor = await readDiskDescriptor(disk);
     const files = /* @__PURE__ */ new Map();
     for (const extent of descriptor.extents) {
-      const backing = await this.backend.hostPath(import_node_path7.default.join(import_node_path7.default.dirname(disk), extent.name), "input-file");
-      if (!isWithin(import_node_path7.default.dirname(disk), backing)) fail("UNSAFE_PATH", "VMDK extent escapes the descriptor directory.");
+      const backing = await this.backend.hostPath(import_node_path8.default.join(import_node_path8.default.dirname(disk), extent.name), "input-file");
+      if (!isWithin(import_node_path8.default.dirname(disk), backing)) fail("UNSAFE_PATH", "VMDK extent escapes the descriptor directory.");
       const stat2 = await import_promises6.default.stat(backing);
       if (extent.type === "FLAT" && stat2.size < (extent.offset_sectors + extent.sectors) * 512) fail("UNSUPPORTED_DISK", "Flat extent is shorter than its declared capacity.");
       files.set(key(backing), { path: backing, size_bytes: stat2.size, modified_ms: stat2.mtimeMs, device: stat2.dev, inode: stat2.ino });
@@ -49687,12 +49730,12 @@ var DiskManager = class {
     const text3 = await import_promises6.default.readFile(vmx3, "utf8");
     const config2 = vmConfig(text3);
     if (Object.entries(config2).some(([k, v]) => /^encryption\./.test(k) && v || k === "vtpm.present" && /^true$/i.test(v))) fail("UNSAFE_VM", "Encrypted and vTPM VM configurations are unsupported for disk edits.");
-    const dirs = /* @__PURE__ */ new Set([import_node_path7.default.dirname(vmx3)]);
-    for (const k of ["workingdir", "snapshot.directory"]) if (config2[k]) dirs.add(await this.backend.hostPath(import_node_path7.default.resolve(import_node_path7.default.dirname(vmx3), config2[k]), "directory"));
+    const dirs = /* @__PURE__ */ new Set([import_node_path8.default.dirname(vmx3)]);
+    for (const k of ["workingdir", "snapshot.directory"]) if (config2[k]) dirs.add(await this.backend.hostPath(import_node_path8.default.resolve(import_node_path8.default.dirname(vmx3), config2[k]), "directory"));
     for (const dir of dirs) if ((await import_promises6.default.readdir(dir)).some((name2) => /\.(lck|vmss|vmem|vmsn)$/i.test(name2))) fail("UNSAFE_VM", "Locked or suspended VM detected. Fully power off and close it before disk edits.");
     if (config2["checkpoint.vmstate"] || config2["suspend.filename"]) fail("UNSAFE_VM", "Snapshots or saved state prevent safe disk edits. Prepare a fully powered-off VM without snapshots.");
     for (const dir of dirs) for (const name2 of await import_promises6.default.readdir(dir)) if (/\.vmsd$/i.test(name2)) {
-      const metadata = vmConfig(await import_promises6.default.readFile(import_node_path7.default.join(dir, name2), "utf8"));
+      const metadata = vmConfig(await import_promises6.default.readFile(import_node_path8.default.join(dir, name2), "utf8"));
       if (Number(metadata["snapshot.numsnapshots"] || 0) !== 0 || Object.keys(metadata).some((k) => /^snapshot\d+\./.test(k))) fail("UNSAFE_VM", "Snapshot metadata prevents safe disk edits.");
     }
     return { vmx: vmx3, text: text3, config: config2 };
@@ -49709,10 +49752,10 @@ var DiskManager = class {
       inventoryKeys.add(match[1].toLowerCase());
       const value = parseAssignments(line)[match[1]];
       if (!value) continue;
-      if (!import_node_path7.default.isAbsolute(value) || import_node_path7.default.extname(value).toLowerCase() !== ".vmx") fail("INVENTORY_UNAVAILABLE", "Inventory VMX paths must be absolute.");
+      if (!import_node_path8.default.isAbsolute(value) || import_node_path8.default.extname(value).toLowerCase() !== ".vmx") fail("INVENTORY_UNAVAILABLE", "Inventory VMX paths must be absolute.");
       candidates.push(value);
     }
-    for (const name2 of await import_promises6.default.readdir(import_node_path7.default.dirname(info.disk))) if (/\.vmx$/i.test(name2)) candidates.push(import_node_path7.default.join(import_node_path7.default.dirname(info.disk), name2));
+    for (const name2 of await import_promises6.default.readdir(import_node_path8.default.dirname(info.disk))) if (/\.vmx$/i.test(name2)) candidates.push(import_node_path8.default.join(import_node_path8.default.dirname(info.disk), name2));
     const references2 = [];
     const seen = /* @__PURE__ */ new Set();
     const paths = new Set(info.files.map((f) => key(f.path)));
@@ -49724,7 +49767,7 @@ var DiskManager = class {
       const text3 = await import_promises6.default.readFile(vmx3, "utf8");
       const config2 = vmConfig(text3);
       for (const [name2, value] of Object.entries(config2)) if (/^(scsi|sata|ide|nvme)\d+:\d+\.filename$/.test(name2) && /\.vmdk$/i.test(value)) {
-        const backing = await this.diskPath(import_node_path7.default.resolve(import_node_path7.default.dirname(vmx3), value));
+        const backing = await this.diskPath(import_node_path8.default.resolve(import_node_path8.default.dirname(vmx3), value));
         if (paths.has(key(backing))) references2.push({ vmx: vmx3, slot: name2.replace(/\.filename$/, ""), text: text3 });
         else {
           const other = await this.inspect({ disk: backing });
@@ -49737,20 +49780,20 @@ var DiskManager = class {
   }
   async preflight(info, extra) {
     if (!info.independent || info.create_type === "streamOptimized") fail("UNSAFE_CHAIN", "Snapshots, linked/backing chains and stream-optimized source disks are refused. Prepare an independent Workstation disk.");
-    if ((await import_promises6.default.readdir(import_node_path7.default.dirname(info.disk))).some((name2) => /\.(lck|vmss|vmem|vmsn)$/i.test(name2))) fail("UNSAFE_DISK", "Disk directory contains locks or saved/snapshot state.");
+    if ((await import_promises6.default.readdir(import_node_path8.default.dirname(info.disk))).some((name2) => /\.(lck|vmss|vmem|vmsn)$/i.test(name2))) fail("UNSAFE_DISK", "Disk directory contains locks or saved/snapshot state.");
     for (const f of info.files) if ((await import_promises6.default.stat(f.path)).nlink > 1) fail("UNSAFE_DISK", "Hard-linked disk files are unsafe to modify.");
-    for (const name2 of await import_promises6.default.readdir(import_node_path7.default.dirname(info.disk))) {
-      if (!/\.vmdk$/i.test(name2) || info.files.some((f) => key(f.path) === key(import_node_path7.default.join(import_node_path7.default.dirname(info.disk), name2)))) continue;
+    for (const name2 of await import_promises6.default.readdir(import_node_path8.default.dirname(info.disk))) {
+      if (!/\.vmdk$/i.test(name2) || info.files.some((f) => key(f.path) === key(import_node_path8.default.join(import_node_path8.default.dirname(info.disk), name2)))) continue;
       let descriptor;
       try {
-        descriptor = await readDiskDescriptor(await this.diskPath(import_node_path7.default.join(import_node_path7.default.dirname(info.disk), name2)));
+        descriptor = await readDiskDescriptor(await this.diskPath(import_node_path8.default.join(import_node_path8.default.dirname(info.disk), name2)));
       } catch (e2) {
         if (e2.code === "UNSUPPORTED_DISK" && /extent has no embedded|Unrecognized VMDK/.test(e2.message) && /-(?:flat|[sf]\d+)\.vmdk$/i.test(name2)) continue;
         throw e2;
       }
       if (descriptor.parent_cid === info.cid.toLowerCase() || descriptor.has_parent_hint) fail("UNSAFE_CHAIN", "A dependent/snapshot disk descriptor is present beside this disk.");
       for (const extent of descriptor.extents) {
-        const backing = await this.backend.hostPath(import_node_path7.default.join(import_node_path7.default.dirname(info.disk), extent.name), "input-file");
+        const backing = await this.backend.hostPath(import_node_path8.default.join(import_node_path8.default.dirname(info.disk), extent.name), "input-file");
         if (info.files.some((f) => key(f.path) === key(backing))) fail("SHARED_DISK", "Another local descriptor references this disk or its extents.");
       }
     }
@@ -49766,17 +49809,17 @@ var DiskManager = class {
     if (!Number.isSafeInteger(required2) || !Number.isFinite(free) || free < required2) fail("INSUFFICIENT_SPACE", "Insufficient or unknown free space for a conservative disk operation estimate.", { required_bytes: required2, available_bytes: free });
   }
   async output(input2) {
-    if (!/^[a-zA-Z0-9][a-zA-Z0-9_.-]*\.vmdk$/i.test(import_node_path7.default.basename(input2))) fail("UNSAFE_PATH", "Destination needs a simple .vmdk filename.");
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9_.-]*\.vmdk$/i.test(import_node_path8.default.basename(input2))) fail("UNSAFE_PATH", "Destination needs a simple .vmdk filename.");
     const disk = await this.backend.hostPath(input2, "output-file");
-    const directory = import_node_path7.default.dirname(disk);
+    const directory = import_node_path8.default.dirname(disk);
     await this.backend.hostPath(directory, "host-destination-directory");
-    await this.backend.hostPath(import_node_path7.default.dirname(directory), "directory");
+    await this.backend.hostPath(import_node_path8.default.dirname(directory), "directory");
     if (await exists(directory)) fail("TARGET_EXISTS", "Disk output requires a NEW parent directory to protect all companion extents.");
     return { disk, directory };
   }
-  async run(status, args, seconds, partial2) {
+  async run(status, args, seconds2, partial2) {
     try {
-      await this.backend.execute(status.executable, args, { shell: false, windowsHide: true, timeout: seconds * 1e3, maxBuffer: 1024 * 1024, encoding: "utf8" });
+      await this.backend.nativeRun(status.executable, args, { shell: false, windowsHide: true, timeout: seconds2 * 1e3, maxBuffer: 1024 * 1024, encoding: "utf8" });
     } catch (e2) {
       fail("DISK_OPERATION_FAILED", `Disk manager failed (${e2.killed ? "timeout" : e2.code || "execution error"}). Inspect state before retrying.`, { partial_output: partial2, action: "No automatic rollback or deletion. Inspect retained files; remove only the new output directory after confirming its contents are disposable. In-place operations may have partially changed the original." });
     }
@@ -49787,14 +49830,14 @@ var DiskManager = class {
     const output2 = a.destination ? await this.output(a.destination) : null;
     const original = a.disk ? await this.inspect({ disk: a.disk }) : null;
     const refs = original ? await this.references(original, a.vmx_paths) : [];
-    const resources = [...original ? [import_node_path7.default.dirname(original.disk), ...original.files.map((f) => f.path)] : [], ...refs.map((r) => r.vmx), ...output2 ? [output2.directory] : []];
+    const resources = [...original ? [import_node_path8.default.dirname(original.disk), ...original.files.map((f) => f.path)] : [], ...refs.map((r) => r.vmx), ...output2 ? [output2.directory] : []];
     return this.backend.resources.use(resources, async () => {
       if (original) await this.preflight(original, a.vmx_paths);
       if (["compact", "defragment"].includes(operation) && !sparse.has(original.create_type)) fail("UNSUPPORTED_DISK", "Compaction and defragmentation require a growable Workstation disk.");
       const bytes = a.capacity_mb ? a.capacity_mb * 1024 * 1024 : original.capacity_bytes;
       if (operation === "expand" && bytes <= original.capacity_bytes) fail("INVALID_CAPACITY", "New capacity must exceed the existing virtual capacity. Shrinking is unsupported.");
       if ((a.adapter === "buslogic" || original?.adapter === "buslogic") && a.capacity_mb > 2040 * 1024) fail("INVALID_CAPACITY", "BusLogic disks are limited to 2040 GiB.");
-      await this.freeSpace(output2 ? import_node_path7.default.dirname(output2.directory) : import_node_path7.default.dirname(original.disk), bytes);
+      await this.freeSpace(output2 ? import_node_path8.default.dirname(output2.directory) : import_node_path8.default.dirname(original.disk), bytes);
       if (original) {
         const current = await this.inspect({ disk: original.disk });
         if (JSON.stringify(current) !== JSON.stringify(original)) fail("DISK_CHANGED", "Disk changed during preflight; inspect and retry.");
@@ -49821,14 +49864,14 @@ var DiskManager = class {
     if (a.unit > max || a.controller === "scsi" && a.unit === 7 || a.controller === "ide" && a.controller_index > 1) fail("INVALID_SLOT", "Invalid controller/unit index; SCSI unit 7 is reserved.");
     const vmx3 = await this.backend.vmx(a.vmx);
     const info = await this.inspect({ disk: a.disk });
-    return this.backend.resources.use([vmx3, import_node_path7.default.dirname(info.disk)], async () => {
+    return this.backend.resources.use([vmx3, import_node_path8.default.dirname(info.disk)], async () => {
       const vm2 = await this.safeVM(vmx3);
       const prefix2 = `${a.controller}${a.controller_index}:${a.unit}`;
       if (await import_promises6.default.stat(vmx3).then((s2) => s2.nlink > 1)) fail("UNSAFE_VM", "Hard-linked VMX files cannot be edited safely.");
       const refs = await this.preflight(info, [...a.vmx_paths, vmx3]);
       const existing = vm2.config[`${prefix2}.filename`];
       if (detach) {
-        if (!existing || key(await this.diskPath(import_node_path7.default.resolve(import_node_path7.default.dirname(vmx3), existing))) !== key(info.disk)) fail("SLOT_MISMATCH", "Selected slot does not reference the expected VMDK.");
+        if (!existing || key(await this.diskPath(import_node_path8.default.resolve(import_node_path8.default.dirname(vmx3), existing))) !== key(info.disk)) fail("SLOT_MISMATCH", "Selected slot does not reference the expected VMDK.");
       } else {
         if (Object.keys(vm2.config).some((k) => k.startsWith(prefix2 + "."))) fail("SLOT_OCCUPIED", "Slot already has settings. Choose an unused slot.");
         if (refs.length) fail("SHARED_DISK", "Disk is already referenced by a VM device. Detach it first.");
@@ -49850,7 +49893,7 @@ var DiskManager = class {
 
 // src/lan-segments.mjs
 var import_promises7 = __toESM(require("node:fs/promises"), 1);
-var import_node_path8 = __toESM(require("node:path"), 1);
+var import_node_path9 = __toESM(require("node:path"), 1);
 var import_node_crypto = require("node:crypto");
 var vmx = external_exports.string().min(1).describe("Absolute VMX path. Adapter changes require a powered-off, unlocked UTF-8 VM.");
 var segment = external_exports.string().min(1).max(256).describe("LAN segment name or pvnID returned by list_lan_segments. Use the ID if names are ambiguous.");
@@ -49949,7 +49992,7 @@ async function assertLanGUIClosed(backend2, platform = process.platform, procRoo
     names2 = [];
     for (const pid of (await import_promises7.default.readdir(procRoot)).filter((entry) => /^\d+$/.test(entry))) {
       try {
-        names2.push((await import_promises7.default.readFile(import_node_path8.default.join(procRoot, pid, "comm"), "utf8")).trim());
+        names2.push((await import_promises7.default.readFile(import_node_path9.default.join(procRoot, pid, "comm"), "utf8")).trim());
       } catch (error62) {
         if (error62.code !== "ENOENT" && error62.code !== "ESRCH") throw error62;
       }
@@ -49967,7 +50010,7 @@ var LanSegments = class {
     this.tail = Promise.resolve();
   }
   async readCatalog() {
-    if (!import_node_path8.default.isAbsolute(this.filename) || /[\x00-\x1f]/.test(this.filename)) throw new Error("VMWARE_PREFERENCES_PATH must be an absolute path without control characters.");
+    if (!import_node_path9.default.isAbsolute(this.filename) || /[\x00-\x1f]/.test(this.filename)) throw new Error("VMWARE_PREFERENCES_PATH must be an absolute path without control characters.");
     let bytes = null;
     try {
       const stat = await import_promises7.default.lstat(this.filename);
@@ -50007,10 +50050,10 @@ var LanSegments = class {
     const bytes = renderPreferences(catalog.document, segments);
     const backup = catalog.bytes === null ? null : `${this.filename}.backup-${(0, import_node_crypto.randomUUID)()}`;
     const temporary = `${this.filename}.edit-${(0, import_node_crypto.randomUUID)()}`;
-    const write = async (filename, content) => {
-      await import_promises7.default.writeFile(filename, "", { flag: "wx", mode: 384 });
-      if (this.protectFile) await this.protectFile(filename);
-      await import_promises7.default.writeFile(filename, content);
+    const write = async (filename2, content) => {
+      await import_promises7.default.writeFile(filename2, "", { flag: "wx", mode: 384 });
+      if (this.protectFile) await this.protectFile(filename2);
+      await import_promises7.default.writeFile(filename2, content);
     };
     try {
       if (backup) await write(backup, catalog.bytes);
@@ -50093,7 +50136,7 @@ var LanSegments = class {
         if (!/^\s*vmlist\d+\.config\b/i.test(line)) continue;
         const entry = line.match(assignment);
         const value = entry && unescapeBytes(entry[2]);
-        if (!entry || value && (!import_node_path8.default.isAbsolute(value) || import_node_path8.default.extname(value).toLowerCase() !== ".vmx")) throw new Error("Malformed VM inventory; cannot verify LAN segment references.");
+        if (!entry || value && (!import_node_path9.default.isAbsolute(value) || import_node_path9.default.extname(value).toLowerCase() !== ".vmx")) throw new Error("Malformed VM inventory; cannot verify LAN segment references.");
       }
       const inventory = await this.backend.listVMs();
       if (inventory.warnings.length) throw new Error("Cannot verify segment usage because VM inventory is unavailable. Restore inventory before removal.");
@@ -50145,7 +50188,7 @@ var LanSegments = class {
         const saved = vm2.values.get(key3);
         if (saved) {
           try {
-            await import_promises7.default.access(import_node_path8.default.resolve(import_node_path8.default.dirname(vm2.vmx), saved));
+            await import_promises7.default.access(import_node_path9.default.resolve(import_node_path9.default.dirname(vm2.vmx), saved));
             throw new Error("VM has a saved/suspended state; power it off first.");
           } catch (error62) {
             if (error62.code !== "ENOENT") throw error62;
@@ -50387,7 +50430,7 @@ var HardwareManager = class {
   async create(a) {
     return this.vmFiles.exclusive(async () => {
       const directory = await this.backend.hostPath(a.directory, "destination-directory");
-      await this.backend.hostPath(import_node_path9.default.dirname(directory), "directory");
+      await this.backend.hostPath(import_node_path10.default.dirname(directory), "directory");
       await this.backend.hostPath(directory, "host-destination-directory");
       const caps = await this.available();
       const controllers = a.controllers ?? [{ type: "lsilogic", index: 0 }];
@@ -50431,22 +50474,22 @@ var HardwareManager = class {
         Object.assign(settings, { "sata0.present": "TRUE", [`${slot2}.present`]: "TRUE", [`${slot2}.deviceType`]: "cdrom-image", [`${slot2}.fileName`]: iso });
       }
       await this.disks.available("create", "0");
-      await this.disks.freeSpace(import_node_path9.default.dirname(directory), disks2.reduce((sum, d) => sum + d.capacity_mb * 1048576, 0));
+      await this.disks.freeSpace(import_node_path10.default.dirname(directory), disks2.reduce((sum, d) => sum + d.capacity_mb * 1048576, 0));
       if (nic.catalog) {
         await this.assertGUIClosed();
         await this.lan.unchanged(nic.catalog);
       }
       await import_promises8.default.mkdir(directory, { mode: 448 });
-      const vmx3 = import_node_path9.default.join(directory, "machine.vmx"), createdDisks = [];
+      const vmx3 = import_node_path10.default.join(directory, "machine.vmx"), createdDisks = [];
       return this.backend.resources.use([directory], async () => {
         try {
           for (let i = 0; i < disks2.length; i++) {
-            const d = disks2[i], destination = import_node_path9.default.join(directory, `disk-${i}`, "disk.vmdk");
+            const d = disks2[i], destination = import_node_path10.default.join(directory, `disk-${i}`, "disk.vmdk");
             const result = await this.disks.perform("create", { destination, capacity_mb: d.capacity_mb, adapter: "lsilogic", disk_type: "0", timeout_seconds: a.timeout_seconds });
             createdDisks.push(result.disk);
             const slot2 = `${d.controller}${d.controller_index}:${d.unit}`;
             settings[`${slot2}.present`] = "TRUE";
-            settings[`${slot2}.fileName`] = import_node_path9.default.relative(directory, result.disk);
+            settings[`${slot2}.fileName`] = import_node_path10.default.relative(directory, result.disk);
           }
           if (nic.catalog) {
             await this.assertGUIClosed();
@@ -50507,8 +50550,8 @@ var VMFiles = class {
       const vmrun = await this.backend.executable();
       const diskManager = await findVMwareExecutable("vmware-vdiskmanager", { env: this.backend.env, beside: vmrun });
       await import_promises9.default.mkdir(directory);
-      const vmx3 = import_node_path10.default.join(directory, "machine.vmx");
-      const disk = import_node_path10.default.join(directory, "disk.vmdk");
+      const vmx3 = import_node_path11.default.join(directory, "machine.vmx");
+      const disk = import_node_path11.default.join(directory, "disk.vmdk");
       try {
         await this.backend.execute(diskManager, ["-c", "-s", `${a.disk_gb}GB`, "-a", "lsilogic", "-t", "0", disk], { windowsHide: true, shell: false, timeout: a.timeout_seconds * 1e3, maxBuffer: 1024 * 1024, encoding: "utf8" });
         if (!(await import_promises9.default.stat(disk)).isFile()) throw new Error("Disk manager did not create the VMDK.");
@@ -50565,7 +50608,7 @@ var VMFiles = class {
       if (config2[".encoding"] && !/^utf-?8$/i.test(config2[".encoding"])) throw new Error("Local VMX editing supports UTF-8 only. Use REST or convert the VMX encoding explicitly.");
       for (const value of [config2["checkpoint.vmState"], config2["suspend.filename"]].filter(Boolean)) {
         try {
-          await import_promises9.default.access(import_node_path10.default.resolve(import_node_path10.default.dirname(vmx3), value));
+          await import_promises9.default.access(import_node_path11.default.resolve(import_node_path11.default.dirname(vmx3), value));
           throw new Error("VM has a saved/suspended state; fully power it off before editing hardware.");
         } catch (error62) {
           if (error62.code !== "ENOENT") throw error62;
@@ -50620,11 +50663,11 @@ var VMFiles = class {
       } catch (error62) {
         const cleanup = [temporaryCreated && temporary, backupCreated && !backupComplete && backup].filter(Boolean);
         const failed = [];
-        for (const filename of cleanup) {
+        for (const filename2 of cleanup) {
           try {
-            await import_promises9.default.unlink(filename);
+            await import_promises9.default.unlink(filename2);
           } catch (cause) {
-            if (cause.code !== "ENOENT") failed.push(filename);
+            if (cause.code !== "ENOENT") failed.push(filename2);
           }
         }
         if (failed.length) throw Object.assign(new Error(`${error62.message} Could not remove incomplete files: ${failed.join(", ")}. Inspect them before retrying.`, { cause: error62 }), { code: error62.code });
@@ -54987,7 +55030,7 @@ var import_pngjs = __toESM(require_png(), 1);
 
 // src/linux-listener.mjs
 var import_promises10 = __toESM(require("node:fs/promises"), 1);
-var import_node_path11 = __toESM(require("node:path"), 1);
+var import_node_path12 = __toESM(require("node:path"), 1);
 var import_node_os2 = __toESM(require("node:os"), 1);
 function procAddress(hex3, endian = import_node_os2.default.endianness()) {
   if (!/^(?:[0-9A-F]{8}|[0-9A-F]{32})$/i.test(hex3)) throw new Error("Unrecognized Linux TCP address.");
@@ -55012,8 +55055,8 @@ function parseProcListeners(text3, port) {
 }
 async function inspectLinuxListener(port, { procRoot = "/proc" } = {}) {
   if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("Invalid VNC listener port.");
-  const tcp = await import_promises10.default.readFile(import_node_path11.default.join(procRoot, "net/tcp"), "utf8");
-  const tcp6 = await import_promises10.default.readFile(import_node_path11.default.join(procRoot, "net/tcp6"), "utf8").catch((error62) => {
+  const tcp = await import_promises10.default.readFile(import_node_path12.default.join(procRoot, "net/tcp"), "utf8");
+  const tcp6 = await import_promises10.default.readFile(import_node_path12.default.join(procRoot, "net/tcp6"), "utf8").catch((error62) => {
     if (error62.code === "ENOENT") return "";
     throw error62;
   });
@@ -55022,17 +55065,17 @@ async function inspectLinuxListener(port, { procRoot = "/proc" } = {}) {
   const owners = /* @__PURE__ */ new Map();
   const inodes = new Set(listeners.map((item) => item.inode));
   for (const pid of (await import_promises10.default.readdir(procRoot)).filter((name2) => /^\d+$/.test(name2))) {
-    const directory = import_node_path11.default.join(procRoot, pid);
+    const directory = import_node_path12.default.join(procRoot, pid);
     let descriptors;
     try {
-      descriptors = await import_promises10.default.readdir(import_node_path11.default.join(directory, "fd"));
+      descriptors = await import_promises10.default.readdir(import_node_path12.default.join(directory, "fd"));
     } catch (error62) {
       if (["ENOENT", "ESRCH", "EACCES", "EPERM"].includes(error62.code)) continue;
       throw error62;
     }
     const owned = /* @__PURE__ */ new Set();
     for (const fd of descriptors) {
-      const link = await import_promises10.default.readlink(import_node_path11.default.join(directory, "fd", fd)).catch((error62) => {
+      const link = await import_promises10.default.readlink(import_node_path12.default.join(directory, "fd", fd)).catch((error62) => {
         if (["ENOENT", "ESRCH", "EACCES", "EPERM", "EINVAL"].includes(error62.code)) return "";
         throw error62;
       });
@@ -55042,9 +55085,9 @@ async function inspectLinuxListener(port, { procRoot = "/proc" } = {}) {
     if (!owned.size) continue;
     let owner;
     try {
-      const executable = await import_promises10.default.readlink(import_node_path11.default.join(directory, "exe"));
-      const args = (await import_promises10.default.readFile(import_node_path11.default.join(directory, "cmdline"), "utf8")).split("\0").filter(Boolean);
-      owner = { pid: Number(pid), processName: import_node_path11.default.basename(executable), arguments: args, commandLine: args.join(" ") };
+      const executable = await import_promises10.default.readlink(import_node_path12.default.join(directory, "exe"));
+      const args = (await import_promises10.default.readFile(import_node_path12.default.join(directory, "cmdline"), "utf8")).split("\0").filter(Boolean);
+      owner = { pid: Number(pid), processName: import_node_path12.default.basename(executable), arguments: args, commandLine: args.join(" ") };
     } catch (error62) {
       if (!["ENOENT", "ESRCH", "EACCES", "EPERM"].includes(error62.code)) throw error62;
       continue;
@@ -55112,8 +55155,8 @@ var ConsoleManager = class {
     this.closed = false;
   }
   async endpoint(vmID) {
-    const file5 = await this.credentials.load();
-    const aliases = Object.fromEntries(Object.entries(file5.console || {}).filter(([, entry]) => typeof entry?.vmx === "string").map(([name2, entry]) => [name2, entry.vmx]));
+    const file6 = await this.credentials.load();
+    const aliases = Object.fromEntries(Object.entries(file6.console || {}).filter(([, entry]) => typeof entry?.vmx === "string").map(([name2, entry]) => [name2, entry.vmx]));
     const vmx3 = await this.backend.resolveVM(vmID, { aliases, restInventory: this.rest ? async () => {
       const response = await this.rest.request("GET", "/api/vms");
       if (!Array.isArray(response.data)) throw new Error("REST inventory did not return VM IDs and paths.");
@@ -55364,12 +55407,12 @@ var ConsoleManager = class {
 // src/ovf.mjs
 var import_promises15 = __toESM(require("node:fs/promises"), 1);
 var import_node_os3 = __toESM(require("node:os"), 1);
-var import_node_path13 = __toESM(require("node:path"), 1);
+var import_node_path14 = __toESM(require("node:path"), 1);
 
 // src/ovf-artifacts.mjs
 var import_promises13 = __toESM(require("node:fs/promises"), 1);
 var import_node_fs4 = require("node:fs");
-var import_node_path12 = __toESM(require("node:path"), 1);
+var import_node_path13 = __toESM(require("node:path"), 1);
 var import_node_crypto6 = require("node:crypto");
 var import_promises14 = require("node:stream/promises");
 var import_tar_stream = __toESM(require_tar_stream(), 1);
@@ -55467,16 +55510,16 @@ function checkManifest(text3, files) {
 }
 async function inspectArtifact(backend2, input2, { signal } = {}) {
   const source3 = await backend2.hostPath(input2, "input-file");
-  const ext = import_node_path12.default.extname(source3).toLowerCase();
+  const ext = import_node_path13.default.extname(source3).toLowerCase();
   if (![".ovf", ".ova"].includes(ext)) throw new Error("Source must be a local .ovf or .ova file.");
   signal?.throwIfAborted();
   const files = /* @__PURE__ */ new Map();
   let descriptorName;
   let headerBytes = 0;
-  const add = (name2, file5) => {
-    headerBytes += file5.header.length;
+  const add = (name2, file6) => {
+    headerBytes += file6.header.length;
     if (headerBytes > 64 * 1024 * 1024) throw new Error("Appliance exceeds the 64 MiB header preflight budget.");
-    files.set(name2, file5);
+    files.set(name2, file6);
   };
   if (ext === ".ova") {
     const extract = import_tar_stream.default.extract();
@@ -55503,22 +55546,22 @@ async function inspectArtifact(backend2, input2, { signal } = {}) {
     }
     if (!descriptorName) throw new Error("OVA has no OVF descriptor.");
   } else {
-    descriptorName = import_node_path12.default.basename(source3);
+    descriptorName = import_node_path13.default.basename(source3);
     add(descriptorName, await digest((0, import_node_fs4.createReadStream)(source3, { signal }), true));
     const names2 = references(files.get(descriptorName).text);
-    const manifest = `${import_node_path12.default.basename(source3, import_node_path12.default.extname(source3))}.mf`;
+    const manifest = `${import_node_path13.default.basename(source3, import_node_path13.default.extname(source3))}.mf`;
     for (const name2 of [...names2, manifest]) {
-      const filename = import_node_path12.default.join(import_node_path12.default.dirname(source3), name2);
+      const filename2 = import_node_path13.default.join(import_node_path13.default.dirname(source3), name2);
       if (name2 === manifest) {
         try {
-          await import_promises13.default.lstat(filename);
+          await import_promises13.default.lstat(filename2);
         } catch (error62) {
           if (error62.code === "ENOENT") continue;
           throw error62;
         }
       }
-      const resolved = await backend2.hostPath(filename, "input-file");
-      if (!isWithin(import_node_path12.default.dirname(source3), resolved)) throw new Error("OVF reference escapes its source directory through a link.");
+      const resolved = await backend2.hostPath(filename2, "input-file");
+      if (!isWithin(import_node_path13.default.dirname(source3), resolved)) throw new Error("OVF reference escapes its source directory through a link.");
       if (!files.has(name2)) add(name2, await digest((0, import_node_fs4.createReadStream)(resolved, { signal }), /\.mf$/i.test(name2)));
     }
   }
@@ -55528,7 +55571,7 @@ async function inspectArtifact(backend2, input2, { signal } = {}) {
   const manifests = [...files].filter(([name2]) => /\.mf$/i.test(name2));
   if (manifests.length > 1) throw new Error("Multiple appliance manifests are unsupported.");
   if (manifests.length) checkManifest(manifests[0][1].text, files);
-  return { source: source3, descriptorName, manifest: manifests.length ? "checksums verified (SHA1/SHA256/SHA512); signer trust is not established" : "absent", descriptor: files.get(descriptorName).text, size: [...files.values()].reduce((size, file5) => size + file5.size, 0), files: [...files.keys()] };
+  return { source: source3, descriptorName, manifest: manifests.length ? "checksums verified (SHA1/SHA256/SHA512); signer trust is not established" : "absent", descriptor: files.get(descriptorName).text, size: [...files.values()].reduce((size, file6) => size + file6.size, 0), files: [...files.keys()] };
 }
 function machineRecords(output2) {
   const records = [];
@@ -55596,10 +55639,10 @@ var limits = [
   "OVF Tool decides hardware/device support. VM identity, MACs, firmware/NVRAM, guest properties, LAN segments and host-specific settings may not round-trip. Compare the imported VM before booting.",
   "Validation checks local descriptor/schema and any supplied manifest checksums. It does not establish signer trust or compatibility with a remote host, guest boot or application readiness."
 ];
-var key2 = (filename) => process.platform === "win32" ? filename.toLowerCase() : filename;
-var exists2 = async (filename) => {
+var key2 = (filename2) => process.platform === "win32" ? filename2.toLowerCase() : filename2;
+var exists2 = async (filename2) => {
   try {
-    return await import_promises15.default.lstat(filename);
+    return await import_promises15.default.lstat(filename2);
   } catch (error62) {
     if (error62.code === "ENOENT") return null;
     throw error62;
@@ -55608,7 +55651,7 @@ var exists2 = async (filename) => {
 async function removeTemporary(directory, parent, prefix2) {
   const actual = await import_promises15.default.realpath(directory);
   const base = await import_promises15.default.realpath(parent);
-  if (!isWithin(base, actual) || actual === base || !import_node_path13.default.basename(actual).startsWith(prefix2) || (await import_promises15.default.lstat(directory)).isSymbolicLink()) throw new Error("Temporary directory identity changed; retained for inspection.");
+  if (!isWithin(base, actual) || actual === base || !import_node_path14.default.basename(actual).startsWith(prefix2) || (await import_promises15.default.lstat(directory)).isSymbolicLink()) throw new Error("Temporary directory identity changed; retained for inspection.");
   await import_promises15.default.rm(actual, { recursive: true, force: true });
 }
 var OvfManager = class {
@@ -55629,8 +55672,8 @@ var OvfManager = class {
     let executable;
     try {
       executable = await this.executable();
-      scratch = await import_promises15.default.mkdtemp(import_node_path13.default.join(import_node_os3.default.tmpdir(), "vmware-ovf-status-"));
-      const config2 = import_node_path13.default.join(scratch, "empty.conf");
+      scratch = await import_promises15.default.mkdtemp(import_node_path14.default.join(import_node_os3.default.tmpdir(), "vmware-ovf-status-"));
+      const config2 = import_node_path14.default.join(scratch, "empty.conf");
       await import_promises15.default.writeFile(config2, "", { mode: 384 });
       const run = async (args) => {
         try {
@@ -55660,26 +55703,26 @@ var OvfManager = class {
     return status;
   }
   async sourcePath(input2) {
-    return import_node_path13.default.extname(input2).toLowerCase() === ".vmx" ? this.backend.vmx(input2) : this.backend.hostPath(input2, "input-file");
+    return import_node_path14.default.extname(input2).toLowerCase() === ".vmx" ? this.backend.vmx(input2) : this.backend.hostPath(input2, "input-file");
   }
   async start(operation, input2) {
     const a = ovfSchemas[operation].parse(input2);
     const inputPath = await this.sourcePath(a.source || a.vmx);
-    const ext = import_node_path13.default.extname(inputPath).slice(1).toLowerCase();
+    const ext = import_node_path14.default.extname(inputPath).slice(1).toLowerCase();
     if (!["ovf", "ova", "vmx"].includes(ext) || ["ovf_inspect", "ovf_validate", "ovf_import"].includes(operation) && ext === "vmx") throw new Error("This operation requires a local OVF/OVA appliance.");
     let destination;
     let directory;
     let target3;
     if (operation === "ovf_import") {
       directory = await this.backend.hostPath(a.directory, "destination-directory");
-      destination = import_node_path13.default.join(directory, "machine.vmx");
+      destination = import_node_path14.default.join(directory, "machine.vmx");
       target3 = "vmx";
     } else if (a.destination) {
-      target3 = import_node_path13.default.extname(a.destination).slice(1).toLowerCase();
+      target3 = import_node_path14.default.extname(a.destination).slice(1).toLowerCase();
       if (!["ovf", "ova", "vmx"].includes(target3) || ext === "vmx" && target3 === "vmx" || operation === "ovf_export" && target3 === "vmx") throw new Error("Supported targets are OVF/OVA, or VMX imported from OVF/OVA.");
       destination = await this.backend.hostPath(a.destination, "output-file", a.overwrite);
-      localName(import_node_path13.default.basename(destination));
-      directory = import_node_path13.default.dirname(destination);
+      localName(import_node_path14.default.basename(destination));
+      directory = import_node_path14.default.dirname(destination);
       if (target3 === "vmx") await this.backend.hostPath(directory, "destination-directory");
     }
     if (destination) {
@@ -55691,15 +55734,16 @@ var OvfManager = class {
       } else {
         if (a.overwrite) throw new Error("Overwrite is supported only for a single OVA file. OVF/VMX companion files require a new output directory.");
         if (await exists2(directory)) throw new Error("OVF/VMX output directory must be NEW to protect companion files.");
-        await this.backend.hostPath(import_node_path13.default.dirname(directory), "directory");
+        await this.backend.hostPath(import_node_path14.default.dirname(directory), "directory");
       }
     }
     const status = await this.available(operation === "ovf_validate" ? ["schemaValidate", "hideEula"] : ["hideEula"]);
     return this.jobs.start({
       operation,
-      resources: [key2(import_node_path13.default.dirname(inputPath)), ...directory ? [key2(directory)] : []],
+      resources: [import_node_path14.default.dirname(inputPath), ...directory ? [directory] : []],
+      artifacts: destination ? [destination, directory] : [],
       timeout: a.timeout_seconds * 1e3,
-      task: (context) => this.backend.resources.use([ext === "vmx" ? import_node_path13.default.dirname(inputPath) : inputPath, ...directory ? [directory] : []], () => this.perform(operation, { ...a, source: inputPath, destination, directory, target: target3, ext }, status, context))
+      task: (context) => this.backend.resources.use([ext === "vmx" ? import_node_path14.default.dirname(inputPath) : inputPath, ...directory ? [directory] : []], () => this.perform(operation, { ...a, source: inputPath, destination, directory, target: target3, ext }, status, context))
     });
   }
   async vmSource(vmx3) {
@@ -55707,27 +55751,27 @@ var OvfManager = class {
     const config2 = Object.fromEntries(Object.entries(parseAssignments(await import_promises15.default.readFile(vmx3, "utf8"))).map(([key3, value]) => [key3.toLowerCase(), value]));
     if (config2[".encoding"] && !/^utf-?8$/i.test(config2[".encoding"])) throw new Error("VMX export preflight supports UTF-8 configurations only. Convert the encoding explicitly before exporting.");
     if ((await this.backend.details(vmx3)).running) throw new Error("Power off the VM before exporting.");
-    const entries = await import_promises15.default.readdir(import_node_path13.default.dirname(vmx3));
+    const entries = await import_promises15.default.readdir(import_node_path14.default.dirname(vmx3));
     if (entries.some((name2) => /\.(lck|vmss|vmem|vmsn)$/i.test(name2)) || config2["checkpoint.vmstate"] || config2["suspend.filename"]) throw new Error("Locked/suspended VM sources are unsupported. Fully power off and close the VM.");
     if (Object.entries(config2).some(([name2, value]) => /^encryption\./.test(name2) && value || /^vtpm\./.test(name2) && value.toLowerCase() !== "false")) throw new Error("Encrypted VM/vTPM exports are unsupported.");
     if ((await this.backend.snapshots(vmx3)).snapshots.length) throw new Error("Snapshot sources are unsupported. Export a separately prepared VM without snapshots.");
     let size = (await import_promises15.default.stat(vmx3)).size;
     const inspectFile = async (input2) => {
-      const file5 = await this.backend.hostPath(input2, "input-file");
-      if (!isWithin(import_node_path13.default.dirname(vmx3), file5)) throw new Error("VM export backings must remain inside the VM directory. External disks/media are unsupported.");
-      size += (await import_promises15.default.stat(file5)).size;
-      return file5;
+      const file6 = await this.backend.hostPath(input2, "input-file");
+      if (!isWithin(import_node_path14.default.dirname(vmx3), file6)) throw new Error("VM export backings must remain inside the VM directory. External disks/media are unsupported.");
+      size += (await import_promises15.default.stat(file6)).size;
+      return file6;
     };
     for (const name2 of ["workingdir", "snapshot.directory"]) if (config2[name2]) {
-      const directory = await this.backend.hostPath(import_node_path13.default.resolve(import_node_path13.default.dirname(vmx3), config2[name2]), "directory");
-      if (!isWithin(import_node_path13.default.dirname(vmx3), directory)) throw new Error("External VM working/snapshot directories are unsupported.");
+      const directory = await this.backend.hostPath(import_node_path14.default.resolve(import_node_path14.default.dirname(vmx3), config2[name2]), "directory");
+      if (!isWithin(import_node_path14.default.dirname(vmx3), directory)) throw new Error("External VM working/snapshot directories are unsupported.");
     }
     if (Object.keys(config2).some((name2) => /^(bios440|efi32|efi64)\.filename$/.test(name2))) throw new Error("Custom firmware file backings are unsupported.");
     for (const [name2, value] of Object.entries(config2)) if ((/\.filename$/.test(name2) || ["nvram", "extendedconfigfile"].includes(name2)) && value && config2[name2.replace(/filename$/, "present")]?.toLowerCase() !== "false") {
       if (value.toLowerCase() === "auto detect") continue;
-      const file5 = await inspectFile(import_node_path13.default.resolve(import_node_path13.default.dirname(vmx3), value));
-      if (import_node_path13.default.extname(file5).toLowerCase() === ".vmdk") {
-        const handle = await import_promises15.default.open(file5, "r");
+      const file6 = await inspectFile(import_node_path14.default.resolve(import_node_path14.default.dirname(vmx3), value));
+      if (import_node_path14.default.extname(file6).toLowerCase() === ".vmdk") {
+        const handle = await import_promises15.default.open(file6, "r");
         let header;
         try {
           const buffer3 = Buffer.alloc(1024 * 1024);
@@ -55738,7 +55782,7 @@ var OvfManager = class {
         }
         const diskType = header.match(/createType\s*=\s*"([^"]+)"/i)?.[1];
         if (/parentFileNameHint\s*=|parentCID\s*=\s*(?!ffffffff)[a-f0-9]{8}/i.test(header) || !/^(monolithicSparse|monolithicFlat|twoGbMaxExtentSparse|twoGbMaxExtentFlat|streamOptimized)$/i.test(diskType || "")) throw new Error("Snapshot/linked/raw or unrecognized VMDK backings are unsupported.");
-        for (const extent of header.matchAll(/(?:^|\n)(?:RW|RDONLY|NOACCESS)\s+\d+\s+\w+\s+"([^"]+)"/g)) await inspectFile(import_node_path13.default.resolve(import_node_path13.default.dirname(file5), extent[1]));
+        for (const extent of header.matchAll(/(?:^|\n)(?:RW|RDONLY|NOACCESS)\s+\d+\s+\w+\s+"([^"]+)"/g)) await inspectFile(import_node_path14.default.resolve(import_node_path14.default.dirname(file6), extent[1]));
       }
     }
     return { source: vmx3, size, manifest: "not applicable" };
@@ -55748,8 +55792,8 @@ var OvfManager = class {
     if (Object.keys(values).some((name2) => /password|secret|token/i.test(name2))) throw new Error("Sensitive deployment properties must use a local property_profile, not property_mappings in tool arguments.");
     if (a.property_profile) {
       const profile = this.credentials.profile(a.property_profile);
-      const file5 = await this.credentials.load();
-      const stored = file5.ovf_properties?.[profile];
+      const file6 = await this.credentials.load();
+      const stored = file6.ovf_properties?.[profile];
       if (!stored || typeof stored !== "object" || Array.isArray(stored)) throw new Error("OVF property profile is not configured in the local credentials file.");
       const parsed = mappings.parse(stored);
       for (const value of Object.values(parsed)) this.credentials.remember(value);
@@ -55761,15 +55805,15 @@ var OvfManager = class {
     const { signal } = context;
     const sourceInfo = a.ext === "vmx" ? await this.vmSource(a.source) : await inspectArtifact(this.backend, a.source, { signal });
     const properties = await this.propertyValues(a);
-    const scratch = await import_promises15.default.mkdtemp(import_node_path13.default.join(import_node_os3.default.tmpdir(), "vmware-ovf-"));
-    const config2 = import_node_path13.default.join(scratch, "empty.conf");
+    const scratch = await import_promises15.default.mkdtemp(import_node_path14.default.join(import_node_os3.default.tmpdir(), "vmware-ovf-"));
+    const config2 = import_node_path14.default.join(scratch, "empty.conf");
     await import_promises15.default.writeFile(config2, "", { mode: 384 });
     const env = { ...this.backend.env, HOME: scratch, USERPROFILE: scratch };
     let staging;
     let committed = false;
     try {
       const common = [`--configFile=${config2}`, "--machineOutput", "--X:noPrompting", "--hideEula", `--sourceType=${a.ext.toUpperCase()}`];
-      const probe = await context.run(status.executable, [...common, ...operation === "ovf_validate" ? ["--schemaValidate"] : [], a.source], { cwd: scratch, env, logOutput: false });
+      const probe = await context.run(status.executable, [...common, ...operation === "ovf_validate" ? ["--schemaValidate"] : [], a.source], { cwd: scratch, env, logOutput: false, progress: "ovf", allowNonzero: true });
       const records = machineRecords(probe.output);
       const success2 = probe.code === 0 && records.some((record2) => record2.type === "RESULT" && record2.payload === "SUCCESS");
       if (!success2) throw new Error(`OVF Tool ${operation === "ovf_validate" ? "validation" : "probe"} failed. ${this.failure(probe.output)}`);
@@ -55781,7 +55825,7 @@ var OvfManager = class {
       if (Object.keys(a.network_mappings || {}).length && !status.supported_flags.net) throw new Error("Installed OVF Tool does not support network mappings.");
       if (Object.keys(properties).length && !status.supported_flags.prop) throw new Error("Installed OVF Tool does not support property mappings.");
       if (a.accept_eulas && !status.supported_flags.acceptAllEulas) throw new Error("Installed OVF Tool does not support explicit EULA acceptance.");
-      const parent = a.target === "ova" ? a.directory : import_node_path13.default.dirname(a.directory);
+      const parent = a.target === "ova" ? a.directory : import_node_path14.default.dirname(a.directory);
       const flat = Number(metadata.sizes?.flat);
       if (!Number.isSafeInteger(flat) || flat < 0) throw new Error("Cannot determine the flat disk size for a conservative destination free-space check.");
       const copies = a.target === "ova" && !a.overwrite ? 2 : 1;
@@ -55792,12 +55836,14 @@ var OvfManager = class {
       signal.throwIfAborted();
       let output2;
       if (a.target === "ova") {
-        staging = await import_promises15.default.mkdtemp(import_node_path13.default.join(a.directory, ".ovf-job-"));
-        output2 = import_node_path13.default.join(staging, import_node_path13.default.basename(a.destination));
+        staging = await import_promises15.default.mkdtemp(import_node_path14.default.join(a.directory, ".ovf-job-"));
+        output2 = import_node_path14.default.join(staging, import_node_path14.default.basename(a.destination));
       } else {
         await import_promises15.default.mkdir(a.directory);
         output2 = a.destination;
       }
+      context.artifact(staging || a.directory);
+      await context.checkpoint({ transfer_started: false, destination: a.destination, staging: staging || null });
       const args = [...common, `--targetType=${a.target.toUpperCase()}`];
       if (a.name) args.push(`--name=${a.name}`);
       if (a.deployment_option) args.push(`--deploymentOption=${a.deployment_option}`);
@@ -55805,7 +55851,7 @@ var OvfManager = class {
       for (const [name2, value] of Object.entries(a.network_mappings || {})) args.push(`--net:${name2}=${value}`);
       for (const [name2, value] of Object.entries(properties)) args.push(`--prop:${name2}=${value}`);
       if (a.ext === "vmx") await this.vmSource(a.source);
-      const converted = await context.run(status.executable, [...args, a.source, output2], { cwd: scratch, env });
+      const converted = await context.run(status.executable, [...args, a.source, output2], { cwd: scratch, env, progress: "ovf", allowNonzero: true });
       const final = machineRecords(converted.output);
       if (converted.code !== 0 || !final.some((record2) => record2.type === "RESULT" && record2.payload === "SUCCESS")) throw new Error(`OVF Tool transfer failed. Partial files may remain at ${staging || a.directory}. ${this.failure(converted.output)}`);
       signal.throwIfAborted();
@@ -55813,7 +55859,7 @@ var OvfManager = class {
       if (a.target === "vmx") {
         const targetID = final.find((record2) => record2.type === "TARGET_ID")?.payload;
         if (!targetID) throw new Error("OVF Tool did not identify its imported VMX. Inspect the output directory.");
-        resultPath = await this.backend.vmx(import_node_path13.default.resolve(scratch, targetID));
+        resultPath = await this.backend.vmx(import_node_path14.default.resolve(scratch, targetID));
         if (!isWithin(a.directory, resultPath)) throw new Error("Imported VMX is outside its reserved destination.");
       } else {
         if (!(await import_promises15.default.stat(output2)).isFile()) throw new Error("OVF Tool reported success but the output file is missing.");
@@ -55836,7 +55882,7 @@ Transfer succeeded at ${resultPath}
         if (a.register) {
           if (!this.rest) throw new Error("Registration requires configured Workstation REST.");
           signal.throwIfAborted();
-          await this.rest.request("POST", "/api/vms/registration", { body: { name: a.name || import_node_path13.default.basename(resultPath, ".vmx"), path: resultPath } });
+          await this.rest.request("POST", "/api/vms/registration", { body: { name: a.name || import_node_path14.default.basename(resultPath, ".vmx"), path: resultPath } });
           registered = true;
         }
         if (a.power_on) {
@@ -55865,7 +55911,7 @@ Uncommitted output retained at ${staging}
 // src/jobs.mjs
 var import_node_child_process2 = require("node:child_process");
 var import_node_crypto7 = require("node:crypto");
-var import_node_path14 = __toESM(require("node:path"), 1);
+var import_node_path15 = __toESM(require("node:path"), 1);
 var jobID = external_exports.string().min(1).max(100);
 var jobSchemas = {
   job_status: external_exports.object({ job_id: jobID }).strict(),
@@ -55874,104 +55920,259 @@ var jobSchemas = {
   job_logs: external_exports.object({ job_id: jobID }).strict()
 };
 var terminal = /* @__PURE__ */ new Set(["succeeded", "failed", "cancelled", "timed_out", "interrupted"]);
+var uncertain = "Partial files or VM changes may remain. Inspect all reported artifact paths before retrying; no rollback was attempted.";
 var JobManager = class {
-  constructor({ redact = (text3) => text3, spawnProcess = import_node_child_process2.spawn, maxActive = 4, maxRecords = 100 } = {}) {
+  constructor({ redact = (text3) => text3, spawnProcess = import_node_child_process2.spawn, maxActive = 4, maxRecords = 100, resources = new Resources(), store } = {}) {
+    if (!Number.isInteger(maxActive) || maxActive < 1 || maxActive > 32 || !Number.isInteger(maxRecords) || maxRecords < maxActive || maxRecords > 100) throw new Error("Invalid job concurrency/history limits.");
     this.session = (0, import_node_crypto7.randomUUID)();
     this.jobs = /* @__PURE__ */ new Map();
     this.redact = redact;
+    this.resources = resources;
+    this.store = store;
     this.spawnProcess = spawnProcess;
     this.maxActive = maxActive;
     this.maxRecords = maxRecords;
     this.closed = false;
+    this.initialized = !store;
   }
-  start({ operation, resources = [], timeout: timeout4 = 36e5, task }) {
+  async initialize() {
+    this.initializing ??= (async () => {
+      if (!this.store) return;
+      const records = await this.store.load();
+      for (const record2 of records) {
+        if (!terminal.has(record2.state)) {
+          record2.state = "interrupted";
+          record2.progress = null;
+          record2.error = "Previous server session; outcome unknown and an orphaned process may still exist. " + uncertain;
+          delete record2.result;
+        }
+        record2.historical = true;
+        if (Date.parse(record2.finished_at || record2.started_at) < Date.now() - this.store.retentionMs) await this.store.remove(record2.job_id);
+        else this.jobs.set(record2.job_id, record2);
+      }
+      while (this.jobs.size > this.maxRecords) {
+        const id = this.jobs.keys().next().value;
+        this.jobs.delete(id);
+        await this.store.remove(id);
+      }
+      this.initialized = true;
+    })();
+    await this.initializing;
+    if (this.store) {
+      for (const job of this.jobs.values()) if (terminal.has(job.state) && Date.parse(job.finished_at || job.started_at) < Date.now() - this.store.retentionMs) {
+        this.jobs.delete(job.job_id);
+        await this.store.remove(job.job_id);
+      }
+    }
+  }
+  start({ operation, resources = [], artifacts = [], timeout: timeout4 = 36e5, task }) {
     if (this.closed) throw new Error("Job manager is shutting down.");
+    if (!this.initialized) throw new Error("Initialize the job journal before admission.");
+    if (!Number.isFinite(timeout4) || timeout4 < 1 || timeout4 > 864e5 || typeof task !== "function") throw new Error("Invalid job task or timeout.");
     const active = [...this.jobs.values()].filter((job2) => !terminal.has(job2.state));
     if (active.length >= this.maxActive) throw new Error("Background job limit reached. Wait for a job to finish.");
-    const prefix2 = (value) => value.endsWith(import_node_path14.default.sep) ? value : value + import_node_path14.default.sep;
-    const overlaps = (a, b) => a === b || a.startsWith(prefix2(b)) || b.startsWith(prefix2(a));
-    if (active.some((job2) => job2.resources.some((value) => resources.some((resource) => overlaps(value, resource))))) throw new Error("A background job already uses this source or destination. Wait for it to finish.");
+    let reservation;
+    try {
+      reservation = this.resources.reserve(resources);
+    } catch (cause) {
+      throw Object.assign(new Error("A conflicting operation already uses this source or destination. Wait for it to finish.", { cause }), { code: "RESOURCE_BUSY" });
+    }
+    const evicted = [];
     while (this.jobs.size >= this.maxRecords) {
       const oldest = [...this.jobs.values()].find((job2) => terminal.has(job2.state));
-      if (!oldest) throw new Error("Job history is full.");
+      if (!oldest) {
+        reservation.release();
+        throw new Error("Job history is full.");
+      }
       this.jobs.delete(oldest.job_id);
+      evicted.push(oldest.job_id);
     }
-    const job = { job_id: `${this.session}:${(0, import_node_crypto7.randomUUID)()}`, operation, resources, state: "running", started_at: (/* @__PURE__ */ new Date()).toISOString(), progress: null, logs: "", controller: new AbortController() };
+    const job = {
+      job_id: `${this.session}:${(0, import_node_crypto7.randomUUID)()}`,
+      operation,
+      state: "running",
+      started_at: (/* @__PURE__ */ new Date()).toISOString(),
+      progress: null,
+      artifacts: [...new Set(artifacts)].slice(0, 64),
+      logs: "",
+      controller: new AbortController()
+    };
     this.jobs.set(job.job_id, job);
-    job.timer = setTimeout(() => {
-      job.stopReason = "timed_out";
-      job.controller.abort();
-    }, timeout4);
-    job.done = Promise.resolve().then(async () => {
-      const context = { signal: job.controller.signal, log: (text3) => this.log(job, text3), run: (file5, args, options2) => this.run(job, file5, args, options2) };
+    if (this.store) job.flushTimer = setInterval(async () => {
+      if (!job.dirty || job.flushing || job.finalizing) return;
+      job.flushing = true;
+      job.dirty = false;
       try {
+        await this.persist(job);
+      } catch {
+        this.stop(job, "interrupted");
+      } finally {
+        job.flushing = false;
+      }
+    }, 1e3);
+    job.timer = setTimeout(() => this.stop(job, "timed_out"), timeout4);
+    job.done = reservation.run(async () => {
+      const context = {
+        signal: job.controller.signal,
+        log: (text3) => this.log(job, text3),
+        artifact: (file6) => {
+          if (!job.artifacts.includes(file6) && job.artifacts.length < 64) {
+            job.artifacts.push(file6);
+            job.dirty = true;
+          }
+        },
+        checkpoint: async (result) => {
+          job.partial_result = this.bounded(result);
+          await this.persist(job);
+        },
+        run: (file6, args, options2) => this.run(job, file6, args, options2)
+      };
+      try {
+        await this.initialize();
+        for (const id of evicted) await this.store?.remove(id);
+        await this.persist(job);
         context.signal.throwIfAborted();
         const result = await task(context);
         context.signal.throwIfAborted();
-        job.result = result;
+        job.result = this.bounded(result);
         job.state = "succeeded";
       } catch (error62) {
         job.state = job.stopReason || "failed";
-        job.error = this.redact(job.stopReason ? `Job ${job.stopReason}; partial output or registration/power changes may remain. Inspect the destination before retrying.` : error62.message);
+        job.error = this.redact(job.stopReason ? `Job ${job.stopReason}. ${uncertain}` : error62.message || String(error62));
+        if (job.error.length > 8192) job.error = "Native job failed; error exceeded the output bound. " + uncertain;
       } finally {
         clearTimeout(job.timer);
+        clearInterval(job.flushTimer);
         job.finished_at = (/* @__PURE__ */ new Date()).toISOString();
+        const finalState = job.state;
+        job.state = "running";
+        job.finalizing = true;
+        try {
+          await this.persist(job, finalState);
+          job.state = finalState;
+        } catch {
+          job.state = "interrupted";
+          delete job.result;
+          job.error = "Journal write failed; durable outcome unknown. " + uncertain;
+        }
+        reservation.release();
       }
     });
     return this.view(job);
   }
+  safe(value) {
+    if (value === void 0) return void 0;
+    const clean = (item) => typeof item === "string" ? this.redact(item) : Array.isArray(item) ? item.map(clean) : item && typeof item === "object" ? Object.fromEntries(Object.entries(item).map(([key3, val]) => [this.redact(key3), clean(val)])) : item;
+    return clean(value);
+  }
+  bounded(value) {
+    return value !== void 0 && Buffer.byteLength(JSON.stringify(value)) > 65536 ? { omitted: true, reason: "Result exceeded 64 KiB; inspect reported artifacts." } : value;
+  }
+  publicResult(value) {
+    if (Array.isArray(value.jobs)) return { ...value, jobs: value.jobs.map((job) => this.publicResult(job)) };
+    return {
+      ...value,
+      result: this.safe(value.result),
+      partial_result: this.safe(value.partial_result),
+      error: value.error && this.redact(value.error),
+      artifacts: this.safe(value.artifacts),
+      log: value.log && this.redact(value.log)
+    };
+  }
+  async persist(job, state = job.state) {
+    if (!this.store) return;
+    const redactedLogs = this.redact((job.logs || "") + (job.liveOutput || ""));
+    const logTooLarge = Buffer.byteLength(JSON.stringify(redactedLogs)) > 65536;
+    const record2 = { ...this.publicResult(this.view(job)), state, logs: logTooLarge ? "" : redactedLogs, truncated: !!job.truncated || logTooLarge };
+    await this.store.write(record2, new Set(this.jobs.keys()));
+  }
   get(id) {
     const job = this.jobs.get(id);
-    if (!job && id.split(":")[0] !== this.session) return { job_id: id, state: "interrupted", error: "Job belongs to another server session. Its outcome is unknown; inspect source/destination before retrying. Logs and results are not persisted." };
+    if (!job && id.split(":")[0] !== this.session) return { job_id: id, state: "interrupted", error: "Job belongs to another server session or expired history. Its outcome is unknown; inspect source/destination before retrying." };
     if (!job) throw new Error("Unknown or expired job ID in this session.");
     return job;
   }
   view(job) {
-    const { job_id, operation, state, started_at, finished_at, progress, result, error: error62 } = job;
-    return { job_id, operation, state, started_at, finished_at, progress, result, error: error62 };
+    const { job_id, operation, state, started_at, finished_at, progress, result, partial_result, error: error62, artifacts, historical } = job;
+    return { job_id, operation, state, started_at, finished_at, progress, result, partial_result, error: error62, artifacts: artifacts || [], historical };
   }
   status(id) {
     return this.view(this.get(id));
   }
   list() {
-    return { session_id: this.session, persistence: "memory only; previous-session IDs report interrupted with unknown outcome", jobs: [...this.jobs.values()].map((job) => this.view(job)) };
+    return { session_id: this.session, persistence: this.store ? "private redacted journals; seven-day, 100-record maximum; no automatic replay" : "memory only", jobs: [...this.jobs.values()].map((job) => this.view(job)) };
   }
   logs(id) {
     const job = this.get(id);
-    return { job_id: id, state: job.state, log: this.redact(job.logs || ""), truncated: !!job.truncated };
+    return { job_id: id, state: job.state, log: this.redact((job.logs || "") + (job.liveOutput || "")), truncated: !!job.truncated };
+  }
+  stop(job, reason) {
+    if (terminal.has(job.state) || job.stopReason || job.finalizing) return;
+    job.stopReason = reason;
+    job.controller.abort();
   }
   cancel(id) {
     const job = this.get(id);
-    if (!terminal.has(job.state)) {
-      job.stopReason = "cancelled";
-      job.controller.abort();
-    }
+    if (!terminal.has(job.state)) this.stop(job, "cancelled");
     return { ...this.view(job), cancellation_requested: job.stopReason === "cancelled" };
   }
   log(job, text3) {
-    job.logs += text3;
-    if (job.logs.length > 65536) {
+    if (job.truncated) return;
+    job.logs += String(text3);
+    job.dirty = true;
+    if (Buffer.byteLength(JSON.stringify(job.logs)) > 65536) {
       job.logs = "";
       job.truncated = true;
     }
   }
-  run(job, file5, args, { cwd, env, logOutput = true } = {}) {
+  run(job, file6, args, { cwd, env, logOutput = true, progress = null, timeout: timeout4, allowNonzero = false } = {}) {
     job.controller.signal.throwIfAborted();
     return new Promise((resolve, reject) => {
-      let output2 = "";
-      let outputBytes = 0;
-      let tooLarge = false;
-      let killTimer;
-      let child;
+      let output2 = "", outputBytes = 0, tooLarge = false, child, killPromise, processTimer, startError = false;
       try {
-        child = this.spawnProcess(file5, args, { cwd, env, windowsHide: true, shell: false, stdio: ["ignore", "pipe", "pipe"] });
+        child = this.spawnProcess(file6, args, { cwd, env, windowsHide: true, shell: false, detached: process.platform !== "win32", stdio: ["ignore", "pipe", "pipe"] });
       } catch {
-        reject(new Error("Cannot start OVF Tool. Check its installation and executable permissions."));
+        reject(new Error("Cannot start native job process. Check installation and executable permissions."));
         return;
       }
       const stop = () => {
-        child.kill("SIGTERM");
-        killTimer ??= setTimeout(() => child.kill("SIGKILL"), 2e3);
+        if (killPromise) return;
+        killPromise = new Promise((done) => {
+          if (!child.pid) {
+            done();
+            return;
+          }
+          if (process.platform === "win32") {
+            const killer = (0, import_node_child_process2.spawn)(import_node_path15.default.join(process.env.SystemRoot || "C:\\Windows", "System32", "taskkill.exe"), ["/PID", String(child.pid), "/T", "/F"], { windowsHide: true, shell: false, stdio: "ignore" });
+            const timer = setTimeout(() => {
+              child.kill("SIGKILL");
+              killer.kill();
+              done();
+            }, 5e3);
+            killer.once("error", () => {
+              child.kill("SIGKILL");
+              clearTimeout(timer);
+              done();
+            });
+            killer.once("close", () => {
+              clearTimeout(timer);
+              done();
+            });
+          } else {
+            const kill = (signal) => {
+              try {
+                process.kill(-child.pid, signal);
+              } catch (e2) {
+                if (e2.code !== "ESRCH") child.kill(signal);
+              }
+            };
+            kill("SIGTERM");
+            setTimeout(() => {
+              kill("SIGKILL");
+              done();
+            }, 250);
+          }
+        });
       };
       const read = (chunk) => {
         outputBytes += Buffer.byteLength(chunk);
@@ -55983,12 +56184,25 @@ var JobManager = class {
           stop();
           return;
         }
+        if (logOutput && !job.truncated) {
+          job.liveOutput = output2.slice(0, output2.lastIndexOf("\n") + 1);
+          if (Buffer.byteLength(JSON.stringify(job.logs + job.liveOutput)) > 65536) {
+            job.logs = "";
+            job.liveOutput = "";
+            job.truncated = true;
+          }
+          job.dirty = true;
+        }
+        if (progress !== "ovf") return;
         let progressRecord = false;
         for (const line of output2.split(/\r?\n/).slice(0, -1)) {
           if (/^[A-Z_]+$/.test(line)) progressRecord = line === "PROGRESS";
           else if (progressRecord && /^\+[ \t]*\d+(?:\.\d+)?[ \t]*%?$/.test(line)) {
             const value = Number(line.slice(1).replace("%", "").trim());
-            if (value >= 0 && value <= 100) job.progress = value;
+            if (value >= 0 && value <= 100) {
+              job.progress = value;
+              job.dirty = true;
+            }
           }
         }
       };
@@ -55997,49 +56211,57 @@ var JobManager = class {
       child.stdout.on("data", read);
       child.stderr.on("data", read);
       job.controller.signal.addEventListener("abort", stop, { once: true });
-      let startError = false;
       child.once("error", () => {
         startError = true;
       });
-      child.once("close", (code, signal) => {
-        clearTimeout(killTimer);
+      child.once("close", async (code, signal) => {
+        clearTimeout(processTimer);
         job.controller.signal.removeEventListener("abort", stop);
-        if (logOutput) this.log(job, this.redact(output2));
+        await killPromise;
+        job.liveOutput = "";
+        if (logOutput) this.log(job, output2);
         if (job.controller.signal.aborted) {
           reject(new Error("Process interrupted."));
           return;
         }
         if (tooLarge) {
-          reject(new Error("OVF Tool output exceeded 1 MiB; process stopped. Partial files may remain."));
+          reject(new Error("Native process output exceeded 1 MiB; process tree stopped. Partial files may remain."));
           return;
         }
         if (startError) {
-          reject(new Error("Cannot start OVF Tool. Check installation and permissions."));
+          reject(new Error("Cannot start native job process. Check installation and permissions."));
+          return;
+        }
+        if (signal || code === null) {
+          this.stop(job, "interrupted");
+          reject(new Error("Native process was killed; outcome unknown. " + uncertain));
+          return;
+        }
+        if (code !== 0 && !allowNonzero) {
+          reject(new Error(`Native process exited with code ${code}. ${uncertain}`));
           return;
         }
         resolve({ code, signal, output: output2 });
       });
+      if (timeout4) processTimer = setTimeout(() => this.stop(job, "timed_out"), timeout4);
       if (job.controller.signal.aborted) stop();
     });
   }
   async close() {
     this.closed = true;
-    for (const job of this.jobs.values()) if (!terminal.has(job.state)) {
-      job.stopReason = "interrupted";
-      job.controller.abort();
-    }
+    for (const job of this.jobs.values()) if (!terminal.has(job.state)) this.stop(job, "interrupted");
     await Promise.all([...this.jobs.values()].map((job) => job.done));
   }
 };
 
 // src/serial.mjs
 var import_promises17 = __toESM(require("node:fs/promises"), 1);
-var import_node_path16 = __toESM(require("node:path"), 1);
+var import_node_path17 = __toESM(require("node:path"), 1);
 var import_node_crypto8 = require("node:crypto");
 
 // src/serial-transport.mjs
 var import_promises16 = __toESM(require("node:fs/promises"), 1);
-var import_node_path15 = __toESM(require("node:path"), 1);
+var import_node_path16 = __toESM(require("node:path"), 1);
 var import_node_net3 = __toESM(require("node:net"), 1);
 var import_node_child_process3 = require("node:child_process");
 var import_node_stream = require("node:stream");
@@ -56056,7 +56278,7 @@ var bridgeFailures = {
 async function verifyUnixSerial(endpoint, { procRoot = "/proc" } = {}) {
   const stat = await import_promises16.default.lstat(endpoint.path);
   if (!stat.isSocket() || stat.uid !== process.getuid()) throw failure2();
-  const rows = (await import_promises16.default.readFile(import_node_path15.default.join(procRoot, "net/unix"), "utf8")).split("\n").slice(1);
+  const rows = (await import_promises16.default.readFile(import_node_path16.default.join(procRoot, "net/unix"), "utf8")).split("\n").slice(1);
   const inodes = new Set(rows.flatMap((row) => {
     const m = row.match(/^\S+\s+\S+\s+\S+\s+(\S+)\s+(\S+)\s+(\S+)\s+(\d+)\s+(.+)$/);
     return m && m[1] === "00010000" && m[2] === "0001" && m[4] && m[5] === endpoint.path ? [m[4]] : [];
@@ -56066,7 +56288,7 @@ async function verifyUnixSerial(endpoint, { procRoot = "/proc" } = {}) {
   for (const pid of (await import_promises16.default.readdir(procRoot)).filter((name2) => /^\d+$/.test(name2))) {
     let descriptors;
     try {
-      descriptors = await import_promises16.default.readdir(import_node_path15.default.join(procRoot, pid, "fd"));
+      descriptors = await import_promises16.default.readdir(import_node_path16.default.join(procRoot, pid, "fd"));
     } catch (e2) {
       if (["ENOENT", "ESRCH", "EACCES", "EPERM"].includes(e2.code)) continue;
       throw e2;
@@ -56074,7 +56296,7 @@ async function verifyUnixSerial(endpoint, { procRoot = "/proc" } = {}) {
     for (const fd of descriptors) {
       let link;
       try {
-        link = await import_promises16.default.readlink(import_node_path15.default.join(procRoot, pid, "fd", fd));
+        link = await import_promises16.default.readlink(import_node_path16.default.join(procRoot, pid, "fd", fd));
       } catch (e2) {
         if (["ENOENT", "ESRCH", "EACCES", "EPERM", "EINVAL"].includes(e2.code)) continue;
         throw e2;
@@ -56082,9 +56304,9 @@ async function verifyUnixSerial(endpoint, { procRoot = "/proc" } = {}) {
       const inode = link.match(/^socket:\[(\d+)\]$/)?.[1];
       if (!inodes.has(inode)) continue;
       try {
-        const executable = await import_promises16.default.readlink(import_node_path15.default.join(procRoot, pid, "exe"));
-        const args = (await import_promises16.default.readFile(import_node_path15.default.join(procRoot, pid, "cmdline"), "utf8")).split("\0");
-        if (import_node_path15.default.basename(executable) !== "vmware-vmx" || !args.includes(endpoint.vmx)) throw failure2();
+        const executable = await import_promises16.default.readlink(import_node_path16.default.join(procRoot, pid, "exe"));
+        const args = (await import_promises16.default.readFile(import_node_path16.default.join(procRoot, pid, "cmdline"), "utf8")).split("\0");
+        if (import_node_path16.default.basename(executable) !== "vmware-vmx" || !args.includes(endpoint.vmx)) throw failure2();
         verified.add(inode);
       } catch {
         throw failure2();
@@ -56120,7 +56342,7 @@ async function connectSerial(endpoint, { signal, timeoutMs = 1e4, platform = pro
     });
   }
   if (platform !== "win32") throw serialError("SERIAL_UNSUPPORTED", "Direct serial requires native Windows or Linux Workstation.");
-  const script = bridgeScript || import_node_path15.default.resolve(import_node_path15.default.dirname(process.argv[1]), "..", "scripts", "Serial-Bridge.ps1");
+  const script = bridgeScript || import_node_path16.default.resolve(import_node_path16.default.dirname(process.argv[1]), "..", "scripts", "Serial-Bridge.ps1");
   return new Promise((resolve, reject) => {
     const child = (0, import_node_child_process3.spawn)("pwsh", ["-NoProfile", "-NonInteractive", "-File", script, "-PipeName", endpoint.path.slice("\\\\.\\pipe\\".length), "-VMX", endpoint.vmx, "-ConnectTimeoutMs", String(timeoutMs)], { shell: false, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
     let stream;
@@ -56231,13 +56453,13 @@ var SerialManager = class {
   endpoint(vmx3, port) {
     if (!["win32", "linux"].includes(this.platform)) throw serialError("SERIAL_UNSUPPORTED", "Direct serial requires native Windows or Linux Workstation.");
     const digest2 = (0, import_node_crypto8.createHash)("sha256").update(this.key(vmx3, port)).digest("hex").slice(0, 32);
-    const endpoint = this.platform === "win32" ? `\\\\.\\pipe\\vmware-mcp-serial-${digest2}-${port}` : import_node_path16.default.join(import_node_path16.default.dirname(vmx3), ".mcp-serial", `${digest2}-${port}.sock`);
+    const endpoint = this.platform === "win32" ? `\\\\.\\pipe\\vmware-mcp-serial-${digest2}-${port}` : import_node_path17.default.join(import_node_path17.default.dirname(vmx3), ".mcp-serial", `${digest2}-${port}.sock`);
     if (this.platform === "linux" && Buffer.byteLength(endpoint) > 103) throw serialError("SERIAL_SETUP_REQUIRED", "VM directory is too long for a portable UNIX socket path. Use a shorter approved native VM path.");
     return { vmx: vmx3, port, path: endpoint, key: this.key(vmx3, port), transport: this.platform === "win32" ? "local Windows named pipe" : "local UNIX stream socket" };
   }
   async localPath(endpoint, create = false) {
     if (this.platform !== "linux") return;
-    const parent = import_node_path16.default.dirname(endpoint.path);
+    const parent = import_node_path17.default.dirname(endpoint.path);
     if (await this.backend.hostPath(endpoint.path, "serial-socket") !== endpoint.path) throw serialError("SERIAL_UNSAFE_ENDPOINT", "Serial endpoint must not traverse links.");
     if (create) await import_promises17.default.mkdir(parent, { mode: 448 }).catch((e2) => {
       if (e2.code !== "EEXIST") throw e2;
@@ -56256,8 +56478,8 @@ var SerialManager = class {
     const prefix2 = `serial${port}.`;
     if (config2[prefix2 + "present"]?.toLowerCase() !== "true") throw serialError("SERIAL_SETUP_REQUIRED", "No enabled serial device on this port. Authorize serial_configure while powered off, then enable a serial console in the guest.");
     if (config2[prefix2 + "filetype"]?.toLowerCase() !== "pipe" || config2[prefix2 + "pipe.endpoint"]?.toLowerCase() !== "server" || config2[prefix2 + "startconnected"]?.toLowerCase() !== "true" || config2[prefix2 + "trynorxloss"]?.toLowerCase() !== "true") throw serialError("SERIAL_UNSUPPORTED_MODE", "Serial requires a server-side application pipe/socket. Physical devices, files, VM-to-VM pipes and network/Telnet modes are unsupported. Reconfigure explicitly while powered off.");
-    const filename = config2[prefix2 + "filename"];
-    if ((this.platform === "win32" ? filename?.toLowerCase() : filename) !== (this.platform === "win32" ? endpoint.path.toLowerCase() : endpoint.path)) throw serialError("SERIAL_UNSAFE_ENDPOINT", "Serial endpoint does not match this VM and port. Only the generated per-VM local endpoint is approved; arbitrary paths and remote sockets are refused.");
+    const filename2 = config2[prefix2 + "filename"];
+    if ((this.platform === "win32" ? filename2?.toLowerCase() : filename2) !== (this.platform === "win32" ? endpoint.path.toLowerCase() : endpoint.path)) throw serialError("SERIAL_UNSAFE_ENDPOINT", "Serial endpoint does not match this VM and port. Only the generated per-VM local endpoint is approved; arbitrary paths and remote sockets are refused.");
     await this.localPath(endpoint);
     return endpoint;
   }
@@ -56284,9 +56506,9 @@ var SerialManager = class {
       const config2 = configOf(original);
       const offline = async () => {
         if ((await this.backend.details(vmx3)).running) throw serialError("SERIAL_VM_RUNNING", "Power off the VM before changing serial hardware.");
-        if ((await import_promises17.default.readdir(import_node_path16.default.dirname(vmx3))).some((name2) => /\.(?:lck|vmss|vmem)$/i.test(name2))) throw serialError("SERIAL_VM_BUSY", "VM directory has locks or saved state. Fully power off and close the VM before editing serial hardware.");
+        if ((await import_promises17.default.readdir(import_node_path17.default.dirname(vmx3))).some((name2) => /\.(?:lck|vmss|vmem)$/i.test(name2))) throw serialError("SERIAL_VM_BUSY", "VM directory has locks or saved state. Fully power off and close the VM before editing serial hardware.");
         for (const key3 of ["checkpoint.vmstate", "suspend.filename"]) if (config2[key3]) {
-          const state = import_node_path16.default.resolve(import_node_path16.default.dirname(vmx3), config2[key3]);
+          const state = import_node_path17.default.resolve(import_node_path17.default.dirname(vmx3), config2[key3]);
           try {
             await import_promises17.default.access(state);
             throw serialError("SERIAL_VM_BUSY", "VM has saved state. Fully power it off before editing serial hardware.");
@@ -56489,7 +56711,7 @@ var SerialManager = class {
 // src/readiness.mjs
 var import_promises18 = __toESM(require("node:fs/promises"), 1);
 var import_node_fs5 = require("node:fs");
-var import_node_path17 = __toESM(require("node:path"), 1);
+var import_node_path18 = __toESM(require("node:path"), 1);
 var import_node_net4 = __toESM(require("node:net"), 1);
 var import_node_http = __toESM(require("node:http"), 1);
 var import_node_https = __toESM(require("node:https"), 1);
@@ -56579,19 +56801,19 @@ var Readiness = class {
       const category = failureCategory(error62.message);
       return { state: "unknown", lifecycle: "unknown", category, action: actionFor(category) };
     }
-    const paths = await Promise.all(running.map((file5) => import_promises18.default.realpath(file5).catch(() => file5)));
-    if (!paths.some((file5) => same(file5, vmx3))) {
+    const paths = await Promise.all(running.map((file6) => import_promises18.default.realpath(file6).catch(() => file6)));
+    if (!paths.some((file6) => same(file6, vmx3))) {
       for (const field of ["checkpoint.vmstate", "suspend.filename"]) {
         const saved = config2[field];
         if (saved) {
-          const candidate = import_node_path17.default.resolve(import_node_path17.default.dirname(vmx3), saved);
-          if (!isWithin(import_node_path17.default.dirname(vmx3), candidate)) return { state: "unknown", lifecycle: "unknown", category: "external_saved_state" };
+          const candidate = import_node_path18.default.resolve(import_node_path18.default.dirname(vmx3), saved);
+          if (!isWithin(import_node_path18.default.dirname(vmx3), candidate)) return { state: "unknown", lifecycle: "unknown", category: "external_saved_state" };
           const stat = await import_promises18.default.lstat(candidate).catch(() => null);
           if (stat?.isFile() && !stat.isSymbolicLink()) return { state: "suspended", lifecycle: "suspended" };
           return { state: "unknown", lifecycle: "unknown", category: "saved_state_unavailable" };
         }
       }
-      const names2 = await import_promises18.default.readdir(import_node_path17.default.dirname(vmx3));
+      const names2 = await import_promises18.default.readdir(import_node_path18.default.dirname(vmx3));
       if (names2.some((name2) => /\.vmss$/i.test(name2))) return { state: "unknown", lifecycle: "unknown", category: "saved_state_unattributed" };
       if (names2.some((name2) => /\.lck$/i.test(name2))) return { state: "unknown", lifecycle: "unknown", category: "lock_contention", action: actionFor("lock_contention") };
       return { state: "powered_off", lifecycle: "powered_off", evidence: "not_listed_no_saved_state_or_lock", confidence: "inferred" };
@@ -56664,16 +56886,16 @@ var Readiness = class {
   async logs(vmx3, maxBytes, maxEntries) {
     let handle;
     try {
-      const filename = import_node_path17.default.join(import_node_path17.default.dirname(vmx3), "vmware.log");
-      const entry = await import_promises18.default.lstat(filename);
+      const filename2 = import_node_path18.default.join(import_node_path18.default.dirname(vmx3), "vmware.log");
+      const entry = await import_promises18.default.lstat(filename2);
       if (!entry.isFile() || entry.isSymbolicLink() || entry.nlink !== 1) throw new Error();
-      handle = await import_promises18.default.open(filename, import_node_fs5.constants.O_RDONLY | (import_node_fs5.constants.O_NOFOLLOW || 0) | (import_node_fs5.constants.O_NONBLOCK || 0));
+      handle = await import_promises18.default.open(filename2, import_node_fs5.constants.O_RDONLY | (import_node_fs5.constants.O_NOFOLLOW || 0) | (import_node_fs5.constants.O_NONBLOCK || 0));
       const stat = await handle.stat();
       if (!stat.isFile() || stat.nlink !== 1 || stat.ino !== entry.ino || process.platform !== "win32" && stat.dev !== entry.dev) throw new Error();
       const head = Buffer.alloc(Math.min(65536, stat.size));
       await handle.read(head, 0, head.length, 0);
       const identities = [...head.toString("utf8").matchAll(/Config file:\s*([^\r\n]+)/gi)].map((match) => match[1].trim().replace(/^"|"$/g, ""));
-      if (!identities.length || !identities.every((value) => import_node_path17.default.isAbsolute(value) && same(import_node_path17.default.normalize(value), import_node_path17.default.normalize(vmx3)))) return { available: false, category: "log_identity_unverified", entries: [] };
+      if (!identities.length || !identities.every((value) => import_node_path18.default.isAbsolute(value) && same(import_node_path18.default.normalize(value), import_node_path18.default.normalize(vmx3)))) return { available: false, category: "log_identity_unverified", entries: [] };
       const length = Math.min(maxBytes, stat.size);
       const bytes = Buffer.alloc(length);
       const offset = stat.size - length;
@@ -56713,8 +56935,8 @@ var Readiness = class {
     const a = readinessSchemas.vm_collect_diagnostics.parse(input2);
     const roots = this.backend.env.VMWARE_DIAGNOSTICS_ROOTS || this.backend.env.VMWARE_ALLOWED_HOST_ROOTS;
     if (!roots) throw new Error("Configure VMWARE_DIAGNOSTICS_ROOTS or VMWARE_ALLOWED_HOST_ROOTS before saving diagnostics.");
-    const allowed = roots.split(import_node_path17.default.delimiter).filter(Boolean);
-    if (!allowed.length || allowed.some((root) => !import_node_path17.default.isAbsolute(root))) throw new Error("Diagnostic roots must be existing absolute directories.");
+    const allowed = roots.split(import_node_path18.default.delimiter).filter(Boolean);
+    if (!allowed.length || allowed.some((root) => !import_node_path18.default.isAbsolute(root))) throw new Error("Diagnostic roots must be existing absolute directories.");
     const directory = await this.backend.hostPath(a.destination_directory, "host-destination-directory");
     const canonical = await Promise.all(allowed.map((root) => import_promises18.default.realpath(root)));
     if (!canonical.some((root) => isWithin(root, directory) && !same(root, directory))) throw new Error("Diagnostic destination must be a NEW directory inside an approved root.");
@@ -56750,9 +56972,9 @@ var Readiness = class {
     await import_promises18.default.mkdir(directory, { mode: 448 });
     const write = async (name2, data) => {
       if (!same(await import_promises18.default.realpath(directory), directory) || !(await import_promises18.default.lstat(directory)).isDirectory()) throw new Error("Diagnostic directory changed; no further data will be written.");
-      const filename = import_node_path17.default.join(directory, name2);
-      await import_promises18.default.writeFile(filename, data, { flag: "wx", mode: 384 });
-      await this.protectFile(filename);
+      const filename2 = import_node_path18.default.join(directory, name2);
+      await import_promises18.default.writeFile(filename2, data, { flag: "wx", mode: 384 });
+      await this.protectFile(filename2);
     };
     await write("diagnostics.json", JSON.stringify(report, (key3, value) => typeof value === "string" ? this.credentials.redact(value) : value, 2) + "\n");
     if (image) await write("guest-console.png", Buffer.from(image.data, "base64"));
@@ -56763,7 +56985,7 @@ var Readiness = class {
 // src/guest-exec.mjs
 var import_promises20 = __toESM(require("node:fs/promises"), 1);
 var import_node_os4 = __toESM(require("node:os"), 1);
-var import_node_path18 = __toESM(require("node:path"), 1);
+var import_node_path19 = __toESM(require("node:path"), 1);
 var import_node_crypto9 = require("node:crypto");
 var import_promises21 = require("node:timers/promises");
 
@@ -56971,7 +57193,7 @@ var GuestExec = class {
   }
   async perform(a, vmx3, base, signal) {
     const nonce = (0, import_node_crypto9.randomUUID)();
-    const guestPath2 = a.guest_os === "windows" ? import_node_path18.default.win32 : import_node_path18.default.posix;
+    const guestPath2 = a.guest_os === "windows" ? import_node_path19.default.win32 : import_node_path19.default.posix;
     const guestDirectory = guestPath2.join(base, `vmware-mcp-exec-${nonce}`);
     const result = {
       vmx: vmx3,
@@ -57009,7 +57231,7 @@ var GuestExec = class {
       authentication = ["-gu", guest2.username, "-gp", guest2.password];
       if (a.vm_password_profile) authentication.unshift("-vp", await this.credentials.vm(a.vm_password_profile));
       const scratch = await this.backend.hostPath(this.backend.env.VMWARE_GUEST_EXEC_ROOT || import_node_os4.default.tmpdir(), "directory");
-      hostDirectory = await import_promises20.default.mkdtemp(import_node_path18.default.join(scratch, "vmware-mcp-exec-"));
+      hostDirectory = await import_promises20.default.mkdtemp(import_node_path19.default.join(scratch, "vmware-mcp-exec-"));
       result.cleanup.host = "pending";
       const request = {
         nonce,
@@ -57023,10 +57245,10 @@ var GuestExec = class {
       };
       const runner = a.guest_os === "windows" ? "runner.ps1" : "runner.py";
       for (const [name2, content] of [["request.json", JSON.stringify(request)], [runner, a.guest_os === "windows" ? windowsRunner : linuxRunner]]) {
-        const file5 = import_node_path18.default.join(hostDirectory, name2);
-        await import_promises20.default.writeFile(file5, "", { flag: "wx", mode: 384 });
-        await this.protectFile(file5);
-        await import_promises20.default.writeFile(file5, content);
+        const file6 = import_node_path19.default.join(hostDirectory, name2);
+        await import_promises20.default.writeFile(file6, "", { flag: "wx", mode: 384 });
+        await this.protectFile(file6);
+        await import_promises20.default.writeFile(file6, content);
       }
       result.transport.phase = "tools";
       if (await run("checkToolsState") !== "running") throw new Error("Tools unavailable");
@@ -57038,7 +57260,7 @@ var GuestExec = class {
       result.cleanup.guest = "pending";
       delete result.cleanup.guest_directory;
       result.transport.phase = "upload";
-      for (const name2 of ["request.json", runner]) await run("CopyFileFromHostToGuest", [import_node_path18.default.join(hostDirectory, name2), guestPath2.join(guestDirectory, name2)], true);
+      for (const name2 of ["request.json", runner]) await run("CopyFileFromHostToGuest", [import_node_path19.default.join(hostDirectory, name2), guestPath2.join(guestDirectory, name2)], true);
       result.transport.phase = "launch";
       const launch = a.guest_os === "windows" ? ["-noWait", "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", guestPath2.join(guestDirectory, runner)] : ["-noWait", "/usr/bin/python3", guestPath2.join(guestDirectory, runner)];
       result.status = "indeterminate";
@@ -57053,7 +57275,7 @@ var GuestExec = class {
         await (0, import_promises21.setTimeout)(Math.min(200, Math.max(1, deadline - performance.now())), void 0, { signal });
       }
       result.transport.phase = "download";
-      const output2 = import_node_path18.default.join(hostDirectory, "result.json");
+      const output2 = import_node_path19.default.join(hostDirectory, "result.json");
       await import_promises20.default.writeFile(output2, "", { flag: "wx", mode: 384 });
       await this.protectFile(output2);
       await run("CopyFileFromGuestToHost", [guestPath2.join(guestDirectory, "result.json"), output2]);
@@ -57108,7 +57330,7 @@ var GuestExec = class {
 };
 
 // src/iso.mjs
-var import_node_path19 = __toESM(require("node:path"), 1);
+var import_node_path20 = __toESM(require("node:path"), 1);
 var file4 = external_exports.string().min(1).max(4096).refine((value) => !/[\x00-\x1f]/.test(value));
 var device = external_exports.string().regex(/^(?:ide[01]:[01]|sata[0-3]:(?:[0-9]|[12][0-9])|scsi[0-3]:(?:[0-6]|[89]|1[0-5]))$/);
 var confirm3 = external_exports.literal(true).describe("Set only after authorization for this VM/media change, with exclusive configuration access.");
@@ -57129,7 +57351,7 @@ function devices(config2, vmx3) {
       device: slot2,
       device_type: config2[`${slot2}.devicetype`],
       present: bool2(config2[`${slot2}.present`]),
-      iso_path: /^cdrom-image$/i.test(config2[`${slot2}.devicetype`]) && backing ? import_node_path19.default.resolve(import_node_path19.default.dirname(vmx3), backing) : null,
+      iso_path: /^cdrom-image$/i.test(config2[`${slot2}.devicetype`]) && backing ? import_node_path20.default.resolve(import_node_path20.default.dirname(vmx3), backing) : null,
       connected: bool2(config2[`${slot2}.connected`]),
       start_connected: bool2(config2[`${slot2}.startconnected`]),
       connection_source: "vmx_configuration",
@@ -57164,9 +57386,9 @@ var IsoManager = class {
     this.vmFiles = vmFiles2;
   }
   async isoPath(input2) {
-    if (import_node_path19.default.extname(input2).toLowerCase() !== ".iso" || /:[^\\/]/.test(input2.slice(2))) hardwareError("INVALID_ISO", "Select an absolute local .iso file without alternate streams.");
+    if (import_node_path20.default.extname(input2).toLowerCase() !== ".iso" || /:[^\\/]/.test(input2.slice(2))) hardwareError("INVALID_ISO", "Select an absolute local .iso file without alternate streams.");
     const iso = await this.backend.hostPath(input2, "input-file");
-    if (import_node_path19.default.extname(iso).toLowerCase() !== ".iso") hardwareError("INVALID_ISO", "ISO links must resolve to a .iso file.");
+    if (import_node_path20.default.extname(iso).toLowerCase() !== ".iso") hardwareError("INVALID_ISO", "ISO links must resolve to a .iso file.");
     return iso;
   }
   async list(input2) {
@@ -57244,6 +57466,221 @@ var IsoManager = class {
   }
 };
 
+// src/job-store.mjs
+var import_promises22 = __toESM(require("node:fs/promises"), 1);
+var import_node_path21 = __toESM(require("node:path"), 1);
+var import_node_os5 = __toESM(require("node:os"), 1);
+var import_node_crypto10 = require("node:crypto");
+function jobDirectory(env = process.env) {
+  if (env.VMWARE_JOB_DIRECTORY) {
+    if (!import_node_path21.default.isAbsolute(env.VMWARE_JOB_DIRECTORY)) throw new Error("VMWARE_JOB_DIRECTORY must be absolute.");
+    return env.VMWARE_JOB_DIRECTORY;
+  }
+  const base = process.platform === "win32" ? env.LOCALAPPDATA || import_node_path21.default.join(import_node_os5.default.homedir(), "AppData", "Local") : env.XDG_STATE_HOME && import_node_path21.default.isAbsolute(env.XDG_STATE_HOME) ? env.XDG_STATE_HOME : import_node_path21.default.join(import_node_os5.default.homedir(), ".local", "state");
+  return import_node_path21.default.join(base, "vmware-workstation-mcp", "jobs");
+}
+var validID = /^[0-9a-f-]{36}:[0-9a-f-]{36}$/;
+var filename = (id) => {
+  if (!validID.test(id)) throw new Error("Invalid persisted job ID.");
+  return id.replace(":", "_") + ".json";
+};
+var recordName = /^[0-9a-f-]{36}_[0-9a-f-]{36}\.json$/;
+var JobStore = class {
+  constructor({ directory, protectFile, protectDirectory = protectFile, maxRecords = 100, retentionMs = 7 * 864e5, maxBytes = 262144 } = {}) {
+    this.directory = directory;
+    this.protectFile = protectFile;
+    this.protectDirectory = protectDirectory;
+    this.maxRecords = maxRecords;
+    this.retentionMs = retentionMs;
+    this.maxBytes = maxBytes;
+    this.tail = Promise.resolve();
+  }
+  async load() {
+    await import_promises22.default.mkdir(this.directory, { recursive: true, mode: 448 });
+    const stat = await import_promises22.default.lstat(this.directory);
+    if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error("Job journal must be a private, regular directory, not a link.");
+    if (process.platform === "linux") {
+      if (stat.uid !== process.getuid() || stat.mode & 63) throw new Error("Job journal directory must be owned by this user with mode 700.");
+    } else await this.protectDirectory(this.directory);
+    const records = [];
+    const entries = await import_promises22.default.readdir(this.directory);
+    if (entries.filter((entry) => recordName.test(entry)).length > this.maxRecords) throw new Error("Job journal count exceeds its storage limit; inspect the directory.");
+    for (const entry of entries) {
+      if (!recordName.test(entry)) continue;
+      const file6 = import_node_path21.default.join(this.directory, entry), info = await import_promises22.default.lstat(file6);
+      if (!info.isFile() || info.isSymbolicLink() || info.nlink !== 1 || info.size > this.maxBytes) throw new Error("Unsafe or oversized job journal; inspect the journal directory.");
+      let record2;
+      try {
+        record2 = JSON.parse(process.platform === "linux" ? await readPrivateFile(file6) : await import_promises22.default.readFile(file6, "utf8"));
+        if (filename(record2.job_id) !== entry || !Number.isFinite(Date.parse(record2.started_at)) || !["running", "succeeded", "failed", "cancelled", "timed_out", "interrupted"].includes(record2.state)) throw new Error();
+      } catch {
+        throw new Error("Job journal is invalid; inspect it before starting more jobs.");
+      }
+      records.push(record2);
+    }
+    return records.sort((a, b) => Date.parse(a.started_at) - Date.parse(b.started_at));
+  }
+  write(record2, retainedIDs) {
+    const body = JSON.stringify(record2);
+    if (Buffer.byteLength(body) > this.maxBytes) return Promise.reject(new Error("Job journal record exceeded its storage limit."));
+    const operation = this.tail.then(async () => {
+      const entries = await import_promises22.default.readdir(this.directory);
+      if (!entries.includes(filename(record2.job_id)) && entries.filter((entry) => recordName.test(entry)).length >= this.maxRecords) throw new Error("Job journal record limit reached. Another server may be writing history.");
+      if (entries.filter((entry) => /^\.[0-9a-f-]{36}\.tmp$/.test(entry)).length >= 4) throw new Error("Interrupted journal temporary-file limit reached; inspect the private journal directory.");
+      const temporary = import_node_path21.default.join(this.directory, `.${(0, import_node_crypto10.randomUUID)()}.tmp`);
+      try {
+        const handle = await import_promises22.default.open(temporary, "wx", 384);
+        await handle.close();
+        await this.protectFile(temporary);
+        const output2 = await import_promises22.default.open(temporary, "r+");
+        try {
+          await output2.writeFile(body);
+          await output2.sync();
+        } finally {
+          await output2.close();
+        }
+        await import_promises22.default.rename(temporary, import_node_path21.default.join(this.directory, filename(record2.job_id)));
+      } finally {
+        await import_promises22.default.unlink(temporary).catch((e2) => {
+          if (e2.code !== "ENOENT") throw e2;
+        });
+      }
+      const cutoff = Date.now() - this.retentionMs;
+      for (const entry of await import_promises22.default.readdir(this.directory)) {
+        if (!recordName.test(entry) || retainedIDs.has(entry.slice(0, -5).replace("_", ":"))) continue;
+        const file6 = import_node_path21.default.join(this.directory, entry), info = await import_promises22.default.lstat(file6);
+        if (info.isFile() && !info.isSymbolicLink() && info.mtimeMs < cutoff) await import_promises22.default.unlink(file6);
+      }
+    });
+    this.tail = operation.catch(() => {
+    });
+    return operation;
+  }
+  async remove(id) {
+    await this.tail;
+    await import_promises22.default.unlink(import_node_path21.default.join(this.directory, filename(id))).catch((e2) => {
+      if (e2.code !== "ENOENT") throw e2;
+    });
+  }
+};
+
+// src/job-operations.mjs
+var import_promises23 = __toESM(require("node:fs/promises"), 1);
+var import_node_path22 = __toESM(require("node:path"), 1);
+var file5 = external_exports.string().min(1).max(4096).refine((value) => !/[\x00-\x1f]/.test(value));
+var seconds = external_exports.number().int().min(1).max(3600).default(600);
+var clone2 = external_exports.object({
+  vmx: file5,
+  destination_vmx: file5.describe("New .vmx in a NEW directory; full offline clones only."),
+  name: external_exports.string().min(1).max(128).regex(/^[a-zA-Z0-9][a-zA-Z0-9 ._-]*$/).optional(),
+  timeout_seconds: seconds
+}).strict();
+var power = external_exports.object({ vmx: file5, action: external_exports.enum(["start", "stop", "reset", "suspend", "pause", "unpause"]), mode: external_exports.enum(["soft", "hard"]).default("soft"), timeout_seconds: seconds }).strict();
+var step = external_exports.discriminatedUnion("operation", [
+  external_exports.object({ operation: external_exports.literal("disk_convert"), arguments: diskSchemas.disk_convert }).strict(),
+  external_exports.object({ operation: external_exports.literal("disk_expand"), arguments: diskSchemas.disk_expand }).strict(),
+  external_exports.object({ operation: external_exports.literal("clone"), arguments: clone2 }).strict(),
+  external_exports.object({ operation: external_exports.literal("vm_power"), arguments: power }).strict()
+]);
+var jobStartSchema = external_exports.object({
+  steps: external_exports.array(step).min(1).max(16).describe("Explicit sequential steps; stops on first failure/cancellation. Submit separate jobs for concurrency."),
+  confirm: external_exports.literal(true).describe("Only after authorization for every listed operation, VM, disk and power mode."),
+  timeout_seconds: external_exports.number().int().min(1).max(86400).default(3600)
+}).strict();
+var JobOperations = class {
+  constructor({ backend: backend2, jobs: jobs2, disks: disks2, ovf: ovf2 } = {}) {
+    Object.assign(this, { backend: backend2, jobs: jobs2, disks: disks2, ovf: ovf2 });
+  }
+  async start(input2) {
+    const a = jobStartSchema.parse(input2), resources = [], artifacts = [], steps = [];
+    for (const step2 of a.steps) {
+      const args = { ...step2.arguments };
+      if (step2.operation.startsWith("disk_")) {
+        args.disk = await this.disks.diskPath(args.disk);
+        resources.push(import_node_path22.default.dirname(args.disk));
+        artifacts.push(args.disk);
+        args.vmx_paths = await Promise.all(args.vmx_paths.map((vmx3) => this.backend.vmx(vmx3)));
+        resources.push(...args.vmx_paths);
+        if (args.destination) {
+          const output2 = await this.disks.output(args.destination);
+          args.destination = output2.disk;
+          resources.push(output2.directory);
+          artifacts.push(output2.directory);
+        }
+      } else {
+        args.vmx = await this.backend.vmx(args.vmx);
+        resources.push(import_node_path22.default.dirname(args.vmx));
+        artifacts.push(args.vmx);
+        if (step2.operation === "clone") {
+          args.destination_vmx = await this.backend.hostPath(args.destination_vmx, "new-vmx");
+          const directory = import_node_path22.default.dirname(args.destination_vmx);
+          await this.backend.hostPath(import_node_path22.default.dirname(directory), "directory");
+          if (await import_promises23.default.lstat(directory).then(() => true, (e2) => {
+            if (e2.code === "ENOENT") return false;
+            throw e2;
+          })) throw new Error("Clone destination requires a NEW parent directory.");
+          resources.push(directory);
+          artifacts.push(directory);
+        }
+      }
+      steps.push({ operation: step2.operation, arguments: args });
+    }
+    return this.jobs.start({
+      operation: steps.length === 1 ? steps[0].operation : "batch",
+      resources,
+      artifacts,
+      timeout: a.timeout_seconds * 1e3,
+      task: (context) => this.backend.execution.run(context, async () => {
+        const results = [];
+        for (const [index, step2] of steps.entries()) {
+          context.signal.throwIfAborted();
+          context.log(`Step ${index + 1}/${steps.length}: ${step2.operation} started.
+`);
+          let result;
+          if (step2.operation.startsWith("disk_")) result = await this.disks.perform(step2.operation.slice(5), step2.arguments);
+          else if (step2.operation === "clone") result = await this.clone(step2.arguments, context);
+          else result = await this.power(step2.arguments);
+          results.push({ step: index + 1, operation: step2.operation, result });
+          await context.checkpoint({ completed_steps: results });
+          context.log(`Step ${index + 1}/${steps.length}: verified completion.
+`);
+        }
+        return { completed_steps: results, note: "Native results verified per step; no guest readiness or automatic rollback is implied." };
+      })
+    });
+  }
+  async clone(a, context) {
+    const source3 = await this.ovf.vmSource(a.vmx);
+    const config2 = parseAssignments(await import_promises23.default.readFile(a.vmx, "utf8"));
+    let bytes = source3.size;
+    for (const [key3, value] of Object.entries(config2)) if (/^(scsi|sata|ide|nvme)\d+:\d+\.filename$/i.test(key3) && /\.vmdk$/i.test(value)) {
+      bytes += (await this.disks.inspect({ disk: import_node_path22.default.resolve(import_node_path22.default.dirname(a.vmx), value) })).capacity_bytes;
+    }
+    const directory = import_node_path22.default.dirname(a.destination_vmx);
+    await this.disks.freeSpace(import_node_path22.default.dirname(directory), bytes);
+    context.signal.throwIfAborted();
+    await import_promises23.default.mkdir(directory);
+    await this.backend.run(["clone", a.vmx, a.destination_vmx, "full", ...a.name ? [`-cloneName=${a.name}`] : []], { mutation: true, timeout: a.timeout_seconds * 1e3 });
+    context.signal.throwIfAborted();
+    const destination = await this.backend.vmx(a.destination_vmx);
+    await this.ovf.vmSource(destination);
+    return { source: a.vmx, destination, clone_type: "full", powered_on: false, output_verified: true };
+  }
+  async power(a) {
+    const output2 = await this.backend.run([a.action, a.vmx, ...a.action === "start" ? ["nogui"] : ["stop", "reset", "suspend"].includes(a.action) ? [a.mode] : []], { mutation: true, timeout: a.timeout_seconds * 1e3 });
+    const running = (await this.backend.details(a.vmx)).running;
+    if (a.action === "start" && !running || ["stop", "suspend"].includes(a.action) && running) throw new Error("Power command completed but observed VM state did not match; inspect before retrying.");
+    return {
+      vmx: a.vmx,
+      action: a.action,
+      commandSucceeded: true,
+      running,
+      output: output2,
+      verification: ["start", "stop", "suspend"].includes(a.action) ? "subsequent running inventory" : "native command exit only; pause/reset state is not observable through running inventory"
+    };
+  }
+};
+
 // src/server.mjs
 var backend = new Workstation();
 var credentials = new Credentials();
@@ -57251,7 +57688,11 @@ var rest = new RestClient({ credentials, backend, coordinateDiskEdits: true });
 var vmFiles = new VMFiles(backend, { protectSensitiveFile: localFileProtector(backend) });
 var lanSegments = new LanSegments(backend, vmFiles, { protectFile: localFileProtector(backend) });
 var consoles = new ConsoleManager({ backend, credentials, rest });
-var jobs = new JobManager({ redact: (text3) => credentials.redact(text3) });
+var jobs = new JobManager({
+  redact: (text3) => credentials.redact(text3),
+  resources: backend.resources,
+  store: new JobStore({ directory: jobDirectory(), protectFile: localFileProtector(backend) })
+});
 var ovf = new OvfManager({ backend, credentials, jobs, rest });
 var disks = new DiskManager({ backend, vmFiles });
 var serial = new SerialManager({ backend, vmFiles, credentials, rest });
@@ -57259,7 +57700,8 @@ var readiness = new Readiness({ backend, credentials, consoles, protectFile: loc
 var guestExec = new GuestExec({ backend, credentials, protectFile: localFileProtector(backend) });
 var media = new IsoManager({ backend, vmFiles });
 var hardware = new HardwareManager({ backend, vmFiles, disks, lan: lanSegments });
-var server = new McpServer({ name: "vmware-workstation", version: "0.11.0" });
+var jobOperations = new JobOperations({ backend, jobs, disks, ovf });
+var server = new McpServer({ name: "vmware-workstation", version: "0.12.0" });
 var vmx2 = external_exports.string().min(1).describe("Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.");
 var name = external_exports.string().min(1).max(256).describe("Exact snapshot name.");
 tool("vm_hardware_capabilities", "Inspect installed native Workstation product version and conservative typed hardware limits. No power or configuration changes. vTPM writes require an unavailable encryption backend; nested CPU and guest driver support remain unverified.", hardwareSchemas.vm_hardware_capabilities, true, () => hardware.capabilities());
@@ -57285,7 +57727,9 @@ function tool(name2, description, schema, readOnly, callback, destructive = !rea
     annotations: { readOnlyHint: readOnly, destructiveHint: destructive, idempotentHint: idempotent, openWorldHint: openWorld }
   }, async (args, extra) => {
     try {
+      if (name2.startsWith("job_") || name2.startsWith("ovf_") && name2 !== "ovf_tool_status") await jobs.initialize();
       const result = await callback(args, extra);
+      if (result?.job_id || name2 === "job_list") return { content: [{ type: "text", text: JSON.stringify(jobs.publicResult(result), null, 2) }] };
       if (Array.isArray(result?.content)) return { content: result.content.map((block) => block.type === "text" ? { ...block, text: credentials.redact(block.text) } : block) };
       return { content: [{ type: "text", text: credentials.redact(JSON.stringify(result, null, 2)) }] };
     } catch (error62) {
@@ -57323,9 +57767,10 @@ tool("ovf_validate", "Start read-only local OVF/OVA schema and manifest validati
 tool("ovf_import", "Start an OVF/OVA import into a NEW VM directory. Supports typed network/property mappings and explicit EULA acceptance. Registration through REST and headless power-on are opt-in. Returns a job ID; poll job_status.", ovfSchemas.ovf_import, false, (a) => ovf.start("ovf_import", a), false);
 tool("ovf_export", "Start a powered-off VMX export to OVF/OVA. Refuses snapshots, locks, saved state, external backings, encryption and vTPM. OVF needs a new parent directory. Only OVA permits explicit overwrite=true. Returns a job ID.", ovfSchemas.ovf_export, false, (a) => ovf.start("ovf_export", a));
 tool("ovf_convert", "Start a local OVF/OVA/VMX conversion using VMware OVF Tool. VMX sources require power-off and no snapshots. OVF/VMX targets need new parent directories; overwrite is limited to OVA. Returns a job ID.", ovfSchemas.ovf_convert, false, (a) => ovf.start("ovf_convert", a));
-tool("job_status", "Read a background job state, observed progress and final result/error. Prior-server-session job IDs report interrupted with unknown outcome.", jobSchemas.job_status, true, (a) => jobs.status(a.job_id));
-tool("job_list", "List up to 100 background jobs retained in this server session. Job results and logs are memory-only.", jobSchemas.job_list, true, () => jobs.list());
-tool("job_cancel", "Request cancellation of a background job and its native OVF Tool process. Partial files and registration/power changes may remain; inspect before retrying.", jobSchemas.job_cancel, false, (a) => jobs.cancel(a.job_id));
+tool("job_start", "Start a bounded background job of explicit disk conversion/expansion, full offline cloning or headless VM power steps. Requires confirm=true for every target and action. Steps run sequentially and stop on failure; separate unrelated jobs run concurrently. Returns a job ID; inspect status, partial results and artifact paths before retrying.", jobStartSchema, false, (a) => jobOperations.start(a));
+tool("job_status", "Read background state, genuine backend progress and verified result/error from private bounded journals. Unfinished prior-session jobs report interrupted with unknown outcome and are never replayed.", jobSchemas.job_status, true, (a) => jobs.status(a.job_id));
+tool("job_list", "List up to 100 current and retained historical jobs from private redacted journals, retained for at most seven days. History does not imply a previous process has stopped.", jobSchemas.job_list, true, () => jobs.list());
+tool("job_cancel", "Request cancellation of a current job and its native process tree. Locks remain until process cleanup finishes. Partial files and VM changes may remain; inspect before retrying.", jobSchemas.job_cancel, false, (a) => jobs.cancel(a.job_id));
 tool("job_logs", "Read bounded, redacted background job output. Raw probe metadata/property defaults are omitted. A truncated log is explicitly marked.", jobSchemas.job_logs, true, (a) => jobs.logs(a.job_id));
 tool("list_lan_segments", "List the current host user LAN segment catalog. Optionally supply vmx to inspect adapter indices and segment associations, including orphaned IDs. Does not scan disks or change VMs.", lanSegmentSchemas.list_lan_segments, true, (a) => lanSegments.list(a));
 tool("create_lan_segment", "Create a named private LAN segment in Workstation preferences with a backup, or return the uniquely named existing segment. Close the Workstation/Player GUI first. Does not create a VMnet, DHCP server or VM adapter.", lanSegmentSchemas.create_lan_segment, false, (a) => lanSegments.create(a), false);
@@ -57390,6 +57835,7 @@ tool("workstation_capabilities", "Show full vmrun/REST tool coverage, compare th
     ovfTool: await ovf.status(),
     ovfTools: Object.keys(ovfSchemas),
     backgroundJobTools: Object.keys(jobSchemas),
+    jobSubmission: { tool: "job_start", maximumConcurrent: 4, maximumSteps: 16, persistence: "bounded private journals; no replay", locks: "shared VM and resource reservations in this server; external writers must remain closed" },
     diskManager: await disks.status(),
     diskTools: Object.keys(diskSchemas),
     readinessTools: Object.keys(readinessSchemas),

@@ -2287,8 +2287,281 @@
       }
     },
     {
+      "name": "job_start",
+      "description": "Start a bounded background job of explicit disk conversion/expansion, full offline cloning or headless VM power steps. Requires confirm=true for every target and action. Steps run sequentially and stop on failure; separate unrelated jobs run concurrently. Returns a job ID; inspect status, partial results and artifact paths before retrying.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "steps": {
+            "minItems": 1,
+            "maxItems": 16,
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "operation": {
+                      "type": "string",
+                      "const": "disk_convert"
+                    },
+                    "arguments": {
+                      "type": "object",
+                      "properties": {
+                        "disk": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 4096
+                        },
+                        "vmx_paths": {
+                          "default": [],
+                          "description": "Additional unregistered VMX files that may reference this disk. Inventory is also checked.",
+                          "maxItems": 256,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 4096
+                          }
+                        },
+                        "confirm": {
+                          "type": "boolean",
+                          "const": true,
+                          "description": "Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk."
+                        },
+                        "timeout_seconds": {
+                          "default": 600,
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 3600
+                        },
+                        "destination": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 4096,
+                          "description": "Absolute .vmdk in a NEW parent directory; source is preserved."
+                        },
+                        "disk_type": {
+                          "default": "0",
+                          "type": "string",
+                          "enum": [
+                            "0",
+                            "1",
+                            "2",
+                            "3",
+                            "5"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "disk",
+                        "confirm",
+                        "destination"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "operation",
+                    "arguments"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "operation": {
+                      "type": "string",
+                      "const": "disk_expand"
+                    },
+                    "arguments": {
+                      "type": "object",
+                      "properties": {
+                        "disk": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 4096
+                        },
+                        "vmx_paths": {
+                          "default": [],
+                          "description": "Additional unregistered VMX files that may reference this disk. Inventory is also checked.",
+                          "maxItems": 256,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 4096
+                          }
+                        },
+                        "confirm": {
+                          "type": "boolean",
+                          "const": true,
+                          "description": "Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk."
+                        },
+                        "timeout_seconds": {
+                          "default": 600,
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 3600
+                        },
+                        "capacity_mb": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 8388608,
+                          "description": "Total virtual capacity in MiB, not an increment."
+                        }
+                      },
+                      "required": [
+                        "disk",
+                        "confirm",
+                        "capacity_mb"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "operation",
+                    "arguments"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "operation": {
+                      "type": "string",
+                      "const": "clone"
+                    },
+                    "arguments": {
+                      "type": "object",
+                      "properties": {
+                        "vmx": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 4096
+                        },
+                        "destination_vmx": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 4096,
+                          "description": "New .vmx in a NEW directory; full offline clones only."
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128,
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9 ._-]*$"
+                        },
+                        "timeout_seconds": {
+                          "default": 600,
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 3600
+                        }
+                      },
+                      "required": [
+                        "vmx",
+                        "destination_vmx"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "operation",
+                    "arguments"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "operation": {
+                      "type": "string",
+                      "const": "vm_power"
+                    },
+                    "arguments": {
+                      "type": "object",
+                      "properties": {
+                        "vmx": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 4096
+                        },
+                        "action": {
+                          "type": "string",
+                          "enum": [
+                            "start",
+                            "stop",
+                            "reset",
+                            "suspend",
+                            "pause",
+                            "unpause"
+                          ]
+                        },
+                        "mode": {
+                          "default": "soft",
+                          "type": "string",
+                          "enum": [
+                            "soft",
+                            "hard"
+                          ]
+                        },
+                        "timeout_seconds": {
+                          "default": 600,
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 3600
+                        }
+                      },
+                      "required": [
+                        "vmx",
+                        "action"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "operation",
+                    "arguments"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "description": "Explicit sequential steps; stops on first failure/cancellation. Submit separate jobs for concurrency."
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Only after authorization for every listed operation, VM, disk and power mode."
+          },
+          "timeout_seconds": {
+            "default": 3600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          }
+        },
+        "required": [
+          "steps",
+          "confirm"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
       "name": "job_status",
-      "description": "Read a background job state, observed progress and final result/error. Prior-server-session job IDs report interrupted with unknown outcome.",
+      "description": "Read background state, genuine backend progress and verified result/error from private bounded journals. Unfinished prior-session jobs report interrupted with unknown outcome and are never replayed.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -2316,7 +2589,7 @@
     },
     {
       "name": "job_list",
-      "description": "List up to 100 background jobs retained in this server session. Job results and logs are memory-only.",
+      "description": "List up to 100 current and retained historical jobs from private redacted journals, retained for at most seven days. History does not imply a previous process has stopped.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2335,7 +2608,7 @@
     },
     {
       "name": "job_cancel",
-      "description": "Request cancellation of a background job and its native OVF Tool process. Partial files and registration/power changes may remain; inspect before retrying.",
+      "description": "Request cancellation of a current job and its native process tree. Locks remain until process cleanup finishes. Partial files and VM changes may remain; inspect before retrying.",
       "inputSchema": {
         "type": "object",
         "properties": {

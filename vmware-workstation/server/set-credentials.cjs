@@ -99,10 +99,26 @@ var Resources = class {
   }
   assert(files) {
     const owner = this.context.getStore();
-    const overlaps = (a, b) => a === b || a.startsWith(b + import_node_path2.default.sep) || b.startsWith(a + import_node_path2.default.sep);
+    const contains = (a, b) => {
+      const relative = import_node_path2.default.relative(a, b);
+      return !relative || !relative.startsWith(".." + import_node_path2.default.sep) && relative !== ".." && !import_node_path2.default.isAbsolute(relative);
+    };
+    const overlaps = (a, b) => contains(a, b) || contains(b, a);
     for (const file of files.map((file2) => this.key(file2))) for (const [held, token] of this.active) {
       if (token !== owner && overlaps(file, held)) throw Object.assign(new Error("A conflicting operation holds this VM or disk path. Wait for it to finish, inspect state, then retry."), { code: "RESOURCE_BUSY" });
     }
+  }
+  reserve(files) {
+    this.context.run(void 0, () => this.assert(files));
+    const token = /* @__PURE__ */ Symbol("reservation");
+    const keys = [...new Set(files.map((file) => this.key(file)))];
+    for (const key of keys) this.active.set(key, token);
+    return {
+      run: (callback) => this.context.run(token, callback),
+      release: () => {
+        for (const key of keys) if (this.active.get(key) === token) this.active.delete(key);
+      }
+    };
   }
   async use(files, callback) {
     this.assert(files);
@@ -118,6 +134,7 @@ var Resources = class {
 };
 
 // src/workstation.mjs
+var import_node_async_hooks2 = require("node:async_hooks");
 var execute = (0, import_node_util.promisify)(import_node_child_process.execFile);
 function parseAssignments(text) {
   const values = {};
@@ -142,7 +159,8 @@ var Workstation = class {
   constructor({ env = process.env, run = execute } = {}) {
     this.env = env;
     this.execute = run;
-    this.tail = Promise.resolve();
+    this.queues = /* @__PURE__ */ new Map();
+    this.execution = new import_node_async_hooks2.AsyncLocalStorage();
     this.inventoryPath = inventoryPath(env);
     this.resources = new Resources();
   }
@@ -150,8 +168,13 @@ var Workstation = class {
     return findVMwareExecutable("vmrun", { env: this.env });
   }
   async run(args, { mutation = false, authentication = [], timeout = 12e4, deadline, signal } = {}) {
+    const context = this.execution.getStore();
+    signal ||= context?.signal;
+    signal?.throwIfAborted();
     if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
-    const job = this.tail.then(async () => {
+    const key = args[1] && import_node_path3.default.isAbsolute(args[1]) ? this.resources.key(args[1]) : `host:${args[0]}`;
+    const previous = this.queues.get(key) || Promise.resolve();
+    const job = previous.then(async () => {
       if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
       const binary = await this.executable();
       signal?.throwIfAborted();
@@ -160,7 +183,7 @@ var Workstation = class {
         if (timeout <= 0) throw Object.assign(new Error("Observation deadline expired while waiting for vmrun."), { code: "OBSERVATION_DEADLINE" });
       }
       try {
-        const result = await this.execute(binary, ["-T", "ws", ...authentication, ...args], {
+        const invoke = () => this.nativeRun(binary, ["-T", "ws", ...authentication, ...args], {
           windowsHide: true,
           shell: false,
           timeout,
@@ -168,6 +191,7 @@ var Workstation = class {
           maxBuffer: 1024 * 1024,
           encoding: "utf8"
         });
+        const result = mutation && args[1] && import_node_path3.default.isAbsolute(args[1]) ? await this.resources.use([args[1]], invoke) : await invoke();
         return result.stdout.trim();
       } catch (error) {
         const details = [error.stderr, error.stdout].filter(Boolean).join("\n").trim().slice(0, 4e3);
@@ -175,15 +199,27 @@ var Workstation = class {
         throw Object.assign(new Error(`vmrun ${args[0] || "help"} failed (${error.killed ? "timeout" : error.code || "unknown error"}).${uncertain}${details ? ` ${details}` : ""}`), { code: error.killed ? "VMRUN_TIMEOUT" : "VMRUN_FAILED" });
       }
     });
-    this.tail = job.catch(() => {
+    const tail = job.catch(() => {
     });
-    if (!signal) return job;
+    this.queues.set(key, tail);
+    void tail.then(() => {
+      if (this.queues.get(key) === tail) this.queues.delete(key);
+    });
+    if (!signal || context) return job;
     return new Promise((resolve, reject) => {
       const abort = () => reject(signal.reason || new Error("Operation cancelled."));
       if (signal.aborted) abort();
       else signal.addEventListener("abort", abort, { once: true });
       job.then(resolve, reject).finally(() => signal.removeEventListener("abort", abort));
     });
+  }
+  async nativeRun(file, args, options = {}) {
+    const context = this.execution.getStore();
+    if (!context) return this.execute(file, args, options);
+    context.signal.throwIfAborted();
+    const result = await context.run(file, args, { ...options, env: options.env || this.env, logOutput: false, progress: null });
+    if (result.code !== 0) throw Object.assign(new Error("Native job command failed."), { code: result.code, stderr: result.output });
+    return { stdout: result.output, stderr: "" };
   }
   async help() {
     const binary = await this.executable();
