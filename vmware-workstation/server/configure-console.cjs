@@ -396,8 +396,8 @@ async function readPrivateFile(filename) {
     await handle.close();
   }
 }
-function localFileProtector(backend) {
-  if (process.platform === "linux") return async (filename) => {
+function localFileProtector(backend, { platform = process.platform, root } = {}) {
+  if (platform === "linux") return async (filename) => {
     const handle = await openPrivateFile(filename);
     try {
       await handle.chmod(384);
@@ -406,8 +406,26 @@ function localFileProtector(backend) {
       await handle.close();
     }
   };
-  const root = import_node_path4.default.resolve(import_node_path4.default.dirname(process.argv[1]), "..");
-  return (filename) => backend.execute("pwsh", ["-NoProfile", "-File", import_node_path4.default.join(root, "scripts", "Protect-LocalFile.ps1"), "-LiteralPath", filename], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
+  const script = import_node_path4.default.join(root ?? import_node_path4.default.resolve(import_node_path4.default.dirname(process.argv[1]), ".."), "scripts", "Protect-LocalFile.ps1");
+  const preflight = async () => {
+    try {
+      if (!(await import_promises3.default.stat(script)).isFile()) throw new Error("Expected a regular helper file.");
+      await import_promises3.default.access(script, import_node_fs2.constants.R_OK);
+    } catch (cause) {
+      throw Object.assign(new Error("PLUGIN_RUNTIME_MISSING: The VMware Workstation plugin runtime is incomplete or no longer available (Protect-LocalFile.ps1). Reconnect the plugin or open a fresh chat to use the installed version. If this persists, reinstall/reimport the plugin before retrying.", { cause }), { code: "PLUGIN_RUNTIME_MISSING" });
+    }
+  };
+  const protect = async (filename) => {
+    await preflight();
+    try {
+      return await backend.execute("pwsh", ["-NoProfile", "-File", script, "-LiteralPath", filename], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
+    } catch (error62) {
+      await preflight();
+      throw error62;
+    }
+  };
+  protect.preflight = preflight;
+  return protect;
 }
 
 // src/credentials.mjs
@@ -21366,31 +21384,40 @@ var VMFiles = class {
       for (const [key2, update] of updates) if (!seen.has(key2) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
       const mode = (await import_promises9.default.stat(vmx2)).mode & 511;
       if (beforeCommit) await beforeCommit();
+      await protectFile?.preflight?.();
       const backup = `${vmx2}.backup-${(0, import_node_crypto2.randomUUID)()}`;
-      if (protectFile) {
-        await import_promises9.default.writeFile(backup, "", { flag: "wx", mode: 384 });
-        await protectFile(backup);
-        await import_promises9.default.writeFile(backup, original);
-      } else await import_promises9.default.copyFile(vmx2, backup, import_node_fs3.constants.COPYFILE_EXCL);
       const temporary = `${vmx2}.edit-${(0, import_node_crypto2.randomUUID)()}`;
-      if (protectFile) {
-        await import_promises9.default.writeFile(temporary, "", { flag: "wx", mode: 384 });
-        await protectFile(temporary);
-      }
-      await import_promises9.default.writeFile(temporary, lines.join("\n").replace(/\n*$/, "\n"), { flag: protectFile ? "w" : "wx", mode });
-      if (await import_promises9.default.readFile(vmx2, "utf8") !== original) {
-        await import_promises9.default.unlink(temporary);
-        throw new Error(`VMX changed during editing; original retained. Backup: ${backup}`);
-      }
-      if (beforeCommit) {
-        try {
-          await beforeCommit();
-        } catch (error62) {
-          await import_promises9.default.unlink(temporary);
-          throw error62;
+      let backupCreated = false, backupComplete = false, temporaryCreated = false;
+      try {
+        if (protectFile) {
+          const handle2 = await import_promises9.default.open(backup, "wx", 384);
+          backupCreated = true;
+          await handle2.close();
+          await protectFile(backup);
+          await import_promises9.default.writeFile(backup, original);
+        } else await import_promises9.default.copyFile(vmx2, backup, import_node_fs3.constants.COPYFILE_EXCL);
+        backupComplete = true;
+        const handle = await import_promises9.default.open(temporary, "wx", mode);
+        temporaryCreated = true;
+        await handle.close();
+        if (protectFile) await protectFile(temporary);
+        await import_promises9.default.writeFile(temporary, lines.join("\n").replace(/\n*$/, "\n"));
+        if (await import_promises9.default.readFile(vmx2, "utf8") !== original) throw new Error(`VMX changed during editing; original retained. Backup: ${backup}`);
+        if (beforeCommit) await beforeCommit();
+        await import_promises9.default.rename(temporary, vmx2);
+      } catch (error62) {
+        const cleanup = [temporaryCreated && temporary, backupCreated && !backupComplete && backup].filter(Boolean);
+        const failed = [];
+        for (const filename of cleanup) {
+          try {
+            await import_promises9.default.unlink(filename);
+          } catch (cause) {
+            if (cause.code !== "ENOENT") failed.push(filename);
+          }
         }
+        if (failed.length) throw Object.assign(new Error(`${error62.message} Could not remove incomplete files: ${failed.join(", ")}. Inspect them before retrying.`, { cause: error62 }), { code: error62.code });
+        throw error62;
       }
-      await import_promises9.default.rename(temporary, vmx2);
       return { vmx: vmx2, updated: true, backup, changedSettings: Object.keys(a.settings), note: "VMX saved while VM was not running and had no detected saved state/VMX lock. Close/reopen its Workstation tab if it has cached settings." };
     });
   }
