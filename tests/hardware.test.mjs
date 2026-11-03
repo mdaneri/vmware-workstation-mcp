@@ -130,7 +130,7 @@ test('declarative nested ESXi VM creates multiple controllers, sparse disks, iso
     disks: [{ controller: 'scsi', controller_index: 0, unit: 0, capacity_mb: 1 }, { controller: 'scsi', controller_index: 1, unit: 1, capacity_mb: 2 }, { controller: 'sata', controller_index: 0, unit: 0, capacity_mb: 3 }, { controller: 'nvme', controller_index: 0, unit: 0, capacity_mb: 4 }],
     nics: [{ index: 0, model: 'vmxnet3', network: 'lan_segment', segment: id }, { index: 1, model: 'e1000e', network: 'lan_segment', segment: 'isolated', mac: '00:50:56:01:02:03' }] });
   const got = await f.manager.get({ vmx: result.vmx }); assert.equal(got.disks.length, 4); assert.equal(got.controllers.length, 4); assert.equal(got.nics.length, 2); assert.equal(got.sockets, 2);
-  const config = parseAssignments(await fs.readFile(result.vmx, 'utf8')); assert.equal(config['sata0:1.filename'], iso); assert.match(config['sata0:0.filename'], /disk-2/);
+  const config = parseAssignments(await fs.readFile(result.vmx, 'utf8')); assert.equal(config['sata0:1.fileName'], iso); assert.match(config['sata0:0.fileName'], /disk-2/);
   assert.equal(result.poweredOn, false); assert.equal(result.registered, false);
   assert.ok(!f.calls.some(c => c.args.includes('start'))); assert.equal((await f.config()).numvcpus, '4');
 });

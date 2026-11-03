@@ -44,6 +44,14 @@ require('node:child_process').execFile = stub;
     controllers: [{ type: 'lsilogic', index: 0 }, { type: 'nvme', index: 0 }],
     disks: [{ controller: 'scsi', controller_index: 0, unit: 0, capacity_mb: 1 }, { controller: 'nvme', controller_index: 0, unit: 0, capacity_mb: 1 }],
     nics: [{ index: 0, model: 'vmxnet3', network: 'custom', vmnet: 'vmnet2' }, { index: 1, model: 'e1000e', network: 'custom', vmnet: 'vmnet2' }] });
+  const details = await call('get_vm_details', { vmx: created.vmx });
+  assert.equal(details.hardware.displayName, 'Nested ESXi fixture');
+  assert.equal(details.hardware.guestOS, 'vmkernel8');
+  assert.equal(details.hardware['virtualHW.version'], '21');
+  assert.equal(details.hardware['scsi0:0.fileName'], path.relative(path.dirname(created.vmx), created.disks[0]));
+  assert.equal(details.hardware['nvme0:0.fileName'], path.relative(path.dirname(created.vmx), created.disks[1]));
+  assert.equal(details.hardware['ethernet0.connectionType'], 'custom');
+  assert.equal(details.hardware['ethernet1.connectionType'], 'custom');
   let got = await call('vm_hardware_get', { vmx: created.vmx }); assert.equal(got.disks.length, 2); assert.equal(got.nics.length, 2); assert.equal(got.nested_virtualization, true);
   await call('vm_hardware_set', { vmx: created.vmx, confirm: true, memory_mb: 16384 }); got = await call('vm_hardware_get', { vmx: created.vmx }); assert.equal(got.memory_mb, 16384);
   const error = await client.callTool({ name: 'vm_hardware_set', arguments: { vmx: created.vmx, confirm: true, vtpm: true } });

@@ -21169,19 +21169,20 @@ var HardwareManager = class {
       const base = {
         ".encoding": "UTF-8",
         "config.version": "8",
-        "virtualhw.version": String(a.hardware_version),
+        "virtualHW.version": String(a.hardware_version),
         displayName: a.name,
         guestOS: a.guest_os,
         memsize: String(a.memory_mb),
         numvcpus: String(a.cpus),
-        "cpuid.corespersocket": String(a.cores_per_socket ?? 1),
+        "cpuid.coresPerSocket": String(a.cores_per_socket ?? 1),
         firmware: a.firmware,
         "floppy0.present": "FALSE",
         "sound.present": "FALSE",
         "usb.present": "FALSE",
         ...pcieSettings({})
       };
-      const settings = { ...base, ...this.settings({ ...a, controllers }, base, caps) };
+      const config2 = Object.fromEntries(Object.entries(base).map(([k, v]) => [k.toLowerCase(), v]));
+      const settings = { ...base, ...this.settings({ ...a, controllers }, config2, caps) };
       const nic = await this.nicSettings(nics, {});
       Object.assign(settings, nic.settings);
       const slots = /* @__PURE__ */ new Set();
@@ -21225,8 +21226,7 @@ var HardwareManager = class {
             await this.lan.unchanged(nic.catalog);
           }
           if (JSON.stringify(await this.available()) !== JSON.stringify(caps)) hardwareError("CAPABILITY_CHANGED", "Worker version changed during creation.");
-          const normalized = Object.fromEntries(Object.entries(settings).map(([k, v]) => [k.toLowerCase(), v]));
-          await import_promises8.default.writeFile(vmx2, Object.entries(normalized).filter(([, v]) => v !== null).map(([k, v]) => `${k} = "${encode3(v)}"`).join("\n") + "\n", { flag: "wx", mode: 384 });
+          await import_promises8.default.writeFile(vmx2, Object.entries(settings).filter(([, v]) => v !== null).map(([k, v]) => `${k} = "${encode3(v)}"`).join("\n") + "\n", { flag: "wx", mode: 384 });
           return { created: true, vmx: vmx2, disk: createdDisks[0], disks: createdDisks, directory, registered: false, poweredOn: false, guestOSInstalled: false, live_support: "unknown", note: "Blank isolated hardware created. Guest drivers, OS installation and nested hypervisor execution require separate live validation." };
         } catch (e) {
           throw Object.assign(new Error("Typed VM creation failed. Partial files are retained in the new directory; inspect before retrying. No existing VM was overwritten."), { code: e.code || "CREATE_FAILED", details: { directory, reason: e.code || "DISK_OR_CONFIG_FAILED" } });
