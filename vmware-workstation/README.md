@@ -1,6 +1,10 @@
+<p align="center">
+  <img src="assets/icon.svg" alt="VMware Workstation Plugin logo" width="128" height="128">
+</p>
+
 # VMware Workstation
 
-Local Windows and Linux MCP plugin, version 0.14.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 148 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), five [LAN segment tools](#lan-segments), ten [OVF/OVA and background job tools](ovf.md), reusable [job submission](jobs.md), nine [VMDK lifecycle tools](disks.md), six [optional serial tools](serial.md), five [readiness and diagnostics tools](readiness.md), [verified guest execution](guest-exec.md), five [ISO media/boot capability tools](iso.md), three [typed hardware tools](hardware.md), four [declarative VM template tools](templates.md), and six [multi-VM lab tools](labs.md). All 142 previous tool definitions are unchanged. Portable templates provide validation, read-only plans, sanitized export and explicit no-overwrite deployment with optional registration/power-on. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
+Local Windows and Linux MCP plugin, version 0.14.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 148 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), five [LAN segment tools](#lan-segments), ten [OVF/OVA and background job tools](ovf.md), reusable [job submission](jobs.md), nine [VMDK lifecycle tools](disks.md), six [optional serial tools](serial.md), five [readiness and diagnostics tools](readiness.md), [verified guest execution](guest-exec.md), five [ISO media/boot capability tools](iso.md), three [typed hardware tools](hardware.md), four [declarative VM template tools](templates.md), and six [multi-VM lab tools](#multi-vm-labs). All 142 previous tool definitions are unchanged. Portable templates provide validation, read-only plans, sanitized export and explicit no-overwrite deployment with optional registration/power-on. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
 
 Requires VMware Workstation with vmrun, Node.js 22.12+, PowerShell 7 for setup helpers, and a host with local stdio MCP support. REST tools additionally need a running, authenticated vmrest service. Guest OS commands need VMware Tools running and a guest OS account; console tools need neither and work before the OS boots. The plugin runs as your local user and opens no HTTP listener. Native VNC listeners are configured on the VM itself and restricted to localhost.
 
@@ -11,10 +15,16 @@ See [the full command and endpoint reference](reference.md) for the exact operat
 | Area | Implemented capabilities |
 | --- | --- |
 | Inventory and configuration | Registered/running VMs, selected local hardware details, REST VM settings, restrictions, registration, arbitrary supported config parameters |
+| Multi-VM labs | [Coordinate templates, private LANs, dependency/readiness ordering, recovery and tracked-resource teardown](labs.md) |
+| VM templates | [List portable Linux/Windows Server/nested ESXi hardware recipes, validate read-only plans, export sanitized hardware and deploy explicitly](templates.md); OS installation is separate |
+| Typed hardware | [Inspect capabilities and configure controllers, disks, NICs, CPU topology, nested virtualization, firmware and Secure Boot](hardware.md) |
 | Power | Start, soft/hard stop/reset/suspend, pause/unpause, REST power state and operations |
 | Snapshots | List flat/tree, create, revert, delete one or delete with children |
 | VMDK lifecycle | [Discover disk-manager flags, inspect/create/expand/convert/compact/defragment, and explicit controller/slot attach/detach](disks.md); no guest filesystem resizing |
-| Guest execution | Programs, scripts, interactive/active-window/no-wait modes, processes, termination, variables, keystrokes |
+| ISO media and boot | [Inspect optical drives and boot capabilities, mount/eject existing ISO media with offline backups](iso.md); boot-order writes are unsupported |
+| Background jobs | [Submit disk, full offline clone and sequential power operations; monitor, inspect logs and cancel](jobs.md); OVF workflows share the job engine |
+| Readiness and diagnostics | [Bounded OS agent/IP/service waits, recent errors and private diagnostic bundles](readiness.md) |
+| Guest execution | [Verified program/script execution with captured stdout/stderr and guest exit status](guest-exec.md), plus low-level interactive/active-window/no-wait modes, processes, termination, variables and keystrokes |
 | Files and directories | Both transfer directions, existence checks, list/create/delete directories, delete/rename files, create temp files |
 | Host integration | Shared-folder add/remove/enable/disable/access changes; device connect/disconnect; screenshots |
 | Serial console | [Optional direct named-pipe/UNIX-socket byte I/O](serial.md), explicit offline configuration, bounded reads/writes and per-VM sessions |
@@ -22,11 +32,56 @@ See [the full command and endpoint reference](reference.md) for the exact operat
 | VM lifecycle | Full/linked clones, snapshot-based clones, deletion, hardware upgrade, Tools installation/status, Photon VM download |
 | Networking | Host networks, network creation, NAT port forwarding, DHCP MAC/IP bindings, VM NIC create/update/delete, guest address and NIC/IP-stack information |
 
-This covers the installed vmrun and Workstation API interfaces. Blank VM creation also uses VMware Virtual Disk Manager to create a sparse disk; optional [OVF Tool support](ovf.md) adds local appliance workflows. Other disk-manager operations and separate interfaces such as ESXi/vCenter and vmcli are outside this scope.
+This covers the reference vmrun and Workstation API interfaces. Blank VM creation and [VMDK lifecycle tools](disks.md) use VMware Virtual Disk Manager; optional [OVF Tool support](ovf.md) adds local appliance workflows. Separate management interfaces such as ESXi/vCenter and vmcli are outside this scope.
 
 ## Multi-VM labs
 
-Use the [lab guide](labs.md) and packaged two/three-VM examples to compose templates with private LANs, external network/media bindings, dependencies and bounded readiness. Plan with `lab_validate`; deploy into a NEW directory only after confirmation. `lab_status` reads the private ownership manifest; explicit start/stop/destroy actions default to dry-run. Recovery never adopts ambiguous resources; teardown removes only recorded files and preserves unexpected files. Native lab/guest validation remains unverified.
+Version 0.14.0 adds coordinated lab deployment with `lab_validate`, `lab_deploy`, `lab_status`, `lab_start`, `lab_stop` and `lab_destroy`. See the [complete lab guide](labs.md) for bundled two/three-VM and nested ESXi examples, recovery, teardown checks and validation limits. Native VMware lab deployment and lifecycle validation remain unverified.
+
+For example, plan two blank Linux VMs on a new private LAN, with `app` depending on `database`:
+
+```json
+{
+  "tool": "lab_validate",
+  "arguments": {
+    "directory": "C:/VMs/two-vm-lab",
+    "lab": {
+      "schema_version": "1.0",
+      "id": "two-vm-lab",
+      "networks": { "backend": { "kind": "private_lan" } },
+      "vms": [
+        {
+          "id": "database",
+          "template": "linux",
+          "networks": { "primary": "backend" }
+        },
+        {
+          "id": "app",
+          "template": "linux",
+          "networks": { "primary": "backend" },
+          "depends_on": ["database"]
+        }
+      ]
+    }
+  }
+}
+```
+
+The parent directory must exist and the lab directory must be new. On native Linux, use a path such as `/home/alice/vms/two-vm-lab`. Both VM and host-file allowlists apply. Validation checks the dependency graph, template/network/media mappings and aggregate disk space without creating VMs or LAN segments. These are blank hardware recipes: install/configure the guest OS separately, and provide static guest addresses or your own DHCP on the private LAN.
+
+| Step | Tool and arguments |
+| --- | --- |
+| Deploy after reviewing the plan | `lab_deploy` with the same recipe/directory plus `dry_run: false` and `confirm: true`; `start` defaults to false |
+| Inspect ownership and completed/uncertain steps | `lab_status` with `directory`; manifest state does not establish guest readiness |
+| Review startup, then start explicitly | `lab_start` with `directory` defaults to dry-run; add `dry_run: false` and `confirm: true` to act |
+| Review shutdown, then stop explicitly | `lab_stop` with `directory`, then explicit confirmation; `mode: "soft"` is the default, without hard-stop fallback |
+| Review teardown, then destroy explicitly | `lab_destroy` with `directory`, then explicit confirmation; VMs must already be fully powered off, unlocked, unregistered and snapshot-free; disk dependency checks must pass |
+
+Dependencies determine startup order; stopping uses reverse order. Each VM can specify `readiness` with `kind: "none"`, `"boot"`, `"ip"` or `"service"`, `timeout_seconds` (1–600) and `attempts` (1–3). Service checks also require `port` and can specify `protocol`, `path` and `expected_status`. The default `none` in this blank-VM example checks running power and supplies ordering without an OS/service readiness gate. Set appropriate [guest readiness conditions](readiness.md) once the OS and services exist; bounded retries apply to readiness observations.
+
+External network bindings use lab network `kind: "binding"` and the top-level `networks` map; media paths use the top-level `media` map. They remain externally owned. Private LAN changes require all Workstation/Player GUI windows closed, as in the [LAN segment workflow](#lan-segments).
+
+If deployment fails, inspect `lab_status` and the retained manifest before retrying. `lab_deploy` with `resume: true` requires the identical recipe and bindings, skips verified completed VMs and refuses ambiguous partial artifacts. There is no automatic rollback. Destroy checks artifact ownership, external disk references, dependent VMDK chains and shared extents before removing recorded files and owned LAN segments. Unsafe or uncertain resources block teardown; unknown files, member directories and the recovery manifest remain. External VMnets, media and unrelated files are retained.
 
 ## Connect in Codex
 
@@ -56,7 +111,7 @@ An account upload does not give web/mobile chats access to local VMware processe
 
 ## Configure credentials locally
 
-The plugin automatically reads `%APPDATA%\VMwareWorkstationPlugin\credentials.json`. Override this using `VMWARE_CREDENTIALS_FILE`. Credentials never belong in chat/tool arguments. Create or update profiles with PowerShell 7, using the packaged script from this directory:
+On Windows, the plugin automatically reads `%APPDATA%\VMwareWorkstationPlugin\credentials.json`. On Linux, it reads `${XDG_CONFIG_HOME:-$HOME/.config}/vmware-workstation-mcp/credentials.json`. Override either default using an absolute `VMWARE_CREDENTIALS_FILE` path. Credentials never belong in chat/tool arguments. Create or update profiles with PowerShell 7, using the packaged script from this directory:
 
 ```powershell
 pwsh -NoProfile -File ./scripts/Set-Credentials.ps1 -GuestProfile default
@@ -64,7 +119,7 @@ pwsh -NoProfile -File ./scripts/Set-Credentials.ps1 -Rest
 pwsh -NoProfile -File ./scripts/Set-Credentials.ps1 -VMPasswordProfile encrypted_lab
 ```
 
-The script prompts for credentials, preserves other profiles, and restricts file access to your Windows account. The file contains plaintext JSON protected by Windows permissions. Its structure is shown below with placeholders only; the script is preferred to manually typing passwords into shell commands:
+The script prompts for credentials, preserves other profiles, and restricts file access to your account. The file contains plaintext JSON protected by Windows permissions or Linux ownership and mode 600. See [Linux credential setup](linux.md#credentials-and-guest-operations) for details and the Node-only interactive helper. Its structure is shown below with placeholders only; the script is preferred to manually typing passwords into shell commands:
 
 ```json
 {
@@ -265,16 +320,19 @@ Automated tests exercise catalog changes and adapter transitions in temporary fi
 
 | Variable | Meaning |
 | --- | --- |
-| `VMRUN_PATH` | Absolute vmrun.exe path; default discovery checks Program Files and PATH |
-| `VMWARE_VDISKMANAGER_PATH` | Optional absolute disk-manager path for blank VM creation; otherwise beside vmrun |
+| `VMRUN_PATH` | Absolute native vmrun path; default discovery checks Program Files/PATH on Windows and standard native locations/PATH on Linux |
+| `VMWARE_VDISKMANAGER_PATH` | Optional absolute disk-manager path for blank VM creation and VMDK lifecycle tools; otherwise discovered beside vmrun, on PATH or in standard native locations |
+| `VMWARE_OVFTOOL_PATH` | Optional absolute OVF Tool executable path for appliance workflows |
 | `VMWARE_INVENTORY_PATH` | Override inventory.vmls location |
 | `VMWARE_PREFERENCES_PATH` | Absolute current-user preferences override for the LAN segment catalog |
-| `VMWARE_ALLOWED_ROOTS` | Semicolon-separated absolute directories for VMX targets and CLI clone/template destinations |
-| `VMWARE_ALLOWED_HOST_ROOTS` | Semicolon-separated directories for file transfer, screenshot, and shared-folder host paths |
+| `VMWARE_ALLOWED_ROOTS` | Absolute directories for VMX targets and CLI clone/template destinations |
+| `VMWARE_ALLOWED_HOST_ROOTS` | Absolute directories for host files, including transfers, screenshots, shared folders, disks and media |
 | `VMWARE_CREDENTIALS_FILE` | Optional absolute credentials JSON path |
 | `VMWARE_REST_URL` | REST origin; default http://127.0.0.1:8697 |
 
-Without configured roots, explicitly selected accessible paths are permitted. With roots configured, the plugin checks real paths to avoid directory-link escapes; REST VM IDs are resolved to VMX paths before VM operations. Inventory still lists paths outside allowed roots. REST clone destination placement is controlled by VMware. Root checks scope direct path operations; they are not an OS sandbox and do not restrict what an authorized guest program, shared folder, or arbitrary VM configuration can do.
+Separate allowed-root entries with semicolons on Windows and colons on Linux. Pass these environment settings to the MCP server process; a desktop app may not inherit your shell settings.
+
+Without configured roots, explicitly selected accessible paths are generally permitted; [diagnostic bundles](readiness.md) require approved roots. With roots configured, the plugin checks real paths to avoid directory-link escapes; REST VM IDs are resolved to VMX paths before VM operations. Inventory still lists paths outside allowed roots. REST clone destination placement is controlled by VMware. Root checks scope direct path operations; they are not an OS sandbox and do not restrict what an authorized guest program, shared folder, or arbitrary VM configuration can do.
 
 Each low-level tool accepts `timeout_seconds` from 1 to 3600 (default 120); output is limited to 1 MiB. CLI invocations are serialized within this process, and REST workflows are serialized separately. Other VMware processes can act concurrently. A failed/timed-out mutation can have taken effect; inspect state before retrying. Soft shutdown never falls back to hard automatically. Destructive changes require the user's authorization for the exact target and action.
 
