@@ -7242,12 +7242,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name2}"`);
       return f;
     };
-    function addFormats(ajv, list, fs22, exportName) {
+    function addFormats(ajv, list, fs23, exportName) {
       var _a3;
       var _b;
       (_a3 = (_b = ajv.opts.code).formats) !== null && _a3 !== void 0 ? _a3 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
-        ajv.addFormat(f, fs22[f]);
+        ajv.addFormat(f, fs23[f]);
     }
     module2.exports = exports2 = formatsPlugin;
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -45538,7 +45538,7 @@ var Protocol = class {
           }
         };
       }
-      const cancel = (reason) => {
+      const cancel = (reason2) => {
         this._responseHandlers.delete(messageId);
         this._progressHandlers.delete(messageId);
         this._cleanupTimeout(messageId);
@@ -45547,10 +45547,10 @@ var Protocol = class {
           method: "notifications/cancelled",
           params: {
             requestId: messageId,
-            reason: String(reason)
+            reason: String(reason2)
           }
         }, { relatedRequestId, resumptionToken, onresumptiontoken }).catch((error63) => this._onerror(new Error(`Failed to send cancellation: ${error63}`)));
-        const error62 = reason instanceof McpError ? reason : new McpError(ErrorCode.RequestTimeout, String(reason));
+        const error62 = reason2 instanceof McpError ? reason2 : new McpError(ErrorCode.RequestTimeout, String(reason2));
         reject(error62);
       };
       this._responseHandlers.set(messageId, (response) => {
@@ -47674,7 +47674,7 @@ function credentialsPath(env = process.env, platform = process.platform, home = 
 async function findVMwareExecutable(name2, { env = process.env, platform = process.platform, beside } = {}) {
   if (!["win32", "linux"].includes(platform)) throw new Error("VMware Workstation hosts supported by this plugin are Windows and Linux.");
   const filename2 = `${name2}${platform === "win32" ? ".exe" : ""}`;
-  const setting = { vmrun: "VMRUN_PATH", "vmware-vdiskmanager": "VMWARE_VDISKMANAGER_PATH", "vmware-vmx": "VMWARE_VMX_PATH", ovftool: "VMWARE_OVFTOOL_PATH" }[name2];
+  const setting = { vmrun: "VMRUN_PATH", vmcli: "VMWARE_VMCLI_PATH", "vmware-vdiskmanager": "VMWARE_VDISKMANAGER_PATH", "vmware-vmx": "VMWARE_VMX_PATH", ovftool: "VMWARE_OVFTOOL_PATH" }[name2];
   if (!setting) throw new Error("Unsupported VMware executable.");
   const validFile = async (candidate) => {
     if (!import_node_path.default.isAbsolute(candidate) || !(await import_promises.default.stat(candidate)).isFile()) return false;
@@ -47717,8 +47717,8 @@ var Resources = class {
     this.active = /* @__PURE__ */ new Map();
     this.context = new import_node_async_hooks.AsyncLocalStorage();
   }
-  key(file8) {
-    return process.platform === "win32" ? import_node_path2.default.resolve(file8).toLowerCase() : import_node_path2.default.resolve(file8);
+  key(file9) {
+    return process.platform === "win32" ? import_node_path2.default.resolve(file9).toLowerCase() : import_node_path2.default.resolve(file9);
   }
   assert(files) {
     const owner = this.context.getStore();
@@ -47727,14 +47727,14 @@ var Resources = class {
       return !relative || !relative.startsWith(".." + import_node_path2.default.sep) && relative !== ".." && !import_node_path2.default.isAbsolute(relative);
     };
     const overlaps = (a, b) => contains(a, b) || contains(b, a);
-    for (const file8 of files.map((file9) => this.key(file9))) for (const [held, token] of this.active) {
-      if (token !== owner && overlaps(file8, held)) throw Object.assign(new Error("A conflicting operation holds this VM or disk path. Wait for it to finish, inspect state, then retry."), { code: "RESOURCE_BUSY" });
+    for (const file9 of files.map((file10) => this.key(file10))) for (const [held, token] of this.active) {
+      if (token !== owner && overlaps(file9, held)) throw Object.assign(new Error("A conflicting operation holds this VM or disk path. Wait for it to finish, inspect state, then retry."), { code: "RESOURCE_BUSY" });
     }
   }
   reserve(files) {
     this.context.run(void 0, () => this.assert(files));
     const token = /* @__PURE__ */ Symbol("reservation");
-    const keys = [...new Set(files.map((file8) => this.key(file8)))];
+    const keys = [...new Set(files.map((file9) => this.key(file9)))];
     for (const key3 of keys) this.active.set(key3, token);
     return {
       run: (callback) => this.context.run(token, callback),
@@ -47746,12 +47746,12 @@ var Resources = class {
   async use(files, callback) {
     this.assert(files);
     const token = this.context.getStore() || /* @__PURE__ */ Symbol("resource-owner");
-    const added = files.map((file8) => this.key(file8)).filter((file8) => !this.active.has(file8));
-    for (const file8 of added) this.active.set(file8, token);
+    const added = files.map((file9) => this.key(file9)).filter((file9) => !this.active.has(file9));
+    for (const file9 of added) this.active.set(file9, token);
     try {
       return await this.context.run(token, callback);
     } finally {
-      for (const file8 of added) this.active.delete(file8);
+      for (const file9 of added) this.active.delete(file9);
     }
   }
 };
@@ -47836,11 +47836,11 @@ var Workstation = class {
       job.then(resolve, reject).finally(() => signal.removeEventListener("abort", abort));
     });
   }
-  async nativeRun(file8, args, options2 = {}) {
+  async nativeRun(file9, args, options2 = {}) {
     const context3 = this.execution.getStore();
-    if (!context3) return this.execute(file8, args, options2);
+    if (!context3) return this.execute(file9, args, options2);
     context3.signal.throwIfAborted();
-    const result = await context3.run(file8, args, { ...options2, env: options2.env || this.env, logOutput: false, progress: null });
+    const result = await context3.run(file9, args, { ...options2, env: options2.env || this.env, logOutput: false, progress: null });
     if (result.code !== 0) throw Object.assign(new Error("Native job command failed."), { code: result.code, stderr: result.output });
     return { stdout: result.output, stderr: "" };
   }
@@ -47965,10 +47965,10 @@ var Workstation = class {
     const vmx3 = await this.vmx(input2);
     const config2 = parseAssignments(await import_promises2.default.readFile(vmx3, "utf8"));
     const running = parseCountedList(await this.run(["list"]));
-    const realRunning = await Promise.all(running.map(async (file8) => import_promises2.default.realpath(file8).catch(() => file8)));
-    const compare = (file8) => process.platform === "win32" ? file8.toLowerCase() : file8;
+    const realRunning = await Promise.all(running.map(async (file9) => import_promises2.default.realpath(file9).catch(() => file9)));
+    const compare = (file9) => process.platform === "win32" ? file9.toLowerCase() : file9;
     const hardware2 = Object.fromEntries(Object.entries(config2).filter(([key3]) => /^(displayName|guestOS|memsize|numvcpus|virtualHW.version|ethernet\d+\.(present|connectionType|vnet)|(?:scsi|sata|ide|nvme)\d+:\d+\.(present|fileName|deviceType))$/.test(key3)));
-    return { vmx: vmx3, running: realRunning.some((file8) => compare(file8) === compare(vmx3)), hardware: hardware2 };
+    return { vmx: vmx3, running: realRunning.some((file9) => compare(file9) === compare(vmx3)), hardware: hardware2 };
   }
   async power(input2, action2, mode = "soft", gui = false) {
     if (!["start", "stop", "reset", "suspend", "pause", "unpause"].includes(action2)) throw new Error("Unsupported power action.");
@@ -48115,24 +48115,24 @@ var Credentials = class {
   }
   async guest(profile = "default") {
     const name2 = this.profile(profile);
-    const file8 = await this.load();
+    const file9 = await this.load();
     const prefix2 = `VMWARE_GUEST_${name2.toUpperCase()}`;
-    const username = this.env[`${prefix2}_USERNAME`] ?? file8.guest?.[name2]?.username;
-    const password = this.remember(this.env[`${prefix2}_PASSWORD`] ?? file8.guest?.[name2]?.password);
+    const username = this.env[`${prefix2}_USERNAME`] ?? file9.guest?.[name2]?.username;
+    const password = this.remember(this.env[`${prefix2}_PASSWORD`] ?? file9.guest?.[name2]?.password);
     if (typeof username !== "string" || !username || typeof password !== "string" || !password) throw new Error(`Guest credential profile '${name2}' is not configured. Use VMWARE_CREDENTIALS_FILE or ${prefix2}_USERNAME/PASSWORD; never paste passwords into chat.`);
     return { username, password };
   }
   async vm(profile) {
     const name2 = this.profile(profile);
-    const file8 = await this.load();
-    const password = this.remember(this.env[`VMWARE_VM_${name2.toUpperCase()}_PASSWORD`] ?? file8.vm?.[name2]?.password);
+    const file9 = await this.load();
+    const password = this.remember(this.env[`VMWARE_VM_${name2.toUpperCase()}_PASSWORD`] ?? file9.vm?.[name2]?.password);
     if (typeof password !== "string" || !password) throw new Error(`Encrypted VM password profile '${name2}' is not configured.`);
     return password;
   }
   async console(vmx3, requestedProfile) {
-    const file8 = await this.load();
+    const file9 = await this.load();
     const canonical = (value) => process.platform === "win32" ? import_node_path5.default.resolve(value).toLowerCase() : import_node_path5.default.resolve(value);
-    const profiles = file8.console || {};
+    const profiles = file9.console || {};
     const resolved = await Promise.all(Object.entries(profiles).map(async ([name3, entry2]) => [name3, typeof entry2?.vmx === "string" ? await import_promises4.default.realpath(entry2.vmx).catch(() => entry2.vmx) : null]));
     const matches = resolved.filter(([, target3]) => target3 && canonical(target3) === canonical(vmx3));
     if (!requestedProfile && matches.length > 1) throw new Error("Multiple console profiles identify this VM. Use its configured profile alias as vm_id.");
@@ -48145,9 +48145,9 @@ var Credentials = class {
     return { profile: name2, password };
   }
   async rest() {
-    const file8 = await this.load();
-    const username = this.env.VMWARE_REST_USERNAME ?? file8.rest?.username;
-    const password = this.remember(this.env.VMWARE_REST_PASSWORD ?? file8.rest?.password);
+    const file9 = await this.load();
+    const username = this.env.VMWARE_REST_USERNAME ?? file9.rest?.username;
+    const password = this.remember(this.env.VMWARE_REST_PASSWORD ?? file9.rest?.password);
     if (typeof username !== "string" || !username || typeof password !== "string" || !password || username.includes(":")) throw new Error("REST credentials are not configured. Set VMWARE_REST_USERNAME/PASSWORD or VMWARE_CREDENTIALS_FILE. REST usernames cannot contain colons.");
     const token = Buffer.from(`${username}:${password}`, "utf8").toString("base64");
     this.secrets.add(token);
@@ -49370,8 +49370,8 @@ var RestClient = class {
       return { status: response.status, data };
     } catch (error62) {
       const uncertain2 = method !== "GET" ? " The operation may have taken effect; inspect state before retrying." : "";
-      const reason = error62.status ? `HTTP ${error62.status}` : error62.name === "TimeoutError" || error62.name === "AbortError" ? "timeout" : error62.message === "RESPONSE_TOO_LARGE" ? "response exceeded 1 MiB" : "connection, TLS, or response failure";
-      throw new Error(`Workstation REST ${method} failed (${reason}).${uncertain2}${error62.details ? ` ${this.credentials.redact(error62.details)}` : ""}`);
+      const reason2 = error62.status ? `HTTP ${error62.status}` : error62.name === "TimeoutError" || error62.name === "AbortError" ? "timeout" : error62.message === "RESPONSE_TOO_LARGE" ? "response exceeded 1 MiB" : "connection, TLS, or response failure";
+      throw new Error(`Workstation REST ${method} failed (${reason2}).${uncertain2}${error62.details ? ` ${this.credentials.redact(error62.details)}` : ""}`);
     }
   }
   async assertVM(id) {
@@ -49543,7 +49543,10 @@ function hardwareError(code, message) {
   throw Object.assign(new Error(message), { code, details: { action: "Inspect the selected VM, fully power it off and close other configuration writers before retrying." } });
 }
 async function readHardware(vmx3) {
-  const text3 = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(await import_promises5.default.readFile(vmx3));
+  return parseHardware(await import_promises5.default.readFile(vmx3));
+}
+function parseHardware(bytes) {
+  const text3 = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes);
   const seen = /* @__PURE__ */ new Set();
   for (const line of text3.replace(/^\uFEFF/, "").split(/\r?\n/)) {
     if (/^\s*(?:#.*)?$/.test(line)) continue;
@@ -49591,10 +49594,10 @@ var diskSchemas = {
 var flags = { create: "-c", expand: "-x", convert: "-r", compact: "-k", defragment: "-d" };
 var types = /* @__PURE__ */ new Set(["monolithicSparse", "monolithicFlat", "twoGbMaxExtentSparse", "twoGbMaxExtentFlat", "streamOptimized"]);
 var sparse = /* @__PURE__ */ new Set(["monolithicSparse", "twoGbMaxExtentSparse"]);
-var key = (file8) => process.platform === "win32" ? file8.toLowerCase() : file8;
-var exists = async (file8) => {
+var key = (file9) => process.platform === "win32" ? file9.toLowerCase() : file9;
+var exists = async (file9) => {
   try {
-    return await import_promises6.default.lstat(file8);
+    return await import_promises6.default.lstat(file9);
   } catch (e2) {
     if (e2.code === "ENOENT") return null;
     throw e2;
@@ -49615,8 +49618,8 @@ function vmConfig(text3) {
   if (config2[".encoding"] && !/^utf-?8$/i.test(config2[".encoding"])) fail("UNSAFE_VM", "Disk edits require UTF-8 VMX files.");
   return config2;
 }
-async function readDiskDescriptor(file8) {
-  const handle = await import_promises6.default.open(file8, "r");
+async function readDiskDescriptor(file9) {
+  const handle = await import_promises6.default.open(file9, "r");
   try {
     const stat = await handle.stat();
     const header = Buffer.alloc(512);
@@ -54353,11 +54356,11 @@ var RfbClient = class extends import_node_events.EventEmitter {
         error62 = null;
     }
     this.#closeError = error62;
-    const reason = this.#closedError();
+    const reason2 = this.#closedError();
     for (const w of this.#updateWaiters.splice(0))
-      w.reject(reason);
+      w.reject(reason2);
     for (const w of this.#resizeWaiters.splice(0))
-      w.reject(reason);
+      w.reject(reason2);
     try {
       if (error62)
         this.emit("error", error62);
@@ -54509,9 +54512,9 @@ var RfbClient = class extends import_node_events.EventEmitter {
     return got;
   }
   async #refusal(t) {
-    const reason = await t.reader.lengthPrefixedString("utf8", 1 << 16).catch(() => void 0);
-    return new RfbError("SERVER_REFUSED", `the server refused the connection${reason ? `: ${reason}` : ""}`, {
-      ...reason !== void 0 && { reason }
+    const reason2 = await t.reader.lengthPrefixedString("utf8", 1 << 16).catch(() => void 0);
+    return new RfbError("SERVER_REFUSED", `the server refused the connection${reason2 ? `: ${reason2}` : ""}`, {
+      ...reason2 !== void 0 && { reason: reason2 }
     });
   }
   async #securityResult(t) {
@@ -54526,11 +54529,11 @@ var RfbClient = class extends import_node_events.EventEmitter {
     }
     if (status === 0)
       return;
-    let reason;
+    let reason2;
     if (this.protocolVersion === "3.8")
-      reason = await t.reader.lengthPrefixedString("utf8", 1 << 16).catch(() => void 0);
+      reason2 = await t.reader.lengthPrefixedString("utf8", 1 << 16).catch(() => void 0);
     const tooMany = status === 2 ? " (too many attempts)" : "";
-    throw new RfbError("AUTH_FAILED", `authentication failed${tooMany}${reason ? `: ${reason}` : ""} (${securityName(this.securityType)}); check the credentials`, { ...reason !== void 0 && { reason } });
+    throw new RfbError("AUTH_FAILED", `authentication failed${tooMany}${reason2 ? `: ${reason2}` : ""} (${securityName(this.securityType)}); check the credentials`, { ...reason2 !== void 0 && { reason: reason2 } });
   }
   // --- messages from the server ---
   async #messageLoop(t) {
@@ -54837,9 +54840,9 @@ function resizeStatus(status) {
   return ["no error", "resizing is prohibited", "out of resources", "invalid screen layout", "request forwarded"][status] ?? `error ${status}`;
 }
 function checkEncodings(list) {
-  const unknown2 = list.filter((e2) => !isKnownEncoding(e2));
-  if (unknown2.length > 0) {
-    throw new RfbError("UNSUPPORTED_ENCODING", `this client can't decode encoding${unknown2.length > 1 ? "s" : ""} ${unknown2.join(", ")}; use the values in \`encodings\``);
+  const unknown3 = list.filter((e2) => !isKnownEncoding(e2));
+  if (unknown3.length > 0) {
+    throw new RfbError("UNSUPPORTED_ENCODING", `this client can't decode encoding${unknown3.length > 1 ? "s" : ""} ${unknown3.join(", ")}; use the values in \`encodings\``);
   }
   return [...list];
 }
@@ -55172,8 +55175,8 @@ var ConsoleManager = class {
     this.closed = false;
   }
   async endpoint(vmID) {
-    const file8 = await this.credentials.load();
-    const aliases = Object.fromEntries(Object.entries(file8.console || {}).filter(([, entry]) => typeof entry?.vmx === "string").map(([name2, entry]) => [name2, entry.vmx]));
+    const file9 = await this.credentials.load();
+    const aliases = Object.fromEntries(Object.entries(file9.console || {}).filter(([, entry]) => typeof entry?.vmx === "string").map(([name2, entry]) => [name2, entry.vmx]));
     const vmx3 = await this.backend.resolveVM(vmID, { aliases, restInventory: this.rest ? async () => {
       const response = await this.rest.request("GET", "/api/vms");
       if (!Array.isArray(response.data)) throw new Error("REST inventory did not return VM IDs and paths.");
@@ -55533,10 +55536,10 @@ async function inspectArtifact(backend2, input2, { signal } = {}) {
   const files = /* @__PURE__ */ new Map();
   let descriptorName;
   let headerBytes = 0;
-  const add = (name2, file8) => {
-    headerBytes += file8.header.length;
+  const add = (name2, file9) => {
+    headerBytes += file9.header.length;
     if (headerBytes > 64 * 1024 * 1024) throw new Error("Appliance exceeds the 64 MiB header preflight budget.");
-    files.set(name2, file8);
+    files.set(name2, file9);
   };
   if (ext === ".ova") {
     const extract = import_tar_stream.default.extract();
@@ -55588,7 +55591,7 @@ async function inspectArtifact(backend2, input2, { signal } = {}) {
   const manifests = [...files].filter(([name2]) => /\.mf$/i.test(name2));
   if (manifests.length > 1) throw new Error("Multiple appliance manifests are unsupported.");
   if (manifests.length) checkManifest(manifests[0][1].text, files);
-  return { source: source3, descriptorName, manifest: manifests.length ? "checksums verified (SHA1/SHA256/SHA512); signer trust is not established" : "absent", descriptor: files.get(descriptorName).text, size: [...files.values()].reduce((size, file8) => size + file8.size, 0), files: [...files.keys()] };
+  return { source: source3, descriptorName, manifest: manifests.length ? "checksums verified (SHA1/SHA256/SHA512); signer trust is not established" : "absent", descriptor: files.get(descriptorName).text, size: [...files.values()].reduce((size, file9) => size + file9.size, 0), files: [...files.keys()] };
 }
 function machineRecords(output2) {
   const records = [];
@@ -55774,10 +55777,10 @@ var OvfManager = class {
     if ((await this.backend.snapshots(vmx3)).snapshots.length) throw new Error("Snapshot sources are unsupported. Export a separately prepared VM without snapshots.");
     let size = (await import_promises15.default.stat(vmx3)).size;
     const inspectFile = async (input2) => {
-      const file8 = await this.backend.hostPath(input2, "input-file");
-      if (!isWithin(import_node_path14.default.dirname(vmx3), file8)) throw new Error("VM export backings must remain inside the VM directory. External disks/media are unsupported.");
-      size += (await import_promises15.default.stat(file8)).size;
-      return file8;
+      const file9 = await this.backend.hostPath(input2, "input-file");
+      if (!isWithin(import_node_path14.default.dirname(vmx3), file9)) throw new Error("VM export backings must remain inside the VM directory. External disks/media are unsupported.");
+      size += (await import_promises15.default.stat(file9)).size;
+      return file9;
     };
     for (const name2 of ["workingdir", "snapshot.directory"]) if (config2[name2]) {
       const directory = await this.backend.hostPath(import_node_path14.default.resolve(import_node_path14.default.dirname(vmx3), config2[name2]), "directory");
@@ -55786,9 +55789,9 @@ var OvfManager = class {
     if (Object.keys(config2).some((name2) => /^(bios440|efi32|efi64)\.filename$/.test(name2))) throw new Error("Custom firmware file backings are unsupported.");
     for (const [name2, value] of Object.entries(config2)) if ((/\.filename$/.test(name2) || ["nvram", "extendedconfigfile"].includes(name2)) && value && config2[name2.replace(/filename$/, "present")]?.toLowerCase() !== "false") {
       if (value.toLowerCase() === "auto detect") continue;
-      const file8 = await inspectFile(import_node_path14.default.resolve(import_node_path14.default.dirname(vmx3), value));
-      if (import_node_path14.default.extname(file8).toLowerCase() === ".vmdk") {
-        const handle = await import_promises15.default.open(file8, "r");
+      const file9 = await inspectFile(import_node_path14.default.resolve(import_node_path14.default.dirname(vmx3), value));
+      if (import_node_path14.default.extname(file9).toLowerCase() === ".vmdk") {
+        const handle = await import_promises15.default.open(file9, "r");
         let header;
         try {
           const buffer3 = Buffer.alloc(1024 * 1024);
@@ -55799,7 +55802,7 @@ var OvfManager = class {
         }
         const diskType = header.match(/createType\s*=\s*"([^"]+)"/i)?.[1];
         if (/parentFileNameHint\s*=|parentCID\s*=\s*(?!ffffffff)[a-f0-9]{8}/i.test(header) || !/^(monolithicSparse|monolithicFlat|twoGbMaxExtentSparse|twoGbMaxExtentFlat|streamOptimized)$/i.test(diskType || "")) throw new Error("Snapshot/linked/raw or unrecognized VMDK backings are unsupported.");
-        for (const extent of header.matchAll(/(?:^|\n)(?:RW|RDONLY|NOACCESS)\s+\d+\s+\w+\s+"([^"]+)"/g)) await inspectFile(import_node_path14.default.resolve(import_node_path14.default.dirname(file8), extent[1]));
+        for (const extent of header.matchAll(/(?:^|\n)(?:RW|RDONLY|NOACCESS)\s+\d+\s+\w+\s+"([^"]+)"/g)) await inspectFile(import_node_path14.default.resolve(import_node_path14.default.dirname(file9), extent[1]));
       }
     }
     return { source: vmx3, size, manifest: "not applicable" };
@@ -55809,8 +55812,8 @@ var OvfManager = class {
     if (Object.keys(values).some((name2) => /password|secret|token/i.test(name2))) throw new Error("Sensitive deployment properties must use a local property_profile, not property_mappings in tool arguments.");
     if (a.property_profile) {
       const profile = this.credentials.profile(a.property_profile);
-      const file8 = await this.credentials.load();
-      const stored = file8.ovf_properties?.[profile];
+      const file9 = await this.credentials.load();
+      const stored = file9.ovf_properties?.[profile];
       if (!stored || typeof stored !== "object" || Array.isArray(stored)) throw new Error("OVF property profile is not configured in the local credentials file.");
       const parsed = mappings.parse(stored);
       for (const value of Object.values(parsed)) this.credentials.remember(value);
@@ -56032,9 +56035,9 @@ var JobManager = class {
       const context3 = {
         signal: job.controller.signal,
         log: (text3) => this.log(job, text3),
-        artifact: (file8) => {
-          if (!job.artifacts.includes(file8) && job.artifacts.length < 64) {
-            job.artifacts.push(file8);
+        artifact: (file9) => {
+          if (!job.artifacts.includes(file9) && job.artifacts.length < 64) {
+            job.artifacts.push(file9);
             job.dirty = true;
           }
         },
@@ -56042,7 +56045,7 @@ var JobManager = class {
           job.partial_result = this.bounded(result);
           await this.persist(job);
         },
-        run: (file8, args, options2) => this.run(job, file8, args, options2)
+        run: (file9, args, options2) => this.run(job, file9, args, options2)
       };
       try {
         await this.initialize();
@@ -56123,9 +56126,9 @@ var JobManager = class {
     const job = this.get(id);
     return { job_id: id, state: job.state, log: this.redact((job.logs || "") + (job.liveOutput || "")), truncated: !!job.truncated };
   }
-  stop(job, reason) {
+  stop(job, reason2) {
     if (terminal.has(job.state) || job.stopReason || job.finalizing) return;
-    job.stopReason = reason;
+    job.stopReason = reason2;
     job.controller.abort();
   }
   cancel(id) {
@@ -56142,12 +56145,12 @@ var JobManager = class {
       job.truncated = true;
     }
   }
-  run(job, file8, args, { cwd, env, logOutput = true, progress = null, timeout: timeout4, allowNonzero = false } = {}) {
+  run(job, file9, args, { cwd, env, logOutput = true, progress = null, timeout: timeout4, allowNonzero = false } = {}) {
     job.controller.signal.throwIfAborted();
     return new Promise((resolve, reject) => {
       let output2 = "", outputBytes = 0, tooLarge = false, child, killPromise, processTimer, startError = false;
       try {
-        child = this.spawnProcess(file8, args, { cwd, env, windowsHide: true, shell: false, detached: process.platform !== "win32", stdio: ["ignore", "pipe", "pipe"] });
+        child = this.spawnProcess(file9, args, { cwd, env, windowsHide: true, shell: false, detached: process.platform !== "win32", stdio: ["ignore", "pipe", "pipe"] });
       } catch {
         reject(new Error("Cannot start native job process. Check installation and executable permissions."));
         return;
@@ -56818,8 +56821,8 @@ var Readiness = class {
       const category = failureCategory(error62.message);
       return { state: "unknown", lifecycle: "unknown", category, action: actionFor(category) };
     }
-    const paths = await Promise.all(running.map((file8) => import_promises18.default.realpath(file8).catch(() => file8)));
-    if (!paths.some((file8) => same(file8, vmx3))) {
+    const paths = await Promise.all(running.map((file9) => import_promises18.default.realpath(file9).catch(() => file9)));
+    if (!paths.some((file9) => same(file9, vmx3))) {
       for (const field of ["checkpoint.vmstate", "suspend.filename"]) {
         const saved = config2[field];
         if (saved) {
@@ -57262,10 +57265,10 @@ var GuestExec = class {
       };
       const runner = a.guest_os === "windows" ? "runner.ps1" : "runner.py";
       for (const [name2, content] of [["request.json", JSON.stringify(request)], [runner, a.guest_os === "windows" ? windowsRunner : linuxRunner]]) {
-        const file8 = import_node_path19.default.join(hostDirectory, name2);
-        await import_promises20.default.writeFile(file8, "", { flag: "wx", mode: 384 });
-        await this.protectFile(file8);
-        await import_promises20.default.writeFile(file8, content);
+        const file9 = import_node_path19.default.join(hostDirectory, name2);
+        await import_promises20.default.writeFile(file9, "", { flag: "wx", mode: 384 });
+        await this.protectFile(file9);
+        await import_promises20.default.writeFile(file9, content);
       }
       result.transport.phase = "tools";
       if (await run("checkToolsState") !== "running") throw new Error("Tools unavailable");
@@ -57524,11 +57527,11 @@ var JobStore = class {
     if (entries.filter((entry) => recordName.test(entry)).length > this.maxRecords) throw new Error("Job journal count exceeds its storage limit; inspect the directory.");
     for (const entry of entries) {
       if (!recordName.test(entry)) continue;
-      const file8 = import_node_path21.default.join(this.directory, entry), info = await import_promises22.default.lstat(file8);
+      const file9 = import_node_path21.default.join(this.directory, entry), info = await import_promises22.default.lstat(file9);
       if (!info.isFile() || info.isSymbolicLink() || info.nlink !== 1 || info.size > this.maxBytes) throw new Error("Unsafe or oversized job journal; inspect the journal directory.");
       let record2;
       try {
-        record2 = JSON.parse(process.platform === "linux" ? await readPrivateFile(file8) : await import_promises22.default.readFile(file8, "utf8"));
+        record2 = JSON.parse(process.platform === "linux" ? await readPrivateFile(file9) : await import_promises22.default.readFile(file9, "utf8"));
         if (filename(record2.job_id) !== entry || !Number.isFinite(Date.parse(record2.started_at)) || !["running", "succeeded", "failed", "cancelled", "timed_out", "interrupted"].includes(record2.state)) throw new Error();
       } catch {
         throw new Error("Job journal is invalid; inspect it before starting more jobs.");
@@ -57565,8 +57568,8 @@ var JobStore = class {
       const cutoff = Date.now() - this.retentionMs;
       for (const entry of await import_promises22.default.readdir(this.directory)) {
         if (!recordName.test(entry) || retainedIDs.has(entry.slice(0, -5).replace("_", ":"))) continue;
-        const file8 = import_node_path21.default.join(this.directory, entry), info = await import_promises22.default.lstat(file8);
-        if (info.isFile() && !info.isSymbolicLink() && info.mtimeMs < cutoff) await import_promises22.default.unlink(file8);
+        const file9 = import_node_path21.default.join(this.directory, entry), info = await import_promises22.default.lstat(file9);
+        if (info.isFile() && !info.isSymbolicLink() && info.mtimeMs < cutoff) await import_promises22.default.unlink(file9);
       }
     });
     this.tail = operation.catch(() => {
@@ -58025,7 +58028,7 @@ var labSchemas = {
 var fail2 = (code, message) => {
   throw Object.assign(new Error(message), { code });
 };
-var exists3 = async (file8) => import_promises25.default.lstat(file8).catch((e2) => {
+var exists3 = async (file9) => import_promises25.default.lstat(file9).catch((e2) => {
   if (e2.code !== "ENOENT") throw e2;
   return null;
 });
@@ -58065,10 +58068,10 @@ var LabManager = class {
     if (root !== import_node_path24.default.resolve(input2) || import_node_path24.default.dirname(root) === root) fail2("UNSAFE_LAB_PATH", "Use a canonical lab directory without symlink aliases.");
     return root;
   }
-  async writePrivate(file8, text3, flags2 = "wx") {
-    const handle = await import_promises25.default.open(file8, flags2, 384);
+  async writePrivate(file9, text3, flags2 = "wx") {
+    const handle = await import_promises25.default.open(file9, flags2, 384);
     try {
-      await this.protectFile(file8);
+      await this.protectFile(file9);
       await handle.writeFile(text3);
       await handle.sync();
     } finally {
@@ -58111,7 +58114,7 @@ var LabManager = class {
     return `lab-${m.lab.id}-${m.owner}-${key3}`;
   }
   async canonicalMedia(media2) {
-    return Object.fromEntries(await Promise.all(Object.entries(media2).map(async ([key3, file8]) => [key3, await this.backend.hostPath(file8, "input-file")])));
+    return Object.fromEntries(await Promise.all(Object.entries(media2).map(async ([key3, file9]) => [key3, await this.backend.hostPath(file9, "input-file")])));
   }
   async plan(input2) {
     const { lab, order } = orderLab(input2.lab), directory = await this.root(input2.directory);
@@ -58158,10 +58161,10 @@ var LabManager = class {
     const records = [];
     for (const name2 of await import_promises25.default.readdir(directory)) {
       if (++limit.count > 1024) fail2("ARTIFACT_LIMIT", "VM artifact count exceeds manifest bound.");
-      const file8 = import_node_path24.default.join(directory, name2), s2 = await import_promises25.default.lstat(file8);
+      const file9 = import_node_path24.default.join(directory, name2), s2 = await import_promises25.default.lstat(file9);
       if (s2.isSymbolicLink() || !s2.isDirectory() && (!s2.isFile() || s2.nlink !== 1)) fail2("UNSAFE_ARTIFACT", "Links and special VM artifacts cannot be owned.");
-      records.push({ path: import_node_path24.default.relative(root, file8), directory: s2.isDirectory(), ...identity(s2) });
-      if (s2.isDirectory()) records.push(...await this.inventory(file8, root, limit));
+      records.push({ path: import_node_path24.default.relative(root, file9), directory: s2.isDirectory(), ...identity(s2) });
+      if (s2.isDirectory()) records.push(...await this.inventory(file9, root, limit));
     }
     return records;
   }
@@ -58169,15 +58172,15 @@ var LabManager = class {
     const directory = import_node_path24.default.join(m.directory, v.id), s2 = await import_promises25.default.lstat(directory);
     if (s2.isSymbolicLink() || !s2.isDirectory() || !same2(s2, v.identity)) fail2("OWNERSHIP_CHANGED", "VM directory identity changed; inspect before retrying.");
     for (const f of v.files) {
-      const file8 = import_node_path24.default.resolve(m.directory, f.path), stat = await exists3(file8);
+      const file9 = import_node_path24.default.resolve(m.directory, f.path), stat = await exists3(file9);
       if (!stat && v.state === "destroying") continue;
-      if (!same2(stat, f) || stat.isSymbolicLink() || stat.isDirectory() !== f.directory || !f.directory && (!stat.isFile() || stat.nlink !== 1) || await import_promises25.default.realpath(file8) !== file8) fail2("OWNERSHIP_CHANGED", "A tracked artifact is missing, replaced, linked or outside its canonical path.");
+      if (!same2(stat, f) || stat.isSymbolicLink() || stat.isDirectory() !== f.directory || !f.directory && (!stat.isFile() || stat.nlink !== 1) || await import_promises25.default.realpath(file9) !== file9) fail2("OWNERSHIP_CHANGED", "A tracked artifact is missing, replaced, linked or outside its canonical path.");
     }
     const vmx3 = import_node_path24.default.join(directory, "machine.vmx");
     if (await exists3(vmx3)) {
       await this.backend.vmx(vmx3);
       const { config: config2 } = await readHardware(vmx3);
-      const mediaPaths = new Set(Object.values(m.media_paths ?? await this.canonicalMedia(m.media)).map((file8) => this.backend.resources.key(file8)));
+      const mediaPaths = new Set(Object.values(m.media_paths ?? await this.canonicalMedia(m.media)).map((file9) => this.backend.resources.key(file9)));
       for (const [key3, value] of Object.entries(config2)) if (/\.filename$|^workingdir$|^snapshot\.directory$|^checkpoint\.vmstate$|^suspend\.filename$/.test(key3) && value) {
         if (/\.filename$/.test(key3) && config2[key3.replace("filename", "devicetype")] === "cdrom-image" && mediaPaths.has(this.backend.resources.key(import_node_path24.default.resolve(directory, value)))) continue;
         if (!isWithin(directory, import_node_path24.default.resolve(directory, value))) fail2("EXTERNAL_BACKING", "VM now references storage/state outside its owned directory.");
@@ -58393,13 +58396,13 @@ var LabManager = class {
           v.state = "destroying";
           await this.save(m);
           for (const f of [...v.files].reverse()) {
-            const file8 = import_node_path24.default.resolve(root, f.path), stat = await exists3(file8);
+            const file9 = import_node_path24.default.resolve(root, f.path), stat = await exists3(file9);
             if (!stat) continue;
-            if (!same2(stat, f) || stat.isSymbolicLink() || await import_promises25.default.realpath(file8) !== file8) fail2("OWNERSHIP_CHANGED", "Tracked artifact changed during teardown.");
-            if (f.directory) await import_promises25.default.rmdir(file8).catch((e2) => {
+            if (!same2(stat, f) || stat.isSymbolicLink() || await import_promises25.default.realpath(file9) !== file9) fail2("OWNERSHIP_CHANGED", "Tracked artifact changed during teardown.");
+            if (f.directory) await import_promises25.default.rmdir(file9).catch((e2) => {
               if (e2.code !== "ENOTEMPTY" && e2.code !== "EEXIST") throw e2;
             });
-            else await import_promises25.default.unlink(file8);
+            else await import_promises25.default.unlink(file9);
           }
           const directory = import_node_path24.default.join(root, id);
           v.retained_files = await import_promises25.default.readdir(directory);
@@ -58417,6 +58420,133 @@ var LabManager = class {
         m.state = "destroyed";
       });
     });
+  }
+};
+
+// src/security.mjs
+var import_promises26 = __toESM(require("node:fs/promises"), 1);
+var file8 = external_exports.string().min(1).max(4096).refine((value) => !/[\x00-\x1f]/.test(value));
+var securitySchemas = {
+  vm_security_capabilities: external_exports.object({}).strict(),
+  vm_security_status: external_exports.object({ vmx: file8 }).strict()
+};
+var reason = "No supported headless encryption creation and vTPM provisioning backend has been verified. Installed tools and version discovery do not establish provisioning support.";
+var blocked = () => ({
+  available: false,
+  code: "UNSUPPORTED_CAPABILITY",
+  reason,
+  supported_encryption_modes: [],
+  encryption_enable: false,
+  vtpm_provision: false,
+  password_rotation: false,
+  decryption: false,
+  vtpm_remove: false,
+  vtpm_reset: false,
+  action: "See security.md for native probe evidence and validation gaps. Do not bypass this refusal with raw VMX keys or GUI automation."
+});
+var boolean4 = (value) => /^true$/i.test(value || "") ? true : /^false$/i.test(value || "") ? false : null;
+var unknown2 = () => ({
+  encryption: { state: "unknown", mode: "unknown", configuration_markers_present: null },
+  vtpm: { declared_present: null, presence: "unknown", independently_verified: false },
+  managed_configuration_detected: null,
+  firmware: "unknown",
+  hardware_version: null
+});
+async function readDeclarations(vmx3) {
+  const handle = await import_promises26.default.open(vmx3, "r");
+  try {
+    const before = await handle.stat({ bigint: true });
+    if (!before.isFile() || before.size > 4n * 1024n * 1024n) throw new Error("Unsupported configuration size/type");
+    const size = Number(before.size);
+    const bytes = Buffer.alloc(size + 1);
+    let count = 0;
+    while (count < bytes.length) {
+      const { bytesRead } = await handle.read(bytes, count, bytes.length - count, null);
+      if (!bytesRead) break;
+      count += bytesRead;
+    }
+    const after = await handle.stat({ bigint: true }), current = await import_promises26.default.stat(vmx3, { bigint: true });
+    if (count !== size || [after, current].some((stat) => (process.platform !== "win32" || stat.dev !== 0n) && before.dev !== stat.dev || before.ino !== stat.ino || before.size !== stat.size || before.mtimeNs !== stat.mtimeNs || before.ctimeNs !== stat.ctimeNs)) throw new Error("Concurrent change");
+    return parseHardware(bytes.subarray(0, count)).config;
+  } finally {
+    await handle.close();
+  }
+}
+var SecurityManager = class {
+  constructor({ backend: backend2, hardware: hardware2 }) {
+    this.backend = backend2;
+    this.hardware = hardware2;
+  }
+  async capabilities() {
+    const product = await this.hardware.capabilities();
+    const worker = {
+      available: product.available,
+      product_version: product.product_version || null,
+      build: product.build || null,
+      compatibility_profile_known: product.available
+    };
+    let executable = null;
+    let cli = { discovered: false, help_verified: false, version: null };
+    try {
+      const beside = await this.backend.executable().catch(() => void 0);
+      executable = await findVMwareExecutable("vmcli", { env: this.backend.env, beside });
+      cli.discovered = true;
+      const options2 = { shell: false, windowsHide: true, encoding: "utf8", timeout: 1e4, maxBuffer: 65536, env: this.backend.env };
+      const help = await this.backend.execute(executable, ["--help"], options2);
+      cli.help_verified = /Usage:\s*vmcli(?:\.exe)?\s/i.test(help.stdout || "");
+      const version2 = await this.backend.execute(executable, ["--version"], options2);
+      cli.version = (version2.stdout || "").match(/^vmcli(?:\.exe)? version (\d+(?:\.\d+){1,3})\s*$/i)?.[1] || null;
+    } catch {
+    }
+    return {
+      platform: process.platform,
+      worker,
+      vmcli: { ...cli, executable },
+      backend: blocked(),
+      live_support: "unverified",
+      prerequisites: [
+        "Verified native encryption/key-management backend and independent security inspection",
+        "Compatible product, virtual hardware and UEFI firmware",
+        "Full power-off, no locks/suspend/other writers, exclusive access",
+        "Verified protected complete recovery artifacts and local credential profile",
+        "Separately authorized disposable provisioning and guest TPM persistence validation"
+      ],
+      note: "Read-only discovery. No supported encryption mode, credential transport or security mutation is enabled on any platform/version."
+    };
+  }
+  async status(input2) {
+    const a = securitySchemas.vm_security_status.parse(input2);
+    const vmx3 = await this.backend.vmx(a.vmx);
+    let observation = unknown2(), inspection = "unknown";
+    try {
+      const config2 = await readDeclarations(vmx3);
+      const markers = Object.keys(config2).some((key3) => key3.startsWith("encryption."));
+      const managed = Object.keys(config2).some((key3) => key3.startsWith("managedvm."));
+      const declared = boolean4(config2["vtpm.present"]);
+      observation = {
+        encryption: { state: "unknown", mode: "unknown", configuration_markers_present: markers },
+        vtpm: { declared_present: declared, presence: "unknown", independently_verified: false },
+        managed_configuration_detected: managed,
+        firmware: ["efi", "bios"].includes(config2.firmware?.toLowerCase()) ? config2.firmware.toLowerCase() : "unknown",
+        hardware_version: /^\d{1,3}$/.test(config2["virtualhw.version"] || "") ? Number(config2["virtualhw.version"]) : null
+      };
+      inspection = "configuration_only";
+    } catch {
+    }
+    return {
+      vmx: vmx3,
+      inspection,
+      ...observation,
+      backend: blocked(),
+      prerequisites: {
+        full_power_off: "unknown",
+        exclusive_access: "unknown",
+        recovery_verified: false,
+        product_compatibility: "unknown",
+        encryption_mode_verified: false
+      },
+      note: "Configuration declarations only; missing keys do not prove absence. Encrypted data may hide hardware. No disk, TPM contents, credentials or native security state were inspected. No configuration, power or file changes were made."
+    };
   }
 };
 
@@ -58439,12 +58569,15 @@ var readiness2 = new Readiness({ backend, credentials, consoles, protectFile: lo
 var guestExec = new GuestExec({ backend, credentials, protectFile: localFileProtector(backend) });
 var media = new IsoManager({ backend, vmFiles });
 var hardware = new HardwareManager({ backend, vmFiles, disks, lan: lanSegments });
+var security2 = new SecurityManager({ backend, hardware });
 var jobOperations = new JobOperations({ backend, jobs, disks, ovf });
 var templates = new TemplateManager({ backend, hardware, rest });
 var labs = new LabManager({ backend, templates, lan: lanSegments, readiness: readiness2, protectFile: localFileProtector(backend) });
-var server = new McpServer({ name: "vmware-workstation", version: "0.14.0" });
+var server = new McpServer({ name: "vmware-workstation", version: "0.15.0" });
 var vmx2 = external_exports.string().min(1).describe("Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.");
 var name = external_exports.string().min(1).max(256).describe("Exact snapshot name.");
+tool("vm_security_capabilities", "Read-only native worker/version and vmcli help discovery. Separates installed tools from a verified encryption/vTPM backend. No security mutations or encryption modes are supported; no VM or credentials are opened.", securitySchemas.vm_security_capabilities, true, () => security2.capabilities());
+tool("vm_security_status", "Read selected allowlisted VM security declarations without returning encryption keys, TPM contents or arbitrary VMX values. Encryption state/mode and actual vTPM presence remain unknown without independent native verification. No unlock, power or configuration changes.", securitySchemas.vm_security_status, true, (a) => security2.status(a));
 tool("lab_validate", "Read-only versioned multi-VM lab validation and plan. Reuses template/hardware preflight, checks dependency graph, network/media mappings and aggregate disk space. Plans private LANs without creating them. No OS installation or readiness is implied.", labSchemas.lab_validate, true, (a) => labs.validate(a));
 tool("lab_deploy", "Plan by default. Explicit dry_run=false and confirm=true create a NEW lab root, private ownership manifest, optional owned LAN segments and blank template VMs. start=true opts into headless dependency/readiness-ordered startup. resume=true requires the identical recipe and bindings; completed verified VMs are skipped and uncertain partial creation is refused. No implicit rollback, overwrite or registration.", labSchemas.lab_deploy, false, (a, extra) => labs.deploy(a, extra), false);
 tool("lab_status", "Read the selected private lab manifest and observe VM ownership/power. Completed steps and uncertain intents are separate from live guest readiness. Does not scan for or adopt resources.", labSchemas.lab_status, true, (a) => labs.status(a));

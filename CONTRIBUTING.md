@@ -1,5 +1,7 @@
 # Contributing
 
+Security inspection uses [the feasibility guide](vmware-workstation/security.md). `npm run security:probe` reads native help/version without selecting a VM or loading credentials. Default tests cover redaction, explicit unknown states, unsafe configuration and all prior tool contracts. No encryption/vTPM mutation backend is enabled; disposable provisioning and guest persistence tests remain pending under #27 and need separate workload authorization.
+
 Multi-VM orchestration uses [the lab guide](vmware-workstation/labs.md). Default tests exercise private two/three-VM and nested hardware lab plans, deployment, bounded readiness, manifest recovery, lifecycle and safe teardown with test doubles on Windows/Ubuntu. `npm run test:labs:live` requires separate disposable-workload authorization and `VMWARE_LABS_LIVE=1`; it retains new powered-off labs, private catalog segments and evidence without starting/stopping/destroying VMs. Edit `src/lab-schemas.mjs` and rebuild the published schema.
 
 Declarative VM templates use [the template guide](vmware-workstation/templates.md).
@@ -30,7 +32,7 @@ npm test
 npm run package
 ```
 
-The package command builds all bundled entrypoints, refreshes the operation reference and dependency notices, validates portable manifests and all 148 MCP tool schemas, checks compatibility with all 142 previous tool definitions, verifies platform credential-file protection, and creates the plugin ZIP. CI performs these checks on Windows and Ubuntu. Run `npm run build` before testing changes to bundled helpers or the Linux MCP integration test.
+The package command builds all bundled entrypoints, refreshes the operation reference and dependency notices, validates portable manifests and all 150 MCP tool schemas, checks compatibility with all 148 previous tool definitions, verifies platform credential-file protection, and creates the plugin ZIP. CI performs these checks on Windows and Ubuntu. Run `npm run build` before testing changes to bundled helpers or the Linux MCP integration test.
 
 Commit source changes together with updated generated files under `vmware-workstation/`. The repository includes built entrypoints so Git-backed plugin installation does not require an npm install. CI checks that a fresh build reproduces the committed generated files.
 

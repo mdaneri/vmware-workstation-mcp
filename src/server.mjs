@@ -25,6 +25,7 @@ import { TemplateManager } from './templates.mjs';
 import { templateSchemas } from './template-schemas.mjs';
 import { LabManager } from './labs.mjs';
 import { labSchemas } from './lab-schemas.mjs';
+import { SecurityManager, securitySchemas } from './security.mjs';
 
 const backend = new Workstation();
 const credentials = new Credentials();
@@ -41,12 +42,16 @@ const readiness = new Readiness({ backend, credentials, consoles, protectFile: l
 const guestExec = new GuestExec({ backend, credentials, protectFile: localFileProtector(backend) });
 const media = new IsoManager({ backend, vmFiles });
 const hardware = new HardwareManager({ backend, vmFiles, disks, lan: lanSegments });
+const security = new SecurityManager({ backend, hardware });
 const jobOperations = new JobOperations({ backend, jobs, disks, ovf });
 const templates = new TemplateManager({ backend, hardware, rest });
 const labs = new LabManager({ backend, templates, lan: lanSegments, readiness, protectFile: localFileProtector(backend) });
-const server = new McpServer({ name: 'vmware-workstation', version: '0.14.0' });
+const server = new McpServer({ name: 'vmware-workstation', version: '0.15.0' });
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
+
+tool('vm_security_capabilities', 'Read-only native worker/version and vmcli help discovery. Separates installed tools from a verified encryption/vTPM backend. No security mutations or encryption modes are supported; no VM or credentials are opened.', securitySchemas.vm_security_capabilities, true, () => security.capabilities());
+tool('vm_security_status', 'Read selected allowlisted VM security declarations without returning encryption keys, TPM contents or arbitrary VMX values. Encryption state/mode and actual vTPM presence remain unknown without independent native verification. No unlock, power or configuration changes.', securitySchemas.vm_security_status, true, a => security.status(a));
 
 tool('lab_validate', 'Read-only versioned multi-VM lab validation and plan. Reuses template/hardware preflight, checks dependency graph, network/media mappings and aggregate disk space. Plans private LANs without creating them. No OS installation or readiness is implied.', labSchemas.lab_validate, true, a => labs.validate(a));
 tool('lab_deploy', 'Plan by default. Explicit dry_run=false and confirm=true create a NEW lab root, private ownership manifest, optional owned LAN segments and blank template VMs. start=true opts into headless dependency/readiness-ordered startup. resume=true requires the identical recipe and bindings; completed verified VMs are skipped and uncertain partial creation is refused. No implicit rollback, overwrite or registration.', labSchemas.lab_deploy, false, (a, extra) => labs.deploy(a, extra), false);

@@ -29,7 +29,7 @@ require('node:child_process').execFile = stub;
   await client.connect(new StdioClientTransport({ command: process.execPath, args: ['--require', preload, path.resolve('vmware-workstation/server/server.cjs')], stderr: 'pipe', env: {
     ...process.env, VMRUN_PATH: binary, VMWARE_ALLOWED_ROOTS: root, VMWARE_ALLOWED_HOST_ROOTS: root,
   } }));
-  const tools = (await client.listTools()).tools; assert.equal(tools.length, 148);
+  const tools = (await client.listTools()).tools; assert.equal(tools.length, 150);
   const previous = JSON.parse(await fs.readFile('tests/fixtures/pre-iso-tool-schemas.json', 'utf8'));
   assert.equal(previous.tools.length, 129);
   for (const prior of previous.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior);

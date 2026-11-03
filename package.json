@@ -1,6 +1,6 @@
 {
   "name": "vmware-workstation-plugin-dev",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "private": true,
   "license": "MIT",
   "repository": {
@@ -9,6 +9,7 @@
   },
   "type": "module",
   "scripts": {
+    "security:probe": "node scripts/probe-security.mjs",
     "build": "node scripts/build.mjs",
     "test": "node --test tests/*.test.mjs",
     "smoke": "node scripts/smoke.mjs",
