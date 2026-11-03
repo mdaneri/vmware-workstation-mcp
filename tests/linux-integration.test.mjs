@@ -41,7 +41,7 @@ test('Linux bundled MCP uses real child processes, private console setup and nat
   await fs.writeFile(env.VMWARE_CREDENTIALS_FILE, '{}', { mode: 0o600 });
   const client = new Client({ name: 'linux-integration-test', version: '1' }); clients.push(client);
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [bundled], env, stderr: 'pipe' }));
-  assert.equal((await client.listTools()).tools.length, 117);
+  assert.equal((await client.listTools()).tools.length, 123);
   assert.equal(textResult(await client.callTool({ name: 'workstation_status', arguments: {} })).executable, binary);
 
   const workerBinary = path.join(root, 'vmware-vmx');

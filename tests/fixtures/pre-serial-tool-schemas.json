@@ -1,0 +1,5340 @@
+{
+  "tools": [
+    {
+      "name": "console_screenshot",
+      "description": "Capture a fresh PNG from this VM native VNC/RFB framebuffer. Never captures the host desktop. Works during BIOS/UEFI, PXE and installation without VMware Tools.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vm_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "vm_id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "console_click",
+      "description": "Click VM framebuffer coordinates using a direct RFB PointerEvent. No host mouse, window activation or desktop focus is used.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vm_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "x": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "y": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "button": {
+            "default": "left",
+            "type": "string",
+            "enum": [
+              "left",
+              "middle",
+              "right"
+            ]
+          }
+        },
+        "required": [
+          "vm_id",
+          "x",
+          "y"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "console_key",
+      "description": "Send a named key or chord to this VM via RFB, for example F2, Escape, Enter, ArrowDown, Ctrl+Alt+Delete. No host keyboard input is used.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vm_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "vm_id",
+          "key"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "console_type",
+      "description": "Type text into the VM via RFB key events, including at pre-OS prompts. Does not use the clipboard, guest agents, or host keyboard injection. Guest keyboard layout affects text.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vm_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "vm_id",
+          "text"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "console_scroll",
+      "description": "Send RFB wheel events to the VM at the last console pointer position or framebuffer center. amount is the number of wheel ticks.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vm_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down",
+              "left",
+              "right"
+            ]
+          },
+          "amount": {
+            "default": 1,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "vm_id",
+          "direction"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "console_status",
+      "description": "Check this VM native loopback-only VNC configuration and authenticated RFB session. Does not start the VM or modify its VNC settings.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vm_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "vm_id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "create_vm",
+      "description": "Create a new blank VMX and sparse virtual disk in a NEW directory using VMware Virtual Disk Manager. Configure CPUs, memory, firmware, networking and optional ISO. Does not install a guest OS or power on/register the VM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "directory": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute NEW VM directory; its parent must exist. Existing directories are never overwritten."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "guest_os": {
+            "default": "otherlinux-64",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "memory_mb": {
+            "default": 2048,
+            "type": "integer",
+            "minimum": 256,
+            "maximum": 1048576,
+            "multipleOf": 4
+          },
+          "cpus": {
+            "default": 2,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 128
+          },
+          "disk_gb": {
+            "default": 20,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8192
+          },
+          "hardware_version": {
+            "default": 21,
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 99
+          },
+          "firmware": {
+            "default": "bios",
+            "type": "string",
+            "enum": [
+              "bios",
+              "efi"
+            ]
+          },
+          "network": {
+            "default": "nat",
+            "type": "string",
+            "enum": [
+              "nat",
+              "bridged",
+              "hostonly",
+              "custom",
+              "none"
+            ]
+          },
+          "vmnet": {
+            "type": "string"
+          },
+          "iso_path": {
+            "description": "Optional existing host ISO file. Creating a VM does not install a guest OS.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "directory",
+          "name"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "configure_vm",
+      "description": "Edit a powered-off UTF-8 VMX with a backup. Set arbitrary VMX key/value strings or null to remove keys. Refuses running, locked, or detected suspended VMs. Use for CPU, memory, boot media, network and other VMX configuration.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1
+          },
+          "settings": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[A-Za-z_.][A-Za-z0-9_.:-]{0,127}$"
+            },
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 65536
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "vmx",
+          "settings"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_manager_status",
+      "description": "Discover native VMware Virtual Disk Manager and the exact flags/disk types advertised by its installed help. Missing capabilities return actionable status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_inspect",
+      "description": "Read a local VMDK descriptor, capacity, extents and backing-chain metadata. No disk-manager repair, guest mount or filesystem access.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "disk": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "disk"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_create",
+      "description": "Create a local VMDK in a NEW parent directory to protect companion extents. Supports installed growable/preallocated single/split disk types 0-3.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "Absolute .vmdk in a NEW parent directory; grandparent must exist."
+          },
+          "capacity_mb": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8388608,
+            "description": "Total virtual capacity in MiB, not an increment."
+          },
+          "disk_type": {
+            "default": "0",
+            "type": "string",
+            "enum": [
+              "0",
+              "1",
+              "2",
+              "3"
+            ]
+          },
+          "adapter": {
+            "default": "lsilogic",
+            "type": "string",
+            "enum": [
+              "ide",
+              "buslogic",
+              "lsilogic"
+            ]
+          },
+          "timeout_seconds": {
+            "default": 600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "destination",
+          "capacity_mb"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_expand",
+      "description": "Expand an independent offline VMDK to total capacity_mb. Requires explicit confirmation; refuses snapshots, locks, shared/backing chains. Does not resize guest partitions or filesystems.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "disk": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "vmx_paths": {
+            "default": [],
+            "description": "Additional unregistered VMX files that may reference this disk. Inventory is also checked.",
+            "maxItems": 256,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk."
+          },
+          "timeout_seconds": {
+            "default": 600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          },
+          "capacity_mb": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8388608,
+            "description": "Total virtual capacity in MiB, not an increment."
+          }
+        },
+        "required": [
+          "disk",
+          "confirm",
+          "capacity_mb"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_convert",
+      "description": "Convert an independent offline local VMDK into a NEW parent directory, preserving the original. Supports advertised types 0-3 and stream-optimized output type 5. Partial output is retained on failure.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "disk": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "vmx_paths": {
+            "default": [],
+            "description": "Additional unregistered VMX files that may reference this disk. Inventory is also checked.",
+            "maxItems": 256,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk."
+          },
+          "timeout_seconds": {
+            "default": 600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          },
+          "destination": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "Absolute .vmdk in a NEW parent directory; source is preserved."
+          },
+          "disk_type": {
+            "default": "0",
+            "type": "string",
+            "enum": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "5"
+            ]
+          }
+        },
+        "required": [
+          "disk",
+          "confirm",
+          "destination"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_compact",
+      "description": "Compact an independent offline growable VMDK using installed -k capability. Requires explicit confirmation. Guest free-space preparation is separate; no guest filesystem resize.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "disk": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "vmx_paths": {
+            "default": [],
+            "description": "Additional unregistered VMX files that may reference this disk. Inventory is also checked.",
+            "maxItems": 256,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk."
+          },
+          "timeout_seconds": {
+            "default": 600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "disk",
+          "confirm"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_defragment",
+      "description": "Defragment an independent offline growable VMDK using installed -d capability. Requires explicit confirmation and conservative free-space checks.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "disk": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "vmx_paths": {
+            "default": [],
+            "description": "Additional unregistered VMX files that may reference this disk. Inventory is also checked.",
+            "maxItems": 256,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk."
+          },
+          "timeout_seconds": {
+            "default": 600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "disk",
+          "confirm"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_attach",
+      "description": "Attach an independent VMDK to an existing controller and explicit unused unit in a powered-off VMX, with a backup. Refuses snapshots, locked/suspended VMs and known shared disks. confirm requires authorization.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "controller": {
+            "type": "string",
+            "enum": [
+              "scsi",
+              "sata",
+              "ide",
+              "nvme"
+            ]
+          },
+          "controller_index": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "unit": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 63
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk."
+          },
+          "disk": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "vmx_paths": {
+            "default": [],
+            "description": "Additional unregistered VMX files that may reference this disk. Inventory is also checked.",
+            "maxItems": 256,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          }
+        },
+        "required": [
+          "vmx",
+          "controller",
+          "controller_index",
+          "unit",
+          "confirm",
+          "disk"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_detach",
+      "description": "Remove the explicit VMX disk slot after verifying its expected VMDK, with a backup. Never deletes the underlying VMDK or extents. Requires authorization and a powered-off snapshot-free VM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "controller": {
+            "type": "string",
+            "enum": [
+              "scsi",
+              "sata",
+              "ide",
+              "nvme"
+            ]
+          },
+          "controller_index": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "unit": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 63
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk."
+          },
+          "disk": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "Expected backing disk; refuses a different disk at the selected slot."
+          },
+          "vmx_paths": {
+            "default": [],
+            "description": "Additional unregistered VMX files that may reference this disk. Inventory is also checked.",
+            "maxItems": 256,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          }
+        },
+        "required": [
+          "vmx",
+          "controller",
+          "controller_index",
+          "unit",
+          "confirm",
+          "disk"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ovf_tool_status",
+      "description": "Discover optional local VMware OVF Tool, version and supported flags. VMWARE_OVFTOOL_PATH overrides automatic discovery with an absolute executable path.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ovf_inspect",
+      "description": "Start a read-only background appliance probe. job_status.result reports hardware, disks, NICs, properties, deployment options and manifest checks. Local flat OVF/OVA packages only.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Absolute local OVF/OVA file path; URLs are not accepted."
+          },
+          "timeout_seconds": {
+            "default": 3600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          }
+        },
+        "required": [
+          "source"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ovf_validate",
+      "description": "Start read-only local OVF/OVA schema and manifest validation. Returns a job ID. Remote-host compatibility, signer trust and guest boot are not established.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Absolute local OVF/OVA file path; URLs are not accepted."
+          },
+          "timeout_seconds": {
+            "default": 3600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          }
+        },
+        "required": [
+          "source"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ovf_import",
+      "description": "Start an OVF/OVA import into a NEW VM directory. Supports typed network/property mappings and explicit EULA acceptance. Registration through REST and headless power-on are opt-in. Returns a job ID; poll job_status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Absolute local OVF/OVA file path; URLs are not accepted."
+          },
+          "directory": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "NEW output directory; parent must exist."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "network_mappings": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
+          },
+          "property_mappings": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
+          },
+          "property_profile": {
+            "description": "Local credentials.json ovf_properties profile; use for sensitive deployment properties.",
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,31}$"
+          },
+          "deployment_option": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "accept_eulas": {
+            "default": false,
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "default": 3600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          },
+          "register": {
+            "default": false,
+            "type": "boolean"
+          },
+          "power_on": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "source",
+          "directory"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ovf_export",
+      "description": "Start a powered-off VMX export to OVF/OVA. Refuses snapshots, locks, saved state, external backings, encryption and vTPM. OVF needs a new parent directory. Only OVA permits explicit overwrite=true. Returns a job ID.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "destination": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Absolute .ova or .ovf output path. OVF requires a NEW parent directory."
+          },
+          "overwrite": {
+            "default": false,
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "default": 3600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          }
+        },
+        "required": [
+          "vmx",
+          "destination"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ovf_convert",
+      "description": "Start a local OVF/OVA/VMX conversion using VMware OVF Tool. VMX sources require power-off and no snapshots. OVF/VMX targets need new parent directories; overwrite is limited to OVA. Returns a job ID.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Absolute local .ovf, .ova or .vmx source."
+          },
+          "destination": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Absolute .ovf, .ova or .vmx target. OVF/VMX require a NEW parent directory."
+          },
+          "overwrite": {
+            "default": false,
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "network_mappings": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
+          },
+          "property_mappings": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
+          },
+          "property_profile": {
+            "description": "Local credentials.json ovf_properties profile; use for sensitive deployment properties.",
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,31}$"
+          },
+          "deployment_option": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "accept_eulas": {
+            "default": false,
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "default": 3600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          }
+        },
+        "required": [
+          "source",
+          "destination"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "job_status",
+      "description": "Read a background job state, observed progress and final result/error. Prior-server-session job IDs report interrupted with unknown outcome.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "job_list",
+      "description": "List up to 100 background jobs retained in this server session. Job results and logs are memory-only.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "job_cancel",
+      "description": "Request cancellation of a background job and its native OVF Tool process. Partial files and registration/power changes may remain; inspect before retrying.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "job_logs",
+      "description": "Read bounded, redacted background job output. Raw probe metadata/property defaults are omitted. A truncated log is explicitly marked.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "list_lan_segments",
+      "description": "List the current host user LAN segment catalog. Optionally supply vmx to inspect adapter indices and segment associations, including orphaned IDs. Does not scan disks or change VMs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute VMX path. Adapter changes require a powered-off, unlocked UTF-8 VM."
+          }
+        },
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "create_lan_segment",
+      "description": "Create a named private LAN segment in Workstation preferences with a backup, or return the uniquely named existing segment. Close the Workstation/Player GUI first. Does not create a VMnet, DHCP server or VM adapter.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "remove_lan_segment",
+      "description": "Remove a LAN segment from Workstation preferences with a backup. Refuses references in registered/running and supplied unregistered VMX files; detach those adapters first. Cannot discover other unregistered VMs. Close the Workstation/Player GUI first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "segment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "LAN segment name or pvnID returned by list_lan_segments. Use the ID if names are ambiguous."
+          },
+          "vmx_paths": {
+            "default": [],
+            "description": "Additional unregistered VMX files to check for references. Registered and running VMs are always checked; detach references before removal.",
+            "maxItems": 1024,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Absolute VMX path. Adapter changes require a powered-off, unlocked UTF-8 VM."
+            }
+          }
+        },
+        "required": [
+          "segment"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "attach_vm_adapter_to_lan_segment",
+      "description": "Attach an existing powered-off VM adapter to a LAN segment. adapter is the zero-based ethernetN index. Backs up the UTF-8 VMX, clears any custom VMnet, and enables connection at next power-on. Close the Workstation/Player GUI first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute VMX path. Adapter changes require a powered-off, unlocked UTF-8 VM."
+          },
+          "adapter": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255,
+            "description": "Zero-based VMX adapter index: 0 means ethernet0, not the REST NIC index."
+          },
+          "segment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "LAN segment name or pvnID returned by list_lan_segments. Use the ID if names are ambiguous."
+          }
+        },
+        "required": [
+          "vmx",
+          "adapter",
+          "segment"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "detach_vm_adapter_from_lan_segment",
+      "description": "Detach an existing powered-off VM adapter from the specified LAN segment, preserving the adapter. Backs up the UTF-8 VMX, removes its segment ID, selects a replacement network (default NAT), and leaves the adapter disconnected at next power-on. Close the Workstation/Player GUI first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute VMX path. Adapter changes require a powered-off, unlocked UTF-8 VM."
+          },
+          "adapter": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255,
+            "description": "Zero-based VMX adapter index: 0 means ethernet0, not the REST NIC index."
+          },
+          "segment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "LAN segment name or pvnID returned by list_lan_segments. Use the ID if names are ambiguous."
+          },
+          "network": {
+            "default": "nat",
+            "description": "Replacement network mode. The adapter is left disconnected with startConnected=FALSE.",
+            "type": "string",
+            "enum": [
+              "nat",
+              "bridged",
+              "hostonly",
+              "custom"
+            ]
+          },
+          "vmnet": {
+            "description": "Required only for the custom replacement network.",
+            "type": "string",
+            "pattern": "^vmnet\\d{1,3}$"
+          }
+        },
+        "required": [
+          "vmx",
+          "adapter",
+          "segment"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "workstation_status",
+      "description": "Check local vmrun availability and count running VMs without changing them.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "list_vms",
+      "description": "List registered and running VMs. Stale inventory entries are retained and marked. This does not scan disks.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "get_vm_details",
+      "description": "Read selected VM hardware configuration and whether the VM is running. Does not expose the full VMX.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user."
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vm_power",
+      "description": "Start, gracefully stop, reset, suspend, pause or unpause a VM. Defaults to soft mode. Hard stop/reset can lose data; use only when explicitly requested. No automatic hard fallback.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user."
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "start",
+              "stop",
+              "reset",
+              "suspend",
+              "pause",
+              "unpause"
+            ]
+          },
+          "mode": {
+            "default": "soft",
+            "type": "string",
+            "enum": [
+              "soft",
+              "hard"
+            ]
+          },
+          "gui": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "vmx",
+          "action"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "list_snapshots",
+      "description": "List snapshot names without changing the VM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user."
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "create_snapshot",
+      "description": "Create a named snapshot on the selected VM. Requires a user request to create it.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Exact snapshot name."
+          }
+        },
+        "required": [
+          "vmx",
+          "name"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "revert_snapshot",
+      "description": "Revert the VM to an existing snapshot. Discards later VM state; requires explicit user authorization for this VM and snapshot.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Exact snapshot name."
+          }
+        },
+        "required": [
+          "vmx",
+          "name"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "delete_snapshot",
+      "description": "Delete one named snapshot, preserving children. Removes a restore point; requires explicit user authorization for this VM and snapshot.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Exact snapshot name."
+          }
+        },
+        "required": [
+          "vmx",
+          "name"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "get_guest_ip",
+      "description": "Get the IP address reported by VMware Tools in a running VM. Does not log into the guest or wait for startup.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user."
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_start",
+      "description": "Start a VM; optionally show its Workstation window.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "mode": {
+            "default": "nogui",
+            "type": "string",
+            "enum": [
+              "gui",
+              "nogui"
+            ]
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_stop",
+      "description": "stop a VM. Soft mode is the default; hard mode requires explicit authorization.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "mode": {
+            "default": "soft",
+            "type": "string",
+            "enum": [
+              "soft",
+              "hard"
+            ]
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_reset",
+      "description": "reset a VM. Soft mode is the default; hard mode requires explicit authorization.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "mode": {
+            "default": "soft",
+            "type": "string",
+            "enum": [
+              "soft",
+              "hard"
+            ]
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_suspend",
+      "description": "suspend a VM. Soft mode is the default; hard mode requires explicit authorization.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "mode": {
+            "default": "soft",
+            "type": "string",
+            "enum": [
+              "soft",
+              "hard"
+            ]
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_pause",
+      "description": "pause a VM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_unpause",
+      "description": "unpause a VM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_list_snapshots",
+      "description": "List VM snapshots; show_tree returns the hierarchy.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "show_tree": {
+            "type": "boolean"
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_snapshot",
+      "description": "Create a named VM snapshot.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "name"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_delete_snapshot",
+      "description": "Delete a named snapshot. Optionally delete its children as explicitly requested.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "delete_children": {
+            "type": "boolean"
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "name"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_revert_to_snapshot",
+      "description": "Revert to a named snapshot; later VM state is discarded.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "name"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_list_host_networks",
+      "description": "List VMware virtual host networks.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_list_port_forwardings",
+      "description": "List port forwarding rules on a host network.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmnet": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmnet"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_set_port_forwarding",
+      "description": "Add or update a host network port forwarding rule.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmnet": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "protocol": {
+            "type": "string",
+            "enum": [
+              "tcp",
+              "udp"
+            ]
+          },
+          "host_port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "guest_ip": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "guest_port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmnet",
+          "protocol",
+          "host_port",
+          "guest_ip",
+          "guest_port"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_delete_port_forwarding",
+      "description": "Delete a host network port forwarding rule.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmnet": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "protocol": {
+            "type": "string",
+            "enum": [
+              "tcp",
+              "udp"
+            ]
+          },
+          "host_port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmnet",
+          "protocol",
+          "host_port"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_run_program_in_guest",
+      "description": "Execute a program in the guest. This returns vmrun status, not guest stdout or a reliable guest program exit code.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "no_wait": {
+            "type": "boolean"
+          },
+          "active_window": {
+            "type": "boolean"
+          },
+          "interactive": {
+            "type": "boolean"
+          },
+          "program": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "arguments": {
+            "maxItems": 256,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 65536
+            }
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "default": "default",
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "program"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_file_exists_in_guest",
+      "description": "Check whether a guest file exists.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "guest_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "default": "default",
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "guest_path"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_directory_exists_in_guest",
+      "description": "Check whether a guest directory exists.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "guest_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "default": "default",
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "guest_path"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_set_shared_folder_state",
+      "description": "Set a shared folder host path and write access.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "share_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "host_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "access": {
+            "type": "string",
+            "enum": [
+              "writable",
+              "readonly"
+            ]
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "share_name",
+          "host_path",
+          "access"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_add_shared_folder",
+      "description": "Add a host directory as a guest shared folder.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "share_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "host_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "share_name",
+          "host_path"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_remove_shared_folder",
+      "description": "Remove a shared folder mapping.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "share_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "share_name"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_enable_shared_folders",
+      "description": "Enable shared folders; runtime_only avoids a persistent change.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "runtime_only": {
+            "type": "boolean"
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_disable_shared_folders",
+      "description": "Disable shared folders.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_list_processes_in_guest",
+      "description": "List guest processes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "default": "default",
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_kill_process_in_guest",
+      "description": "Terminate a guest process by process ID.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "pid": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "default": "default",
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "pid"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_run_script_in_guest",
+      "description": "Run script text with a guest interpreter. Redirect script output to a guest file and copy it back if output is needed.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "no_wait": {
+            "type": "boolean"
+          },
+          "active_window": {
+            "type": "boolean"
+          },
+          "interactive": {
+            "type": "boolean"
+          },
+          "interpreter": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 1048576
+          },
+          "script": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "default": "default",
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "interpreter",
+          "script"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_delete_file_in_guest",
+      "description": "Delete a guest file.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "guest_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "default": "default",
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "guest_path"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_create_directory_in_guest",
+      "description": "Create a guest directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "guest_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "default": "default",
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "guest_path"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_delete_directory_in_guest",
+      "description": "Delete a guest directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "guest_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "default": "default",
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "guest_path"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_create_tempfile_in_guest",
+      "description": "Create a temporary file in the guest.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "default": "default",
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_list_directory_in_guest",
+      "description": "List a guest directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "guest_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "default": "default",
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "guest_path"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_copy_file_from_host_to_guest",
+      "description": "Copy a local host file to a guest path. The destination may be overwritten by VMware.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "host_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "guest_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "default": "default",
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "host_path",
+          "guest_path"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_copy_file_from_guest_to_host",
+      "description": "Copy a guest file to a local host path. Existing host files are protected unless overwrite=true.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "guest_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "host_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "default": "default",
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "overwrite": {
+            "default": false,
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "guest_path",
+          "host_path"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_rename_file_in_guest",
+      "description": "Rename a guest file.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "source_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "destination_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "default": "default",
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "source_path",
+          "destination_path"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_type_keystrokes_in_guest",
+      "description": "Type text into the guest console.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "default": "default",
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "text"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_connect_named_device",
+      "description": "Connect a named virtual device.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "device_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "device_name"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_disconnect_named_device",
+      "description": "Disconnect a named virtual device.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "device_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "device_name"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_capture_screen",
+      "description": "Capture the VM display into a local file.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "host_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "overwrite": {
+            "default": false,
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "host_path"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_write_variable",
+      "description": "Write a VM runtimeConfig, guestEnv, or guestVar variable.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "runtimeConfig",
+              "guestEnv",
+              "guestVar"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "value": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "scope",
+          "name",
+          "value"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_read_variable",
+      "description": "Read a VM runtimeConfig, guestEnv, or guestVar variable.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "runtimeConfig",
+              "guestEnv",
+              "guestVar"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "scope",
+          "name"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_get_guest_ip_address",
+      "description": "Read the guest address reported by VMware Tools; optionally wait until available.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "wait": {
+            "type": "boolean"
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_list",
+      "description": "List running VMX paths.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_upgradevm",
+      "description": "Upgrade a VM virtual hardware/file format.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_install_tools",
+      "description": "Start VMware Tools installation in the guest.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_check_tools_state",
+      "description": "Inspect VMware Tools state.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_delete_vm",
+      "description": "Delete the selected VM and its VMware-managed files. Requires explicit authorization for the exact VM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_clone",
+      "description": "Create a full or linked clone of a VM, optionally from a named snapshot.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Absolute existing .vmx path."
+          },
+          "destination_vmx": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "clone_type": {
+            "type": "string",
+            "enum": [
+              "full",
+              "linked"
+            ]
+          },
+          "snapshot": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "clone_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM credential profile name; never a password.",
+            "type": "string"
+          },
+          "guest_profile": {
+            "description": "Local guest credential profile name; no passwords in tool arguments.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmx",
+          "destination_vmx",
+          "clone_type"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vmrun_download_photon_vm",
+      "description": "Download a Photon template VM into a selected host directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "destination_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1048576
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "destination_path"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_get_all_vms",
+      "description": "VM Management: getAllVMs. Calls GET /api/vms on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_create_vm",
+      "description": "VM Management: createVM. Calls POST /api/vms on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "params": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 1048576
+              },
+              "parentId": {
+                "type": "string",
+                "maxLength": 1048576
+              }
+            },
+            "required": [
+              "name",
+              "parentId"
+            ],
+            "additionalProperties": false
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_get_vm",
+      "description": "VM Management: getVM. Calls GET /api/vms/{id} on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_update_vm",
+      "description": "VM Management: updateVM. Calls PUT /api/vms/{id} on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "processors": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "memory": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "additionalProperties": false
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id",
+          "parameters"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_delete_vm",
+      "description": "VM Management: deleteVM. Calls DELETE /api/vms/{id} on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_get_vm_restrictions",
+      "description": "VM Management: getVMRestrictions. Calls GET /api/vms/{id}/restrictions on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_register_vm",
+      "description": "VM Management: registerVM. Calls POST /api/vms/registration on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 1048576
+              },
+              "path": {
+                "type": "string",
+                "maxLength": 1048576
+              }
+            },
+            "additionalProperties": false
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "parameters"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_get_vm_params",
+      "description": "VM Management: getVMParams. Calls GET /api/vms/{id}/params/{name} on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_config_vm_params",
+      "description": "VM Management: configVMParams. Calls PUT /api/vms/{id}/configparams on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 1048576
+              },
+              "value": {
+                "type": "string",
+                "maxLength": 1048576
+              }
+            },
+            "additionalProperties": false
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id",
+          "parameters"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_get_power_state",
+      "description": "VM Power Management: getPowerState. Calls GET /api/vms/{id}/power on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_change_power_state",
+      "description": "VM Power Management: changePowerState. Calls PUT /api/vms/{id}/power on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "operation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "on"
+              },
+              {
+                "type": "string",
+                "const": "off"
+              },
+              {
+                "type": "string",
+                "const": "shutdown"
+              },
+              {
+                "type": "string",
+                "const": "suspend"
+              },
+              {
+                "type": "string",
+                "const": "pause"
+              },
+              {
+                "type": "string",
+                "const": "unpause"
+              }
+            ]
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id",
+          "operation"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_get_all_shared_folders",
+      "description": "VM Shared Folders Management: getAllSharedFolders. Calls GET /api/vms/{id}/sharedfolders on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_create_shared_folder",
+      "description": "VM Shared Folders Management: createSharedFolder. Calls POST /api/vms/{id}/sharedfolders on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "folder_id": {
+                "type": "string",
+                "maxLength": 1048576
+              },
+              "host_path": {
+                "type": "string",
+                "maxLength": 1048576
+              },
+              "flags": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "folder_id",
+              "host_path",
+              "flags"
+            ],
+            "additionalProperties": false
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id",
+          "parameters"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_delete_shared_folder",
+      "description": "VM Shared Folders Management: deleteSharedFolder. Calls DELETE /api/vms/{id}/sharedfolders/{folder id} on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "folder_id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id",
+          "folder_id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_update_shared_folder",
+      "description": "VM Shared Folders Management: updataSharedFolder. Calls PUT /api/vms/{id}/sharedfolders/{folder id} on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "folder_id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "host_path": {
+                "type": "string",
+                "maxLength": 1048576
+              },
+              "flags": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "host_path",
+              "flags"
+            ],
+            "additionalProperties": false
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id",
+          "folder_id",
+          "parameters"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_get_all_nic_devices",
+      "description": "VM Network Adapters Management: getAllNICDevices. Calls GET /api/vms/{id}/nic on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_create_nic_device",
+      "description": "VM Network Adapters Management: createNICDevice. Calls POST /api/vms/{id}/nic on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "custom"
+                  },
+                  {
+                    "type": "string",
+                    "const": "bridged"
+                  },
+                  {
+                    "type": "string",
+                    "const": "nat"
+                  },
+                  {
+                    "type": "string",
+                    "const": "hostonly"
+                  }
+                ]
+              },
+              "vmnet": {
+                "type": "string",
+                "maxLength": 1048576
+              }
+            },
+            "required": [
+              "type",
+              "vmnet"
+            ],
+            "additionalProperties": false
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id",
+          "parameters"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_delete_nic_device",
+      "description": "VM Network Adapters Management: deleteNICDevice. Calls DELETE /api/vms/{id}/nic/{index} on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "index": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id",
+          "index"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_update_nic_device",
+      "description": "VM Network Adapters Management: updateNICDevice. Calls PUT /api/vms/{id}/nic/{index} on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "index": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "custom"
+                  },
+                  {
+                    "type": "string",
+                    "const": "bridged"
+                  },
+                  {
+                    "type": "string",
+                    "const": "nat"
+                  },
+                  {
+                    "type": "string",
+                    "const": "hostonly"
+                  }
+                ]
+              },
+              "vmnet": {
+                "type": "string",
+                "maxLength": 1048576
+              }
+            },
+            "required": [
+              "type",
+              "vmnet"
+            ],
+            "additionalProperties": false
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id",
+          "index",
+          "parameters"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_get_ip_address",
+      "description": "VM Network Adapters Management: getIPAddress. Calls GET /api/vms/{id}/ip on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_get_nic_info",
+      "description": "VM Network Adapters Management: getNicInfo. Calls GET /api/vms/{id}/nicips on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "vm_password_profile": {
+            "description": "Local encrypted-VM password profile name, never the password.",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_create_network",
+      "description": "Host Networks Management: createNetwork. Calls POST /api/vmnets on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 1048576
+              },
+              "type": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "nat"
+                  },
+                  {
+                    "type": "string",
+                    "const": "hostOnly"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "additionalProperties": false
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "parameters"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_get_all_networks",
+      "description": "Host Networks Management: getAllNetworks. Calls GET /api/vmnet on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_get_portforwards",
+      "description": "Host Networks Management: getPortforwards. Calls GET /api/vmnet/{vmnet}/portforward on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmnet": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmnet"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_get_mac_to_ips",
+      "description": "Host Networks Management: getMACToIPs. Calls GET /api/vmnet/{vmnet}/mactoip on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmnet": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmnet"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_update_mac_to_ip",
+      "description": "Host Networks Management: updateMacToIP. Calls PUT /api/vmnet/{vmnet}/mactoip/{mac} on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmnet": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "mac": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "IP": {
+                "type": "string",
+                "maxLength": 1048576
+              }
+            },
+            "required": [
+              "IP"
+            ],
+            "additionalProperties": false
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmnet",
+          "mac",
+          "parameters"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_update_portforward",
+      "description": "Host Networks Management: updatePortforward. Calls PUT /api/vmnet/{vmnet}/portforward/{protocol}/{port} on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmnet": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "protocol": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "port": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "guestIp": {
+                "type": "string",
+                "maxLength": 1048576
+              },
+              "guestPort": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "desc": {
+                "type": "string",
+                "maxLength": 1048576
+              }
+            },
+            "required": [
+              "guestIp",
+              "guestPort"
+            ],
+            "additionalProperties": false
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmnet",
+          "protocol",
+          "port",
+          "parameters"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "rest_delete_portforward",
+      "description": "Host Networks Management: deletePortforward. Calls DELETE /api/vmnet/{vmnet}/portforward/{protocol}/{port} on the configured Workstation REST service.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmnet": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "protocol": {
+            "type": "string",
+            "maxLength": 1048576
+          },
+          "port": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "timeout_seconds": {
+            "default": 120,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "vmnet",
+          "protocol",
+          "port"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "workstation_capabilities",
+      "description": "Show full vmrun/REST tool coverage, compare the installed vmrun help against the implemented catalog, and report REST configuration without exposing secrets.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    }
+  ]
+}

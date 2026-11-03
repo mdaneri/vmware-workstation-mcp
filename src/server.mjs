@@ -13,6 +13,7 @@ import { LanSegments, lanSegmentSchemas } from './lan-segments.mjs';
 import { OvfManager, ovfSchemas } from './ovf.mjs';
 import { JobManager, jobSchemas } from './jobs.mjs';
 import { DiskManager, diskSchemas } from './disks.mjs';
+import { SerialManager, serialSchemas } from './serial.mjs';
 
 const backend = new Workstation();
 const credentials = new Credentials();
@@ -23,23 +24,32 @@ const consoles = new ConsoleManager({ backend, credentials, rest });
 const jobs = new JobManager({ redact: text => credentials.redact(text) });
 const ovf = new OvfManager({ backend, credentials, jobs, rest });
 const disks = new DiskManager({ backend, vmFiles });
-const server = new McpServer({ name: 'vmware-workstation', version: '0.6.0' });
+const serial = new SerialManager({ backend, vmFiles, credentials, rest });
+const server = new McpServer({ name: 'vmware-workstation', version: '0.7.0' });
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
-function tool(name, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false) {
+function tool(name, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false, idempotent = readOnly) {
   server.registerTool(name, {
     description, inputSchema: schema instanceof z.ZodObject ? schema : z.object(schema).strict(),
-    annotations: { readOnlyHint: readOnly, destructiveHint: destructive, idempotentHint: readOnly, openWorldHint: openWorld },
-  }, async args => {
+    annotations: { readOnlyHint: readOnly, destructiveHint: destructive, idempotentHint: idempotent, openWorldHint: openWorld },
+  }, async (args, extra) => {
     try {
-      const result = await callback(args);
+      const result = await callback(args, extra);
       if (Array.isArray(result?.content)) return { content: result.content.map(block => block.type === 'text' ? { ...block, text: credentials.redact(block.text) } : block) };
       return { content: [{ type: 'text', text: credentials.redact(JSON.stringify(result, null, 2)) }] };
     } catch (error) {
+      if (name.startsWith('serial_')) return { isError: true, content: [{ type: 'text', text: credentials.redact(JSON.stringify({ code: error.code || 'SERIAL_SETUP_REQUIRED', message: error.message })) }] };
       return { isError: true, content: [{ type: 'text', text: credentials.redact(error.details || name.startsWith('disk_') ? JSON.stringify({ code: error.code || 'DISK_PREFLIGHT_FAILED', message: error.message, action: 'Inspect the target and disk_manager_status before retrying.', ...error.details }) : error.message) }] };
     }
   });
 }
+
+tool('serial_status', 'Inspect optional per-VM serial capability/configuration and session state without connecting or starting a VM. Only a connected session proves native endpoint ownership.', serialSchemas.serial_status, true, a => serial.status(a));
+tool('serial_configure', 'Explicitly replace or disable one serial port configuration in a powered-off unlocked VMX, with a backup. Requires confirm=true after authorization. Uses only a generated per-VM local pipe/socket; never starts a VM.', serialSchemas.serial_configure, false, a => serial.configure(a));
+tool('serial_connect', 'Explicitly connect to the configured VM serial pipe/socket after verifying native VMware ownership. Guest serial output must be enabled separately. No host terminal, desktop or remote TCP access.', serialSchemas.serial_connect, false, (a, extra) => serial.connect(a, extra), false);
+tool('serial_read', 'Read at most max_bytes from an explicitly connected VM serial port. Bounded wait returns timed_out with empty data. Base64 preserves bytes; UTF-8 also returns raw_base64. MCP cancellation preserves unread bytes.', serialSchemas.serial_read, true, (a, extra) => serial.read(a, extra), false, false, false);
+tool('serial_write', 'Send 1-65536 UTF-8 or canonical base64 bytes to an explicitly connected VM serial port. Can change guest state; requires authorization for the intended input. Timeout/cancellation may leave partial input; never replay automatically.', serialSchemas.serial_write, false, (a, extra) => serial.write(a, extra));
+tool('serial_disconnect', 'Close this VM serial session, cancel pending I/O and discard its buffer. Does not stop the VM or change its serial hardware.', serialSchemas.serial_disconnect, false, a => serial.disconnect(a), false);
 tool('console_screenshot', 'Capture a fresh PNG from this VM native VNC/RFB framebuffer. Never captures the host desktop. Works during BIOS/UEFI, PXE and installation without VMware Tools.', consoleSchemas.console_screenshot, true, a => consoles.screenshot(a.vm_id));
 tool('console_click', 'Click VM framebuffer coordinates using a direct RFB PointerEvent. No host mouse, window activation or desktop focus is used.', consoleSchemas.console_click, false, a => consoles.click(a.vm_id, a.x, a.y, a.button));
 tool('console_key', 'Send a named key or chord to this VM via RFB, for example F2, Escape, Enter, ArrowDown, Ctrl+Alt+Delete. No host keyboard input is used.', consoleSchemas.console_key, false, a => consoles.key(a.vm_id, a.key));
@@ -107,6 +117,7 @@ tool('workstation_capabilities', 'Show full vmrun/REST tool coverage, compare th
     restURL: rest.baseURL(), restSchema: restProvenance,
     credentialsFilePath: credentials.filename,
     consoleTools: Object.keys(consoleSchemas),
+    serialTools: Object.keys(serialSchemas),
     lanSegmentTools: Object.keys(lanSegmentSchemas),
     lanSegmentPreferencesPath: lanSegments.filename,
     ovfTool: await ovf.status(),
@@ -117,7 +128,7 @@ tool('workstation_capabilities', 'Show full vmrun/REST tool coverage, compare th
     note: 'Coverage describes callable implementations. It does not prove a REST service is running, credentials work, or guest operations succeed.',
   };
 });
-async function shutdown() { consoles.close(); await jobs.close(); }
+async function shutdown() { serial.close(); consoles.close(); await jobs.close(); }
 process.stdin.once('end', () => { void shutdown(); });
 process.once('SIGTERM', () => { void shutdown().finally(() => process.exit(0)); });
 process.once('SIGINT', () => { void shutdown().finally(() => process.exit(0)); });

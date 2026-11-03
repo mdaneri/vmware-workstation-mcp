@@ -12,9 +12,9 @@ var __commonJS = (cb, mod) => function __require() {
     throw mod = 0, e2;
   }
 };
-var __export = (target, all) => {
+var __export = (target2, all) => {
   for (var name2 in all)
-    __defProp(target, name2, { get: all[name2], enumerable: true });
+    __defProp(target2, name2, { get: all[name2], enumerable: true });
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -24,12 +24,12 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
   // If the importer is in node compatibility mode or this is not an ESM
   // file that has been converted to a CommonJS file using a Babel-
   // compatible transform (i.e. "__esModule" has not been set), then set
   // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target2, "default", { value: mod, enumerable: true }) : target2,
   mod
 ));
 
@@ -3262,8 +3262,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path13) {
-      let input2 = path13;
+    function removeDotSegments(path15) {
+      let input2 = path15;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -3337,11 +3337,11 @@ var require_utils = __commonJS({
       }
       return output2.join("");
     }
-    function removeDotSegmentsRelative(path13) {
-      if (path13 === "" || path13[0] === "/") {
-        return removeDotSegments(path13);
+    function removeDotSegmentsRelative(path15) {
+      if (path15 === "" || path15[0] === "/") {
+        return removeDotSegments(path15);
       }
-      const segments = path13.split("/");
+      const segments = path15.split("/");
       const last = segments.length - 1;
       const output2 = [];
       let trailingDirectory = false;
@@ -3704,8 +3704,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path13 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path13 && path13 !== "/" ? path13 : void 0;
+        const path15 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path15 && path15 !== "/" ? path15 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -3912,58 +3912,58 @@ var require_fast_uri = __commonJS({
       return serialize(resolved, schemelessOptions);
     }
     function resolveComponent(base, relative, options2, skipNormalization) {
-      const target = {};
+      const target2 = {};
       if (!skipNormalization) {
         base = parse3(serialize(base, options2), options2);
         relative = parse3(serialize(relative, options2), options2);
       }
       options2 = options2 || {};
       if (!options2.tolerant && relative.scheme) {
-        target.scheme = relative.scheme;
-        target.userinfo = relative.userinfo;
-        target.host = relative.host;
-        target.port = relative.port;
-        target.path = removeDotSegments(relative.path || "");
-        target.query = relative.query;
+        target2.scheme = relative.scheme;
+        target2.userinfo = relative.userinfo;
+        target2.host = relative.host;
+        target2.port = relative.port;
+        target2.path = removeDotSegments(relative.path || "");
+        target2.query = relative.query;
       } else {
         if (relative.userinfo !== void 0 || relative.host !== void 0 || relative.port !== void 0) {
-          target.userinfo = relative.userinfo;
-          target.host = relative.host;
-          target.port = relative.port;
-          target.path = removeDotSegments(relative.path || "");
-          target.query = relative.query;
+          target2.userinfo = relative.userinfo;
+          target2.host = relative.host;
+          target2.port = relative.port;
+          target2.path = removeDotSegments(relative.path || "");
+          target2.query = relative.query;
         } else {
           if (!relative.path) {
-            target.path = base.path;
+            target2.path = base.path;
             if (relative.query !== void 0) {
-              target.query = relative.query;
+              target2.query = relative.query;
             } else {
-              target.query = base.query;
+              target2.query = base.query;
             }
           } else {
             if (relative.path[0] === "/") {
-              target.path = removeDotSegments(relative.path);
+              target2.path = removeDotSegments(relative.path);
             } else {
               const baseHasAuthority = base.userinfo !== void 0 || base.host !== void 0 || base.port !== void 0;
               if (baseHasAuthority && !base.path) {
-                target.path = "/" + relative.path;
+                target2.path = "/" + relative.path;
               } else if (!base.path) {
-                target.path = relative.path;
+                target2.path = relative.path;
               } else {
-                target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative.path;
+                target2.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative.path;
               }
-              target.path = base.scheme === void 0 && !baseHasAuthority && target.path[0] !== "/" ? removeDotSegmentsRelative(target.path) : removeDotSegments(target.path);
+              target2.path = base.scheme === void 0 && !baseHasAuthority && target2.path[0] !== "/" ? removeDotSegmentsRelative(target2.path) : removeDotSegments(target2.path);
             }
-            target.query = relative.query;
+            target2.query = relative.query;
           }
-          target.userinfo = base.userinfo;
-          target.host = base.host;
-          target.port = base.port;
+          target2.userinfo = base.userinfo;
+          target2.host = base.host;
+          target2.port = base.port;
         }
-        target.scheme = base.scheme;
+        target2.scheme = base.scheme;
       }
-      target.fragment = relative.fragment;
-      return target;
+      target2.fragment = relative.fragment;
+      return target2;
     }
     function equal(uriA, uriB, options2) {
       const normalizedA = normalizeComparableURI(uriA, options2);
@@ -7242,12 +7242,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name2}"`);
       return f;
     };
-    function addFormats(ajv, list, fs12, exportName) {
+    function addFormats(ajv, list, fs14, exportName) {
       var _a3;
       var _b;
       (_a3 = (_b = ajv.opts.code).formats) !== null && _a3 !== void 0 ? _a3 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
-        ajv.addFormat(f, fs12[f]);
+        ajv.addFormat(f, fs14[f]);
     }
     module2.exports = exports2 = formatsPlugin;
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -9464,8 +9464,8 @@ var require_b4a = __commonJS({
     function concat(buffers, totalLength) {
       return Buffer.concat(buffers, totalLength);
     }
-    function copy(source3, target, targetStart, start, end) {
-      return toBuffer(source3).copy(target, targetStart, start, end);
+    function copy(source3, target2, targetStart, start, end) {
+      return toBuffer(source3).copy(target2, targetStart, start, end);
     }
     function equals(a, b) {
       return toBuffer(a).equals(b);
@@ -10683,7 +10683,7 @@ var require_streamx = __commonJS({
         return this;
       }
     };
-    var Duplex = class extends Readable {
+    var Duplex2 = class extends Readable {
       // and Writable
       constructor(opts) {
         super(opts);
@@ -10721,7 +10721,7 @@ var require_streamx = __commonJS({
         return this;
       }
     };
-    var Transform = class extends Duplex {
+    var Transform = class extends Duplex2 {
       constructor(opts) {
         super(opts);
         this._transformState = new TransformState(this);
@@ -10877,7 +10877,7 @@ var require_streamx = __commonJS({
       this.destroy(StreamError.ABORTED());
     }
     function isWritev(s2) {
-      return s2._writev !== Writable.prototype._writev && s2._writev !== Duplex.prototype._writev;
+      return s2._writev !== Writable.prototype._writev && s2._writev !== Duplex2.prototype._writev;
     }
     module2.exports = {
       pipeline: pipeline2,
@@ -10893,7 +10893,7 @@ var require_streamx = __commonJS({
       Stream,
       Writable,
       Readable,
-      Duplex,
+      Duplex: Duplex2,
       Transform,
       // Export PassThrough for compatibility with Node.js core's stream module
       PassThrough
@@ -11801,16 +11801,16 @@ var require_conventions = __commonJS({
     function hasOwn(object3, key3) {
       return Object.prototype.hasOwnProperty.call(object3, key3);
     }
-    function assign(target, source3) {
-      if (target === null || typeof target !== "object") {
+    function assign(target2, source3) {
+      if (target2 === null || typeof target2 !== "object") {
         throw new TypeError("target is not an object");
       }
       for (var key3 in source3) {
         if (hasOwn(source3, key3)) {
-          target[key3] = source3[key3];
+          target2[key3] = source3[key3];
         }
       }
-      return target;
+      return target2;
     }
     var HTML_BOOLEAN_ATTRIBUTES = freeze({
       allowfullscreen: true,
@@ -14063,11 +14063,11 @@ var require_dom = __commonJS({
        * @see https://dom.spec.whatwg.org/#dom-document-createprocessinginstruction
        * @see https://www.w3.org/TR/DOM-Parsing/#dfn-concept-serialize-xml §3.2.1.7
        */
-      createProcessingInstruction: function(target, data) {
+      createProcessingInstruction: function(target2, data) {
         var node2 = new ProcessingInstruction(PDC);
         node2.ownerDocument = this;
         node2.childNodes = new NodeList();
-        node2.nodeName = node2.target = target;
+        node2.nodeName = node2.target = target2;
         node2.nodeValue = node2.data = data;
         return node2;
       },
@@ -17654,10 +17654,10 @@ var require_sax = __commonJS({
       }
       return elStartEnd + 1;
     }
-    function _copy(source3, target) {
+    function _copy(source3, target2) {
       for (var n2 in source3) {
         if (hasOwn(source3, n2)) {
-          target[n2] = source3[n2];
+          target2[n2] = source3[n2];
         }
       }
     }
@@ -18061,8 +18061,8 @@ var require_dom_parser = __commonJS({
       },
       endPrefixMapping: function(prefix) {
       },
-      processingInstruction: function(target, data) {
-        var ins = this.doc.createProcessingInstruction(target, data);
+      processingInstruction: function(target2, data) {
+        var ins = this.doc.createProcessingInstruction(target2, data);
         this.locator && position(this.locator, ins);
         appendElement(this, ins);
       },
@@ -18622,8 +18622,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path13, errorMaps, issueData } = params;
-  const fullPath = [...path13, ...issueData.path || []];
+  const { data, path: path15, errorMaps, issueData } = params;
+  const fullPath = [...path15, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -18738,11 +18738,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path13, key3) {
+  constructor(parent, value, path15, key3) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path13;
+    this._path = path15;
     this._key = key3;
   }
   get path() {
@@ -19068,8 +19068,8 @@ var ZodType = class {
       description
     });
   }
-  pipe(target) {
-    return ZodPipeline.create(this, target);
+  pipe(target2) {
+    return ZodPipeline.create(this, target2);
   }
   readonly() {
     return ZodReadonly.create(this);
@@ -22628,8 +22628,8 @@ function defineLazy(object3, key3, getter) {
 function objectClone(obj) {
   return Object.create(Object.getPrototypeOf(obj), Object.getOwnPropertyDescriptors(obj));
 }
-function assignProp(target, prop, value) {
-  Object.defineProperty(target, prop, {
+function assignProp(target2, prop, value) {
+  Object.defineProperty(target2, prop, {
     value,
     writable: true,
     enumerable: true,
@@ -22643,8 +22643,8 @@ function rawShape(def) {
 function sourceShape(schema) {
   return rawShape(schema._zod.def) ?? schema._zod.def.shape;
 }
-function deferProp(target, key3, getter) {
-  Object.defineProperty(target, key3, {
+function deferProp(target2, key3, getter) {
+  Object.defineProperty(target2, key3, {
     get() {
       const value = getter();
       assignProp(this, key3, value);
@@ -22654,36 +22654,36 @@ function deferProp(target, key3, getter) {
     configurable: true
   });
 }
-function putProp(target, key3, value) {
-  if (key3 in target)
-    assignProp(target, key3, value);
+function putProp(target2, key3, value) {
+  if (key3 in target2)
+    assignProp(target2, key3, value);
   else
-    target[key3] = value;
+    target2[key3] = value;
 }
-function mirrorShape(target, source3, keys, wrap) {
+function mirrorShape(target2, source3, keys, wrap) {
   const raw = sourceShape(source3);
   for (const key3 of keys) {
     const desc = Object.getOwnPropertyDescriptor(raw, key3);
     if (!desc.enumerable)
       continue;
     if (desc.get) {
-      deferProp(target, key3, () => {
+      deferProp(target2, key3, () => {
         const value = source3._zod.def.shape[key3];
         return wrap ? wrap(value, key3) : value;
       });
     } else
-      putProp(target, key3, wrap ? wrap(desc.value, key3) : desc.value);
+      putProp(target2, key3, wrap ? wrap(desc.value, key3) : desc.value);
   }
 }
-function mirrorProps(target, source3) {
+function mirrorProps(target2, source3) {
   for (const key3 of Reflect.ownKeys(source3)) {
     const desc = Object.getOwnPropertyDescriptor(source3, key3);
     if (!desc.enumerable)
       continue;
     if (desc.get)
-      deferProp(target, key3, () => source3[key3]);
+      deferProp(target2, key3, () => source3[key3]);
     else
-      putProp(target, key3, desc.value);
+      putProp(target2, key3, desc.value);
   }
 }
 function mergeDefs(...defs) {
@@ -22697,10 +22697,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path13) {
-  if (!path13)
+function getElementAtPath(obj, path15) {
+  if (!path15)
     return obj;
-  return path13.reduce((acc, key3) => acc?.[key3], obj);
+  return path15.reduce((acc, key3) => acc?.[key3], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -22862,35 +22862,35 @@ function normalizeParams(_params) {
   return params;
 }
 function createTransparentProxy(getter) {
-  let target;
+  let target2;
   return new Proxy({}, {
     get(_, prop, receiver) {
-      target ?? (target = getter());
-      return Reflect.get(target, prop, receiver);
+      target2 ?? (target2 = getter());
+      return Reflect.get(target2, prop, receiver);
     },
     set(_, prop, value, receiver) {
-      target ?? (target = getter());
-      return Reflect.set(target, prop, value, receiver);
+      target2 ?? (target2 = getter());
+      return Reflect.set(target2, prop, value, receiver);
     },
     has(_, prop) {
-      target ?? (target = getter());
-      return Reflect.has(target, prop);
+      target2 ?? (target2 = getter());
+      return Reflect.has(target2, prop);
     },
     deleteProperty(_, prop) {
-      target ?? (target = getter());
-      return Reflect.deleteProperty(target, prop);
+      target2 ?? (target2 = getter());
+      return Reflect.deleteProperty(target2, prop);
     },
     ownKeys(_) {
-      target ?? (target = getter());
-      return Reflect.ownKeys(target);
+      target2 ?? (target2 = getter());
+      return Reflect.ownKeys(target2);
     },
     getOwnPropertyDescriptor(_, prop) {
-      target ?? (target = getter());
-      return Reflect.getOwnPropertyDescriptor(target, prop);
+      target2 ?? (target2 = getter());
+      return Reflect.getOwnPropertyDescriptor(target2, prop);
     },
     defineProperty(_, prop, descriptor) {
-      target ?? (target = getter());
-      return Reflect.defineProperty(target, prop, descriptor);
+      target2 ?? (target2 = getter());
+      return Reflect.defineProperty(target2, prop, descriptor);
     }
   });
 }
@@ -23040,11 +23040,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path13, issues) {
+function prefixIssues(path15, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path13);
+    iss.path.unshift(path15);
     return iss;
   });
 }
@@ -23373,10 +23373,10 @@ function $constructor(name2, initializer3, proto, params) {
       let up = own2;
       while (up && up !== ctorProto)
         up = Object.getPrototypeOf(up);
-      const target = up ?? own2;
-      if (!initialized.has(target)) {
-        initialized.add(target);
-        members(target, protoMembers);
+      const target2 = up ?? own2;
+      if (!initialized.has(target2)) {
+        initialized.add(target2);
+        members(target2, protoMembers);
       }
     }
     const proto2 = _.prototype;
@@ -23506,16 +23506,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path13 = []) => {
+  const processError = (error63, path15 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path13, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path15, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path13, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path13, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
       } else {
-        const fullpath = [...path13, ...issue2.path];
+        const fullpath = [...path15, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -23554,17 +23554,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path13 = []) => {
+  const processError = (error63, path15 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path13, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path15, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path13, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path13, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path15, ...issue2.path]);
       } else {
-        const fullpath = [...path13, ...issue2.path];
+        const fullpath = [...path15, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -23603,8 +23603,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path13 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path13) {
+  const path15 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path15) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -34888,8 +34888,8 @@ function withParser(schema, parser) {
     installCompiledUserMethods(clone2, schema, parser);
   return clone2;
 }
-function installCompiledUserMethods(target, source3, parser) {
-  const targetAny = target;
+function installCompiledUserMethods(target2, source3, parser) {
+  const targetAny = target2;
   const sourceAny = source3;
   if (typeof sourceAny.safeParse === "function") {
     const originalSafeParse = sourceAny.safeParse;
@@ -37492,26 +37492,26 @@ function _stringFormat(Class2, format, fnOrRegex, _params = {}) {
 }
 
 // node_modules/zod/v4/core/to-json-schema.js
-function assignProps(target, ...sources) {
+function assignProps(target2, ...sources) {
   for (const source3 of sources) {
     for (const key3 of Reflect.ownKeys(source3)) {
       if (Object.prototype.propertyIsEnumerable.call(source3, key3)) {
-        assignProp(target, key3, source3[key3]);
+        assignProp(target2, key3, source3[key3]);
       }
     }
   }
-  return target;
+  return target2;
 }
 function initializeContext(params) {
-  let target = params?.target ?? "draft-2020-12";
-  if (target === "draft-4")
-    target = "draft-04";
-  if (target === "draft-7")
-    target = "draft-07";
+  let target2 = params?.target ?? "draft-2020-12";
+  if (target2 === "draft-4")
+    target2 = "draft-04";
+  if (target2 === "draft-7")
+    target2 = "draft-07";
   return {
     processors: params.processors ?? {},
     metadataRegistry: params?.metadata ?? globalRegistry,
-    target,
+    target: target2,
     unrepresentable: params?.unrepresentable ?? "throw",
     override: params?.override ?? (() => {
     }),
@@ -38014,8 +38014,8 @@ var createToJSONSchemaMethod = (schema, processors = {}) => (params) => {
   return finalize(ctx, schema);
 };
 var createStandardJSONSchemaMethod = (schema, io, processors = {}) => (params) => {
-  const { libraryOptions, target } = params ?? {};
-  const ctx = initializeContext({ ...libraryOptions ?? {}, target, io, processors });
+  const { libraryOptions, target: target2 } = params ?? {};
+  const ctx = initializeContext({ ...libraryOptions ?? {}, target: target2, io, processors });
   processSchema(schema, ctx);
   extractDefs(ctx, schema);
   return finalize(ctx, schema);
@@ -39155,11 +39155,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path13) {
-  if (path13.length === 0) {
+function getDotPath(path15) {
+  if (path15.length === 0) {
     return "object root";
   }
-  return path13.reduce((acc, seg, index) => {
+  return path15.reduce((acc, seg, index) => {
     if (index === 0) {
       return String(seg);
     }
@@ -39853,8 +39853,8 @@ var ZodType2 = /* @__PURE__ */ $constructor("ZodType", (inst, def) => {
   catch(params) {
     return _catch2(this, params);
   },
-  pipe(target) {
-    return pipe(this, target);
+  pipe(target2) {
+    return pipe(this, target2);
   },
   readonly() {
     return readonly(this);
@@ -41386,13 +41386,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path13 = ref.slice(1).split("/").filter(Boolean);
-  if (path13.length === 0) {
+  const path15 = ref.slice(1).split("/").filter(Boolean);
+  if (path15.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path13[0] === defsKey) {
-    const key3 = path13[1] === void 0 ? void 0 : decodeJSONPointerSegment(path13[1]);
+  if (path15[0] === defsKey) {
+    const key3 = path15[1] === void 0 ? void 0 : decodeJSONPointerSegment(path15[1]);
     if (!key3 || !ctx.defs[key3]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -45089,11 +45089,11 @@ var Protocol = class {
     const controller = this._requestHandlerAbortControllers.get(notification.params.requestId);
     controller?.abort(notification.params.reason);
   }
-  _setupTimeout(messageId, timeout3, maxTotalTimeout, onTimeout, resetTimeoutOnProgress = false) {
+  _setupTimeout(messageId, timeout4, maxTotalTimeout, onTimeout, resetTimeoutOnProgress = false) {
     this._timeoutInfo.set(messageId, {
-      timeoutId: setTimeout(onTimeout, timeout3),
+      timeoutId: setTimeout(onTimeout, timeout4),
       startTime: Date.now(),
-      timeout: timeout3,
+      timeout: timeout4,
       maxTotalTimeout,
       resetTimeoutOnProgress,
       onTimeout
@@ -45574,9 +45574,9 @@ var Protocol = class {
       options2?.signal?.addEventListener("abort", () => {
         cancel(options2?.signal?.reason);
       });
-      const timeout3 = options2?.timeout ?? DEFAULT_REQUEST_TIMEOUT_MSEC;
-      const timeoutHandler = () => cancel(McpError.fromError(ErrorCode.RequestTimeout, "Request timed out", { timeout: timeout3 }));
-      this._setupTimeout(messageId, timeout3, options2?.maxTotalTimeout, timeoutHandler, options2?.resetTimeoutOnProgress ?? false);
+      const timeout4 = options2?.timeout ?? DEFAULT_REQUEST_TIMEOUT_MSEC;
+      const timeoutHandler = () => cancel(McpError.fromError(ErrorCode.RequestTimeout, "Request timed out", { timeout: timeout4 }));
+      this._setupTimeout(messageId, timeout4, options2?.maxTotalTimeout, timeoutHandler, options2?.resetTimeoutOnProgress ?? false);
       const relatedTaskId = relatedTask?.taskId;
       if (relatedTaskId) {
         const responseResolver = (response) => {
@@ -47756,8 +47756,8 @@ function parseCountedList(text2) {
   if (count !== lines.length) throw new Error("vmrun list count does not match its output.");
   return lines;
 }
-function isWithin(root, target) {
-  const relative = import_node_path3.default.relative(root, target);
+function isWithin(root, target2) {
+  const relative = import_node_path3.default.relative(root, target2);
   return relative === "" || !relative.startsWith(`..${import_node_path3.default.sep}`) && relative !== ".." && !import_node_path3.default.isAbsolute(relative);
 }
 var Workstation = class {
@@ -47771,7 +47771,7 @@ var Workstation = class {
   async executable() {
     return findVMwareExecutable("vmrun", { env: this.env });
   }
-  async run(args, { mutation = false, authentication = [], timeout: timeout3 = 12e4 } = {}) {
+  async run(args, { mutation = false, authentication = [], timeout: timeout4 = 12e4 } = {}) {
     if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
     const job = this.tail.then(async () => {
       if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
@@ -47780,7 +47780,7 @@ var Workstation = class {
         const result = await this.execute(binary, ["-T", "ws", ...authentication, ...args], {
           windowsHide: true,
           shell: false,
-          timeout: timeout3,
+          timeout: timeout4,
           maxBuffer: 1024 * 1024,
           encoding: "utf8"
         });
@@ -48067,7 +48067,7 @@ var Credentials = class {
     const canonical = (value) => process.platform === "win32" ? import_node_path5.default.resolve(value).toLowerCase() : import_node_path5.default.resolve(value);
     const profiles = file3.console || {};
     const resolved = await Promise.all(Object.entries(profiles).map(async ([name3, entry2]) => [name3, typeof entry2?.vmx === "string" ? await import_promises4.default.realpath(entry2.vmx).catch(() => entry2.vmx) : null]));
-    const matches = resolved.filter(([, target]) => target && canonical(target) === canonical(vmx3));
+    const matches = resolved.filter(([, target2]) => target2 && canonical(target2) === canonical(vmx3));
     if (!requestedProfile && matches.length > 1) throw new Error("Multiple console profiles identify this VM. Use its configured profile alias as vm_id.");
     const name2 = this.profile(requestedProfile || matches[0]?.[0] || "default");
     const entry = profiles[name2];
@@ -49255,7 +49255,7 @@ var RestClient = class {
     if (url2.protocol !== "https:" && !loopback) throw new Error("Remote REST connections require HTTPS. Plain HTTP is limited to loopback.");
     return url2.origin;
   }
-  async request(method, route, { body, password, timeout: timeout3 = 12e4 } = {}) {
+  async request(method, route, { body, password, timeout: timeout4 = 12e4 } = {}) {
     const url2 = new URL(route, this.baseURL());
     if (url2.origin !== this.baseURL() || !url2.pathname.startsWith("/api/")) throw new Error("REST route is outside the Workstation API.");
     if (password) url2.searchParams.set("vmPassword", password);
@@ -49266,7 +49266,7 @@ var RestClient = class {
         headers: { Authorization: auth.authorization, Accept: "application/vnd.vmware.vmw.rest-v1+json", ...body !== void 0 ? { "Content-Type": "application/vnd.vmware.vmw.rest-v1+json" } : {} },
         body: body === void 0 ? void 0 : typeof body === "string" ? body : JSON.stringify(body),
         redirect: "error",
-        signal: AbortSignal.timeout(timeout3)
+        signal: AbortSignal.timeout(timeout4)
       });
       const reader = response.body?.getReader();
       const chunks = [];
@@ -54921,22 +54921,22 @@ var OvfManager = class {
     if (!["ovf", "ova", "vmx"].includes(ext) || ["ovf_inspect", "ovf_validate", "ovf_import"].includes(operation) && ext === "vmx") throw new Error("This operation requires a local OVF/OVA appliance.");
     let destination;
     let directory;
-    let target;
+    let target2;
     if (operation === "ovf_import") {
       directory = await this.backend.hostPath(a.directory, "destination-directory");
       destination = import_node_path10.default.join(directory, "machine.vmx");
-      target = "vmx";
+      target2 = "vmx";
     } else if (a.destination) {
-      target = import_node_path10.default.extname(a.destination).slice(1).toLowerCase();
-      if (!["ovf", "ova", "vmx"].includes(target) || ext === "vmx" && target === "vmx" || operation === "ovf_export" && target === "vmx") throw new Error("Supported targets are OVF/OVA, or VMX imported from OVF/OVA.");
+      target2 = import_node_path10.default.extname(a.destination).slice(1).toLowerCase();
+      if (!["ovf", "ova", "vmx"].includes(target2) || ext === "vmx" && target2 === "vmx" || operation === "ovf_export" && target2 === "vmx") throw new Error("Supported targets are OVF/OVA, or VMX imported from OVF/OVA.");
       destination = await this.backend.hostPath(a.destination, "output-file", a.overwrite);
       localName(import_node_path10.default.basename(destination));
       directory = import_node_path10.default.dirname(destination);
-      if (target === "vmx") await this.backend.hostPath(directory, "destination-directory");
+      if (target2 === "vmx") await this.backend.hostPath(directory, "destination-directory");
     }
     if (destination) {
-      if (key(destination) === key(inputPath) || target !== "ova" && isWithin(directory, inputPath)) throw new Error("Source must be outside the output directory.");
-      if (target === "ova") {
+      if (key(destination) === key(inputPath) || target2 !== "ova" && isWithin(directory, inputPath)) throw new Error("Source must be outside the output directory.");
+      if (target2 === "ova") {
         await this.backend.hostPath(directory, "directory");
         const original = await exists(a.destination || destination);
         if (original?.isSymbolicLink() || original && !original.isFile()) throw new Error("OVA overwrite requires a regular file, never a link or directory.");
@@ -54951,7 +54951,7 @@ var OvfManager = class {
       operation,
       resources: [key(import_node_path10.default.dirname(inputPath)), ...directory ? [key(directory)] : []],
       timeout: a.timeout_seconds * 1e3,
-      task: (context) => this.backend.resources.use([ext === "vmx" ? import_node_path10.default.dirname(inputPath) : inputPath, ...directory ? [directory] : []], () => this.perform(operation, { ...a, source: inputPath, destination, directory, target, ext }, status, context))
+      task: (context) => this.backend.resources.use([ext === "vmx" ? import_node_path10.default.dirname(inputPath) : inputPath, ...directory ? [directory] : []], () => this.perform(operation, { ...a, source: inputPath, destination, directory, target: target2, ext }, status, context))
     });
   }
   async vmSource(vmx3) {
@@ -55136,7 +55136,7 @@ var JobManager = class {
     this.maxRecords = maxRecords;
     this.closed = false;
   }
-  start({ operation, resources = [], timeout: timeout3 = 36e5, task }) {
+  start({ operation, resources = [], timeout: timeout4 = 36e5, task }) {
     if (this.closed) throw new Error("Job manager is shutting down.");
     const active = [...this.jobs.values()].filter((job2) => !terminal.has(job2.state));
     if (active.length >= this.maxActive) throw new Error("Background job limit reached. Wait for a job to finish.");
@@ -55153,7 +55153,7 @@ var JobManager = class {
     job.timer = setTimeout(() => {
       job.stopReason = "timed_out";
       job.controller.abort();
-    }, timeout3);
+    }, timeout4);
     job.done = Promise.resolve().then(async () => {
       const context = { signal: job.controller.signal, log: (text2) => this.log(job, text2), run: (file3, args, options2) => this.run(job, file3, args, options2) };
       try {
@@ -55607,6 +55607,460 @@ var DiskManager = class {
   }
 };
 
+// src/serial.mjs
+var import_promises15 = __toESM(require("node:fs/promises"), 1);
+var import_node_path14 = __toESM(require("node:path"), 1);
+var import_node_crypto8 = require("node:crypto");
+
+// src/serial-transport.mjs
+var import_promises14 = __toESM(require("node:fs/promises"), 1);
+var import_node_path13 = __toESM(require("node:path"), 1);
+var import_node_net3 = __toESM(require("node:net"), 1);
+var import_node_child_process3 = require("node:child_process");
+var import_node_stream = require("node:stream");
+var serialError = (code, message) => Object.assign(new Error(message), { code });
+var failure2 = () => serialError("SERIAL_UNAVAILABLE", "Serial endpoint unavailable or its VMware VM owner could not be verified. Start the configured VM headlessly; run as its owner in the same namespace. No GUI fallback is available.");
+var bridgeFailures = {
+  SERIAL_BRIDGE_UNAVAILABLE: "Windows serial bridge unavailable. Install PowerShell 7 and allow its native pipe helper to run.",
+  SERIAL_CONNECT_FAILED: "Local serial pipe unavailable. Start the explicitly configured VM headlessly and check that its serial port is connected.",
+  SERIAL_OWNER_UNAVAILABLE: "Serial pipe owner or exact command line unavailable. Run as the VM owner with permission to inspect the native VMware worker.",
+  SERIAL_WRONG_WORKER: "Serial endpoint owner is not a native VMware worker.",
+  SERIAL_WRONG_VM: "Serial endpoint owner belongs to a different VM. The exact VMX argument is required.",
+  SERIAL_IO_FAILED: "Serial transport failed. Inspect guest state before reconnecting; input is never replayed."
+};
+async function verifyUnixSerial(endpoint, { procRoot = "/proc" } = {}) {
+  const stat = await import_promises14.default.lstat(endpoint.path);
+  if (!stat.isSocket() || stat.uid !== process.getuid()) throw failure2();
+  const rows = (await import_promises14.default.readFile(import_node_path13.default.join(procRoot, "net/unix"), "utf8")).split("\n").slice(1);
+  const inodes = new Set(rows.flatMap((row) => {
+    const m = row.match(/^\S+\s+\S+\s+\S+\s+(\S+)\s+(\S+)\s+(\S+)\s+(\d+)\s+(.+)$/);
+    return m && m[1] === "00010000" && m[2] === "0001" && m[4] && m[5] === endpoint.path ? [m[4]] : [];
+  }));
+  if (!inodes.size) throw failure2();
+  const verified = /* @__PURE__ */ new Set();
+  for (const pid of (await import_promises14.default.readdir(procRoot)).filter((name2) => /^\d+$/.test(name2))) {
+    let descriptors;
+    try {
+      descriptors = await import_promises14.default.readdir(import_node_path13.default.join(procRoot, pid, "fd"));
+    } catch (e2) {
+      if (["ENOENT", "ESRCH", "EACCES", "EPERM"].includes(e2.code)) continue;
+      throw e2;
+    }
+    for (const fd of descriptors) {
+      let link;
+      try {
+        link = await import_promises14.default.readlink(import_node_path13.default.join(procRoot, pid, "fd", fd));
+      } catch (e2) {
+        if (["ENOENT", "ESRCH", "EACCES", "EPERM", "EINVAL"].includes(e2.code)) continue;
+        throw e2;
+      }
+      const inode = link.match(/^socket:\[(\d+)\]$/)?.[1];
+      if (!inodes.has(inode)) continue;
+      try {
+        const executable = await import_promises14.default.readlink(import_node_path13.default.join(procRoot, pid, "exe"));
+        const args = (await import_promises14.default.readFile(import_node_path13.default.join(procRoot, pid, "cmdline"), "utf8")).split("\0");
+        if (import_node_path13.default.basename(executable) !== "vmware-vmx" || !args.includes(endpoint.vmx)) throw failure2();
+        verified.add(inode);
+      } catch {
+        throw failure2();
+      }
+    }
+  }
+  if (verified.size !== inodes.size) throw failure2();
+}
+async function connectSerial(endpoint, { signal, timeoutMs = 1e4, platform = process.platform, bridgeScript } = {}) {
+  signal?.throwIfAborted();
+  if (platform === "linux") {
+    await verifyUnixSerial(endpoint);
+    return new Promise((resolve, reject) => {
+      const socket = import_node_net3.default.createConnection({ path: endpoint.path });
+      const finish = (error62) => {
+        clearTimeout(timer);
+        signal?.removeEventListener("abort", abort);
+        socket.off("error", onError);
+        socket.off("connect", onConnect);
+        if (error62) {
+          socket.destroy();
+          reject(error62);
+        } else resolve(socket);
+      };
+      const abort = () => finish(serialError("SERIAL_CANCELLED", "Serial connection cancelled."));
+      const onError = () => finish(failure2());
+      const onConnect = () => finish();
+      const timer = setTimeout(() => finish(failure2()), timeoutMs);
+      socket.once("error", onError);
+      socket.once("connect", onConnect);
+      signal?.addEventListener("abort", abort, { once: true });
+      if (signal?.aborted) abort();
+    });
+  }
+  if (platform !== "win32") throw serialError("SERIAL_UNSUPPORTED", "Direct serial requires native Windows or Linux Workstation.");
+  const script = bridgeScript || import_node_path13.default.resolve(import_node_path13.default.dirname(process.argv[1]), "..", "scripts", "Serial-Bridge.ps1");
+  return new Promise((resolve, reject) => {
+    const child = (0, import_node_child_process3.spawn)("pwsh", ["-NoProfile", "-NonInteractive", "-File", script, "-PipeName", endpoint.path.slice("\\\\.\\pipe\\".length), "-VMX", endpoint.vmx, "-ConnectTimeoutMs", String(timeoutMs)], { shell: false, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
+    let stream;
+    let ready = false;
+    let stderr = "";
+    const stop = () => {
+      child.stdin.destroy();
+      child.stdout.destroy();
+      child.kill();
+    };
+    const fail2 = (error62) => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", abort);
+      if (!ready) {
+        stop();
+        reject(error62);
+      } else stream.destroy(error62);
+    };
+    const abort = () => fail2(serialError("SERIAL_CANCELLED", "Serial connection cancelled."));
+    const timer = setTimeout(() => fail2(failure2()), timeoutMs + 2e3);
+    child.once("error", () => fail2(failure2()));
+    child.once("exit", (code) => {
+      if (!ready) fail2(failure2());
+      else if (code !== 0) stream.destroy(failure2());
+      else stream.end();
+    });
+    child.stderr.on("data", (chunk) => {
+      if (ready) return;
+      stderr += chunk.toString("utf8");
+      if (stderr.length > 1024) {
+        fail2(failure2());
+        return;
+      }
+      const code = stderr.match(/(?:^|\n)(SERIAL_[A-Z_]+)\r?\n/)?.[1];
+      if (Object.hasOwn(bridgeFailures, code)) {
+        fail2(serialError(code, bridgeFailures[code]));
+        return;
+      }
+      if (!stderr.includes("SERIAL_READY\n")) return;
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", abort);
+      stream = new import_node_stream.Duplex({
+        read() {
+          child.stdout.resume();
+        },
+        write(bytes, encoding, callback) {
+          child.stdin.write(bytes, encoding, callback);
+        },
+        final(callback) {
+          if (child.exitCode === 0) callback();
+          else child.stdin.end(callback);
+        },
+        destroy(error62, callback) {
+          stop();
+          callback(error62);
+        }
+      });
+      child.stdout.on("data", (bytes) => {
+        if (!stream.push(bytes)) child.stdout.pause();
+      });
+      child.stdout.once("end", () => stream.push(null));
+      child.stdout.once("close", () => {
+        if (!child.stdout.readableEnded && !stream.destroyed) fail2(failure2());
+      });
+      ready = true;
+      resolve(stream);
+    });
+    child.stdin.on("error", () => fail2(failure2()));
+    child.stdout.on("error", () => fail2(failure2()));
+    signal?.addEventListener("abort", abort, { once: true });
+    if (signal?.aborted) abort();
+  });
+}
+
+// src/serial.mjs
+var target = { vm_id: external_exports.string().min(1), port: external_exports.number().int().min(0).max(3).default(0) };
+var timeout3 = external_exports.number().int().min(1).max(1e4).default(1e3);
+var serialSchemas = {
+  serial_status: external_exports.object(target).strict(),
+  serial_configure: external_exports.object({ ...target, enabled: external_exports.boolean().default(true), confirm: external_exports.literal(true).describe("Set only after authorization to replace this serial port configuration in the powered-off VM.") }).strict(),
+  serial_connect: external_exports.object({ ...target, timeout_ms: external_exports.number().int().min(1).max(1e4).default(1e4) }).strict(),
+  serial_read: external_exports.object({ ...target, max_bytes: external_exports.number().int().min(1).max(65536).default(4096), encoding: external_exports.enum(["base64", "utf8"]).default("base64"), timeout_ms: timeout3 }).strict(),
+  serial_write: external_exports.object({ ...target, data: external_exports.string().max(87384), encoding: external_exports.enum(["base64", "utf8"]).default("utf8"), timeout_ms: timeout3 }).strict(),
+  serial_disconnect: external_exports.object(target).strict()
+};
+var configOf = (text2) => Object.fromEntries(Object.entries(parseAssignments(text2)).map(([key3, value]) => [key3.toLowerCase(), value]));
+var cancelled = () => serialError("SERIAL_CANCELLED", "Serial operation cancelled.");
+var disconnected = () => serialError("SERIAL_DISCONNECTED", "Serial session disconnected. Inspect state and explicitly reconnect; input is never replayed.");
+var SerialManager = class {
+  constructor({ backend: backend2, vmFiles: vmFiles2, credentials: credentials2, rest: rest2, connector = connectSerial, platform = process.platform, maxConnections = 8, maxBufferedBytes = 262144, idleMs = 3e5 } = {}) {
+    Object.assign(this, { backend: backend2, vmFiles: vmFiles2, credentials: credentials2, rest: rest2, connector, platform, maxConnections, maxBufferedBytes, idleMs });
+    this.sessions = /* @__PURE__ */ new Map();
+    this.lastErrors = /* @__PURE__ */ new Map();
+    this.closed = false;
+  }
+  key(vmx3, port) {
+    return `${this.platform === "win32" ? vmx3.toLowerCase() : vmx3}\0${port}`;
+  }
+  async resolve(vmID) {
+    const profiles = this.credentials ? (await this.credentials.load()).console || {} : {};
+    const aliases = Object.fromEntries(Object.entries(profiles).filter(([, p]) => typeof p?.vmx === "string").map(([name2, p]) => [name2, p.vmx]));
+    return this.backend.resolveVM(vmID, { aliases, restInventory: this.rest ? async () => {
+      const response = await this.rest.request("GET", "/api/vms");
+      if (!Array.isArray(response.data)) throw serialError("SERIAL_SETUP_REQUIRED", "REST VM inventory unavailable. Supply an absolute VMX path.");
+      return response.data;
+    } : void 0 });
+  }
+  endpoint(vmx3, port) {
+    if (!["win32", "linux"].includes(this.platform)) throw serialError("SERIAL_UNSUPPORTED", "Direct serial requires native Windows or Linux Workstation.");
+    const digest2 = (0, import_node_crypto8.createHash)("sha256").update(this.key(vmx3, port)).digest("hex").slice(0, 32);
+    const endpoint = this.platform === "win32" ? `\\\\.\\pipe\\vmware-mcp-serial-${digest2}-${port}` : import_node_path14.default.join(import_node_path14.default.dirname(vmx3), ".mcp-serial", `${digest2}-${port}.sock`);
+    if (this.platform === "linux" && Buffer.byteLength(endpoint) > 103) throw serialError("SERIAL_SETUP_REQUIRED", "VM directory is too long for a portable UNIX socket path. Use a shorter approved native VM path.");
+    return { vmx: vmx3, port, path: endpoint, key: this.key(vmx3, port), transport: this.platform === "win32" ? "local Windows named pipe" : "local UNIX stream socket" };
+  }
+  async localPath(endpoint, create = false) {
+    if (this.platform !== "linux") return;
+    const parent = import_node_path14.default.dirname(endpoint.path);
+    if (await this.backend.hostPath(endpoint.path, "serial-socket") !== endpoint.path) throw serialError("SERIAL_UNSAFE_ENDPOINT", "Serial endpoint must not traverse links.");
+    if (create) await import_promises15.default.mkdir(parent, { mode: 448 }).catch((e2) => {
+      if (e2.code !== "EEXIST") throw e2;
+    });
+    const stat = await import_promises15.default.lstat(parent);
+    if (!stat.isDirectory() || stat.isSymbolicLink() || stat.uid !== process.getuid() || stat.mode & 63) throw serialError("SERIAL_UNSAFE_ENDPOINT", "Serial socket directory must be owned by the current user with mode 700.");
+    const socket = await import_promises15.default.lstat(endpoint.path).catch((e2) => {
+      if (e2.code !== "ENOENT") throw e2;
+      return null;
+    });
+    if (socket && (!socket.isSocket() || socket.uid !== process.getuid())) throw serialError("SERIAL_UNSAFE_ENDPOINT", "Serial endpoint must be a local UNIX socket owned by the current user.");
+  }
+  async configured(vmx3, port) {
+    const endpoint = this.endpoint(vmx3, port);
+    const config2 = configOf(await import_promises15.default.readFile(vmx3, "utf8"));
+    const prefix = `serial${port}.`;
+    if (config2[prefix + "present"]?.toLowerCase() !== "true") throw serialError("SERIAL_SETUP_REQUIRED", "No enabled serial device on this port. Authorize serial_configure while powered off, then enable a serial console in the guest.");
+    if (config2[prefix + "filetype"]?.toLowerCase() !== "pipe" || config2[prefix + "pipe.endpoint"]?.toLowerCase() !== "server" || config2[prefix + "startconnected"]?.toLowerCase() !== "true" || config2[prefix + "trynorxloss"]?.toLowerCase() !== "true") throw serialError("SERIAL_UNSUPPORTED_MODE", "Serial requires a server-side application pipe/socket. Physical devices, files, VM-to-VM pipes and network/Telnet modes are unsupported. Reconfigure explicitly while powered off.");
+    const filename = config2[prefix + "filename"];
+    if ((this.platform === "win32" ? filename?.toLowerCase() : filename) !== (this.platform === "win32" ? endpoint.path.toLowerCase() : endpoint.path)) throw serialError("SERIAL_UNSAFE_ENDPOINT", "Serial endpoint does not match this VM and port. Only the generated per-VM local endpoint is approved; arbitrary paths and remote sockets are refused.");
+    await this.localPath(endpoint);
+    return endpoint;
+  }
+  async status(input2) {
+    const a = serialSchemas.serial_status.parse(input2);
+    const vmx3 = await this.resolve(a.vm_id);
+    const session = this.sessions.get(this.key(vmx3, a.port));
+    try {
+      const endpoint = await this.configured(vmx3, a.port);
+      const previous = this.lastErrors.get(endpoint.key);
+      return { ...endpoint, key: void 0, host_supported: true, configured: true, running: (await this.backend.details(vmx3)).running, connected: !!session?.ready && !session.closed && !session.ended, connecting: !!session && !session.ready, eof: !!session?.ended, buffered_bytes: session?.buffer.length || 0, runtime_verified: !!session?.ready && !session.closed && !session.ended, last_error: previous ? { code: previous.code, message: previous.message } : void 0, requires_vmware_tools: false, note: "Configured mode is documented Workstation support; only a connected session proves the native endpoint owner. Guest serial output/login must be configured separately." };
+    } catch (e2) {
+      if (session) this.drop(session, e2);
+      return { vmx: vmx3, port: a.port, host_supported: ["win32", "linux"].includes(this.platform), configured: false, connected: false, code: e2.code || "SERIAL_SETUP_REQUIRED", reason: e2.message, requires_vmware_tools: false };
+    }
+  }
+  async configure(input2) {
+    const a = serialSchemas.serial_configure.parse(input2);
+    const vmx3 = await this.resolve(a.vm_id);
+    return this.backend.resources.use([vmx3], async () => {
+      const endpoint = this.endpoint(vmx3, a.port);
+      if (this.sessions.has(endpoint.key)) throw serialError("SERIAL_BUSY", "Disconnect this serial session before reconfiguring.");
+      const original = await import_promises15.default.readFile(vmx3, "utf8");
+      const config2 = configOf(original);
+      const offline = async () => {
+        if ((await this.backend.details(vmx3)).running) throw serialError("SERIAL_VM_RUNNING", "Power off the VM before changing serial hardware.");
+        if ((await import_promises15.default.readdir(import_node_path14.default.dirname(vmx3))).some((name2) => /\.(?:lck|vmss|vmem)$/i.test(name2))) throw serialError("SERIAL_VM_BUSY", "VM directory has locks or saved state. Fully power off and close the VM before editing serial hardware.");
+        for (const key3 of ["checkpoint.vmstate", "suspend.filename"]) if (config2[key3]) {
+          const state = import_node_path14.default.resolve(import_node_path14.default.dirname(vmx3), config2[key3]);
+          try {
+            await import_promises15.default.access(state);
+            throw serialError("SERIAL_VM_BUSY", "VM has saved state. Fully power it off before editing serial hardware.");
+          } catch (e2) {
+            if (e2.code !== "ENOENT") throw e2;
+          }
+        }
+      };
+      await offline();
+      if (a.enabled) await this.localPath(endpoint, true);
+      const prefix = `serial${a.port}.`;
+      const settings = {};
+      for (const key3 of Object.keys(config2)) if (key3.startsWith(prefix)) settings[key3] = null;
+      Object.assign(settings, { [prefix + "present"]: a.enabled ? "TRUE" : "FALSE", [prefix + "startconnected"]: a.enabled ? "TRUE" : "FALSE" });
+      if (a.enabled) Object.assign(settings, { [prefix + "filetype"]: "pipe", [prefix + "filename"]: endpoint.path, [prefix + "pipe.endpoint"]: "server", [prefix + "trynorxloss"]: "TRUE", [prefix + "yieldonmsrread"]: "TRUE" });
+      const result = await this.vmFiles.configure({ vmx: vmx3, settings }, { expectedOriginal: original, beforeCommit: offline });
+      return { ...result, port: a.port, enabled: a.enabled, endpoint: a.enabled ? endpoint.path : null, note: "VMX backed up. No VM was started. Configure guest serial output/login separately. Endpoint directories and sockets are never deleted automatically." };
+    });
+  }
+  touch(session) {
+    clearTimeout(session.timer);
+    if (session.closed) return;
+    session.timer = setTimeout(() => {
+      if (session.reading || session.writing || !session.ready) this.touch(session);
+      else this.drop(session, serialError("SERIAL_IDLE", "Serial session expired after inactivity. Explicitly reconnect."));
+    }, this.idleMs);
+    session.timer.unref();
+  }
+  drop(session, error62 = disconnected()) {
+    if (session.closed) return;
+    session.closed = true;
+    session.error = error62;
+    clearTimeout(session.timer);
+    session.controller.abort();
+    session.stream?.destroy();
+    this.lastErrors.delete(session.key);
+    this.lastErrors.set(session.key, error62);
+    if (this.lastErrors.size > 32) this.lastErrors.delete(this.lastErrors.keys().next().value);
+    session.buffer = Buffer.alloc(0);
+    if (this.sessions.get(session.key) === session) this.sessions.delete(session.key);
+    for (const wake of session.waiters) wake(error62);
+  }
+  async connect(input2, { signal } = {}) {
+    const a = serialSchemas.serial_connect.parse(input2);
+    const vmx3 = await this.resolve(a.vm_id);
+    if (this.closed) throw disconnected();
+    return this.backend.resources.use([vmx3], async () => {
+      const endpoint = await this.configured(vmx3, a.port);
+      if (signal?.aborted) throw cancelled();
+      if (this.sessions.has(endpoint.key)) throw serialError("SERIAL_BUSY", "This VM port already has a session. Read/write it or disconnect explicitly.");
+      if (!(await this.backend.details(vmx3)).running) throw serialError("SERIAL_VM_STOPPED", "Serial requires this VM to be running. Connect never starts a VM.");
+      if (this.closed) throw disconnected();
+      if (this.sessions.size >= this.maxConnections) throw serialError("SERIAL_LIMIT", "Serial connection limit reached. Disconnect an idle VM port.");
+      const session = { ...endpoint, controller: new AbortController(), buffer: Buffer.alloc(0), waiters: /* @__PURE__ */ new Set(), ready: false, closed: false };
+      this.sessions.set(session.key, session);
+      this.lastErrors.delete(session.key);
+      const abort = () => this.drop(session, cancelled());
+      signal?.addEventListener("abort", abort, { once: true });
+      const timer = setTimeout(() => this.drop(session, serialError("SERIAL_TIMEOUT", "Timed out connecting to serial.")), a.timeout_ms);
+      try {
+        if (signal?.aborted) throw cancelled();
+        session.stream = await this.connector(endpoint, { signal: session.controller.signal, timeoutMs: a.timeout_ms, platform: this.platform });
+        session.stream.on("error", () => this.drop(session, serialError("SERIAL_IO_FAILED", "Serial transport failed. Inspect guest state before reconnecting.")));
+        if (session.closed || this.closed) {
+          session.stream.destroy();
+          throw session.error || disconnected();
+        }
+        session.stream.on("data", (bytes) => {
+          if (session.closed) return;
+          if (session.buffer.length + bytes.length > this.maxBufferedBytes) {
+            this.drop(session, serialError("SERIAL_OVERFLOW", "Serial receive buffer exceeded its limit; disconnected without silently dropping bytes. Read promptly after reconnecting."));
+            return;
+          }
+          session.buffer = Buffer.concat([session.buffer, bytes]);
+          for (const wake of session.waiters) wake();
+        });
+        const ended = () => {
+          if (session.closed) return;
+          session.ended = true;
+          for (const wake of session.waiters) wake();
+        };
+        session.stream.once("end", ended);
+        session.stream.once("close", ended);
+        session.ready = true;
+        this.touch(session);
+        return { vmx: vmx3, port: a.port, connected: true, transport: endpoint.transport, endpoint: endpoint.path, receive_limit_bytes: this.maxBufferedBytes, note: "Raw serial bytes only. Guest output is opt-in; connection does not prove a guest console is enabled." };
+      } catch (e2) {
+        this.drop(session, session.error || e2);
+        throw session.error;
+      } finally {
+        clearTimeout(timer);
+        signal?.removeEventListener("abort", abort);
+      }
+    });
+  }
+  async session(a) {
+    const vmx3 = await this.resolve(a.vm_id);
+    const session = this.sessions.get(this.key(vmx3, a.port));
+    if (!session?.ready || session.closed) throw this.lastErrors.get(this.key(vmx3, a.port)) || disconnected();
+    try {
+      await this.configured(vmx3, a.port);
+    } catch (e2) {
+      this.drop(session, e2);
+      throw e2;
+    }
+    if (session.closed) throw session.error;
+    this.touch(session);
+    return session;
+  }
+  async read(input2, { signal } = {}) {
+    const a = serialSchemas.serial_read.parse(input2);
+    const session = await this.session(a);
+    if (session.reading) throw serialError("SERIAL_BUSY", "A read is already pending on this VM port.");
+    if (signal?.aborted) throw cancelled();
+    session.reading = true;
+    try {
+      const timedOut = !session.buffer.length && !session.ended && await new Promise((resolve, reject) => {
+        const finish = (error62, timeout4 = false) => {
+          clearTimeout(timer);
+          session.waiters.delete(wake);
+          signal?.removeEventListener("abort", abort);
+          error62 ? reject(error62) : resolve(timeout4);
+        };
+        const wake = (error62) => finish(error62);
+        const abort = () => finish(cancelled());
+        const timer = setTimeout(() => finish(null, true), a.timeout_ms);
+        session.waiters.add(wake);
+        signal?.addEventListener("abort", abort, { once: true });
+        if (session.closed) wake(session.error);
+        else if (signal?.aborted) abort();
+        else if (session.buffer.length) wake();
+      });
+      if (session.closed) throw session.error;
+      if (signal?.aborted) throw cancelled();
+      const bytes = session.buffer.subarray(0, a.max_bytes);
+      session.buffer = session.buffer.subarray(bytes.length);
+      return { vmx: session.vmx, port: a.port, data: bytes.toString(a.encoding), encoding: a.encoding, bytes: bytes.length, remaining_bytes: session.buffer.length, timed_out: !!timedOut, eof: !!session.ended, ...a.encoding === "utf8" ? { raw_base64: bytes.toString("base64"), note: "UTF-8 is decoded per read and may split a code point. raw_base64 preserves the exact bytes; use base64 for streaming decoders." } : {} };
+    } finally {
+      session.reading = false;
+      this.touch(session);
+    }
+  }
+  async write(input2, { signal } = {}) {
+    const a = serialSchemas.serial_write.parse(input2);
+    if (a.encoding === "base64" && !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(a.data)) throw serialError("SERIAL_INVALID_BYTES", "Provide canonical padded base64.");
+    const bytes = Buffer.from(a.data, a.encoding);
+    if (!bytes.length || bytes.length > 65536 || a.encoding === "base64" && bytes.toString("base64") !== a.data) throw serialError("SERIAL_INVALID_BYTES", "Write must contain 1 to 65536 bytes in UTF-8 or canonical base64.");
+    const session = await this.session(a);
+    if (session.ended) throw disconnected();
+    if (session.writing) throw serialError("SERIAL_BUSY", "A write is already pending on this VM port.");
+    if (signal?.aborted) throw cancelled();
+    session.writing = true;
+    try {
+      await new Promise((resolve, reject) => {
+        const finish = (error62) => {
+          clearTimeout(timer);
+          session.waiters.delete(wake);
+          signal?.removeEventListener("abort", abort);
+          if (error62) {
+            this.drop(session, error62);
+            reject(error62);
+          } else resolve();
+        };
+        const wake = (error62) => {
+          if (error62) finish(error62);
+        };
+        const abort = () => finish(serialError("SERIAL_CANCELLED", "Serial write cancelled. Some bytes may have reached the guest; inspect state before retrying."));
+        const timer = setTimeout(() => finish(serialError("SERIAL_TIMEOUT", "Serial write timed out. Some bytes may have reached the guest; input is never replayed.")), a.timeout_ms);
+        session.waiters.add(wake);
+        signal?.addEventListener("abort", abort, { once: true });
+        if (session.closed) wake(session.error);
+        else if (signal?.aborted) abort();
+        else {
+          try {
+            session.stream.write(bytes, (error62) => finish(error62 ? serialError("SERIAL_IO_FAILED", "Serial write failed. Some bytes may have reached the guest; inspect before retrying.") : null));
+          } catch {
+            finish(serialError("SERIAL_IO_FAILED", "Serial write failed. Inspect guest state before retrying."));
+          }
+        }
+      });
+      return { vmx: session.vmx, port: a.port, bytes: bytes.length, accepted: true, note: "Accepted by the local transport; guest execution/receipt is not acknowledged. Input is never automatically replayed." };
+    } finally {
+      session.writing = false;
+      this.touch(session);
+    }
+  }
+  async disconnect(input2) {
+    const a = serialSchemas.serial_disconnect.parse(input2);
+    const vmx3 = await this.resolve(a.vm_id);
+    const session = this.sessions.get(this.key(vmx3, a.port));
+    if (session) this.drop(session);
+    return { vmx: vmx3, port: a.port, connected: false, was_connected: !!session, note: "Pending I/O cancelled and buffered bytes discarded. VM power and serial configuration unchanged." };
+  }
+  close() {
+    this.closed = true;
+    for (const session of this.sessions.values()) this.drop(session);
+  }
+};
+
 // src/server.mjs
 var backend = new Workstation();
 var credentials = new Credentials();
@@ -55617,24 +56071,32 @@ var consoles = new ConsoleManager({ backend, credentials, rest });
 var jobs = new JobManager({ redact: (text2) => credentials.redact(text2) });
 var ovf = new OvfManager({ backend, credentials, jobs, rest });
 var disks = new DiskManager({ backend, vmFiles });
-var server = new McpServer({ name: "vmware-workstation", version: "0.6.0" });
+var serial = new SerialManager({ backend, vmFiles, credentials, rest });
+var server = new McpServer({ name: "vmware-workstation", version: "0.7.0" });
 var vmx2 = external_exports.string().min(1).describe("Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.");
 var name = external_exports.string().min(1).max(256).describe("Exact snapshot name.");
-function tool(name2, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false) {
+function tool(name2, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false, idempotent = readOnly) {
   server.registerTool(name2, {
     description,
     inputSchema: schema instanceof external_exports.ZodObject ? schema : external_exports.object(schema).strict(),
-    annotations: { readOnlyHint: readOnly, destructiveHint: destructive, idempotentHint: readOnly, openWorldHint: openWorld }
-  }, async (args) => {
+    annotations: { readOnlyHint: readOnly, destructiveHint: destructive, idempotentHint: idempotent, openWorldHint: openWorld }
+  }, async (args, extra) => {
     try {
-      const result = await callback(args);
+      const result = await callback(args, extra);
       if (Array.isArray(result?.content)) return { content: result.content.map((block) => block.type === "text" ? { ...block, text: credentials.redact(block.text) } : block) };
       return { content: [{ type: "text", text: credentials.redact(JSON.stringify(result, null, 2)) }] };
     } catch (error62) {
+      if (name2.startsWith("serial_")) return { isError: true, content: [{ type: "text", text: credentials.redact(JSON.stringify({ code: error62.code || "SERIAL_SETUP_REQUIRED", message: error62.message })) }] };
       return { isError: true, content: [{ type: "text", text: credentials.redact(error62.details || name2.startsWith("disk_") ? JSON.stringify({ code: error62.code || "DISK_PREFLIGHT_FAILED", message: error62.message, action: "Inspect the target and disk_manager_status before retrying.", ...error62.details }) : error62.message) }] };
     }
   });
 }
+tool("serial_status", "Inspect optional per-VM serial capability/configuration and session state without connecting or starting a VM. Only a connected session proves native endpoint ownership.", serialSchemas.serial_status, true, (a) => serial.status(a));
+tool("serial_configure", "Explicitly replace or disable one serial port configuration in a powered-off unlocked VMX, with a backup. Requires confirm=true after authorization. Uses only a generated per-VM local pipe/socket; never starts a VM.", serialSchemas.serial_configure, false, (a) => serial.configure(a));
+tool("serial_connect", "Explicitly connect to the configured VM serial pipe/socket after verifying native VMware ownership. Guest serial output must be enabled separately. No host terminal, desktop or remote TCP access.", serialSchemas.serial_connect, false, (a, extra) => serial.connect(a, extra), false);
+tool("serial_read", "Read at most max_bytes from an explicitly connected VM serial port. Bounded wait returns timed_out with empty data. Base64 preserves bytes; UTF-8 also returns raw_base64. MCP cancellation preserves unread bytes.", serialSchemas.serial_read, true, (a, extra) => serial.read(a, extra), false, false, false);
+tool("serial_write", "Send 1-65536 UTF-8 or canonical base64 bytes to an explicitly connected VM serial port. Can change guest state; requires authorization for the intended input. Timeout/cancellation may leave partial input; never replay automatically.", serialSchemas.serial_write, false, (a, extra) => serial.write(a, extra));
+tool("serial_disconnect", "Close this VM serial session, cancel pending I/O and discard its buffer. Does not stop the VM or change its serial hardware.", serialSchemas.serial_disconnect, false, (a) => serial.disconnect(a), false);
 tool("console_screenshot", "Capture a fresh PNG from this VM native VNC/RFB framebuffer. Never captures the host desktop. Works during BIOS/UEFI, PXE and installation without VMware Tools.", consoleSchemas.console_screenshot, true, (a) => consoles.screenshot(a.vm_id));
 tool("console_click", "Click VM framebuffer coordinates using a direct RFB PointerEvent. No host mouse, window activation or desktop focus is used.", consoleSchemas.console_click, false, (a) => consoles.click(a.vm_id, a.x, a.y, a.button));
 tool("console_key", "Send a named key or chord to this VM via RFB, for example F2, Escape, Enter, ArrowDown, Ctrl+Alt+Delete. No host keyboard input is used.", consoleSchemas.console_key, false, (a) => consoles.key(a.vm_id, a.key));
@@ -55709,6 +56171,7 @@ tool("workstation_capabilities", "Show full vmrun/REST tool coverage, compare th
     restSchema: restProvenance,
     credentialsFilePath: credentials.filename,
     consoleTools: Object.keys(consoleSchemas),
+    serialTools: Object.keys(serialSchemas),
     lanSegmentTools: Object.keys(lanSegmentSchemas),
     lanSegmentPreferencesPath: lanSegments.filename,
     ovfTool: await ovf.status(),
@@ -55720,6 +56183,7 @@ tool("workstation_capabilities", "Show full vmrun/REST tool coverage, compare th
   };
 });
 async function shutdown() {
+  serial.close();
   consoles.close();
   await jobs.close();
 }

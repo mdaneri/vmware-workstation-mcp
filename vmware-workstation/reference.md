@@ -2,6 +2,19 @@
 
 Generated from the command implementations and installed REST contract. Source version: vmrun 1.17.0.25688693; vmrest 1.3.1 build 25688693.
 
+## Optional direct serial console (6)
+
+Read the [serial guide](serial.md) for explicit powered-off setup, guest prerequisites and runnable byte I/O examples. Windows uses local named pipes; Linux uses private local UNIX sockets. Endpoints are generated per canonical VMX and port (0-3). Connect verifies the native VMware worker and never starts a VM. Read/write require an explicit session. Reads, writes, waits, buffers and session counts are bounded; disconnect cancels pending I/O. No remote sockets, host terminal, desktop capture or keyboard injection.
+
+| Tool | Arguments |
+| --- | --- |
+| `serial_status` | `vm_id`, `port` |
+| `serial_configure` | `vm_id`, `port`, `enabled`, `confirm` |
+| `serial_connect` | `vm_id`, `port`, `timeout_ms` |
+| `serial_read` | `vm_id`, `port`, `max_bytes`, `encoding`, `timeout_ms` |
+| `serial_write` | `vm_id`, `port`, `data`, `encoding`, `timeout_ms` |
+| `serial_disconnect` | `vm_id`, `port` |
+
 ## VMDK lifecycle (9)
 
 Read the [disk guide](disks.md) for create/inspect/expand/convert and explicit controller/slot attachment examples. Runtime help gates native operations. Output requires a NEW parent directory to protect companion files. In-place edits and attachment changes require `confirm: true`, powered-off snapshot-free VMs and independent disks. Detach preserves backing files. Capacity expansion does not resize guest partitions or filesystems.
@@ -163,4 +176,4 @@ All console tools accept `vm_id`: an absolute VMX path, a unique inventory name,
 
 ## Convenience tools (9) and capabilities
 
-`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **117 MCP tools**.
+`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **123 MCP tools**.

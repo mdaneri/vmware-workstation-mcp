@@ -79,3 +79,7 @@ Linux integration tests launch the bundled MCP server and real child processes, 
 WSL tests do not establish that Workstation can run VMs inside WSL. This port targets VMware on the **same native Linux host** as the MCP server. It does not bridge Linux paths/process metadata to Windows Workstation, and a Windows `.exe` in `VMRUN_PATH` is unsupported. Use the Windows server for Windows-hosted VMs.
 
 Real BIOS/UEFI console validation was previously performed on Windows Workstation 26.0.1. A native Linux VMware installation is still needed to validate real Linux VM creation, firmware consoles, guest operations and REST end to end.
+
+## Optional serial consoles
+
+Read the [serial guide](serial.md). Native Linux uses a pathname UNIX stream socket in a mode 700 `.mcp-serial` directory beside the VMX, with VM and host-path allowlists enforced. The socket must be owned by the current user and its listener inode must belong to `vmware-vmx` with the exact VMX argument in `/proc`. Physical tty devices, file output and TCP/Telnet endpoints are refused. Setup is explicit, backed up and powered-off; connect never boots a VM. Guest serial output/login is separate. Native Linux stream test doubles exercise this path in CI; WSL results do not certify native VMware guests.
