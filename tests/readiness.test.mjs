@@ -34,7 +34,8 @@ test('OS agent, published IP and service are separate criteria; encrypted VM pro
   const f = await fixture(t, { ip: '' });
   const boot = await f.manager.wait('boot', { ...f.args, vm_password_profile: 'test' });
   assert.equal(boot.ready, true); assert.equal(boot.tools, 'running'); assert.equal(boot.address, null);
-  assert.equal(boot.state, 'network_unavailable');
+  assert.equal(boot.state, 'running');
+  assert.ok(f.calls.every(call => !call.args.includes('getGuestIPAddress')));
   assert.ok(f.calls.every(call => call.args.includes('known-secret')));
   const ip = await f.manager.wait('ip', f.args);
   assert.equal(ip.ready, false); assert.equal(ip.result, 'timed_out'); assert.equal(ip.timed_out, true);

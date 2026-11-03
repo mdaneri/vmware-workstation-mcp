@@ -56158,7 +56158,7 @@ var Readiness = class {
   async authentication(a) {
     return a.vm_password_profile ? ["-vp", await this.credentials.vm(a.vm_password_profile)] : [];
   }
-  async observation(vmx3, config2, options2) {
+  async observation(vmx3, config2, options2, { includeIP = true } = {}) {
     const run = (command, args = []) => this.backend.run([command, ...command === "list" ? [] : [vmx3], ...args], options2);
     let running;
     try {
@@ -56193,6 +56193,7 @@ var Readiness = class {
       result.category = failureCategory(error62.message);
     }
     if (result.tools === "running") result.state = "running";
+    if (!includeIP) return result;
     try {
       const address = (await run("getGuestIPAddress")).trim();
       if (import_node_net4.default.isIP(address)) result.address = address;
@@ -56217,7 +56218,7 @@ var Readiness = class {
       const start = performance.now();
       while (performance.now() < deadline && !totalSignal.aborted) {
         attempts++;
-        const observed = await this.observation(vmx3, config2, { authentication, deadline, signal: totalSignal, timeout: Math.max(1, Math.min(5e3, Math.floor(deadline - performance.now()))) });
+        const observed = await this.observation(vmx3, config2, { authentication, deadline, signal: totalSignal, timeout: Math.max(1, Math.min(5e3, Math.floor(deadline - performance.now()))) }, { includeIP: kind !== "boot" });
         if (observed.expired) {
           expiredAttempt = true;
           break;

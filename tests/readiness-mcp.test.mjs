@@ -14,6 +14,7 @@ test('shipped MCP readiness tools preserve all prior schemas, deadlines, private
   const preload = path.join(root, 'mock.cjs');
   await fs.writeFile(preload, `
 const { promisify } = require('node:util');
+const fs = require('node:fs');
 const native = require('node:child_process').execFile;
 const stub = (...args) => native(...args);
 stub[promisify.custom] = async (binary, args, options) => {
@@ -21,7 +22,17 @@ stub[promisify.custom] = async (binary, args, options) => {
   if (!args.length) return { stdout: 'vmrun version mock\\nUsage: vmrun\\nlist  List VMs\\ncheckToolsState  Check Tools\\ngetGuestIPAddress  IP\\n' };
   if (args[2] === 'list') return { stdout: 'Total running VMs: 1\\n' + process.env.READINESS_TEST_VMX };
   if (args[2] === 'checkToolsState') return { stdout: 'running' };
-  if (args[2] === 'getGuestIPAddress') return { stdout: '' };
+  if (args[2] === 'getGuestIPAddress') {
+    if (fs.existsSync(process.env.READINESS_TEST_VMX + '.stall-ip')) {
+      fs.writeFileSync(process.env.READINESS_TEST_VMX + '.ip-called', '');
+      return new Promise((resolve, reject) => {
+        const abort = () => reject(options.signal.reason);
+        if (options.signal.aborted) abort();
+        else options.signal.addEventListener('abort', abort, { once: true });
+      });
+    }
+    return { stdout: '' };
+  }
   if (args[2] === 'listSnapshots') return { stdout: 'Total snapshots: 1\\nnever-export' };
   throw new Error('Unexpected command');
 };
@@ -35,7 +46,15 @@ require('node:child_process').execFile = stub;
   const call = async (name, args = {}) => {
     const result = await client.callTool({ name, arguments: args }); assert.ok(!result.isError, JSON.stringify(result)); return JSON.parse(result.content[0].text);
   };
-  assert.equal((await call('vm_wait_for_boot', { vmx, timeout_seconds: 1 })).ready, true);
+  // Tools is immediately ready; IP would stall until the request deadline.
+  // A boot wait must succeed without starting that unrelated observation.
+  await fs.writeFile(vmx + '.stall-ip', '');
+  const boot = await call('vm_wait_for_boot', { vmx, timeout_seconds: 1 });
+  assert.equal(boot.ready, true); assert.equal(boot.timed_out, false);
+  assert.equal(boot.tools, 'running'); assert.equal(boot.lifecycle, 'running');
+  assert.equal(boot.state, 'running'); assert.equal(boot.address, null);
+  await assert.rejects(fs.access(vmx + '.ip-called'), { code: 'ENOENT' });
+  await fs.unlink(vmx + '.stall-ip');
   const ip = await call('vm_wait_for_ip', { vmx, timeout_seconds: 1, poll_interval_ms: 100 }); assert.equal(ip.timed_out, true); assert.equal(ip.state, 'network_unavailable');
   const bundle = await call('vm_collect_diagnostics', { vmx, destination_directory: path.join(root, 'bundle') });
   assert.equal(bundle.report.snapshots.count, 1); assert.doesNotMatch(JSON.stringify(bundle), /never-export/);

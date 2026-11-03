@@ -78,7 +78,7 @@ export class Readiness {
     } finally { await handle.close(); }
   }
   async authentication(a) { return a.vm_password_profile ? ['-vp', await this.credentials.vm(a.vm_password_profile)] : []; }
-  async observation(vmx, config, options) {
+  async observation(vmx, config, options, { includeIP = true } = {}) {
     const run = (command, args = []) => this.backend.run([command, ...(command === 'list' ? [] : [vmx]), ...args], options);
     let running;
     try { running = parseCountedList(await run('list')); }
@@ -109,6 +109,9 @@ export class Readiness {
     try { const tools = await run('checkToolsState'); result.tools = ['running', 'installed', 'unknown'].includes(tools) ? tools : 'unknown'; }
     catch (error) { result.category = failureCategory(error.message); }
     if (result.tools === 'running') result.state = 'running';
+    // Boot readiness is established by Tools alone. An unrelated IP query
+    // must not delay or invalidate that criterion, even under queue contention.
+    if (!includeIP) return result;
     // IP publication can disagree with Tools state; observe independently.
     try { const address = (await run('getGuestIPAddress')).trim(); if (net.isIP(address)) result.address = address; }
     catch { /* An IP failure does not prove Tools is stopped. */ }
@@ -127,7 +130,7 @@ export class Readiness {
       const start = performance.now();
       while (performance.now() < deadline && !totalSignal.aborted) {
         attempts++;
-        const observed = await this.observation(vmx, config, { authentication, deadline, signal: totalSignal, timeout: Math.max(1, Math.min(5000, Math.floor(deadline - performance.now()))) });
+        const observed = await this.observation(vmx, config, { authentication, deadline, signal: totalSignal, timeout: Math.max(1, Math.min(5000, Math.floor(deadline - performance.now()))) }, { includeIP: kind !== 'boot' });
         if (observed.expired) { expiredAttempt = true; break; }
         if (totalSignal.aborted || performance.now() >= deadline) break;
         last = observed;

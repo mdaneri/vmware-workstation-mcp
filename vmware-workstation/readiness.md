@@ -38,7 +38,7 @@ Results include `ready`, `result`, `timed_out`, `criterion`, `attempts`, `elapse
 | `running` | VM is running; interpret `ready` using the requested criterion. |
 | `unknown` | Native utility failed, lock contention or saved-state evidence is ambiguous. No power state is fabricated. |
 
-Do not treat an IP failure as proof that Tools is stopped. A Tools-ready boot wait can succeed while its separate state is `network_unavailable`. An IP/service wait can succeed while the later Tools observation is `installed` or `unknown`. Failed service checks cannot always distinguish a firewall from an application that is stopped.
+Boot waits do not query IP publication: once Tools reports `running`, they return readiness with `address: null` (not observed). Use an IP wait for IP publication. Do not treat an IP failure as proof that Tools is stopped. An IP/service wait can succeed while the later Tools observation is `installed` or `unknown`. Failed service checks cannot always distinguish a firewall from an application that is stopped.
 
 ## Inspect recent errors
 
