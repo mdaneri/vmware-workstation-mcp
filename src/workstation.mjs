@@ -43,14 +43,19 @@ export class Workstation {
     return findVMwareExecutable('vmrun', { env: this.env });
   }
 
-  async run(args, { mutation = false, authentication = [], timeout = 120000 } = {}) {
+  async run(args, { mutation = false, authentication = [], timeout = 120000, deadline, signal } = {}) {
     if (mutation && args[1] && path.isAbsolute(args[1])) this.resources.assert([args[1]]);
     const job = this.tail.then(async () => {
       if (mutation && args[1] && path.isAbsolute(args[1])) this.resources.assert([args[1]]);
       const binary = await this.executable();
+      signal?.throwIfAborted();
+      if (deadline !== undefined) {
+        timeout = Math.min(timeout, Math.floor(deadline - performance.now()));
+        if (timeout <= 0) throw Object.assign(new Error('Observation deadline expired while waiting for vmrun.'), { code: 'OBSERVATION_DEADLINE' });
+      }
       try {
         const result = await this.execute(binary, ['-T', 'ws', ...authentication, ...args], {
-          windowsHide: true, shell: false, timeout, maxBuffer: 1024 * 1024, encoding: 'utf8',
+          windowsHide: true, shell: false, timeout, signal, maxBuffer: 1024 * 1024, encoding: 'utf8',
         });
         return result.stdout.trim();
       } catch (error) {
@@ -60,7 +65,15 @@ export class Workstation {
       }
     });
     this.tail = job.catch(() => {});
-    return job;
+    if (!signal) return job;
+    // Queued observations stop waiting when their own deadline/cancellation
+    // fires; the queued job checks the same signal before executing.
+    return new Promise((resolve, reject) => {
+      const abort = () => reject(signal.reason || new Error('Operation cancelled.'));
+      if (signal.aborted) abort();
+      else signal.addEventListener('abort', abort, { once: true });
+      job.then(resolve, reject).finally(() => signal.removeEventListener('abort', abort));
+    });
   }
 
   async help() {

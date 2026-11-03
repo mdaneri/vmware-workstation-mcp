@@ -7,9 +7,13 @@ import { ovfSchemas } from '../src/ovf.mjs';
 import { jobSchemas } from '../src/jobs.mjs';
 import { diskSchemas } from '../src/disks.mjs';
 import { serialSchemas } from '../src/serial.mjs';
+import { readinessSchemas } from '../src/readiness.mjs';
 let text = '# Complete operation reference\n\nGenerated from the command implementations and installed REST contract. Source version: vmrun 1.17.0.25688693; vmrest 1.3.1 build 25688693.\n\n';
 text += '## Optional direct serial console (6)\n\nRead the [serial guide](serial.md) for explicit powered-off setup, guest prerequisites and runnable byte I/O examples. Windows uses local named pipes; Linux uses private local UNIX sockets. Endpoints are generated per canonical VMX and port (0-3). Connect verifies the native VMware worker and never starts a VM. Read/write require an explicit session. Reads, writes, waits, buffers and session counts are bounded; disconnect cancels pending I/O. No remote sockets, host terminal, desktop capture or keyboard injection.\n\n| Tool | Arguments |\n| --- | --- |\n';
 for (const [name, schema] of Object.entries(serialSchemas)) text += `| \`${name}\` | ${Object.keys(schema.shape).map(key => `\`${key}\``).join(', ')} |\n`;
+text += '\n';
+text += '## VM readiness and diagnostics (5)\n\nRead the [readiness guide](readiness.md) for distinct OS agent, IP and service criteria, total deadlines, cancellation, normalized error excerpts and private bundles. Nothing starts or reconfigures a VM. Services use only the Tools-reported IP; HTTP redirects and response bodies are never retained. Diagnostic destinations require configured approved roots and a new directory. Guest-only RFB evidence is opt-in and its pixels are not redacted.\n\n| Tool | Arguments |\n| --- | --- |\n';
+for (const [name, schema] of Object.entries(readinessSchemas)) text += `| \`${name}\` | ${Object.keys(schema.shape).map(key => `\`${key}\``).join(', ')} |\n`;
 text += '\n';
 text += '## VMDK lifecycle (9)\n\nRead the [disk guide](disks.md) for create/inspect/expand/convert and explicit controller/slot attachment examples. Runtime help gates native operations. Output requires a NEW parent directory to protect companion files. In-place edits and attachment changes require `confirm: true`, powered-off snapshot-free VMs and independent disks. Detach preserves backing files. Capacity expansion does not resize guest partitions or filesystems.\n\n| Tool | Arguments |\n| --- | --- |\n';
 for (const [name, schema] of Object.entries(diskSchemas)) text += `| \`${name}\` | ${Object.keys(schema.shape).map(key => `\`${key}\``).join(', ') || '(none)'} |\n`;
@@ -33,5 +37,5 @@ for (const o of restOperations) {
 }
 text += '\nThe vendor operation ID `updataSharedFolder` is exposed with the corrected tool name `rest_update_shared_folder`.\n\n## Direct native VNC/RFB console (6)\n\nAll console tools accept `vm_id`: an absolute VMX path, a unique inventory name, a configured console profile alias, or a REST VM ID when REST is configured. The VM must be running with native VNC explicitly bound to loopback and a local password profile. VMware Tools and guest login are unnecessary. Setup: [console guide](console.md).\n\n| Tool | Arguments |\n| --- | --- |\n';
 for (const [name, schema] of Object.entries(consoleSchemas)) text += `| \`${name}\` | ${Object.keys(schema.shape).map(key => `\`${key}\``).join(', ')} |\n`;
-text += '\n## Convenience tools (9) and capabilities\n\n`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **123 MCP tools**.\n';
+text += '\n## Convenience tools (9) and capabilities\n\n`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **128 MCP tools**.\n';
 await writeGenerated('vmware-workstation/reference.md', text);

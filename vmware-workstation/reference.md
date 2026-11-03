@@ -15,6 +15,18 @@ Read the [serial guide](serial.md) for explicit powered-off setup, guest prerequ
 | `serial_write` | `vm_id`, `port`, `data`, `encoding`, `timeout_ms` |
 | `serial_disconnect` | `vm_id`, `port` |
 
+## VM readiness and diagnostics (5)
+
+Read the [readiness guide](readiness.md) for distinct OS agent, IP and service criteria, total deadlines, cancellation, normalized error excerpts and private bundles. Nothing starts or reconfigures a VM. Services use only the Tools-reported IP; HTTP redirects and response bodies are never retained. Diagnostic destinations require configured approved roots and a new directory. Guest-only RFB evidence is opt-in and its pixels are not redacted.
+
+| Tool | Arguments |
+| --- | --- |
+| `vm_wait_for_boot` | `vmx`, `vm_password_profile`, `timeout_seconds`, `poll_interval_ms` |
+| `vm_wait_for_ip` | `vmx`, `vm_password_profile`, `timeout_seconds`, `poll_interval_ms` |
+| `vm_wait_for_service` | `vmx`, `vm_password_profile`, `timeout_seconds`, `poll_interval_ms`, `port`, `protocol`, `path`, `expected_status` |
+| `vm_get_recent_errors` | `vmx`, `vm_password_profile`, `max_bytes`, `max_entries` |
+| `vm_collect_diagnostics` | `vmx`, `vm_password_profile`, `destination_directory`, `include_console`, `max_log_bytes` |
+
 ## VMDK lifecycle (9)
 
 Read the [disk guide](disks.md) for create/inspect/expand/convert and explicit controller/slot attachment examples. Runtime help gates native operations. Output requires a NEW parent directory to protect companion files. In-place edits and attachment changes require `confirm: true`, powered-off snapshot-free VMs and independent disks. Detach preserves backing files. Capacity expansion does not resize guest partitions or filesystems.
@@ -176,4 +188,4 @@ All console tools accept `vm_id`: an absolute VMX path, a unique inventory name,
 
 ## Convenience tools (9) and capabilities
 
-`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **123 MCP tools**.
+`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **128 MCP tools**.

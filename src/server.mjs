@@ -14,6 +14,7 @@ import { OvfManager, ovfSchemas } from './ovf.mjs';
 import { JobManager, jobSchemas } from './jobs.mjs';
 import { DiskManager, diskSchemas } from './disks.mjs';
 import { SerialManager, serialSchemas } from './serial.mjs';
+import { Readiness, readinessSchemas } from './readiness.mjs';
 
 const backend = new Workstation();
 const credentials = new Credentials();
@@ -25,9 +26,17 @@ const jobs = new JobManager({ redact: text => credentials.redact(text) });
 const ovf = new OvfManager({ backend, credentials, jobs, rest });
 const disks = new DiskManager({ backend, vmFiles });
 const serial = new SerialManager({ backend, vmFiles, credentials, rest });
-const server = new McpServer({ name: 'vmware-workstation', version: '0.7.0' });
+const readiness = new Readiness({ backend, credentials, consoles, protectFile: localFileProtector(backend) });
+const server = new McpServer({ name: 'vmware-workstation', version: '0.8.0' });
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
+for (const kind of ['boot', 'ip', 'service']) tool(`vm_wait_for_${kind}`, {
+  boot: 'Wait for VMware Tools running in the selected VM, indicating OS agent readiness only. Power-on, login and application readiness are separate. Bounded total timeout, polling and MCP cancellation; never starts a VM.',
+  ip: 'Wait for a valid guest IP published by VMware Tools. Does not establish network reachability or service readiness. Bounded total timeout and cancellation; never starts a VM.',
+  service: 'Probe only the selected VM Tools-reported IP and explicit port. TCP means connection accepted; HTTP(S) means expected status, with no redirects or retained body/headers. Does not execute guest commands. Bounded deadline and cancellation.',
+}[kind], readinessSchemas[`vm_wait_for_${kind}`], true, (a, extra) => readiness.wait(kind, a, extra), false, kind === 'service');
+tool('vm_get_recent_errors', 'Read bounded current vmware.log data only after verifying its selected VM identity. Returns normalized error excerpts and actions; arbitrary log text/paths/secrets are omitted. No host log scan.', readinessSchemas.vm_get_recent_errors, true, a => readiness.recentErrors(a));
+tool('vm_collect_diagnostics', 'Save selected VM allowlisted hardware, lifecycle, Tools/IP, snapshot count and normalized log excerpts into a NEW approved directory. Optional direct VNC guest pixels are unredacted: review before sharing. Never captures host desktop or executes guest commands.', readinessSchemas.vm_collect_diagnostics, false, (a, extra) => readiness.collect(a, extra), false, false, false);
 function tool(name, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false, idempotent = readOnly) {
   server.registerTool(name, {
     description, inputSchema: schema instanceof z.ZodObject ? schema : z.object(schema).strict(),
@@ -105,10 +114,18 @@ for (const operation of restOperations) {
   tool(restToolName(operation), `${operation.category}: ${operation.id}. Calls ${operation.method} ${operation.path} on the configured Workstation REST service.`, restSchema(operation), operation.method === 'GET', a => rest.execute(operation, a));
 }
 tool('workstation_capabilities', 'Show full vmrun/REST tool coverage, compare the installed vmrun help against the implemented catalog, and report REST configuration without exposing secrets.', {}, true, async () => {
-  const help = await backend.help();
+  let help = ''; let executable;
+  let vmrunCapability;
+  try {
+    executable = await backend.executable(); help = await backend.help();
+    vmrunCapability = { executable, executable_discovered: true, help_verified: true, live_support: 'unknown' };
+  } catch {
+    vmrunCapability = { executable: executable || null, executable_discovered: !!executable, help_verified: false, live_support: 'unknown', category: 'capability_unavailable', action: 'Install native VMware Workstation or configure VMRUN_PATH; discovery does not prove hypervisor support.' };
+  }
   const installed = [...help.split('Examples:')[0].matchAll(/^([A-Za-z]\w+)\s{2,}.+$/gm)].map(match => match[1]).filter(value => !['Usage', 'COMMAND', 'POWER', 'SNAPSHOT', 'HOST', 'GUEST', 'GENERAL', 'Template'].includes(value));
   return {
     vmrunVersion: help.match(/vmrun version ([\w.]+)/)?.[1] || null,
+    vmrunCapability,
     referenceVersion: importedHelp.version,
     vmrunCommands: commands.map(c => ({ command: c.command, tool: `vmrun_${snake(c.command)}` })),
     unimplementedInstalledCommands: installed.filter(name => !commands.some(c => c.command === name)),
@@ -125,6 +142,8 @@ tool('workstation_capabilities', 'Show full vmrun/REST tool coverage, compare th
     backgroundJobTools: Object.keys(jobSchemas),
     diskManager: await disks.status(),
     diskTools: Object.keys(diskSchemas),
+    readinessTools: Object.keys(readinessSchemas),
+    capabilityEvidence: { diskManager: 'Installed help when available; no live disk operation is performed.', ovfTool: 'Installed version/help when available; no live appliance operation is performed.', nativeHypervisor: 'not_proven_by_discovery', firmwareBoot: { configurable: ['bios', 'efi', 'bootOrder', 'bootDelay', 'forceSetupOnce'], evidence: 'VMX configuration implementation; not a live firmware test', liveSupport: 'unknown', consoleRequires: 'Explicit per-VM native VNC setup; console_status proves only that VM connection.' } },
     note: 'Coverage describes callable implementations. It does not prove a REST service is running, credentials work, or guest operations succeed.',
   };
 });

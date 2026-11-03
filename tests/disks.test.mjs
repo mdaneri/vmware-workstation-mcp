@@ -93,10 +93,13 @@ test('disk output directories honor host-file roots independently of VMX roots',
 
 test('runtime help parses exact case-sensitive flags and advertised types; missing/unsupported capabilities are actionable', async t => {
   const f = await fixture(t); const status = await f.disks.status();
+  assert.equal(status.executable_discovered, true); assert.equal(status.help_verified, true); assert.equal(status.live_support, 'unknown');
   assert.equal(status.available, true); assert.equal(status.operations.convert, true); assert.ok(status.disk_types.some(t => t.id === '3'));
   f.setHelp(help.replace(' -r <source> : convert', ' -R : repair'));
   await assert.rejects(f.disks.perform('convert', { disk: f.disk, destination: path.join(f.root, 'new', 'disk.vmdk'), confirm: true }), e => e.code === 'UNSUPPORTED_CAPABILITY' && e.details.required_flags.includes('-r'));
   assert.equal(nativeCalls(f).length, 0);
+  f.setHelp('not valid help');
+  const unverified = await f.disks.status(); assert.equal(unverified.executable_discovered, true); assert.equal(unverified.help_verified, false);
   f.backend.env.VMWARE_VDISKMANAGER_PATH = path.join(f.root, 'missing', path.basename(f.diskManager));
   assert.equal((await f.disks.status()).available, false);
   await assert.rejects(f.disks.perform('expand', { disk: f.disk, capacity_mb: 2, confirm: true }), { code: 'CAPABILITY_UNAVAILABLE' });

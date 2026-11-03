@@ -49,8 +49,9 @@ export class OvfManager {
   }
   async status() {
     let scratch;
+    let executable;
     try {
-      const executable = await this.executable();
+      executable = await this.executable();
       scratch = await fs.mkdtemp(path.join(os.tmpdir(), 'vmware-ovf-status-'));
       const config = path.join(scratch, 'empty.conf'); await fs.writeFile(config, '', { mode: 0o600 });
       const run = async args => {
@@ -61,8 +62,8 @@ export class OvfManager {
       const flags = ['machineOutput', 'schemaValidate', 'sourceType', 'targetType', 'hideEula', 'name', 'net', 'prop', 'deploymentOption', 'acceptAllEulas', 'configFile'];
       const supported = Object.fromEntries(flags.map(flag => [flag, new RegExp(`--${flag}\\b`).test(help)]));
       supported.noPrompting = debug.includes('--X:noPrompting');
-      return { available: true, executable, configured_path: this.backend.env.VMWARE_OVFTOOL_PATH || null, version, supported_flags: supported, local_conversions: ['OVF/OVA → VMX', 'VMX → OVF/OVA', 'OVF/OVA → OVF/OVA'], limitations: limits };
-    } catch (error) { return { available: false, configured_path: this.backend.env.VMWARE_OVFTOOL_PATH || null, error: error.message, setting: 'VMWARE_OVFTOOL_PATH must be an absolute path to ovftool.exe (Windows) or ovftool (Linux).' }; }
+      return { available: true, executable, executable_discovered: true, help_verified: true, live_support: 'unknown', configured_path: this.backend.env.VMWARE_OVFTOOL_PATH || null, version, supported_flags: supported, local_conversions: ['OVF/OVA → VMX', 'VMX → OVF/OVA', 'OVF/OVA → OVF/OVA'], limitations: limits };
+    } catch (error) { return { available: false, executable: executable || null, executable_discovered: !!executable, help_verified: false, live_support: 'unknown', configured_path: this.backend.env.VMWARE_OVFTOOL_PATH || null, error: error.message, setting: 'VMWARE_OVFTOOL_PATH must be an absolute path to ovftool.exe (Windows) or ovftool (Linux).' }; }
     finally { if (scratch) await removeTemporary(scratch, os.tmpdir(), 'vmware-ovf-status-'); }
   }
   async available(required = []) {
