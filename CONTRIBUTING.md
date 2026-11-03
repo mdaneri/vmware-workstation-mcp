@@ -7,7 +7,7 @@ npm test
 npm run package
 ```
 
-The package command builds all bundled entrypoints, refreshes the operation reference and dependency notices, validates portable manifests and all 129 MCP tool schemas, checks compatibility with all 128 previous tools, verifies platform credential-file protection, and creates the plugin ZIP. CI performs these checks on Windows and Ubuntu. Run `npm run build` before testing changes to bundled helpers or the Linux MCP integration test.
+The package command builds all bundled entrypoints, refreshes the operation reference and dependency notices, validates portable manifests and all 134 MCP tool schemas, checks compatibility with all 129 previous tools, verifies platform credential-file protection, and creates the plugin ZIP. CI performs these checks on Windows and Ubuntu. Run `npm run build` before testing changes to bundled helpers or the Linux MCP integration test.
 
 Commit source changes together with updated generated files under `vmware-workstation/`. The repository includes built entrypoints so Git-backed plugin installation does not require an npm install. CI checks that a fresh build reproduces the committed generated files.
 
@@ -20,3 +20,5 @@ The opt-in `npm run test:readiness:live` creates new disposable live-ISO guests 
 The serial live test requires `VMWARE_SERIAL_LIVE=1` and a user-selected `VMWARE_SERIAL_LIVE_ISO` already configured for ttyS0 output. It creates one new disposable VM, configures serial offline, boots headlessly, reads a bounded expected marker, then stops that VM. It sends no guest input and retains evidence without a transcript. Read [the serial guide](vmware-workstation/serial.md#validation) before an authorized native run. Automated serial tests use local pipe/socket doubles; Windows native tests compile a tiny fake vmrun with the installed .NET Framework C# compiler, and Linux tests use a shebang stub. Both run the bundled MCP process and real endpoint-owner verification.
 
 The opt-in `npm run test:guest-exec:live` full-clones an explicitly selected offline template and runs fixed guest execution checks only in the NEW disposable clone. It requires separate workload authorization and never runs in hosted CI. Read [guest execution validation](vmware-workstation/guest-exec.md#validation) for prerequisites and cleanup limits. Default guest execution tests use mocked VMware transports and local native runner subprocesses without VMware.
+
+The opt-in `npm run test:iso:live` mounts a user-selected ISO only on a newly created disposable VM, boots headlessly, verifies configured optical media, hard-stops that VM and safely ejects without modifying the ISO. It requires separate workload authorization plus explicit `VMWARE_ISO_LIVE=1` and `VMWARE_ISO_LIVE_HARD_STOP=1` flags. Read [ISO validation](vmware-workstation/iso.md#validation) before a native run. WSL is refused for live VMware tests; mocked Windows/Linux tests require no hypervisor.
