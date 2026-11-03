@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "id": "two-vm",
+  "networks": {
+    "private": {
+      "kind": "private_lan"
+    }
+  },
+  "vms": [
+    {
+      "id": "gateway",
+      "template": "linux",
+      "networks": {
+        "primary": "private"
+      },
+      "depends_on": [],
+      "readiness": {
+        "kind": "none"
+      }
+    },
+    {
+      "id": "client",
+      "template": "linux",
+      "networks": {
+        "primary": "private"
+      },
+      "depends_on": [
+        "gateway"
+      ],
+      "readiness": {
+        "kind": "none"
+      }
+    }
+  ]
+}

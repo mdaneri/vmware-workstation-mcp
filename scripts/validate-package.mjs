@@ -1,3 +1,4 @@
+import { labSchema } from '../src/lab-schemas.mjs';
 import { assertCompatibleTool } from '../tests/tool-compatibility.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -36,8 +37,14 @@ try {
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [path.join(pluginRoot, 'server/server.cjs')], stderr: 'pipe' }));
   assert.equal(client.getServerVersion().version, manifest.version, 'Bundled server version must match plugin');
   const { tools } = await client.listTools();
-  assert.equal(tools.length, 142);
-  assert.equal(new Set(tools.map(t => t.name)).size, 142);
+  assert.equal(tools.length, 148);
+  assert.equal(new Set(tools.map(t => t.name)).size, 148);
+  const preLab = JSON.parse(await fs.readFile('tests/fixtures/pre-lab-tool-schemas.json', 'utf8'));
+  assert.equal(preLab.tools.length, 142);
+  for (const prior of preLab.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Pre-lab contract: ${prior.name}`);
+  const labJSON = JSON.parse(await fs.readFile(path.join(pluginRoot, 'labs/schema-v1.json'), 'utf8'));
+  assert.deepEqual(labJSON, z.toJSONSchema(labSchema, { io: 'input' }));
+  for (const name of ['two-vm', 'nested-esxi']) assert.ok(ajv.validate(labJSON, JSON.parse(await fs.readFile(path.join(pluginRoot, `labs/${name}.json`), 'utf8'))), JSON.stringify(ajv.errors));
   const preTemplate = JSON.parse(await fs.readFile('tests/fixtures/pre-template-tool-schemas.json', 'utf8'));
   assert.equal(preTemplate.tools.length, 138);
   for (const prior of preTemplate.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Pre-template contract: ${prior.name}`);
@@ -79,5 +86,5 @@ try {
     assert.equal(typeof tool.annotations.readOnlyHint, 'boolean');
   }
   await writeGenerated('vmware-workstation/tool-schemas.json', JSON.stringify({ tools }, null, 2) + '\n');
-  console.log('Both portable manifests, template schema/examples and all 142 MCP schemas validated; all 138 previous tool definitions unchanged.');
+  console.log('Both portable manifests, template schema/examples and all 148 MCP schemas validated; all 142 previous tool definitions unchanged.');
 } finally { await client.close(); }

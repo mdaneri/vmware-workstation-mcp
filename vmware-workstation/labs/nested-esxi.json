@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "id": "nested-esxi-lab",
+  "networks": {
+    "private": {
+      "kind": "private_lan"
+    },
+    "management": {
+      "kind": "binding"
+    }
+  },
+  "vms": [
+    {
+      "id": "gateway",
+      "template": "linux",
+      "networks": {
+        "primary": "management"
+      },
+      "depends_on": [],
+      "readiness": {
+        "kind": "none"
+      }
+    },
+    {
+      "id": "esxi",
+      "template": "nested-esxi",
+      "networks": {
+        "management": "management",
+        "lab": "private"
+      },
+      "depends_on": [
+        "gateway"
+      ],
+      "readiness": {
+        "kind": "none"
+      }
+    },
+    {
+      "id": "client",
+      "template": "linux",
+      "networks": {
+        "primary": "private"
+      },
+      "depends_on": [
+        "esxi"
+      ],
+      "readiness": {
+        "kind": "none"
+      }
+    }
+  ]
+}

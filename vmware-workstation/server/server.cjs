@@ -1763,7 +1763,7 @@ var require_code2 = __commonJS({
       return allSchemaProperties(schemaMap).filter((p) => !(0, util_1.alwaysValidSchema)(it, schemaMap[p]));
     }
     exports2.schemaProperties = schemaProperties;
-    function callValidateCode({ schemaCode, data, it: { gen, topSchemaRef, schemaPath, errorPath }, it }, func, context2, passSchema) {
+    function callValidateCode({ schemaCode, data, it: { gen, topSchemaRef, schemaPath, errorPath }, it }, func, context3, passSchema) {
       const dataAndSchema = passSchema ? (0, codegen_1._)`${schemaCode}, ${data}, ${topSchemaRef}${schemaPath}` : data;
       const valCxt = [
         [names_1.default.instancePath, (0, codegen_1.strConcat)(names_1.default.instancePath, errorPath)],
@@ -1774,7 +1774,7 @@ var require_code2 = __commonJS({
       if (it.opts.dynamicRef)
         valCxt.push([names_1.default.dynamicAnchors, names_1.default.dynamicAnchors]);
       const args = (0, codegen_1._)`${dataAndSchema}, ${gen.object(...valCxt)}`;
-      return context2 !== codegen_1.nil ? (0, codegen_1._)`${func}.call(${context2}, ${args})` : (0, codegen_1._)`${func}(${args})`;
+      return context3 !== codegen_1.nil ? (0, codegen_1._)`${func}.call(${context3}, ${args})` : (0, codegen_1._)`${func}(${args})`;
     }
     exports2.callValidateCode = callValidateCode;
     var newRegExp = (0, codegen_1._)`new RegExp`;
@@ -3262,8 +3262,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path24) {
-      let input2 = path24;
+    function removeDotSegments(path25) {
+      let input2 = path25;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -3337,11 +3337,11 @@ var require_utils = __commonJS({
       }
       return output2.join("");
     }
-    function removeDotSegmentsRelative(path24) {
-      if (path24 === "" || path24[0] === "/") {
-        return removeDotSegments(path24);
+    function removeDotSegmentsRelative(path25) {
+      if (path25 === "" || path25[0] === "/") {
+        return removeDotSegments(path25);
       }
-      const segments = path24.split("/");
+      const segments = path25.split("/");
       const last = segments.length - 1;
       const output2 = [];
       let trailingDirectory = false;
@@ -3704,8 +3704,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path24 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path24 && path24 !== "/" ? path24 : void 0;
+        const path25 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path25 && path25 !== "/" ? path25 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -7242,12 +7242,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name2}"`);
       return f;
     };
-    function addFormats(ajv, list, fs21, exportName) {
+    function addFormats(ajv, list, fs22, exportName) {
       var _a3;
       var _b;
       (_a3 = (_b = ajv.opts.code).formats) !== null && _a3 !== void 0 ? _a3 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
-        ajv.addFormat(f, fs21[f]);
+        ajv.addFormat(f, fs22[f]);
     }
     module2.exports = exports2 = formatsPlugin;
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -13618,8 +13618,8 @@ var require_dom = __commonJS({
         }
       });
     }
-    function walkDOM(node2, context2, callbacks) {
-      var stack = [{ node: node2, context: context2, phase: walkDOM.ENTER }];
+    function walkDOM(node2, context3, callbacks) {
+      var stack = [{ node: node2, context: context3, phase: walkDOM.ENTER }];
       while (stack.length > 0) {
         var frame = stack.pop();
         if (frame.phase === walkDOM.ENTER) {
@@ -18622,8 +18622,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path24, errorMaps, issueData } = params;
-  const fullPath = [...path24, ...issueData.path || []];
+  const { data, path: path25, errorMaps, issueData } = params;
+  const fullPath = [...path25, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -18738,11 +18738,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path24, key3) {
+  constructor(parent, value, path25, key3) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path24;
+    this._path = path25;
     this._key = key3;
   }
   get path() {
@@ -22697,10 +22697,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path24) {
-  if (!path24)
+function getElementAtPath(obj, path25) {
+  if (!path25)
     return obj;
-  return path24.reduce((acc, key3) => acc?.[key3], obj);
+  return path25.reduce((acc, key3) => acc?.[key3], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -23040,11 +23040,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path24, issues) {
+function prefixIssues(path25, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path24);
+    iss.path.unshift(path25);
     return iss;
   });
 }
@@ -23506,16 +23506,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path24 = []) => {
+  const processError = (error63, path25 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path24, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path25, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path24, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path25, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path24, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path25, ...issue2.path]);
       } else {
-        const fullpath = [...path24, ...issue2.path];
+        const fullpath = [...path25, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -23554,17 +23554,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path24 = []) => {
+  const processError = (error63, path25 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path24, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path25, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path24, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path25, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path24, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path25, ...issue2.path]);
       } else {
-        const fullpath = [...path24, ...issue2.path];
+        const fullpath = [...path25, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -23603,8 +23603,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path24 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path24) {
+  const path25 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path25) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -39155,11 +39155,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path24) {
-  if (path24.length === 0) {
+function getDotPath(path25) {
+  if (path25.length === 0) {
     return "object root";
   }
-  return path24.reduce((acc, seg, index) => {
+  return path25.reduce((acc, seg, index) => {
     if (index === 0) {
       return String(seg);
     }
@@ -41386,13 +41386,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path24 = ref.slice(1).split("/").filter(Boolean);
-  if (path24.length === 0) {
+  const path25 = ref.slice(1).split("/").filter(Boolean);
+  if (path25.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path24[0] === defsKey) {
-    const key3 = path24[1] === void 0 ? void 0 : decodeJSONPointerSegment(path24[1]);
+  if (path25[0] === defsKey) {
+    const key3 = path25[1] === void 0 ? void 0 : decodeJSONPointerSegment(path25[1]);
     if (!key3 || !ctx.defs[key3]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -47717,8 +47717,8 @@ var Resources = class {
     this.active = /* @__PURE__ */ new Map();
     this.context = new import_node_async_hooks.AsyncLocalStorage();
   }
-  key(file7) {
-    return process.platform === "win32" ? import_node_path2.default.resolve(file7).toLowerCase() : import_node_path2.default.resolve(file7);
+  key(file8) {
+    return process.platform === "win32" ? import_node_path2.default.resolve(file8).toLowerCase() : import_node_path2.default.resolve(file8);
   }
   assert(files) {
     const owner = this.context.getStore();
@@ -47727,14 +47727,14 @@ var Resources = class {
       return !relative || !relative.startsWith(".." + import_node_path2.default.sep) && relative !== ".." && !import_node_path2.default.isAbsolute(relative);
     };
     const overlaps = (a, b) => contains(a, b) || contains(b, a);
-    for (const file7 of files.map((file8) => this.key(file8))) for (const [held, token] of this.active) {
-      if (token !== owner && overlaps(file7, held)) throw Object.assign(new Error("A conflicting operation holds this VM or disk path. Wait for it to finish, inspect state, then retry."), { code: "RESOURCE_BUSY" });
+    for (const file8 of files.map((file9) => this.key(file9))) for (const [held, token] of this.active) {
+      if (token !== owner && overlaps(file8, held)) throw Object.assign(new Error("A conflicting operation holds this VM or disk path. Wait for it to finish, inspect state, then retry."), { code: "RESOURCE_BUSY" });
     }
   }
   reserve(files) {
     this.context.run(void 0, () => this.assert(files));
     const token = /* @__PURE__ */ Symbol("reservation");
-    const keys = [...new Set(files.map((file7) => this.key(file7)))];
+    const keys = [...new Set(files.map((file8) => this.key(file8)))];
     for (const key3 of keys) this.active.set(key3, token);
     return {
       run: (callback) => this.context.run(token, callback),
@@ -47746,12 +47746,12 @@ var Resources = class {
   async use(files, callback) {
     this.assert(files);
     const token = this.context.getStore() || /* @__PURE__ */ Symbol("resource-owner");
-    const added = files.map((file7) => this.key(file7)).filter((file7) => !this.active.has(file7));
-    for (const file7 of added) this.active.set(file7, token);
+    const added = files.map((file8) => this.key(file8)).filter((file8) => !this.active.has(file8));
+    for (const file8 of added) this.active.set(file8, token);
     try {
       return await this.context.run(token, callback);
     } finally {
-      for (const file7 of added) this.active.delete(file7);
+      for (const file8 of added) this.active.delete(file8);
     }
   }
 };
@@ -47791,8 +47791,8 @@ var Workstation = class {
     return findVMwareExecutable("vmrun", { env: this.env });
   }
   async run(args, { mutation = false, authentication = [], timeout: timeout4 = 12e4, deadline, signal } = {}) {
-    const context2 = this.execution.getStore();
-    signal ||= context2?.signal;
+    const context3 = this.execution.getStore();
+    signal ||= context3?.signal;
     signal?.throwIfAborted();
     if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
     const key3 = args[1] && import_node_path3.default.isAbsolute(args[1]) ? this.resources.key(args[1]) : `host:${args[0]}`;
@@ -47828,7 +47828,7 @@ var Workstation = class {
     void tail.then(() => {
       if (this.queues.get(key3) === tail) this.queues.delete(key3);
     });
-    if (!signal || context2) return job;
+    if (!signal || context3) return job;
     return new Promise((resolve, reject) => {
       const abort = () => reject(signal.reason || new Error("Operation cancelled."));
       if (signal.aborted) abort();
@@ -47836,11 +47836,11 @@ var Workstation = class {
       job.then(resolve, reject).finally(() => signal.removeEventListener("abort", abort));
     });
   }
-  async nativeRun(file7, args, options2 = {}) {
-    const context2 = this.execution.getStore();
-    if (!context2) return this.execute(file7, args, options2);
-    context2.signal.throwIfAborted();
-    const result = await context2.run(file7, args, { ...options2, env: options2.env || this.env, logOutput: false, progress: null });
+  async nativeRun(file8, args, options2 = {}) {
+    const context3 = this.execution.getStore();
+    if (!context3) return this.execute(file8, args, options2);
+    context3.signal.throwIfAborted();
+    const result = await context3.run(file8, args, { ...options2, env: options2.env || this.env, logOutput: false, progress: null });
     if (result.code !== 0) throw Object.assign(new Error("Native job command failed."), { code: result.code, stderr: result.output });
     return { stdout: result.output, stderr: "" };
   }
@@ -47965,34 +47965,34 @@ var Workstation = class {
     const vmx3 = await this.vmx(input2);
     const config2 = parseAssignments(await import_promises2.default.readFile(vmx3, "utf8"));
     const running = parseCountedList(await this.run(["list"]));
-    const realRunning = await Promise.all(running.map(async (file7) => import_promises2.default.realpath(file7).catch(() => file7)));
-    const compare = (file7) => process.platform === "win32" ? file7.toLowerCase() : file7;
+    const realRunning = await Promise.all(running.map(async (file8) => import_promises2.default.realpath(file8).catch(() => file8)));
+    const compare = (file8) => process.platform === "win32" ? file8.toLowerCase() : file8;
     const hardware2 = Object.fromEntries(Object.entries(config2).filter(([key3]) => /^(displayName|guestOS|memsize|numvcpus|virtualHW.version|ethernet\d+\.(present|connectionType|vnet)|(?:scsi|sata|ide|nvme)\d+:\d+\.(present|fileName|deviceType))$/.test(key3)));
-    return { vmx: vmx3, running: realRunning.some((file7) => compare(file7) === compare(vmx3)), hardware: hardware2 };
+    return { vmx: vmx3, running: realRunning.some((file8) => compare(file8) === compare(vmx3)), hardware: hardware2 };
   }
-  async power(input2, action, mode = "soft", gui = false) {
-    if (!["start", "stop", "reset", "suspend", "pause", "unpause"].includes(action)) throw new Error("Unsupported power action.");
+  async power(input2, action2, mode = "soft", gui = false) {
+    if (!["start", "stop", "reset", "suspend", "pause", "unpause"].includes(action2)) throw new Error("Unsupported power action.");
     if (!["soft", "hard"].includes(mode)) throw new Error("Power mode must be soft or hard.");
     const vmx3 = await this.vmx(input2);
-    const args = [action, vmx3];
-    if (action === "start") args.push(gui ? "gui" : "nogui");
-    if (["stop", "reset", "suspend"].includes(action)) args.push(mode);
+    const args = [action2, vmx3];
+    if (action2 === "start") args.push(gui ? "gui" : "nogui");
+    if (["stop", "reset", "suspend"].includes(action2)) args.push(mode);
     const output2 = await this.run(args, { mutation: true });
-    return { vmx: vmx3, action, output: output2, commandSucceeded: true, note: "vmrun returned successfully; guest application readiness is not established." };
+    return { vmx: vmx3, action: action2, output: output2, commandSucceeded: true, note: "vmrun returned successfully; guest application readiness is not established." };
   }
   async snapshots(input2) {
     const vmx3 = await this.vmx(input2);
     return { vmx: vmx3, snapshots: parseCountedList(await this.run(["listSnapshots", vmx3])) };
   }
-  async snapshot(input2, action, name2) {
-    if (!["snapshot", "revertToSnapshot", "deleteSnapshot"].includes(action)) throw new Error("Unsupported snapshot action.");
+  async snapshot(input2, action2, name2) {
+    if (!["snapshot", "revertToSnapshot", "deleteSnapshot"].includes(action2)) throw new Error("Unsupported snapshot action.");
     if (typeof name2 !== "string" || !name2.trim() || name2.length > 256 || /[\x00-\x1f]/.test(name2)) throw new Error("Provide a nonblank snapshot name of at most 256 characters without control characters.");
     const vmx3 = await this.vmx(input2);
-    if (action !== "snapshot") {
+    if (action2 !== "snapshot") {
       const { snapshots } = await this.snapshots(vmx3);
       if (snapshots.filter((value) => value === name2).length !== 1) throw new Error("Snapshot name must identify exactly one existing snapshot; inspect the snapshot tree in Workstation if ambiguous.");
     }
-    return { vmx: vmx3, action, name: name2, output: await this.run([action, vmx3, name2], { mutation: true }), commandSucceeded: true };
+    return { vmx: vmx3, action: action2, name: name2, output: await this.run([action2, vmx3, name2], { mutation: true }), commandSucceeded: true };
   }
   async guestIP(input2) {
     const vmx3 = await this.vmx(input2);
@@ -48115,24 +48115,24 @@ var Credentials = class {
   }
   async guest(profile = "default") {
     const name2 = this.profile(profile);
-    const file7 = await this.load();
+    const file8 = await this.load();
     const prefix2 = `VMWARE_GUEST_${name2.toUpperCase()}`;
-    const username = this.env[`${prefix2}_USERNAME`] ?? file7.guest?.[name2]?.username;
-    const password = this.remember(this.env[`${prefix2}_PASSWORD`] ?? file7.guest?.[name2]?.password);
+    const username = this.env[`${prefix2}_USERNAME`] ?? file8.guest?.[name2]?.username;
+    const password = this.remember(this.env[`${prefix2}_PASSWORD`] ?? file8.guest?.[name2]?.password);
     if (typeof username !== "string" || !username || typeof password !== "string" || !password) throw new Error(`Guest credential profile '${name2}' is not configured. Use VMWARE_CREDENTIALS_FILE or ${prefix2}_USERNAME/PASSWORD; never paste passwords into chat.`);
     return { username, password };
   }
   async vm(profile) {
     const name2 = this.profile(profile);
-    const file7 = await this.load();
-    const password = this.remember(this.env[`VMWARE_VM_${name2.toUpperCase()}_PASSWORD`] ?? file7.vm?.[name2]?.password);
+    const file8 = await this.load();
+    const password = this.remember(this.env[`VMWARE_VM_${name2.toUpperCase()}_PASSWORD`] ?? file8.vm?.[name2]?.password);
     if (typeof password !== "string" || !password) throw new Error(`Encrypted VM password profile '${name2}' is not configured.`);
     return password;
   }
   async console(vmx3, requestedProfile) {
-    const file7 = await this.load();
+    const file8 = await this.load();
     const canonical = (value) => process.platform === "win32" ? import_node_path5.default.resolve(value).toLowerCase() : import_node_path5.default.resolve(value);
-    const profiles = file7.console || {};
+    const profiles = file8.console || {};
     const resolved = await Promise.all(Object.entries(profiles).map(async ([name3, entry2]) => [name3, typeof entry2?.vmx === "string" ? await import_promises4.default.realpath(entry2.vmx).catch(() => entry2.vmx) : null]));
     const matches = resolved.filter(([, target3]) => target3 && canonical(target3) === canonical(vmx3));
     if (!requestedProfile && matches.length > 1) throw new Error("Multiple console profiles identify this VM. Use its configured profile alias as vm_id.");
@@ -48145,9 +48145,9 @@ var Credentials = class {
     return { profile: name2, password };
   }
   async rest() {
-    const file7 = await this.load();
-    const username = this.env.VMWARE_REST_USERNAME ?? file7.rest?.username;
-    const password = this.remember(this.env.VMWARE_REST_PASSWORD ?? file7.rest?.password);
+    const file8 = await this.load();
+    const username = this.env.VMWARE_REST_USERNAME ?? file8.rest?.username;
+    const password = this.remember(this.env.VMWARE_REST_PASSWORD ?? file8.rest?.password);
     if (typeof username !== "string" || !username || typeof password !== "string" || !password || username.includes(":")) throw new Error("REST credentials are not configured. Set VMWARE_REST_USERNAME/PASSWORD or VMWARE_CREDENTIALS_FILE. REST usernames cannot contain colons.");
     const token = Buffer.from(`${username}:${password}`, "utf8").toString("base64");
     this.secrets.add(token);
@@ -49591,10 +49591,10 @@ var diskSchemas = {
 var flags = { create: "-c", expand: "-x", convert: "-r", compact: "-k", defragment: "-d" };
 var types = /* @__PURE__ */ new Set(["monolithicSparse", "monolithicFlat", "twoGbMaxExtentSparse", "twoGbMaxExtentFlat", "streamOptimized"]);
 var sparse = /* @__PURE__ */ new Set(["monolithicSparse", "twoGbMaxExtentSparse"]);
-var key = (file7) => process.platform === "win32" ? file7.toLowerCase() : file7;
-var exists = async (file7) => {
+var key = (file8) => process.platform === "win32" ? file8.toLowerCase() : file8;
+var exists = async (file8) => {
   try {
-    return await import_promises6.default.lstat(file7);
+    return await import_promises6.default.lstat(file8);
   } catch (e2) {
     if (e2.code === "ENOENT") return null;
     throw e2;
@@ -49615,8 +49615,8 @@ function vmConfig(text3) {
   if (config2[".encoding"] && !/^utf-?8$/i.test(config2[".encoding"])) fail("UNSAFE_VM", "Disk edits require UTF-8 VMX files.");
   return config2;
 }
-async function readDiskDescriptor(file7) {
-  const handle = await import_promises6.default.open(file7, "r");
+async function readDiskDescriptor(file8) {
+  const handle = await import_promises6.default.open(file8, "r");
   try {
     const stat = await handle.stat();
     const header = Buffer.alloc(512);
@@ -50350,7 +50350,7 @@ var HardwareManager = class {
       note: "Declared configuration only; omitted values are unknown, not inferred defaults. Guest driver and nested CPU support require live validation."
     };
   }
-  async nicSettings(nics, config2) {
+  async nicSettings(nics, config2, plannedSegments = []) {
     const settings = {}, seen = /* @__PURE__ */ new Set(), macs = /* @__PURE__ */ new Set();
     let catalog = null;
     if (nics?.some((n2) => n2.segment !== void 0 || n2.network === "lan_segment")) catalog = await this.lan.readCatalog();
@@ -50387,7 +50387,7 @@ var HardwareManager = class {
           settings[`${p}.vnet`] = n2.vmnet;
         }
         if (network === "lan_segment") {
-          const matches = catalog.document.segments.filter((s2) => s2.id === n2.segment?.toLowerCase() || s2.name.toLowerCase() === n2.segment?.toLowerCase());
+          const matches = [...catalog.document.segments, ...plannedSegments].filter((s2) => s2.id === n2.segment?.toLowerCase() || s2.name.toLowerCase() === n2.segment?.toLowerCase());
           if (matches.length !== 1) hardwareError("INVALID_NETWORK", "Select one unambiguous existing LAN segment by name or pvnID.");
           settings[`${p}.pvnID`] = matches[0].id;
         }
@@ -50428,9 +50428,10 @@ var HardwareManager = class {
     });
   }
   // Shared read-only preflight for typed creation and declarative template plans.
-  async planCreate(a) {
+  async planCreate(a, { plannedParent, plannedSegments = [] } = {}) {
     const directory = await this.backend.hostPath(a.directory, "destination-directory");
-    await this.backend.hostPath(import_node_path10.default.dirname(directory), "directory");
+    await this.backend.hostPath(plannedParent || import_node_path10.default.dirname(directory), "directory");
+    if (plannedParent && import_node_path10.default.dirname(import_node_path10.default.dirname(directory)) !== plannedParent) hardwareError("INVALID_PATH", "Planned VM parent must be one new child of the existing parent.");
     await this.backend.hostPath(directory, "host-destination-directory");
     try {
       await import_promises8.default.lstat(directory);
@@ -50459,7 +50460,7 @@ var HardwareManager = class {
     };
     const config2 = Object.fromEntries(Object.entries(base).map(([k, v]) => [k.toLowerCase(), v]));
     const settings = { ...base, ...this.settings({ ...a, controllers }, config2, caps) };
-    const nic = await this.nicSettings(nics, {});
+    const nic = await this.nicSettings(nics, {}, plannedSegments);
     Object.assign(settings, nic.settings);
     const slots = /* @__PURE__ */ new Set();
     for (const d of disks2) {
@@ -50480,7 +50481,7 @@ var HardwareManager = class {
       Object.assign(settings, { "sata0.present": "TRUE", [`${slot2}.present`]: "TRUE", [`${slot2}.deviceType`]: "cdrom-image", [`${slot2}.fileName`]: iso });
     }
     await this.disks.available("create", "0");
-    await this.disks.freeSpace(import_node_path10.default.dirname(directory), disks2.reduce((sum, d) => sum + d.capacity_mb * 1048576, 0));
+    await this.disks.freeSpace(plannedParent || import_node_path10.default.dirname(directory), disks2.reduce((sum, d) => sum + d.capacity_mb * 1048576, 0));
     if (nic.catalog) {
       await this.assertGUIClosed();
       await this.lan.unchanged(nic.catalog);
@@ -50911,11 +50912,11 @@ function bytesPerPixel(pf) {
   return pf.bitsPerPixel >> 3;
 }
 function validatePixelFormat(pf, fromServer = false) {
-  const fail2 = (why) => {
+  const fail3 = (why) => {
     throw new RfbError(fromServer ? "PROTOCOL_ERROR" : "INVALID_ARGUMENT", `invalid pixel format: ${why}`);
   };
   if (pf.bitsPerPixel !== 8 && pf.bitsPerPixel !== 16 && pf.bitsPerPixel !== 32) {
-    fail2(`bitsPerPixel must be 8, 16 or 32, not ${pf.bitsPerPixel}`);
+    fail3(`bitsPerPixel must be 8, 16 or 32, not ${pf.bitsPerPixel}`);
   }
   if (!pf.trueColor)
     return;
@@ -50923,10 +50924,10 @@ function validatePixelFormat(pf, fromServer = false) {
     const max = pf[`${c}Max`];
     const shift = pf[`${c}Shift`];
     if (!Number.isInteger(max) || max < 1 || max > 65535 || (max & max + 1) !== 0) {
-      fail2(`${c}Max must be 2^n - 1, not ${max}`);
+      fail3(`${c}Max must be 2^n - 1, not ${max}`);
     }
     if (!Number.isInteger(shift) || shift < 0 || shift + Math.log2(max + 1) > pf.bitsPerPixel) {
-      fail2(`${c}Shift ${shift} puts ${c} outside the ${pf.bitsPerPixel}-bit pixel`);
+      fail3(`${c}Shift ${shift} puts ${c} outside the ${pf.bitsPerPixel}-bit pixel`);
     }
   }
 }
@@ -55171,8 +55172,8 @@ var ConsoleManager = class {
     this.closed = false;
   }
   async endpoint(vmID) {
-    const file7 = await this.credentials.load();
-    const aliases = Object.fromEntries(Object.entries(file7.console || {}).filter(([, entry]) => typeof entry?.vmx === "string").map(([name2, entry]) => [name2, entry.vmx]));
+    const file8 = await this.credentials.load();
+    const aliases = Object.fromEntries(Object.entries(file8.console || {}).filter(([, entry]) => typeof entry?.vmx === "string").map(([name2, entry]) => [name2, entry.vmx]));
     const vmx3 = await this.backend.resolveVM(vmID, { aliases, restInventory: this.rest ? async () => {
       const response = await this.rest.request("GET", "/api/vms");
       if (!Array.isArray(response.data)) throw new Error("REST inventory did not return VM IDs and paths.");
@@ -55532,10 +55533,10 @@ async function inspectArtifact(backend2, input2, { signal } = {}) {
   const files = /* @__PURE__ */ new Map();
   let descriptorName;
   let headerBytes = 0;
-  const add = (name2, file7) => {
-    headerBytes += file7.header.length;
+  const add = (name2, file8) => {
+    headerBytes += file8.header.length;
     if (headerBytes > 64 * 1024 * 1024) throw new Error("Appliance exceeds the 64 MiB header preflight budget.");
-    files.set(name2, file7);
+    files.set(name2, file8);
   };
   if (ext === ".ova") {
     const extract = import_tar_stream.default.extract();
@@ -55587,7 +55588,7 @@ async function inspectArtifact(backend2, input2, { signal } = {}) {
   const manifests = [...files].filter(([name2]) => /\.mf$/i.test(name2));
   if (manifests.length > 1) throw new Error("Multiple appliance manifests are unsupported.");
   if (manifests.length) checkManifest(manifests[0][1].text, files);
-  return { source: source3, descriptorName, manifest: manifests.length ? "checksums verified (SHA1/SHA256/SHA512); signer trust is not established" : "absent", descriptor: files.get(descriptorName).text, size: [...files.values()].reduce((size, file7) => size + file7.size, 0), files: [...files.keys()] };
+  return { source: source3, descriptorName, manifest: manifests.length ? "checksums verified (SHA1/SHA256/SHA512); signer trust is not established" : "absent", descriptor: files.get(descriptorName).text, size: [...files.values()].reduce((size, file8) => size + file8.size, 0), files: [...files.keys()] };
 }
 function machineRecords(output2) {
   const records = [];
@@ -55759,7 +55760,7 @@ var OvfManager = class {
       resources: [import_node_path14.default.dirname(inputPath), ...directory ? [directory] : []],
       artifacts: destination ? [destination, directory] : [],
       timeout: a.timeout_seconds * 1e3,
-      task: (context2) => this.backend.resources.use([ext === "vmx" ? import_node_path14.default.dirname(inputPath) : inputPath, ...directory ? [directory] : []], () => this.perform(operation, { ...a, source: inputPath, destination, directory, target: target3, ext }, status, context2))
+      task: (context3) => this.backend.resources.use([ext === "vmx" ? import_node_path14.default.dirname(inputPath) : inputPath, ...directory ? [directory] : []], () => this.perform(operation, { ...a, source: inputPath, destination, directory, target: target3, ext }, status, context3))
     });
   }
   async vmSource(vmx3) {
@@ -55773,10 +55774,10 @@ var OvfManager = class {
     if ((await this.backend.snapshots(vmx3)).snapshots.length) throw new Error("Snapshot sources are unsupported. Export a separately prepared VM without snapshots.");
     let size = (await import_promises15.default.stat(vmx3)).size;
     const inspectFile = async (input2) => {
-      const file7 = await this.backend.hostPath(input2, "input-file");
-      if (!isWithin(import_node_path14.default.dirname(vmx3), file7)) throw new Error("VM export backings must remain inside the VM directory. External disks/media are unsupported.");
-      size += (await import_promises15.default.stat(file7)).size;
-      return file7;
+      const file8 = await this.backend.hostPath(input2, "input-file");
+      if (!isWithin(import_node_path14.default.dirname(vmx3), file8)) throw new Error("VM export backings must remain inside the VM directory. External disks/media are unsupported.");
+      size += (await import_promises15.default.stat(file8)).size;
+      return file8;
     };
     for (const name2 of ["workingdir", "snapshot.directory"]) if (config2[name2]) {
       const directory = await this.backend.hostPath(import_node_path14.default.resolve(import_node_path14.default.dirname(vmx3), config2[name2]), "directory");
@@ -55785,9 +55786,9 @@ var OvfManager = class {
     if (Object.keys(config2).some((name2) => /^(bios440|efi32|efi64)\.filename$/.test(name2))) throw new Error("Custom firmware file backings are unsupported.");
     for (const [name2, value] of Object.entries(config2)) if ((/\.filename$/.test(name2) || ["nvram", "extendedconfigfile"].includes(name2)) && value && config2[name2.replace(/filename$/, "present")]?.toLowerCase() !== "false") {
       if (value.toLowerCase() === "auto detect") continue;
-      const file7 = await inspectFile(import_node_path14.default.resolve(import_node_path14.default.dirname(vmx3), value));
-      if (import_node_path14.default.extname(file7).toLowerCase() === ".vmdk") {
-        const handle = await import_promises15.default.open(file7, "r");
+      const file8 = await inspectFile(import_node_path14.default.resolve(import_node_path14.default.dirname(vmx3), value));
+      if (import_node_path14.default.extname(file8).toLowerCase() === ".vmdk") {
+        const handle = await import_promises15.default.open(file8, "r");
         let header;
         try {
           const buffer3 = Buffer.alloc(1024 * 1024);
@@ -55798,7 +55799,7 @@ var OvfManager = class {
         }
         const diskType = header.match(/createType\s*=\s*"([^"]+)"/i)?.[1];
         if (/parentFileNameHint\s*=|parentCID\s*=\s*(?!ffffffff)[a-f0-9]{8}/i.test(header) || !/^(monolithicSparse|monolithicFlat|twoGbMaxExtentSparse|twoGbMaxExtentFlat|streamOptimized)$/i.test(diskType || "")) throw new Error("Snapshot/linked/raw or unrecognized VMDK backings are unsupported.");
-        for (const extent of header.matchAll(/(?:^|\n)(?:RW|RDONLY|NOACCESS)\s+\d+\s+\w+\s+"([^"]+)"/g)) await inspectFile(import_node_path14.default.resolve(import_node_path14.default.dirname(file7), extent[1]));
+        for (const extent of header.matchAll(/(?:^|\n)(?:RW|RDONLY|NOACCESS)\s+\d+\s+\w+\s+"([^"]+)"/g)) await inspectFile(import_node_path14.default.resolve(import_node_path14.default.dirname(file8), extent[1]));
       }
     }
     return { source: vmx3, size, manifest: "not applicable" };
@@ -55808,8 +55809,8 @@ var OvfManager = class {
     if (Object.keys(values).some((name2) => /password|secret|token/i.test(name2))) throw new Error("Sensitive deployment properties must use a local property_profile, not property_mappings in tool arguments.");
     if (a.property_profile) {
       const profile = this.credentials.profile(a.property_profile);
-      const file7 = await this.credentials.load();
-      const stored = file7.ovf_properties?.[profile];
+      const file8 = await this.credentials.load();
+      const stored = file8.ovf_properties?.[profile];
       if (!stored || typeof stored !== "object" || Array.isArray(stored)) throw new Error("OVF property profile is not configured in the local credentials file.");
       const parsed = mappings.parse(stored);
       for (const value of Object.values(parsed)) this.credentials.remember(value);
@@ -55817,8 +55818,8 @@ var OvfManager = class {
     }
     return values;
   }
-  async perform(operation, a, status, context2) {
-    const { signal } = context2;
+  async perform(operation, a, status, context3) {
+    const { signal } = context3;
     const sourceInfo = a.ext === "vmx" ? await this.vmSource(a.source) : await inspectArtifact(this.backend, a.source, { signal });
     const properties = await this.propertyValues(a);
     const scratch = await import_promises15.default.mkdtemp(import_node_path14.default.join(import_node_os3.default.tmpdir(), "vmware-ovf-"));
@@ -55829,12 +55830,12 @@ var OvfManager = class {
     let committed = false;
     try {
       const common = [`--configFile=${config2}`, "--machineOutput", "--X:noPrompting", "--hideEula", `--sourceType=${a.ext.toUpperCase()}`];
-      const probe = await context2.run(status.executable, [...common, ...operation === "ovf_validate" ? ["--schemaValidate"] : [], a.source], { cwd: scratch, env, logOutput: false, progress: "ovf", allowNonzero: true });
+      const probe = await context3.run(status.executable, [...common, ...operation === "ovf_validate" ? ["--schemaValidate"] : [], a.source], { cwd: scratch, env, logOutput: false, progress: "ovf", allowNonzero: true });
       const records = machineRecords(probe.output);
       const success2 = probe.code === 0 && records.some((record2) => record2.type === "RESULT" && record2.payload === "SUCCESS");
       if (!success2) throw new Error(`OVF Tool ${operation === "ovf_validate" ? "validation" : "probe"} failed. ${this.failure(probe.output)}`);
       const metadata = probeMetadata(probe.output);
-      context2.log("OVF Tool probe succeeded. Metadata is available in job_status.result; raw property defaults are omitted from logs.\n");
+      context3.log("OVF Tool probe succeeded. Metadata is available in job_status.result; raw property defaults are omitted from logs.\n");
       const warnings = records.filter((record2) => record2.type === "WARNING").map((record2) => record2.payload);
       if (!a.destination) return { source: a.source, valid: operation === "ovf_validate" ? true : void 0, manifest: sourceInfo.manifest, metadata, warnings, limitations: limits };
       for (const [field, flag2] of [["name", "name"], ["deployment_option", "deploymentOption"]]) if (a[field] && !status.supported_flags[flag2]) throw new Error(`Installed OVF Tool does not support ${field}.`);
@@ -55858,8 +55859,8 @@ var OvfManager = class {
         await import_promises15.default.mkdir(a.directory);
         output2 = a.destination;
       }
-      context2.artifact(staging || a.directory);
-      await context2.checkpoint({ transfer_started: false, destination: a.destination, staging: staging || null });
+      context3.artifact(staging || a.directory);
+      await context3.checkpoint({ transfer_started: false, destination: a.destination, staging: staging || null });
       const args = [...common, `--targetType=${a.target.toUpperCase()}`];
       if (a.name) args.push(`--name=${a.name}`);
       if (a.deployment_option) args.push(`--deploymentOption=${a.deployment_option}`);
@@ -55867,7 +55868,7 @@ var OvfManager = class {
       for (const [name2, value] of Object.entries(a.network_mappings || {})) args.push(`--net:${name2}=${value}`);
       for (const [name2, value] of Object.entries(properties)) args.push(`--prop:${name2}=${value}`);
       if (a.ext === "vmx") await this.vmSource(a.source);
-      const converted = await context2.run(status.executable, [...args, a.source, output2], { cwd: scratch, env, progress: "ovf", allowNonzero: true });
+      const converted = await context3.run(status.executable, [...args, a.source, output2], { cwd: scratch, env, progress: "ovf", allowNonzero: true });
       const final = machineRecords(converted.output);
       if (converted.code !== 0 || !final.some((record2) => record2.type === "RESULT" && record2.payload === "SUCCESS")) throw new Error(`OVF Tool transfer failed. Partial files may remain at ${staging || a.directory}. ${this.failure(converted.output)}`);
       signal.throwIfAborted();
@@ -55891,7 +55892,7 @@ var OvfManager = class {
       }
       let registered = false;
       let poweredOn = false;
-      context2.log(`
+      context3.log(`
 Transfer succeeded at ${resultPath}
 `);
       try {
@@ -55913,7 +55914,7 @@ Transfer succeeded at ${resultPath}
     } finally {
       await removeTemporary(scratch, import_node_os3.default.tmpdir(), "vmware-ovf-");
       if (staging && committed) await removeTemporary(staging, a.directory, ".ovf-job-");
-      else if (staging) context2.log(`
+      else if (staging) context3.log(`
 Uncommitted output retained at ${staging}
 `);
     }
@@ -56028,12 +56029,12 @@ var JobManager = class {
     }, 1e3);
     job.timer = setTimeout(() => this.stop(job, "timed_out"), timeout4);
     job.done = reservation.run(async () => {
-      const context2 = {
+      const context3 = {
         signal: job.controller.signal,
         log: (text3) => this.log(job, text3),
-        artifact: (file7) => {
-          if (!job.artifacts.includes(file7) && job.artifacts.length < 64) {
-            job.artifacts.push(file7);
+        artifact: (file8) => {
+          if (!job.artifacts.includes(file8) && job.artifacts.length < 64) {
+            job.artifacts.push(file8);
             job.dirty = true;
           }
         },
@@ -56041,15 +56042,15 @@ var JobManager = class {
           job.partial_result = this.bounded(result);
           await this.persist(job);
         },
-        run: (file7, args, options2) => this.run(job, file7, args, options2)
+        run: (file8, args, options2) => this.run(job, file8, args, options2)
       };
       try {
         await this.initialize();
         for (const id of evicted) await this.store?.remove(id);
         await this.persist(job);
-        context2.signal.throwIfAborted();
-        const result = await task(context2);
-        context2.signal.throwIfAborted();
+        context3.signal.throwIfAborted();
+        const result = await task(context3);
+        context3.signal.throwIfAborted();
         job.result = this.bounded(result);
         job.state = "succeeded";
       } catch (error62) {
@@ -56141,12 +56142,12 @@ var JobManager = class {
       job.truncated = true;
     }
   }
-  run(job, file7, args, { cwd, env, logOutput = true, progress = null, timeout: timeout4, allowNonzero = false } = {}) {
+  run(job, file8, args, { cwd, env, logOutput = true, progress = null, timeout: timeout4, allowNonzero = false } = {}) {
     job.controller.signal.throwIfAborted();
     return new Promise((resolve, reject) => {
       let output2 = "", outputBytes = 0, tooLarge = false, child, killPromise, processTimer, startError = false;
       try {
-        child = this.spawnProcess(file7, args, { cwd, env, windowsHide: true, shell: false, detached: process.platform !== "win32", stdio: ["ignore", "pipe", "pipe"] });
+        child = this.spawnProcess(file8, args, { cwd, env, windowsHide: true, shell: false, detached: process.platform !== "win32", stdio: ["ignore", "pipe", "pipe"] });
       } catch {
         reject(new Error("Cannot start native job process. Check installation and executable permissions."));
         return;
@@ -56369,7 +56370,7 @@ async function connectSerial(endpoint, { signal, timeoutMs = 1e4, platform = pro
       child.stdout.destroy();
       child.kill();
     };
-    const fail2 = (error62) => {
+    const fail3 = (error62) => {
       clearTimeout(timer);
       signal?.removeEventListener("abort", abort);
       if (!ready) {
@@ -56377,11 +56378,11 @@ async function connectSerial(endpoint, { signal, timeoutMs = 1e4, platform = pro
         reject(error62);
       } else stream.destroy(error62);
     };
-    const abort = () => fail2(serialError("SERIAL_CANCELLED", "Serial connection cancelled."));
-    const timer = setTimeout(() => fail2(failure2()), timeoutMs + 2e3);
-    child.once("error", () => fail2(failure2()));
+    const abort = () => fail3(serialError("SERIAL_CANCELLED", "Serial connection cancelled."));
+    const timer = setTimeout(() => fail3(failure2()), timeoutMs + 2e3);
+    child.once("error", () => fail3(failure2()));
     child.once("exit", (code) => {
-      if (!ready) fail2(failure2());
+      if (!ready) fail3(failure2());
       else if (code !== 0) stream.destroy(failure2());
       else stream.end();
     });
@@ -56389,12 +56390,12 @@ async function connectSerial(endpoint, { signal, timeoutMs = 1e4, platform = pro
       if (ready) return;
       stderr += chunk.toString("utf8");
       if (stderr.length > 1024) {
-        fail2(failure2());
+        fail3(failure2());
         return;
       }
       const code = stderr.match(/(?:^|\n)(SERIAL_[A-Z_]+)\r?\n/)?.[1];
       if (Object.hasOwn(bridgeFailures, code)) {
-        fail2(serialError(code, bridgeFailures[code]));
+        fail3(serialError(code, bridgeFailures[code]));
         return;
       }
       if (!stderr.includes("SERIAL_READY\n")) return;
@@ -56421,13 +56422,13 @@ async function connectSerial(endpoint, { signal, timeoutMs = 1e4, platform = pro
       });
       child.stdout.once("end", () => stream.push(null));
       child.stdout.once("close", () => {
-        if (!child.stdout.readableEnded && !stream.destroyed) fail2(failure2());
+        if (!child.stdout.readableEnded && !stream.destroyed) fail3(failure2());
       });
       ready = true;
       resolve(stream);
     });
-    child.stdin.on("error", () => fail2(failure2()));
-    child.stdout.on("error", () => fail2(failure2()));
+    child.stdin.on("error", () => fail3(failure2()));
+    child.stdout.on("error", () => fail3(failure2()));
     signal?.addEventListener("abort", abort, { once: true });
     if (signal?.aborted) abort();
   });
@@ -56468,8 +56469,8 @@ var SerialManager = class {
   }
   endpoint(vmx3, port) {
     if (!["win32", "linux"].includes(this.platform)) throw serialError("SERIAL_UNSUPPORTED", "Direct serial requires native Windows or Linux Workstation.");
-    const digest2 = (0, import_node_crypto8.createHash)("sha256").update(this.key(vmx3, port)).digest("hex").slice(0, 32);
-    const endpoint = this.platform === "win32" ? `\\\\.\\pipe\\vmware-mcp-serial-${digest2}-${port}` : import_node_path17.default.join(import_node_path17.default.dirname(vmx3), ".mcp-serial", `${digest2}-${port}.sock`);
+    const digest3 = (0, import_node_crypto8.createHash)("sha256").update(this.key(vmx3, port)).digest("hex").slice(0, 32);
+    const endpoint = this.platform === "win32" ? `\\\\.\\pipe\\vmware-mcp-serial-${digest3}-${port}` : import_node_path17.default.join(import_node_path17.default.dirname(vmx3), ".mcp-serial", `${digest3}-${port}.sock`);
     if (this.platform === "linux" && Buffer.byteLength(endpoint) > 103) throw serialError("SERIAL_SETUP_REQUIRED", "VM directory is too long for a portable UNIX socket path. Use a shorter approved native VM path.");
     return { vmx: vmx3, port, path: endpoint, key: this.key(vmx3, port), transport: this.platform === "win32" ? "local Windows named pipe" : "local UNIX stream socket" };
   }
@@ -56817,8 +56818,8 @@ var Readiness = class {
       const category = failureCategory(error62.message);
       return { state: "unknown", lifecycle: "unknown", category, action: actionFor(category) };
     }
-    const paths = await Promise.all(running.map((file7) => import_promises18.default.realpath(file7).catch(() => file7)));
-    if (!paths.some((file7) => same(file7, vmx3))) {
+    const paths = await Promise.all(running.map((file8) => import_promises18.default.realpath(file8).catch(() => file8)));
+    if (!paths.some((file8) => same(file8, vmx3))) {
       for (const field of ["checkpoint.vmstate", "suspend.filename"]) {
         const saved = config2[field];
         if (saved) {
@@ -57261,10 +57262,10 @@ var GuestExec = class {
       };
       const runner = a.guest_os === "windows" ? "runner.ps1" : "runner.py";
       for (const [name2, content] of [["request.json", JSON.stringify(request)], [runner, a.guest_os === "windows" ? windowsRunner : linuxRunner]]) {
-        const file7 = import_node_path19.default.join(hostDirectory, name2);
-        await import_promises20.default.writeFile(file7, "", { flag: "wx", mode: 384 });
-        await this.protectFile(file7);
-        await import_promises20.default.writeFile(file7, content);
+        const file8 = import_node_path19.default.join(hostDirectory, name2);
+        await import_promises20.default.writeFile(file8, "", { flag: "wx", mode: 384 });
+        await this.protectFile(file8);
+        await import_promises20.default.writeFile(file8, content);
       }
       result.transport.phase = "tools";
       if (await run("checkToolsState") !== "running") throw new Error("Tools unavailable");
@@ -57284,9 +57285,9 @@ var GuestExec = class {
       result.transport.launch_succeeded = true;
       result.transport.phase = "completion";
       while (true) {
-        const exists3 = await run("fileExistsInGuest", [guestPath2.join(guestDirectory, "result.json")]);
-        if (exists3 === "The file exists.") break;
-        if (exists3 !== "The file does not exist.") throw new Error("Unrecognized existence response");
+        const exists4 = await run("fileExistsInGuest", [guestPath2.join(guestDirectory, "result.json")]);
+        if (exists4 === "The file exists.") break;
+        if (exists4 !== "The file does not exist.") throw new Error("Unrecognized existence response");
         if (performance.now() >= deadline) throw new Error("Completion deadline");
         await (0, import_promises21.setTimeout)(Math.min(200, Math.max(1, deadline - performance.now())), void 0, { signal });
       }
@@ -57523,11 +57524,11 @@ var JobStore = class {
     if (entries.filter((entry) => recordName.test(entry)).length > this.maxRecords) throw new Error("Job journal count exceeds its storage limit; inspect the directory.");
     for (const entry of entries) {
       if (!recordName.test(entry)) continue;
-      const file7 = import_node_path21.default.join(this.directory, entry), info = await import_promises22.default.lstat(file7);
+      const file8 = import_node_path21.default.join(this.directory, entry), info = await import_promises22.default.lstat(file8);
       if (!info.isFile() || info.isSymbolicLink() || info.nlink !== 1 || info.size > this.maxBytes) throw new Error("Unsafe or oversized job journal; inspect the journal directory.");
       let record2;
       try {
-        record2 = JSON.parse(process.platform === "linux" ? await readPrivateFile(file7) : await import_promises22.default.readFile(file7, "utf8"));
+        record2 = JSON.parse(process.platform === "linux" ? await readPrivateFile(file8) : await import_promises22.default.readFile(file8, "utf8"));
         if (filename(record2.job_id) !== entry || !Number.isFinite(Date.parse(record2.started_at)) || !["running", "succeeded", "failed", "cancelled", "timed_out", "interrupted"].includes(record2.state)) throw new Error();
       } catch {
         throw new Error("Job journal is invalid; inspect it before starting more jobs.");
@@ -57564,8 +57565,8 @@ var JobStore = class {
       const cutoff = Date.now() - this.retentionMs;
       for (const entry of await import_promises22.default.readdir(this.directory)) {
         if (!recordName.test(entry) || retainedIDs.has(entry.slice(0, -5).replace("_", ":"))) continue;
-        const file7 = import_node_path21.default.join(this.directory, entry), info = await import_promises22.default.lstat(file7);
-        if (info.isFile() && !info.isSymbolicLink() && info.mtimeMs < cutoff) await import_promises22.default.unlink(file7);
+        const file8 = import_node_path21.default.join(this.directory, entry), info = await import_promises22.default.lstat(file8);
+        if (info.isFile() && !info.isSymbolicLink() && info.mtimeMs < cutoff) await import_promises22.default.unlink(file8);
       }
     });
     this.tail = operation.catch(() => {
@@ -57646,26 +57647,26 @@ var JobOperations = class {
       resources,
       artifacts,
       timeout: a.timeout_seconds * 1e3,
-      task: (context2) => this.backend.execution.run(context2, async () => {
+      task: (context3) => this.backend.execution.run(context3, async () => {
         const results = [];
         for (const [index, step2] of steps.entries()) {
-          context2.signal.throwIfAborted();
-          context2.log(`Step ${index + 1}/${steps.length}: ${step2.operation} started.
+          context3.signal.throwIfAborted();
+          context3.log(`Step ${index + 1}/${steps.length}: ${step2.operation} started.
 `);
           let result;
           if (step2.operation.startsWith("disk_")) result = await this.disks.perform(step2.operation.slice(5), step2.arguments);
-          else if (step2.operation === "clone") result = await this.clone(step2.arguments, context2);
+          else if (step2.operation === "clone") result = await this.clone(step2.arguments, context3);
           else result = await this.power(step2.arguments);
           results.push({ step: index + 1, operation: step2.operation, result });
-          await context2.checkpoint({ completed_steps: results });
-          context2.log(`Step ${index + 1}/${steps.length}: verified completion.
+          await context3.checkpoint({ completed_steps: results });
+          context3.log(`Step ${index + 1}/${steps.length}: verified completion.
 `);
         }
         return { completed_steps: results, note: "Native results verified per step; no guest readiness or automatic rollback is implied." };
       })
     });
   }
-  async clone(a, context2) {
+  async clone(a, context3) {
     const source3 = await this.ovf.vmSource(a.vmx);
     const config2 = parseAssignments(await import_promises23.default.readFile(a.vmx, "utf8"));
     let bytes = source3.size;
@@ -57674,10 +57675,10 @@ var JobOperations = class {
     }
     const directory = import_node_path22.default.dirname(a.destination_vmx);
     await this.disks.freeSpace(import_node_path22.default.dirname(directory), bytes);
-    context2.signal.throwIfAborted();
+    context3.signal.throwIfAborted();
     await import_promises23.default.mkdir(directory);
     await this.backend.run(["clone", a.vmx, a.destination_vmx, "full", ...a.name ? [`-cloneName=${a.name}`] : []], { mutation: true, timeout: a.timeout_seconds * 1e3 });
-    context2.signal.throwIfAborted();
+    context3.signal.throwIfAborted();
     const destination = await this.backend.vmx(a.destination_vmx);
     await this.ovf.vmSource(destination);
     return { source: a.vmx, destination, clone_type: "full", powered_on: false, output_verified: true };
@@ -57843,7 +57844,7 @@ var TemplateManager = class {
     if (!found) hardwareError("TEMPLATE_NOT_FOUND", "Unknown template ID. Use template_list or supply a portable JSON template.");
     return validateTemplate(found);
   }
-  async prepare(a) {
+  async prepare(a, planning = {}) {
     const t = this.resolve(a.template);
     const required2 = new Set(t.nics.map((n2) => n2.network));
     if (Object.keys(a.networks).some((k) => !required2.has(k)) || [...required2].some((k) => !Object.hasOwn(a.networks, k))) hardwareError("INVALID_NETWORK", "Supply exactly one local binding for each logical network in the template.");
@@ -57869,7 +57870,7 @@ var TemplateManager = class {
       ...iso ? { iso_path: iso } : {},
       timeout_seconds: a.timeout_seconds ?? 600
     };
-    const internal = await this.hardware.planCreate(creation);
+    const internal = await this.hardware.planCreate(creation, planning);
     const capacity2 = t.disks.reduce((sum, d) => sum + d.capacity_mb * 1048576, 0);
     const directory = internal.directory;
     return { creation, plan: {
@@ -57975,6 +57976,437 @@ var TemplateManager = class {
   }
 };
 
+// src/labs.mjs
+var import_promises25 = __toESM(require("node:fs/promises"), 1);
+var import_node_path24 = __toESM(require("node:path"), 1);
+var import_node_crypto11 = require("node:crypto");
+
+// src/lab-schemas.mjs
+var file7 = external_exports.string().min(1).max(4096).regex(/^[^\x00-\x1f]+$/);
+var readiness = external_exports.object({
+  kind: external_exports.enum(["none", "boot", "ip", "service"]).default("none"),
+  timeout_seconds: external_exports.number().int().min(1).max(600).default(120),
+  attempts: external_exports.number().int().min(1).max(3).default(1),
+  port: external_exports.number().int().min(1).max(65535).optional(),
+  protocol: external_exports.enum(["tcp", "http", "https"]).default("tcp"),
+  path: external_exports.string().max(1024).regex(/^\/(?!\/)[^\x00-\x20#]*$/).default("/"),
+  expected_status: external_exports.number().int().min(200).max(599).default(200)
+}).strict();
+var labSchema = external_exports.object({
+  schema_version: external_exports.literal("1.0"),
+  id: templateId,
+  networks: external_exports.record(templateId, external_exports.object({ kind: external_exports.enum(["binding", "private_lan"]) }).strict()),
+  vms: external_exports.array(external_exports.object({
+    id: templateId,
+    template: external_exports.union([templateId, templateSchema]),
+    networks: external_exports.record(templateId, templateId).default({}),
+    media: external_exports.record(templateId, templateId).default({}),
+    depends_on: external_exports.array(templateId).max(15).default([]),
+    readiness: readiness.default({ kind: "none" })
+  }).strict()).min(1).max(16)
+}).strict();
+var context2 = {
+  lab: labSchema,
+  directory: file7.describe("NEW lab directory, or the same owned directory with resume=true. Parent must exist."),
+  networks: templateSchemas.template_validate.shape.networks,
+  media: templateSchemas.template_validate.shape.media
+};
+var action = { directory: file7, dry_run: external_exports.boolean().default(true), confirm: external_exports.literal(true).optional() };
+var labSchemas = {
+  lab_validate: external_exports.object(context2).strict(),
+  lab_deploy: external_exports.object({ ...context2, dry_run: external_exports.boolean().default(true), confirm: external_exports.literal(true).optional(), resume: external_exports.boolean().default(false), start: external_exports.boolean().default(false), timeout_seconds: external_exports.number().int().min(1).max(3600).default(600) }).strict(),
+  lab_status: external_exports.object({ directory: file7 }).strict(),
+  lab_start: external_exports.object(action).strict(),
+  lab_stop: external_exports.object({ ...action, mode: external_exports.enum(["soft", "hard"]).default("soft") }).strict(),
+  lab_destroy: external_exports.object(action).strict()
+};
+
+// src/labs.mjs
+var fail2 = (code, message) => {
+  throw Object.assign(new Error(message), { code });
+};
+var exists3 = async (file8) => import_promises25.default.lstat(file8).catch((e2) => {
+  if (e2.code !== "ENOENT") throw e2;
+  return null;
+});
+var digest2 = (value) => (0, import_node_crypto11.createHash)("sha256").update(JSON.stringify(value)).digest("hex");
+var identity = (s2) => ({ dev: s2.dev, ino: s2.ino });
+var same2 = (s2, expected) => s2 && s2.dev === expected?.dev && s2.ino === expected?.ino;
+var manifestName = "lab-manifest.json";
+var markerName = ".lab-owner";
+function orderLab(input2) {
+  const lab = labSchema.parse(input2), nodes = new Map(lab.vms.map((v) => [v.id, v]));
+  if (nodes.size !== lab.vms.length) fail2("INVALID_LAB", "VM identifiers must be unique.");
+  const done = /* @__PURE__ */ new Set(), visiting = /* @__PURE__ */ new Set(), order = [];
+  function visit2(id) {
+    if (!nodes.has(id)) fail2("INVALID_DEPENDENCY", "Every dependency must name a VM in this lab.");
+    if (visiting.has(id)) fail2("DEPENDENCY_CYCLE", "Lab dependency graph contains a cycle.");
+    if (done.has(id)) return;
+    visiting.add(id);
+    const node2 = nodes.get(id);
+    if (new Set(node2.depends_on).size !== node2.depends_on.length) fail2("INVALID_DEPENDENCY", "Duplicate dependencies are refused.");
+    for (const dependency of node2.depends_on) visit2(dependency);
+    visiting.delete(id);
+    done.add(id);
+    order.push(id);
+    if (node2.readiness.kind === "service" !== (node2.readiness.port !== void 0)) fail2("INVALID_READINESS", "Supply port only for service readiness.");
+    for (const network of Object.values(node2.networks)) if (!Object.hasOwn(lab.networks, network)) fail2("INVALID_NETWORK", "VM mapping refers to an undeclared lab network.");
+  }
+  for (const id of nodes.keys()) visit2(id);
+  return { lab, order };
+}
+var LabManager = class {
+  constructor({ backend: backend2, templates: templates2, lan, readiness: readiness3, protectFile } = {}) {
+    Object.assign(this, { backend: backend2, templates: templates2, lan, readiness: readiness3, protectFile });
+  }
+  async root(input2) {
+    const root = await this.backend.hostPath(input2, "destination-directory");
+    await this.backend.hostPath(root, "host-destination-directory");
+    if (root !== import_node_path24.default.resolve(input2) || import_node_path24.default.dirname(root) === root) fail2("UNSAFE_LAB_PATH", "Use a canonical lab directory without symlink aliases.");
+    return root;
+  }
+  async writePrivate(file8, text3, flags2 = "wx") {
+    const handle = await import_promises25.default.open(file8, flags2, 384);
+    try {
+      await this.protectFile(file8);
+      await handle.writeFile(text3);
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
+  }
+  async save(m) {
+    if (Buffer.byteLength(JSON.stringify(m)) > 4 * 1024 * 1024) fail2("MANIFEST_LIMIT", "Lab manifest exceeds 4 MiB.");
+    const temporary = import_node_path24.default.join(m.directory, `.lab-${(0, import_node_crypto11.randomUUID)()}.tmp`);
+    try {
+      await this.writePrivate(temporary, JSON.stringify(m, null, 2));
+      await import_promises25.default.rename(temporary, import_node_path24.default.join(m.directory, manifestName));
+    } finally {
+      await import_promises25.default.unlink(temporary).catch((e2) => {
+        if (e2.code !== "ENOENT") throw e2;
+      });
+    }
+  }
+  async read(input2) {
+    const directory = await this.root(input2), rootStat = await import_promises25.default.lstat(directory);
+    if (!rootStat.isDirectory() || rootStat.isSymbolicLink()) fail2("UNSAFE_MANIFEST", "Lab root must be a regular directory.");
+    const read = async (name2) => {
+      const filename2 = import_node_path24.default.join(directory, name2), stat = await import_promises25.default.lstat(filename2);
+      if (!stat.isFile() || stat.isSymbolicLink() || stat.nlink !== 1 || stat.size > 4 * 1024 * 1024 || process.platform === "linux" && (stat.uid !== process.getuid() || stat.mode & 63)) fail2("UNSAFE_MANIFEST", "Lab state must be private regular files under 4 MiB.");
+      return import_promises25.default.readFile(filename2, "utf8");
+    };
+    const m = JSON.parse(await read(manifestName));
+    if (m.schema_version !== "1.0" || m.directory !== directory || !same2(rootStat, m.identity) || !/^[0-9a-f-]{36}$/.test(m.owner) || await read(markerName) !== m.owner) fail2("UNSAFE_MANIFEST", "Lab ownership does not match this root.");
+    const { lab, order } = orderLab(m.lab);
+    if (JSON.stringify(order) !== JSON.stringify(m.order) || m.recipe !== digest2({ lab, networks: m.bindings, media: m.media }) || !Array.isArray(m.vms) || m.vms.length !== lab.vms.length || !Array.isArray(m.segments) || m.segments.length > Object.keys(lab.networks).length) fail2("UNSAFE_MANIFEST", "Invalid lab manifest recipe or resources.");
+    for (let i = 0; i < m.vms.length; i++) {
+      const v = m.vms[i];
+      if (v.id !== lab.vms[i].id || !Array.isArray(v.files) || v.files.length > 1024 || v.files.some((f) => typeof f.path !== "string" || import_node_path24.default.isAbsolute(f.path) || !isWithin(import_node_path24.default.join(directory, v.id), import_node_path24.default.resolve(directory, f.path)))) fail2("UNSAFE_MANIFEST", "Manifest paths must stay inside the named VM directory.");
+    }
+    for (const s2 of m.segments) if (lab.networks[s2.key]?.kind !== "private_lan" || s2.name !== this.segmentName(m, s2.key)) fail2("UNSAFE_MANIFEST", "Manifest segment ownership is invalid.");
+    return m;
+  }
+  segmentName(m, key3) {
+    return `lab-${m.lab.id}-${m.owner}-${key3}`;
+  }
+  async plan(input2) {
+    const { lab, order } = orderLab(input2.lab), directory = await this.root(input2.directory);
+    if (await exists3(directory)) fail2("TARGET_EXISTS", "Choose a NEW lab directory, or explicitly resume the matching manifest.");
+    await this.backend.hostPath(import_node_path24.default.dirname(directory), "directory");
+    const required2 = Object.keys(lab.networks).filter((k) => lab.networks[k].kind === "binding");
+    if (Object.keys(input2.networks).length !== required2.length || required2.some((k) => !Object.hasOwn(input2.networks, k))) fail2("INVALID_NETWORK", "Supply exactly the external lab network bindings. Private LANs are created by the lab.");
+    const mediaNames = new Set(lab.vms.flatMap((v) => Object.values(v.media)));
+    if (Object.keys(input2.media).length !== mediaNames.size || [...mediaNames].some((k) => !Object.hasOwn(input2.media, k))) fail2("INVALID_MEDIA", "Supply exactly the mapped lab media bindings.");
+    const bindings = { ...input2.networks }, plannedSegments = [];
+    for (const [key3, network] of Object.entries(lab.networks)) if (network.kind === "private_lan") {
+      const id = `planned:${key3}`;
+      plannedSegments.push({ id, name: id });
+      bindings[key3] = { network: "lan_segment", segment: id };
+    }
+    const plans = [];
+    for (const id of order) {
+      const v = lab.vms.find((v2) => v2.id === id);
+      const a = this.templateArgs(v, directory, bindings, input2.media);
+      const { plan } = await this.templates.prepare(a, { plannedParent: import_node_path24.default.dirname(directory), plannedSegments });
+      plans.push({ id, depends_on: v.depends_on, readiness: v.readiness, ...plan });
+    }
+    const bytes = plans.reduce((n2, p) => n2 + p.resources.virtual_disk_bytes, 0);
+    await this.templates.hardware.disks.freeSpace(import_node_path24.default.dirname(directory), bytes);
+    return { valid: true, dry_run: true, plan: {
+      schema_version: "1.0",
+      directory,
+      order,
+      networks: lab.networks,
+      vms: plans,
+      resources: { cpus: plans.reduce((n2, p) => n2 + p.resources.cpus, 0), memory_mb: plans.reduce((n2, p) => n2 + p.resources.memory_mb, 0), virtual_disk_bytes: bytes },
+      warnings: ["Blank VMs; no OS installation or guest readiness is implied.", "Private LAN IDs are allocated at deployment; external networks/media remain unowned.", "Reservations coordinate this server only. Keep external writers closed.", "Destroy removes only recorded files; unexpected runtime/user files are retained. Ambiguous creation intents require manual inspection."]
+    } };
+  }
+  templateArgs(v, directory, networks, media2, timeout_seconds = 600) {
+    return { template: v.template, directory: import_node_path24.default.join(directory, v.id), networks: Object.fromEntries(Object.entries(v.networks).map(([k, ref]) => [k, networks[ref]])), media: Object.fromEntries(Object.entries(v.media).map(([k, ref]) => [k, media2[ref]])), timeout_seconds };
+  }
+  async validate(input2) {
+    return this.plan(labSchemas.lab_validate.parse(input2));
+  }
+  async inventory(directory, root, limit = { count: 0 }) {
+    const records = [];
+    for (const name2 of await import_promises25.default.readdir(directory)) {
+      if (++limit.count > 1024) fail2("ARTIFACT_LIMIT", "VM artifact count exceeds manifest bound.");
+      const file8 = import_node_path24.default.join(directory, name2), s2 = await import_promises25.default.lstat(file8);
+      if (s2.isSymbolicLink() || !s2.isDirectory() && (!s2.isFile() || s2.nlink !== 1)) fail2("UNSAFE_ARTIFACT", "Links and special VM artifacts cannot be owned.");
+      records.push({ path: import_node_path24.default.relative(root, file8), directory: s2.isDirectory(), ...identity(s2) });
+      if (s2.isDirectory()) records.push(...await this.inventory(file8, root, limit));
+    }
+    return records;
+  }
+  async verifyVM(m, v) {
+    const directory = import_node_path24.default.join(m.directory, v.id), s2 = await import_promises25.default.lstat(directory);
+    if (s2.isSymbolicLink() || !s2.isDirectory() || !same2(s2, v.identity)) fail2("OWNERSHIP_CHANGED", "VM directory identity changed; inspect before retrying.");
+    for (const f of v.files) {
+      const file8 = import_node_path24.default.resolve(m.directory, f.path), stat = await exists3(file8);
+      if (!stat && v.state === "destroying") continue;
+      if (!same2(stat, f) || stat.isSymbolicLink() || stat.isDirectory() !== f.directory || !f.directory && (!stat.isFile() || stat.nlink !== 1) || await import_promises25.default.realpath(file8) !== file8) fail2("OWNERSHIP_CHANGED", "A tracked artifact is missing, replaced, linked or outside its canonical path.");
+    }
+    const vmx3 = import_node_path24.default.join(directory, "machine.vmx");
+    if (await exists3(vmx3)) {
+      await this.backend.vmx(vmx3);
+      const { config: config2 } = await readHardware(vmx3);
+      for (const [key3, value] of Object.entries(config2)) if (/\.filename$|^workingdir$|^snapshot\.directory$|^checkpoint\.vmstate$|^suspend\.filename$/.test(key3) && value) {
+        if (/\.filename$/.test(key3) && config2[key3.replace("filename", "devicetype")] === "cdrom-image" && Object.values(m.media).includes(value)) continue;
+        if (!isWithin(directory, import_node_path24.default.resolve(directory, value))) fail2("EXTERNAL_BACKING", "VM now references storage/state outside its owned directory.");
+      }
+    }
+    return vmx3;
+  }
+  async deploy(input2, extra = {}) {
+    const a = labSchemas.lab_deploy.parse(input2), root = await this.root(a.directory);
+    if (!a.dry_run && !a.confirm) fail2("CONFIRM_REQUIRED", "Deployment requires confirm=true for this lab and requested startup.");
+    return this.backend.resources.use([root], async () => {
+      let m;
+      if (a.resume) {
+        m = await this.read(root);
+        if (m.recipe !== digest2({ lab: orderLab(a.lab).lab, networks: a.networks, media: a.media }) || m.state === "destroyed" || m.state === "destroying") fail2("RECIPE_CHANGED", "Resume requires the original recipe/bindings and an undestroyed lab.");
+        if (a.dry_run) return { dry_run: true, manifest: m, action: "Resume only verified complete VMs and untouched pending resources; uncertain intents are refused." };
+      } else {
+        const planned = await this.plan(a);
+        if (a.dry_run) return planned;
+        await this.protectFile.preflight?.();
+        extra.signal?.throwIfAborted();
+        await import_promises25.default.mkdir(root, { mode: 448 });
+        m = {
+          schema_version: "1.0",
+          directory: root,
+          identity: identity(await import_promises25.default.lstat(root)),
+          owner: (0, import_node_crypto11.randomUUID)(),
+          lab: orderLab(a.lab).lab,
+          order: planned.plan.order,
+          bindings: a.networks,
+          media: a.media,
+          state: "deploying",
+          segments: [],
+          vms: a.lab.vms.map((v) => ({ id: v.id, state: "pending", files: [] }))
+        };
+        m.recipe = digest2({ lab: m.lab, networks: m.bindings, media: m.media });
+        await this.writePrivate(import_node_path24.default.join(root, markerName), m.owner);
+        await this.save(m);
+      }
+      return this.record(m, "deploy", async () => {
+        const bindings = { ...m.bindings };
+        for (const [key3, n2] of Object.entries(m.lab.networks)) if (n2.kind === "private_lan") {
+          extra.signal?.throwIfAborted();
+          let s2 = m.segments.find((s3) => s3.key === key3);
+          if (!s2) {
+            s2 = { key: key3, name: this.segmentName(m, key3), state: "creating" };
+            m.segments.push(s2);
+            await this.save(m);
+            if ((await this.lan.list()).segments.some((e2) => e2.name.toLowerCase() === s2.name.toLowerCase())) fail2("SEGMENT_COLLISION", "Planned private segment already exists; it will not be adopted.");
+            const result = await this.lan.create({ name: s2.name });
+            if (!result.created) fail2("SEGMENT_COLLISION", "Concurrent segment creation; ownership is unknown.");
+            s2.id = result.segment.id;
+            s2.state = "created";
+            await this.save(m);
+          } else if (s2.state !== "created") fail2("UNCERTAIN_RESOURCE", "Segment creation was interrupted; inspect the intent before recovery.");
+          const current = (await this.lan.list()).segments.find((e2) => e2.id === s2.id && e2.name === s2.name);
+          if (!current) fail2("OWNERSHIP_CHANGED", "Owned LAN segment changed or disappeared.");
+          bindings[key3] = { network: "lan_segment", segment: s2.id };
+        }
+        for (const id of m.order) {
+          extra.signal?.throwIfAborted();
+          const v = m.vms.find((v2) => v2.id === id), node2 = m.lab.vms.find((v2) => v2.id === id);
+          if (v.state === "created") {
+            await this.verifyVM(m, v);
+            continue;
+          }
+          if (!["pending", "creating"].includes(v.state) || await exists3(import_node_path24.default.join(root, id))) fail2("UNCERTAIN_RESOURCE", "Partial VM directory exists. It is never adopted or overwritten; inspect it before recovery.");
+          v.state = "creating";
+          await this.save(m);
+          await this.templates.deploy({ ...this.templateArgs(node2, root, bindings, m.media, a.timeout_seconds), dry_run: false, confirm: true }, extra);
+          const directory = import_node_path24.default.join(root, id);
+          v.identity = identity(await import_promises25.default.lstat(directory));
+          v.files = await this.inventory(directory, root);
+          v.state = "created";
+          await this.save(m);
+        }
+        m.state = "deployed";
+        await this.save(m);
+        if (a.start) await this.startVMs(m, extra);
+      });
+    });
+  }
+  async record(m, action2, callback) {
+    try {
+      await callback();
+      delete m.failure;
+      await this.save(m);
+      return { dry_run: false, action: action2, manifest: m };
+    } catch (error62) {
+      m.failure = { action: action2, code: /^[A-Z_]{2,64}$/.test(error62.code || "") ? error62.code : "LAB_ACTION_FAILED", outcome: "partial_or_unknown", recovery: "Inspect lab_status and retained artifacts. Resume only the same recipe; uncertain creation intents are never replayed. No automatic rollback or hard-stop fallback." };
+      await this.save(m);
+      throw Object.assign(new Error("Lab action failed or was cancelled. Retained manifest records completed resources and uncertain intent; inspect lab_status before retrying."), { code: "LAB_PARTIAL_FAILURE", details: { directory: m.directory, failure: m.failure, vms: m.vms.map((v) => ({ id: v.id, state: v.state })), segments: m.segments } });
+    }
+  }
+  async status(input2) {
+    const a = labSchemas.lab_status.parse(input2), m = await this.read(a.directory), observations = [];
+    for (const v of m.vms) {
+      if (v.state !== "created") {
+        observations.push({ id: v.id, state: v.state });
+        continue;
+      }
+      try {
+        const vmx3 = await this.verifyVM(m, v);
+        observations.push({ id: v.id, state: v.state, running: (await this.backend.details(vmx3)).running, readiness: "not_observed" });
+      } catch {
+        observations.push({ id: v.id, state: "unknown", ownership: "unverified" });
+      }
+    }
+    return { manifest: m, observations, note: "Manifest records completed steps, not current guest readiness. Power and readiness are separate observations." };
+  }
+  async startVMs(m, extra) {
+    if (m.vms.some((v) => v.state !== "created")) fail2("INCOMPLETE_LAB", "Start requires every VM to be completely deployed.");
+    for (const id of m.order) {
+      extra.signal?.throwIfAborted();
+      const v = m.vms.find((v2) => v2.id === id), node2 = m.lab.vms.find((v2) => v2.id === id);
+      if (v.state !== "created") fail2("INCOMPLETE_LAB", "Start requires every VM to be completely deployed.");
+      const vmx3 = await this.verifyVM(m, v);
+      if (!(await this.backend.details(vmx3)).running) {
+        await requireOffline(this.backend, vmx3);
+        v.power_intent = "start";
+        await this.save(m);
+        await this.backend.power(vmx3, "start", "soft", false);
+        if (!(await this.backend.details(vmx3)).running) fail2("POWER_UNVERIFIED", "Start command did not establish an observed running VM.");
+      }
+      v.power_intent = null;
+      const r = node2.readiness;
+      v.readiness = { kind: r.kind, ready: null };
+      await this.save(m);
+      if (r.kind !== "none") {
+        let result;
+        for (let attempt = 0; attempt < r.attempts; attempt++) {
+          extra.signal?.throwIfAborted();
+          result = await this.readiness.wait(r.kind, { vmx: vmx3, timeout_seconds: r.timeout_seconds, ...r.kind === "service" ? { port: r.port, protocol: r.protocol, path: r.path, expected_status: r.expected_status } : {} }, extra);
+          if (result.ready || extra.signal?.aborted || result.result === "cancelled") break;
+        }
+        v.readiness = { kind: r.kind, ready: result.ready === true };
+        await this.save(m);
+        if (!result.ready) fail2("READINESS_FAILED", "Dependency readiness failed within the bounded attempts. Dependents were not started.");
+      }
+    }
+    m.state = "started";
+    await this.save(m);
+  }
+  async action(name2, input2, extra = {}) {
+    const a = labSchemas[`lab_${name2}`].parse(input2), root = await this.root(a.directory);
+    if (!a.dry_run && !a.confirm) fail2("CONFIRM_REQUIRED", "Explicit confirm=true is required for this lab lifecycle action.");
+    return this.backend.resources.use([root], async () => {
+      const m = await this.read(root);
+      if (a.dry_run) return { dry_run: true, action: name2, directory: root, order: name2 === "start" ? m.order : [...m.order].reverse(), vms: m.vms, segments: m.segments, note: "Destroy requires offline VMs and removes only recorded files. Unknown files and ambiguous intents are retained; no VMnet or external resource deletion." };
+      return this.record(m, name2, async () => {
+        if (name2 === "start") {
+          if (["destroying", "destroyed"].includes(m.state)) fail2("INCOMPLETE_LAB", "Cannot start a destroyed lab.");
+          return this.startVMs(m, extra);
+        }
+        if (name2 === "stop") {
+          for (const id of [...m.order].reverse()) {
+            extra.signal?.throwIfAborted();
+            const v = m.vms.find((v2) => v2.id === id);
+            if (v.state !== "created") continue;
+            const vmx3 = await this.verifyVM(m, v);
+            if ((await this.backend.details(vmx3)).running) {
+              v.power_intent = "stop";
+              await this.save(m);
+              await this.backend.power(vmx3, "stop", a.mode, false);
+              if ((await this.backend.details(vmx3)).running) fail2("POWER_UNVERIFIED", "Stop command has not established power-off. No hard fallback.");
+            }
+            v.power_intent = null;
+            v.readiness = { kind: "none", ready: null };
+            await this.save(m);
+          }
+          m.state = "stopped";
+          return;
+        }
+        const inventory = await this.backend.listVMs();
+        if (inventory.warnings.length) fail2("INVENTORY_UNAVAILABLE", "Restore inventory before safe teardown.");
+        const ownedDisks = new Set(m.vms.flatMap((v) => v.files.filter((f) => /\.vmdk$/i.test(f.path)).map((f) => this.backend.resources.key(import_node_path24.default.resolve(root, f.path)))));
+        for (const vm2 of inventory.vms) {
+          if (m.vms.some((v) => this.backend.resources.key(import_node_path24.default.join(root, v.id, "machine.vmx")) === this.backend.resources.key(vm2.vmx))) {
+            if (vm2.registered) fail2("VM_REGISTERED", "Unregister lab VMs explicitly before destroying their files.");
+            continue;
+          }
+          if (!vm2.exists) continue;
+          const vmx3 = await this.backend.vmx(vm2.vmx), { config: config2 } = await readHardware(vmx3);
+          for (const [key3, value] of Object.entries(config2)) if (/\.filename$/.test(key3) && /\.vmdk$/i.test(value)) {
+            const disk = await import_promises25.default.realpath(import_node_path24.default.resolve(import_node_path24.default.dirname(vmx3), value));
+            if (ownedDisks.has(this.backend.resources.key(disk))) fail2("SHARED_DISK", "Another known VM references a lab-owned disk; it was retained.");
+          }
+        }
+        for (const v of m.vms) if (!["pending", "destroyed"].includes(v.state)) {
+          if (!["created", "destroying"].includes(v.state)) fail2("UNCERTAIN_RESOURCE", "Uncertain VM creation must be inspected manually before teardown.");
+          const vmx3 = await this.verifyVM(m, v);
+          if (await exists3(vmx3)) {
+            await requireOffline(this.backend, vmx3);
+            if ((await this.backend.snapshots(vmx3)).snapshots.length) fail2("VM_SNAPSHOTS", "Lab teardown refuses snapshot chains; inspect and manage snapshots separately.");
+          } else if (v.state !== "destroying") fail2("OWNERSHIP_CHANGED", "Missing VMX prevents safe teardown.");
+          const known = new Set(v.files.map((f) => f.path));
+          if ((await this.inventory(import_node_path24.default.join(root, v.id), root)).some((f) => !known.has(f.path) && /\.(?:vmdk|vmx)$/i.test(f.path))) fail2("UNKNOWN_STORAGE", "Unexpected VM/disk artifacts require manual inspection before teardown.");
+        }
+        if (m.segments.some((s2) => !["created", "removed"].includes(s2.state))) fail2("UNCERTAIN_RESOURCE", "Uncertain network creation must be inspected manually.");
+        m.state = "destroying";
+        await this.save(m);
+        for (const id of [...m.order].reverse()) {
+          extra.signal?.throwIfAborted();
+          const v = m.vms.find((v2) => v2.id === id);
+          if (["pending", "destroyed"].includes(v.state)) continue;
+          await this.verifyVM(m, v);
+          v.state = "destroying";
+          await this.save(m);
+          for (const f of [...v.files].reverse()) {
+            const file8 = import_node_path24.default.resolve(root, f.path), stat = await exists3(file8);
+            if (!stat) continue;
+            if (!same2(stat, f) || stat.isSymbolicLink() || await import_promises25.default.realpath(file8) !== file8) fail2("OWNERSHIP_CHANGED", "Tracked artifact changed during teardown.");
+            if (f.directory) await import_promises25.default.rmdir(file8).catch((e2) => {
+              if (e2.code !== "ENOTEMPTY" && e2.code !== "EEXIST") throw e2;
+            });
+            else await import_promises25.default.unlink(file8);
+          }
+          const directory = import_node_path24.default.join(root, id);
+          v.retained_files = await import_promises25.default.readdir(directory);
+          v.state = "destroyed";
+          await this.save(m);
+        }
+        for (const s2 of m.segments) if (s2.state === "created") {
+          extra.signal?.throwIfAborted();
+          const found = (await this.lan.list()).segments.find((e2) => e2.id === s2.id);
+          if (found && found.name !== s2.name) fail2("OWNERSHIP_CHANGED", "LAN segment identity changed; it was retained.");
+          if (found) await this.lan.remove({ segment: s2.id });
+          s2.state = "removed";
+          await this.save(m);
+        }
+        m.state = "destroyed";
+      });
+    });
+  }
+};
+
 // src/server.mjs
 var backend = new Workstation();
 var credentials = new Credentials();
@@ -57990,15 +58422,22 @@ var jobs = new JobManager({
 var ovf = new OvfManager({ backend, credentials, jobs, rest });
 var disks = new DiskManager({ backend, vmFiles });
 var serial = new SerialManager({ backend, vmFiles, credentials, rest });
-var readiness = new Readiness({ backend, credentials, consoles, protectFile: localFileProtector(backend) });
+var readiness2 = new Readiness({ backend, credentials, consoles, protectFile: localFileProtector(backend) });
 var guestExec = new GuestExec({ backend, credentials, protectFile: localFileProtector(backend) });
 var media = new IsoManager({ backend, vmFiles });
 var hardware = new HardwareManager({ backend, vmFiles, disks, lan: lanSegments });
 var jobOperations = new JobOperations({ backend, jobs, disks, ovf });
 var templates = new TemplateManager({ backend, hardware, rest });
-var server = new McpServer({ name: "vmware-workstation", version: "0.13.0" });
+var labs = new LabManager({ backend, templates, lan: lanSegments, readiness: readiness2, protectFile: localFileProtector(backend) });
+var server = new McpServer({ name: "vmware-workstation", version: "0.14.0" });
 var vmx2 = external_exports.string().min(1).describe("Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.");
 var name = external_exports.string().min(1).max(256).describe("Exact snapshot name.");
+tool("lab_validate", "Read-only versioned multi-VM lab validation and plan. Reuses template/hardware preflight, checks dependency graph, network/media mappings and aggregate disk space. Plans private LANs without creating them. No OS installation or readiness is implied.", labSchemas.lab_validate, true, (a) => labs.validate(a));
+tool("lab_deploy", "Plan by default. Explicit dry_run=false and confirm=true create a NEW lab root, private ownership manifest, optional owned LAN segments and blank template VMs. start=true opts into headless dependency/readiness-ordered startup. resume=true requires the identical recipe and bindings; completed verified VMs are skipped and uncertain partial creation is refused. No implicit rollback, overwrite or registration.", labSchemas.lab_deploy, false, (a, extra) => labs.deploy(a, extra), false);
+tool("lab_status", "Read the selected private lab manifest and observe VM ownership/power. Completed steps and uncertain intents are separate from live guest readiness. Does not scan for or adopt resources.", labSchemas.lab_status, true, (a) => labs.status(a));
+tool("lab_start", "Plan by default; explicit dry_run=false and confirm=true start only verified lab VMs headlessly in dependency order. Bounded Tools/IP/service readiness gates dependents; retries apply only to read-only readiness observations. Already running VMs are rechecked. No automatic replay of VM creation or power commands.", labSchemas.lab_start, false, (a, extra) => labs.action("start", a, extra), false);
+tool("lab_stop", "Plan by default; explicit dry_run=false and confirm=true stop only verified lab VMs in reverse dependency order. Soft shutdown is default, hard stop requires explicit mode=hard authorization. No hard fallback. Partial or uncertain outcomes remain in the manifest.", labSchemas.lab_stop, false, (a, extra) => labs.action("stop", a, extra));
+tool("lab_destroy", "Plan by default; explicit dry_run=false and confirm=true remove only recorded lab files and owned LAN segments. Requires fully offline, unlocked VMs; never stops implicitly. Refuses changed identity, links, external backings and uncertain creation. Keeps unknown files, empty member directories and the recovery manifest; never deletes external networks, media or unrelated files.", labSchemas.lab_destroy, false, (a, extra) => labs.action("destroy", a, extra));
 tool("template_list", "List bundled portable versioned JSON templates for Linux, Windows Server and nested ESXi. Returns complete editable recipes without reading host files or credentials.", templateSchemas.template_list, true, () => templates.list());
 tool("template_validate", "Read-only template validation and deployment plan: checks schema, supported installed hardware/disk capabilities, explicit local network/ISO bindings, new destination, allowlists and conservative free space. Shows VMX, disk paths and resource requirements. Reserves nothing.", templateSchemas.template_validate, true, (a) => templates.validate(a));
 tool("template_export", "Read an offline VM as a portable blank hardware recipe. Caller supplies new identity. Omits disk contents, UUIDs/MACs, host paths, network identity, secrets and arbitrary VMX fields; requires explicit local rebinding. Does not save a file or clone a guest.", templateSchemas.template_export, true, (a) => templates.export(a));
@@ -58016,9 +58455,9 @@ for (const kind of ["boot", "ip", "service"]) tool(`vm_wait_for_${kind}`, {
   boot: "Wait for VMware Tools running in the selected VM, indicating OS agent readiness only. Power-on, login and application readiness are separate. Bounded total timeout, polling and MCP cancellation; never starts a VM.",
   ip: "Wait for a valid guest IP published by VMware Tools. Does not establish network reachability or service readiness. Bounded total timeout and cancellation; never starts a VM.",
   service: "Probe only the selected VM Tools-reported IP and explicit port. TCP means connection accepted; HTTP(S) means expected status, with no redirects or retained body/headers. Does not execute guest commands. Bounded deadline and cancellation."
-}[kind], readinessSchemas[`vm_wait_for_${kind}`], true, (a, extra) => readiness.wait(kind, a, extra), false, kind === "service");
-tool("vm_get_recent_errors", "Read bounded current vmware.log data only after verifying its selected VM identity. Returns normalized error excerpts and actions; arbitrary log text/paths/secrets are omitted. No host log scan.", readinessSchemas.vm_get_recent_errors, true, (a) => readiness.recentErrors(a));
-tool("vm_collect_diagnostics", "Save selected VM allowlisted hardware, lifecycle, Tools/IP, snapshot count and normalized log excerpts into a NEW approved directory. Optional direct VNC guest pixels are unredacted: review before sharing. Never captures host desktop or executes guest commands.", readinessSchemas.vm_collect_diagnostics, false, (a, extra) => readiness.collect(a, extra), false, false, false);
+}[kind], readinessSchemas[`vm_wait_for_${kind}`], true, (a, extra) => readiness2.wait(kind, a, extra), false, kind === "service");
+tool("vm_get_recent_errors", "Read bounded current vmware.log data only after verifying its selected VM identity. Returns normalized error excerpts and actions; arbitrary log text/paths/secrets are omitted. No host log scan.", readinessSchemas.vm_get_recent_errors, true, (a) => readiness2.recentErrors(a));
+tool("vm_collect_diagnostics", "Save selected VM allowlisted hardware, lifecycle, Tools/IP, snapshot count and normalized log excerpts into a NEW approved directory. Optional direct VNC guest pixels are unredacted: review before sharing. Never captures host desktop or executes guest commands.", readinessSchemas.vm_collect_diagnostics, false, (a, extra) => readiness2.collect(a, extra), false, false, false);
 function tool(name2, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false, idempotent = readOnly) {
   server.registerTool(name2, {
     description,
@@ -58032,6 +58471,7 @@ function tool(name2, description, schema, readOnly, callback, destructive = !rea
       if (Array.isArray(result?.content)) return { content: result.content.map((block) => block.type === "text" ? { ...block, text: credentials.redact(block.text) } : block) };
       return { content: [{ type: "text", text: credentials.redact(JSON.stringify(result, null, 2)) }] };
     } catch (error62) {
+      if (name2.startsWith("lab_")) return { isError: true, content: [{ type: "text", text: credentials.redact(JSON.stringify({ code: error62.code || "LAB_PREFLIGHT_FAILED", message: error62.message, ...error62.details })) }] };
       if (name2.startsWith("serial_")) return { isError: true, content: [{ type: "text", text: credentials.redact(JSON.stringify({ code: error62.code || "SERIAL_SETUP_REQUIRED", message: error62.message })) }] };
       return { isError: true, content: [{ type: "text", text: credentials.redact(error62.details || name2.startsWith("disk_") ? JSON.stringify({ code: error62.code || "DISK_PREFLIGHT_FAILED", message: error62.message, action: "Inspect the target and disk_manager_status before retrying.", ...error62.details }) : error62.message) }] };
     }

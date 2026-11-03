@@ -2,6 +2,19 @@
 
 Generated from the command implementations and installed REST contract. Source version: vmrun 1.17.0.25688693; vmrest 1.3.1 build 25688693.
 
+## Multi-VM labs (6)
+
+Read the [lab guide](labs.md) for portable recipes, dry-run plans, private manifests, dependency/readiness ordering, explicit recovery and safe teardown. Schema/examples are in `labs/`. All mutations default to dry-run and require confirmation.
+
+| Tool | Arguments |
+| --- | --- |
+| `lab_validate` | `lab`, `directory`, `networks`, `media` |
+| `lab_deploy` | `lab`, `directory`, `networks`, `media`, `dry_run`, `confirm`, `resume`, `start`, `timeout_seconds` |
+| `lab_status` | `directory` |
+| `lab_start` | `directory`, `dry_run`, `confirm` |
+| `lab_stop` | `directory`, `dry_run`, `confirm`, `mode` |
+| `lab_destroy` | `directory`, `dry_run`, `confirm` |
+
 ## Declarative VM templates (4)
 
 Read the [template guide](templates.md) for portable JSON recipes, local network/media bindings, read-only planning, sanitized export and explicit deployment. Schema v1 and Linux/Windows Server/nested ESXi examples are packaged in `templates/`. Deployment defaults to dry-run; registration/power-on are opt-in. Unsupported forced PXE boot order and vTPM fail explicitly.
@@ -237,4 +250,4 @@ All console tools accept `vm_id`: an absolute VMX path, a unique inventory name,
 
 ## Convenience tools (9) and capabilities
 
-`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **142 MCP tools**.
+`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **148 MCP tools**.

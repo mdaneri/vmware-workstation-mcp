@@ -21134,7 +21134,7 @@ var HardwareManager = class {
       note: "Declared configuration only; omitted values are unknown, not inferred defaults. Guest driver and nested CPU support require live validation."
     };
   }
-  async nicSettings(nics, config2) {
+  async nicSettings(nics, config2, plannedSegments = []) {
     const settings = {}, seen = /* @__PURE__ */ new Set(), macs = /* @__PURE__ */ new Set();
     let catalog = null;
     if (nics?.some((n) => n.segment !== void 0 || n.network === "lan_segment")) catalog = await this.lan.readCatalog();
@@ -21171,7 +21171,7 @@ var HardwareManager = class {
           settings[`${p}.vnet`] = n.vmnet;
         }
         if (network === "lan_segment") {
-          const matches = catalog.document.segments.filter((s) => s.id === n.segment?.toLowerCase() || s.name.toLowerCase() === n.segment?.toLowerCase());
+          const matches = [...catalog.document.segments, ...plannedSegments].filter((s) => s.id === n.segment?.toLowerCase() || s.name.toLowerCase() === n.segment?.toLowerCase());
           if (matches.length !== 1) hardwareError("INVALID_NETWORK", "Select one unambiguous existing LAN segment by name or pvnID.");
           settings[`${p}.pvnID`] = matches[0].id;
         }
@@ -21212,9 +21212,10 @@ var HardwareManager = class {
     });
   }
   // Shared read-only preflight for typed creation and declarative template plans.
-  async planCreate(a) {
+  async planCreate(a, { plannedParent, plannedSegments = [] } = {}) {
     const directory = await this.backend.hostPath(a.directory, "destination-directory");
-    await this.backend.hostPath(import_node_path9.default.dirname(directory), "directory");
+    await this.backend.hostPath(plannedParent || import_node_path9.default.dirname(directory), "directory");
+    if (plannedParent && import_node_path9.default.dirname(import_node_path9.default.dirname(directory)) !== plannedParent) hardwareError("INVALID_PATH", "Planned VM parent must be one new child of the existing parent.");
     await this.backend.hostPath(directory, "host-destination-directory");
     try {
       await import_promises8.default.lstat(directory);
@@ -21243,7 +21244,7 @@ var HardwareManager = class {
     };
     const config2 = Object.fromEntries(Object.entries(base).map(([k, v]) => [k.toLowerCase(), v]));
     const settings = { ...base, ...this.settings({ ...a, controllers }, config2, caps) };
-    const nic = await this.nicSettings(nics, {});
+    const nic = await this.nicSettings(nics, {}, plannedSegments);
     Object.assign(settings, nic.settings);
     const slots = /* @__PURE__ */ new Set();
     for (const d of disks) {
@@ -21264,7 +21265,7 @@ var HardwareManager = class {
       Object.assign(settings, { "sata0.present": "TRUE", [`${slot2}.present`]: "TRUE", [`${slot2}.deviceType`]: "cdrom-image", [`${slot2}.fileName`]: iso });
     }
     await this.disks.available("create", "0");
-    await this.disks.freeSpace(import_node_path9.default.dirname(directory), disks.reduce((sum, d) => sum + d.capacity_mb * 1048576, 0));
+    await this.disks.freeSpace(plannedParent || import_node_path9.default.dirname(directory), disks.reduce((sum, d) => sum + d.capacity_mb * 1048576, 0));
     if (nic.catalog) {
       await this.assertGUIClosed();
       await this.lan.unchanged(nic.catalog);

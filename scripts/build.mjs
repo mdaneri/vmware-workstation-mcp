@@ -3,8 +3,10 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { writeGenerated } from './write-generated.mjs';
 import { z } from 'zod';
+import { labSchema } from '../src/lab-schemas.mjs';
 import { templateSchema } from '../src/template-schemas.mjs';
 await writeGenerated('vmware-workstation/templates/schema-v1.json', JSON.stringify(z.toJSONSchema(templateSchema), null, 2) + '\n');
+await writeGenerated('vmware-workstation/labs/schema-v1.json', JSON.stringify(z.toJSONSchema(labSchema, { io: 'input' }), null, 2) + '\n');
 const result = await build({
   entryPoints: ['src/server.mjs', 'src/configure-console.mjs', 'src/set-credentials.mjs'], outdir: 'vmware-workstation/server', outExtension: { '.js': '.cjs' },
   bundle: true, platform: 'node', target: 'node22', format: 'cjs',

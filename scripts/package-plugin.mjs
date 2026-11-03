@@ -18,7 +18,7 @@ await collect(root);
 assert.ok(files['readiness.md'], 'Package must include the readiness and diagnostics guide.');
 assert.ok(files['guest-exec.md'], 'Package must include the verified guest execution guide.');
 assert.ok(files['jobs.md'], 'Package must include durable job operations and recovery guidance.');
-for (const name of ['templates.md', 'templates/schema-v1.json', 'templates/linux.json', 'templates/windows.json', 'templates/nested-esxi.json']) assert.ok(files[name], `Package must include ${name}`);
+for (const name of ['labs.md', 'labs/schema-v1.json', 'labs/two-vm.json', 'labs/nested-esxi.json', 'templates.md', 'templates/schema-v1.json', 'templates/linux.json', 'templates/windows.json', 'templates/nested-esxi.json']) assert.ok(files[name], `Package must include ${name}`);
 const { version } = JSON.parse(files['plugin.json'].toString('utf8'));
 assert.match(version, /^\d+\.\d+\.\d+$/);
 await fs.mkdir('dist', { recursive: true });

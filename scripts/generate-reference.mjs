@@ -1,3 +1,4 @@
+import { labSchemas } from '../src/lab-schemas.mjs';
 import { hardwareSchemas } from '../src/hardware-schemas.mjs';
 import { templateSchemas } from '../src/template-schemas.mjs';
 import { isoSchemas } from '../src/iso.mjs';
@@ -14,6 +15,9 @@ import { serialSchemas } from '../src/serial.mjs';
 import { readinessSchemas } from '../src/readiness.mjs';
 import { guestExecSchema } from '../src/guest-exec.mjs';
 let text = '# Complete operation reference\n\nGenerated from the command implementations and installed REST contract. Source version: vmrun 1.17.0.25688693; vmrest 1.3.1 build 25688693.\n\n';
+text += '## Multi-VM labs (6)\n\nRead the [lab guide](labs.md) for portable recipes, dry-run plans, private manifests, dependency/readiness ordering, explicit recovery and safe teardown. Schema/examples are in `labs/`. All mutations default to dry-run and require confirmation.\n\n| Tool | Arguments |\n| --- | --- |\n';
+for (const [name, schema] of Object.entries(labSchemas)) text += `| \`${name}\` | ${Object.keys(schema.shape).map(key => `\`${key}\``).join(', ')} |\n`;
+text += '\n';
 text += '## Declarative VM templates (4)\n\nRead the [template guide](templates.md) for portable JSON recipes, local network/media bindings, read-only planning, sanitized export and explicit deployment. Schema v1 and Linux/Windows Server/nested ESXi examples are packaged in `templates/`. Deployment defaults to dry-run; registration/power-on are opt-in. Unsupported forced PXE boot order and vTPM fail explicitly.\n\n| Tool | Arguments |\n| --- | --- |\n';
 for (const [name, schema] of Object.entries(templateSchemas)) text += `| \`${name}\` | ${Object.keys(schema.shape).map(key => `\`${key}\``).join(', ') || '(none)'} |\n`;
 text += '\n';
@@ -55,5 +59,5 @@ for (const o of restOperations) {
 }
 text += '\nThe vendor operation ID `updataSharedFolder` is exposed with the corrected tool name `rest_update_shared_folder`.\n\n## Direct native VNC/RFB console (6)\n\nAll console tools accept `vm_id`: an absolute VMX path, a unique inventory name, a configured console profile alias, or a REST VM ID when REST is configured. The VM must be running with native VNC explicitly bound to loopback and a local password profile. VMware Tools and guest login are unnecessary. Setup: [console guide](console.md).\n\n| Tool | Arguments |\n| --- | --- |\n';
 for (const [name, schema] of Object.entries(consoleSchemas)) text += `| \`${name}\` | ${Object.keys(schema.shape).map(key => `\`${key}\``).join(', ')} |\n`;
-text += '\n## Convenience tools (9) and capabilities\n\n`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **142 MCP tools**.\n';
+text += '\n## Convenience tools (9) and capabilities\n\n`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **148 MCP tools**.\n';
 await writeGenerated('vmware-workstation/reference.md', text);
