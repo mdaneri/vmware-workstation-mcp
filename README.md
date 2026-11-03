@@ -26,7 +26,7 @@ Requires Windows or Linux, Node.js 22.12 or newer on PATH, and a separately inst
 
 ## Develop
 
-Version 0.12.1 adds the project website, support URL and developer name to the plugin listing, with matching portable homepage metadata.
+Version 0.12.1 adds the project website, support URL and developer name to the plugin listing, with matching portable homepage metadata and a new layered VM logo.
 
 Version 0.12.0 adds [reusable asynchronous jobs](vmware-workstation/jobs.md): disk conversion/expansion, full offline clones and sequential VM power batches through `job_start`. Unrelated VMs run concurrently, resources share locks with existing tools, cancellation stops native process trees, and bounded private journals retain results across restart. Existing input schemas and annotations remain compatible; three job descriptions are updated. See [issue #10](https://github.com/mdaneri/vmware-workstation-mcp/issues/10) and [tracker #6](https://github.com/mdaneri/vmware-workstation-mcp/issues/6).
 

@@ -1,6 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <rect x="4" y="4" width="120" height="120" rx="28" fill="#0079B8"/>
-  <rect x="25" y="29" width="60" height="45" rx="7" fill="none" stroke="#fff" stroke-width="6"/>
-  <rect x="43" y="53" width="60" height="45" rx="7" fill="#0079B8" stroke="#fff" stroke-width="6"/>
-  <path d="M58 77h30m-15-9v18" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
+  <defs>
+    <linearGradient id="background" x1="24" y1="8" x2="234" y2="256" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#182B49"/>
+      <stop offset="1" stop-color="#090F23"/>
+    </linearGradient>
+    <linearGradient id="top" x1="72" y1="57" x2="183" y2="135" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#86F9FF"/>
+      <stop offset="1" stop-color="#23B8F1"/>
+    </linearGradient>
+    <linearGradient id="left" x1="62" y1="102" x2="128" y2="190" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#218FD7"/>
+      <stop offset="1" stop-color="#2847AE"/>
+    </linearGradient>
+    <linearGradient id="right" x1="194" y1="103" x2="128" y2="190" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#176FA8"/>
+      <stop offset="1" stop-color="#183668"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="248" height="248" rx="58" fill="url(#background)"/>
+  <rect x="5" y="5" width="246" height="246" rx="57" stroke="#A1DCFF" stroke-opacity=".14" stroke-width="2"/>
+  <path d="m52 172 76 44 76-44" stroke="#7C6CFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m52 153 76 44 76-44" stroke="#528CFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m62 95 66 38v57l-66-38z" fill="url(#left)"/>
+  <path d="m128 133 66-38v57l-66 38z" fill="url(#right)"/>
+  <path d="m62 95 66-38 66 38-66 38z" fill="url(#top)"/>
+  <path d="m62 95 66 38 66-38M128 133v57" stroke="#A3F3FF" stroke-opacity=".5" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="m105 95 23-13 23 13-23 13z" fill="#E7FDFF" fill-opacity=".75"/>
+  <path d="m79 121 10 13-10 2m18 8 13 7" stroke="#F0FCFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m147 151 26-15m-26 27 17-10" stroke="#5AD9FF" stroke-width="4" stroke-linecap="round"/>
 </svg>
