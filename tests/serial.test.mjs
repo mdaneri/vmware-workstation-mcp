@@ -8,6 +8,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { Workstation } from '../src/workstation.mjs';
 import { VMFiles } from '../src/vm-files.mjs';
 import { SerialManager, serialSchemas } from '../src/serial.mjs';
+import { connectSerial } from '../src/serial-transport.mjs';
 
 async function fixture(t, options = {}) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'ser-'));
@@ -84,6 +85,33 @@ test('clean EOF preserves final bytes for bounded draining and never accepts mor
   assert.equal(final.data, 'final'); assert.equal(final.eof, true);
   const empty = await f.manager.read(f.target); assert.equal(empty.bytes, 0); assert.equal(empty.timed_out, false); assert.equal(empty.eof, true);
   await assert.rejects(f.manager.write({ ...f.target, data: 'input' }), /disconnected/);
+});
+
+for (const exitCode of [0, 1]) test(`Windows bridge exit ${exitCode} ${exitCode ? 'remains an I/O failure' : 'preserves unread EOF bytes'}`, { skip: process.platform !== 'win32', timeout: 15000 }, async t => {
+  let bridgeScript; let closed; const errors = [];
+  const f = await fixture(t, { connector: async (endpoint, options) => {
+    const stream = await connectSerial(endpoint, { ...options, bridgeScript });
+    stream.on('error', error => errors.push(error.code));
+    closed = new Promise(resolve => stream.once('close', resolve));
+    return stream;
+  } });
+  bridgeScript = path.join(f.root, 'bridge.ps1');
+  // A real child process announces readiness, writes final binary output and
+  // exits with stdin still open, as the native bridge does on pipe EOF.
+  await fs.writeFile(bridgeScript, `[Console]::Error.Write("SERIAL_READY\u0060n")\nStart-Sleep -Milliseconds 100\n$serialOutput = [Console]::OpenStandardOutput()\n$serialOutput.Write([byte[]]@(0, 255, 13, 10, 65), 0, 5)\n$serialOutput.Flush()\nexit ${exitCode}\n`);
+  await f.connect(); await closed;
+  const status = await f.manager.status(f.target);
+  if (exitCode) {
+    assert.ok(errors.length > 0); assert.equal(status.last_error.code, 'SERIAL_IO_FAILED');
+    await assert.rejects(f.manager.read(f.target), { code: 'SERIAL_IO_FAILED' });
+  } else {
+    assert.deepEqual(errors, []); assert.equal(status.eof, true); assert.equal(status.buffered_bytes, 5);
+    const first = await f.manager.read({ ...f.target, max_bytes: 2 });
+    const last = await f.manager.read(f.target);
+    assert.deepEqual(Buffer.concat([Buffer.from(first.data, 'base64'), Buffer.from(last.data, 'base64')]), Buffer.from([0, 255, 13, 10, 65]));
+    assert.equal(last.eof, true);
+    const empty = await f.manager.read(f.target); assert.equal(empty.bytes, 0); assert.equal(empty.eof, true); assert.equal(empty.timed_out, false);
+  }
 });
 
 test('overflow, idle eviction and connection limit fail clearly without replay', async t => {

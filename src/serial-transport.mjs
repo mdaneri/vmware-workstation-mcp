@@ -83,7 +83,11 @@ export async function connectSerial(endpoint, { signal, timeoutMs = 10000, platf
     const abort = () => fail(serialError('SERIAL_CANCELLED', 'Serial connection cancelled.'));
     const timer = setTimeout(() => fail(failure()), timeoutMs + 2000);
     child.once('error', () => fail(failure()));
-    child.once('exit', code => { if (!ready) fail(failure()); else if (code) stream.destroy(failure()); });
+    child.once('exit', code => {
+      if (!ready) fail(failure());
+      else if (code !== 0) stream.destroy(failure());
+      else stream.end();
+    });
     child.stderr.on('data', chunk => {
       if (ready) return;
       stderr += chunk.toString('utf8');
@@ -92,8 +96,20 @@ export async function connectSerial(endpoint, { signal, timeoutMs = 10000, platf
       if (Object.hasOwn(bridgeFailures, code)) { fail(serialError(code, bridgeFailures[code])); return; }
       if (!stderr.includes('SERIAL_READY\n')) return;
       clearTimeout(timer); signal?.removeEventListener('abort', abort);
-      stream = Duplex.from({ readable: child.stdout, writable: child.stdin });
-      stream.once('close', stop); ready = true; resolve(stream);
+      // Child stdin closes on process exit without emitting writable finish.
+      // Duplex.from treats that as premature close even after clean stdout EOF,
+      // which would discard the manager's unread receive buffer. Own the stream
+      // lifecycle instead, finishing writes only on a successful bridge exit.
+      stream = new Duplex({
+        read() { child.stdout.resume(); },
+        write(bytes, encoding, callback) { child.stdin.write(bytes, encoding, callback); },
+        final(callback) { if (child.exitCode === 0) callback(); else child.stdin.end(callback); },
+        destroy(error, callback) { stop(); callback(error); },
+      });
+      child.stdout.on('data', bytes => { if (!stream.push(bytes)) child.stdout.pause(); });
+      child.stdout.once('end', () => stream.push(null));
+      child.stdout.once('close', () => { if (!child.stdout.readableEnded && !stream.destroyed) fail(failure()); });
+      ready = true; resolve(stream);
     });
     // Observe pipe errors even if spawning PowerShell itself fails.
     child.stdin.on('error', () => fail(failure())); child.stdout.on('error', () => fail(failure()));

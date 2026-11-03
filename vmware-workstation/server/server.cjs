@@ -55719,7 +55719,8 @@ async function connectSerial(endpoint, { signal, timeoutMs = 1e4, platform = pro
     child.once("error", () => fail2(failure2()));
     child.once("exit", (code) => {
       if (!ready) fail2(failure2());
-      else if (code) stream.destroy(failure2());
+      else if (code !== 0) stream.destroy(failure2());
+      else stream.end();
     });
     child.stderr.on("data", (chunk) => {
       if (ready) return;
@@ -55736,8 +55737,29 @@ async function connectSerial(endpoint, { signal, timeoutMs = 1e4, platform = pro
       if (!stderr.includes("SERIAL_READY\n")) return;
       clearTimeout(timer);
       signal?.removeEventListener("abort", abort);
-      stream = import_node_stream.Duplex.from({ readable: child.stdout, writable: child.stdin });
-      stream.once("close", stop);
+      stream = new import_node_stream.Duplex({
+        read() {
+          child.stdout.resume();
+        },
+        write(bytes, encoding, callback) {
+          child.stdin.write(bytes, encoding, callback);
+        },
+        final(callback) {
+          if (child.exitCode === 0) callback();
+          else child.stdin.end(callback);
+        },
+        destroy(error62, callback) {
+          stop();
+          callback(error62);
+        }
+      });
+      child.stdout.on("data", (bytes) => {
+        if (!stream.push(bytes)) child.stdout.pause();
+      });
+      child.stdout.once("end", () => stream.push(null));
+      child.stdout.once("close", () => {
+        if (!child.stdout.readableEnded && !stream.destroyed) fail2(failure2());
+      });
       ready = true;
       resolve(stream);
     });
