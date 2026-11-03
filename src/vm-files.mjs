@@ -5,6 +5,8 @@ import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { parseAssignments } from './workstation.mjs';
 import { findVMwareExecutable } from './host-platform.mjs';
+import { typedCreateFields, usesTypedCreation } from './hardware-schemas.mjs';
+import { HardwareManager } from './hardware.mjs';
 
 export const createVMSchema = z.object({
   directory: z.string().min(1).describe('Absolute NEW VM directory; its parent must exist. Existing directories are never overwritten.'),
@@ -19,6 +21,7 @@ export const createVMSchema = z.object({
   vmnet: z.string().optional(),
   iso_path: z.string().optional().describe('Optional existing host ISO file. Creating a VM does not install a guest OS.'),
   timeout_seconds: z.number().int().min(1).max(3600).default(120),
+  ...typedCreateFields,
 }).strict().refine(a => a.network !== 'custom' || !!a.vmnet, 'Custom networking requires vmnet.');
 
 export const configureVMSchema = z.object({
@@ -35,6 +38,9 @@ export class VMFiles {
   }
   async create(input) {
     const a = createVMSchema.parse(input);
+    if (usesTypedCreation(a)) {
+      return new HardwareManager({ backend: this.backend, vmFiles: this }).create(a);
+    }
     return this.exclusive(async () => {
       const directory = await this.backend.hostPath(a.directory, 'destination-directory');
       const iso = a.iso_path ? await this.backend.hostPath(a.iso_path, 'input-file') : null;

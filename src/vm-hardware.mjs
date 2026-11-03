@@ -7,7 +7,7 @@ export function hardwareError(code, message) { throw Object.assign(new Error(mes
 // Strict, case-insensitive view for typed hardware edits. Unknown settings stay
 // in the original text and are preserved by VMFiles.configure.
 export async function readHardware(vmx) {
-  const text = await fs.readFile(vmx, 'utf8');
+  const text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(await fs.readFile(vmx));
   const seen = new Set();
   for (const line of text.replace(/^\uFEFF/, '').split(/\r?\n/)) {
     if (/^\s*(?:#.*)?$/.test(line)) continue;
@@ -21,11 +21,13 @@ export async function readHardware(vmx) {
 }
 
 export async function requireOffline(backend, vmx) {
-  if ((await backend.details(vmx)).running) hardwareError('VM_RUNNING', 'Power off the VM; headless optical hot-swap is not supported by this backend.');
+  if ((await backend.details(vmx)).running) hardwareError('VM_RUNNING', 'Power off the VM; this hardware edit requires full power-off.');
   const vm = await readHardware(vmx);
   if ((await fs.stat(vmx)).nlink > 1) hardwareError('UNSAFE_VM', 'Hard-linked VMX files cannot be edited safely.');
   if (Object.keys(vm.config).some(k => /^(encryption\.|managedvm\.autoaddvtpm)/i.test(k))) hardwareError('UNSAFE_VM', 'Encrypted/managed VM hardware editing is unsupported.');
   if (vm.config['checkpoint.vmstate'] || vm.config['suspend.filename']) hardwareError('VM_SUSPENDED', 'VMX declares saved state; fully power off the VM before editing.');
-  if ((await fs.readdir(path.dirname(vmx))).some(name => /(?:\.lck|\.vmss|\.vmem)$/i.test(name))) hardwareError('VM_LOCKED_OR_SUSPENDED', 'VM directory contains locks or saved/suspended memory. Fully power off and close the VM; never delete locks/state to bypass this check.');
+  const directories = new Set([path.dirname(vmx)]);
+  for (const key of ['workingdir', 'snapshot.directory']) if (vm.config[key]) directories.add(await backend.hostPath(path.resolve(path.dirname(vmx), vm.config[key]), 'directory'));
+  for (const directory of directories) if ((await fs.readdir(directory)).some(name => /(?:\.lck|\.vmss|\.vmem)$/i.test(name))) hardwareError('VM_LOCKED_OR_SUSPENDED', 'VM directory contains locks or saved/suspended memory. Fully power off and close the VM; never delete locks/state to bypass this check.');
   return vm;
 }

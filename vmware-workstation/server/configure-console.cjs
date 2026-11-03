@@ -11,9 +11,9 @@ var __export = (target, all) => {
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    for (let key2 of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key2) && key2 !== except)
+        __defProp(to, key2, { get: () => from[key2], enumerable: !(desc = __getOwnPropDesc(from, key2)) || desc.enumerable });
   }
   return to;
 };
@@ -44,6 +44,9 @@ var import_node_path = __toESM(require("node:path"), 1);
 function inventoryPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
   return env.VMWARE_INVENTORY_PATH || (platform === "win32" ? import_node_path.default.join(env.APPDATA || import_node_path.default.join(home, "AppData", "Roaming"), "VMware", "inventory.vmls") : import_node_path.default.join(home, ".vmware", "inventory.vmls"));
 }
+function preferencesPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
+  return env.VMWARE_PREFERENCES_PATH || (platform === "win32" ? import_node_path.default.join(env.APPDATA || import_node_path.default.join(home, "AppData", "Roaming"), "VMware", "preferences.ini") : import_node_path.default.join(home, ".vmware", "preferences"));
+}
 function credentialsPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
   if (env.VMWARE_CREDENTIALS_FILE) return env.VMWARE_CREDENTIALS_FILE;
   if (platform === "win32") return env.APPDATA ? import_node_path.default.join(env.APPDATA, "VMwareWorkstationPlugin", "credentials.json") : null;
@@ -53,7 +56,7 @@ function credentialsPath(env = process.env, platform = process.platform, home = 
 async function findVMwareExecutable(name, { env = process.env, platform = process.platform, beside } = {}) {
   if (!["win32", "linux"].includes(platform)) throw new Error("VMware Workstation hosts supported by this plugin are Windows and Linux.");
   const filename = `${name}${platform === "win32" ? ".exe" : ""}`;
-  const setting = { vmrun: "VMRUN_PATH", "vmware-vdiskmanager": "VMWARE_VDISKMANAGER_PATH", ovftool: "VMWARE_OVFTOOL_PATH" }[name];
+  const setting = { vmrun: "VMRUN_PATH", "vmware-vdiskmanager": "VMWARE_VDISKMANAGER_PATH", "vmware-vmx": "VMWARE_VMX_PATH", ovftool: "VMWARE_OVFTOOL_PATH" }[name];
   if (!setting) throw new Error("Unsupported VMware executable.");
   const validFile = async (candidate) => {
     if (!import_node_path.default.isAbsolute(candidate) || !(await import_promises.default.stat(candidate)).isFile()) return false;
@@ -70,6 +73,7 @@ async function findVMwareExecutable(name, { env = process.env, platform = proces
   const directories = [
     ...name === "ovftool" && beside ? [import_node_path.default.join(import_node_path.default.dirname(beside), "OVFTool"), import_node_path.default.join(import_node_path.default.dirname(beside), "ovftool")] : [],
     ...beside ? [import_node_path.default.dirname(beside)] : [],
+    ...name === "vmware-vmx" && beside && platform === "win32" ? [import_node_path.default.join(import_node_path.default.dirname(beside), "x64")] : [],
     ...platform === "win32" ? [env.ProgramFiles, env["ProgramFiles(x86)"]].filter(Boolean).map((root) => import_node_path.default.join(root, "VMware", "VMware Workstation")) : [],
     ...name === "ovftool" && platform === "win32" ? [env.ProgramFiles, env["ProgramFiles(x86)"]].filter(Boolean).flatMap((root) => [import_node_path.default.join(root, "VMware", "VMware Workstation", "OVFTool"), import_node_path.default.join(root, "VMware", "VMware OVF Tool")]) : [],
     ...(env.PATH || env.Path || "").split(import_node_path.default.delimiter).filter(Boolean),
@@ -95,25 +99,25 @@ var Resources = class {
     this.active = /* @__PURE__ */ new Map();
     this.context = new import_node_async_hooks.AsyncLocalStorage();
   }
-  key(file2) {
-    return process.platform === "win32" ? import_node_path2.default.resolve(file2).toLowerCase() : import_node_path2.default.resolve(file2);
+  key(file4) {
+    return process.platform === "win32" ? import_node_path2.default.resolve(file4).toLowerCase() : import_node_path2.default.resolve(file4);
   }
   assert(files) {
     const owner = this.context.getStore();
     const overlaps = (a, b) => a === b || a.startsWith(b + import_node_path2.default.sep) || b.startsWith(a + import_node_path2.default.sep);
-    for (const file2 of files.map((file3) => this.key(file3))) for (const [held, token] of this.active) {
-      if (token !== owner && overlaps(file2, held)) throw Object.assign(new Error("A conflicting operation holds this VM or disk path. Wait for it to finish, inspect state, then retry."), { code: "RESOURCE_BUSY" });
+    for (const file4 of files.map((file5) => this.key(file5))) for (const [held, token] of this.active) {
+      if (token !== owner && overlaps(file4, held)) throw Object.assign(new Error("A conflicting operation holds this VM or disk path. Wait for it to finish, inspect state, then retry."), { code: "RESOURCE_BUSY" });
     }
   }
   async use(files, callback) {
     this.assert(files);
     const token = this.context.getStore() || /* @__PURE__ */ Symbol("resource-owner");
-    const added = files.map((file2) => this.key(file2)).filter((file2) => !this.active.has(file2));
-    for (const file2 of added) this.active.set(file2, token);
+    const added = files.map((file4) => this.key(file4)).filter((file4) => !this.active.has(file4));
+    for (const file4 of added) this.active.set(file4, token);
     try {
       return await this.context.run(token, callback);
     } finally {
-      for (const file2 of added) this.active.delete(file2);
+      for (const file4 of added) this.active.delete(file4);
     }
   }
 };
@@ -150,21 +154,21 @@ var Workstation = class {
   async executable() {
     return findVMwareExecutable("vmrun", { env: this.env });
   }
-  async run(args, { mutation = false, authentication = [], timeout = 12e4, deadline, signal } = {}) {
+  async run(args, { mutation = false, authentication = [], timeout: timeout2 = 12e4, deadline, signal } = {}) {
     if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
     const job = this.tail.then(async () => {
       if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
       const binary = await this.executable();
       signal?.throwIfAborted();
       if (deadline !== void 0) {
-        timeout = Math.min(timeout, Math.floor(deadline - performance.now()));
-        if (timeout <= 0) throw Object.assign(new Error("Observation deadline expired while waiting for vmrun."), { code: "OBSERVATION_DEADLINE" });
+        timeout2 = Math.min(timeout2, Math.floor(deadline - performance.now()));
+        if (timeout2 <= 0) throw Object.assign(new Error("Observation deadline expired while waiting for vmrun."), { code: "OBSERVATION_DEADLINE" });
       }
       try {
         const result = await this.execute(binary, ["-T", "ws", ...authentication, ...args], {
           windowsHide: true,
           shell: false,
-          timeout,
+          timeout: timeout2,
           signal,
           maxBuffer: 1024 * 1024,
           encoding: "utf8"
@@ -282,16 +286,16 @@ var Workstation = class {
     } catch (error62) {
       warnings.push(`Inventory unavailable (${error62.code || error62.message}); showing running VMs only.`);
     }
-    const key = (value) => process.platform === "win32" ? import_node_path3.default.normalize(value).toLowerCase() : import_node_path3.default.normalize(value);
+    const key2 = (value) => process.platform === "win32" ? import_node_path3.default.normalize(value).toLowerCase() : import_node_path3.default.normalize(value);
     const records = /* @__PURE__ */ new Map();
-    for (const [name, vmx] of Object.entries(entries)) {
-      if (/^vmlist\d+\.config$/.test(name) && vmx && import_node_path3.default.extname(vmx).toLowerCase() === ".vmx") {
-        records.set(key(vmx), { vmx, displayName: entries[name.replace(/\.config$/, ".DisplayName")] || import_node_path3.default.basename(vmx, import_node_path3.default.extname(vmx)), registered: true, running: false });
+    for (const [name, vmx2] of Object.entries(entries)) {
+      if (/^vmlist\d+\.config$/.test(name) && vmx2 && import_node_path3.default.extname(vmx2).toLowerCase() === ".vmx") {
+        records.set(key2(vmx2), { vmx: vmx2, displayName: entries[name.replace(/\.config$/, ".DisplayName")] || import_node_path3.default.basename(vmx2, import_node_path3.default.extname(vmx2)), registered: true, running: false });
       }
     }
-    for (const vmx of running) {
-      const record2 = records.get(key(vmx)) || { vmx, displayName: import_node_path3.default.basename(vmx, import_node_path3.default.extname(vmx)), registered: false };
-      records.set(key(vmx), { ...record2, running: true });
+    for (const vmx2 of running) {
+      const record2 = records.get(key2(vmx2)) || { vmx: vmx2, displayName: import_node_path3.default.basename(vmx2, import_node_path3.default.extname(vmx2)), registered: false };
+      records.set(key2(vmx2), { ...record2, running: true });
     }
     const vms = await Promise.all([...records.values()].map(async (record2) => {
       try {
@@ -304,48 +308,48 @@ var Workstation = class {
     return { vms, warnings, note: "running=false does not distinguish powered off, suspended, or unavailable VMs. Inventory is not a disk scan." };
   }
   async details(input2) {
-    const vmx = await this.vmx(input2);
-    const config2 = parseAssignments(await import_promises2.default.readFile(vmx, "utf8"));
+    const vmx2 = await this.vmx(input2);
+    const config2 = parseAssignments(await import_promises2.default.readFile(vmx2, "utf8"));
     const running = parseCountedList(await this.run(["list"]));
-    const realRunning = await Promise.all(running.map(async (file2) => import_promises2.default.realpath(file2).catch(() => file2)));
-    const compare = (file2) => process.platform === "win32" ? file2.toLowerCase() : file2;
-    const hardware = Object.fromEntries(Object.entries(config2).filter(([key]) => /^(displayName|guestOS|memsize|numvcpus|virtualHW.version|ethernet\d+\.(present|connectionType|vnet)|(?:scsi|sata|ide|nvme)\d+:\d+\.(present|fileName|deviceType))$/.test(key)));
-    return { vmx, running: realRunning.some((file2) => compare(file2) === compare(vmx)), hardware };
+    const realRunning = await Promise.all(running.map(async (file4) => import_promises2.default.realpath(file4).catch(() => file4)));
+    const compare = (file4) => process.platform === "win32" ? file4.toLowerCase() : file4;
+    const hardware = Object.fromEntries(Object.entries(config2).filter(([key2]) => /^(displayName|guestOS|memsize|numvcpus|virtualHW.version|ethernet\d+\.(present|connectionType|vnet)|(?:scsi|sata|ide|nvme)\d+:\d+\.(present|fileName|deviceType))$/.test(key2)));
+    return { vmx: vmx2, running: realRunning.some((file4) => compare(file4) === compare(vmx2)), hardware };
   }
   async power(input2, action, mode = "soft", gui = false) {
     if (!["start", "stop", "reset", "suspend", "pause", "unpause"].includes(action)) throw new Error("Unsupported power action.");
     if (!["soft", "hard"].includes(mode)) throw new Error("Power mode must be soft or hard.");
-    const vmx = await this.vmx(input2);
-    const args = [action, vmx];
+    const vmx2 = await this.vmx(input2);
+    const args = [action, vmx2];
     if (action === "start") args.push(gui ? "gui" : "nogui");
     if (["stop", "reset", "suspend"].includes(action)) args.push(mode);
     const output2 = await this.run(args, { mutation: true });
-    return { vmx, action, output: output2, commandSucceeded: true, note: "vmrun returned successfully; guest application readiness is not established." };
+    return { vmx: vmx2, action, output: output2, commandSucceeded: true, note: "vmrun returned successfully; guest application readiness is not established." };
   }
   async snapshots(input2) {
-    const vmx = await this.vmx(input2);
-    return { vmx, snapshots: parseCountedList(await this.run(["listSnapshots", vmx])) };
+    const vmx2 = await this.vmx(input2);
+    return { vmx: vmx2, snapshots: parseCountedList(await this.run(["listSnapshots", vmx2])) };
   }
   async snapshot(input2, action, name) {
     if (!["snapshot", "revertToSnapshot", "deleteSnapshot"].includes(action)) throw new Error("Unsupported snapshot action.");
     if (typeof name !== "string" || !name.trim() || name.length > 256 || /[\x00-\x1f]/.test(name)) throw new Error("Provide a nonblank snapshot name of at most 256 characters without control characters.");
-    const vmx = await this.vmx(input2);
+    const vmx2 = await this.vmx(input2);
     if (action !== "snapshot") {
-      const { snapshots } = await this.snapshots(vmx);
+      const { snapshots } = await this.snapshots(vmx2);
       if (snapshots.filter((value) => value === name).length !== 1) throw new Error("Snapshot name must identify exactly one existing snapshot; inspect the snapshot tree in Workstation if ambiguous.");
     }
-    return { vmx, action, name, output: await this.run([action, vmx, name], { mutation: true }), commandSucceeded: true };
+    return { vmx: vmx2, action, name, output: await this.run([action, vmx2, name], { mutation: true }), commandSucceeded: true };
   }
   async guestIP(input2) {
-    const vmx = await this.vmx(input2);
+    const vmx2 = await this.vmx(input2);
     try {
-      const address = (await this.run(["getGuestIPAddress", vmx])).trim();
+      const address = (await this.run(["getGuestIPAddress", vmx2])).trim();
       if (!(0, import_node_net.isIP)(address)) throw new Error(`vmrun did not return a valid guest IP address. Output: ${address.slice(0, 4e3) || "(empty)"}`);
-      return { vmx, address };
+      return { vmx: vmx2, address };
     } catch (error62) {
       let toolsState;
       try {
-        const output2 = await this.run(["checkToolsState", vmx], { timeout: 5e3 });
+        const output2 = await this.run(["checkToolsState", vmx2], { timeout: 5e3 });
         toolsState = { state: ["running", "installed", "unknown"].includes(output2) ? output2 : "unknown", output: output2.slice(0, 4e3) };
       } catch (checkError) {
         toolsState = { state: "unknown", error: checkError.message };
@@ -353,7 +357,7 @@ var Workstation = class {
       throw Object.assign(new Error(error62.message, { cause: error62 }), {
         code: "GUEST_IP_UNAVAILABLE",
         details: {
-          vmx,
+          vmx: vmx2,
           addressAvailable: false,
           toolsState,
           note: "The IP lookup failed. checkToolsState is a separate, later observation; even running Tools does not establish IP publication, network reachability, or guest readiness. The lookup error alone does not establish that Tools is stopped.",
@@ -372,8 +376,8 @@ var import_node_path5 = __toESM(require("node:path"), 1);
 var import_node_path4 = __toESM(require("node:path"), 1);
 var import_promises3 = __toESM(require("node:fs/promises"), 1);
 var import_node_fs2 = require("node:fs");
-async function openPrivateFile(filename, flags = import_node_fs2.constants.O_RDONLY) {
-  const handle = await import_promises3.default.open(filename, flags | import_node_fs2.constants.O_NOFOLLOW | import_node_fs2.constants.O_NONBLOCK, 384);
+async function openPrivateFile(filename, flags2 = import_node_fs2.constants.O_RDONLY) {
+  const handle = await import_promises3.default.open(filename, flags2 | import_node_fs2.constants.O_NOFOLLOW | import_node_fs2.constants.O_NONBLOCK, 384);
   try {
     const stat = await handle.stat();
     if (!stat.isFile() || stat.uid !== process.getuid() || stat.nlink !== 1) throw new Error("Sensitive files must be regular files owned by the current user with exactly one hard link.");
@@ -439,39 +443,39 @@ var Credentials = class {
   }
   async guest(profile = "default") {
     const name = this.profile(profile);
-    const file2 = await this.load();
-    const prefix = `VMWARE_GUEST_${name.toUpperCase()}`;
-    const username = this.env[`${prefix}_USERNAME`] ?? file2.guest?.[name]?.username;
-    const password = this.remember(this.env[`${prefix}_PASSWORD`] ?? file2.guest?.[name]?.password);
-    if (typeof username !== "string" || !username || typeof password !== "string" || !password) throw new Error(`Guest credential profile '${name}' is not configured. Use VMWARE_CREDENTIALS_FILE or ${prefix}_USERNAME/PASSWORD; never paste passwords into chat.`);
+    const file4 = await this.load();
+    const prefix2 = `VMWARE_GUEST_${name.toUpperCase()}`;
+    const username = this.env[`${prefix2}_USERNAME`] ?? file4.guest?.[name]?.username;
+    const password = this.remember(this.env[`${prefix2}_PASSWORD`] ?? file4.guest?.[name]?.password);
+    if (typeof username !== "string" || !username || typeof password !== "string" || !password) throw new Error(`Guest credential profile '${name}' is not configured. Use VMWARE_CREDENTIALS_FILE or ${prefix2}_USERNAME/PASSWORD; never paste passwords into chat.`);
     return { username, password };
   }
   async vm(profile) {
     const name = this.profile(profile);
-    const file2 = await this.load();
-    const password = this.remember(this.env[`VMWARE_VM_${name.toUpperCase()}_PASSWORD`] ?? file2.vm?.[name]?.password);
+    const file4 = await this.load();
+    const password = this.remember(this.env[`VMWARE_VM_${name.toUpperCase()}_PASSWORD`] ?? file4.vm?.[name]?.password);
     if (typeof password !== "string" || !password) throw new Error(`Encrypted VM password profile '${name}' is not configured.`);
     return password;
   }
-  async console(vmx, requestedProfile) {
-    const file2 = await this.load();
+  async console(vmx2, requestedProfile) {
+    const file4 = await this.load();
     const canonical = (value) => process.platform === "win32" ? import_node_path5.default.resolve(value).toLowerCase() : import_node_path5.default.resolve(value);
-    const profiles = file2.console || {};
+    const profiles = file4.console || {};
     const resolved = await Promise.all(Object.entries(profiles).map(async ([name2, entry2]) => [name2, typeof entry2?.vmx === "string" ? await import_promises4.default.realpath(entry2.vmx).catch(() => entry2.vmx) : null]));
-    const matches = resolved.filter(([, target]) => target && canonical(target) === canonical(vmx));
+    const matches = resolved.filter(([, target]) => target && canonical(target) === canonical(vmx2));
     if (!requestedProfile && matches.length > 1) throw new Error("Multiple console profiles identify this VM. Use its configured profile alias as vm_id.");
     const name = this.profile(requestedProfile || matches[0]?.[0] || "default");
     const entry = profiles[name];
     const profileTarget = resolved.find(([profile]) => profile === name)?.[1];
-    if (profileTarget && canonical(profileTarget) !== canonical(vmx)) throw new Error("Console credential profile belongs to another VM.");
+    if (profileTarget && canonical(profileTarget) !== canonical(vmx2)) throw new Error("Console credential profile belongs to another VM.");
     const password = this.remember(this.env[`VMWARE_CONSOLE_${name.toUpperCase()}_PASSWORD`] ?? entry?.password);
     if (typeof password !== "string" || !/^[\x20-\x7e]{1,8}$/.test(password)) throw new Error(`Console password profile '${name}' must contain 1 to 8 ASCII characters. Configure it locally; never paste passwords into chat.`);
     return { profile: name, password };
   }
   async rest() {
-    const file2 = await this.load();
-    const username = this.env.VMWARE_REST_USERNAME ?? file2.rest?.username;
-    const password = this.remember(this.env.VMWARE_REST_PASSWORD ?? file2.rest?.password);
+    const file4 = await this.load();
+    const username = this.env.VMWARE_REST_USERNAME ?? file4.rest?.username;
+    const password = this.remember(this.env.VMWARE_REST_PASSWORD ?? file4.rest?.password);
     if (typeof username !== "string" || !username || typeof password !== "string" || !password || username.includes(":")) throw new Error("REST credentials are not configured. Set VMWARE_REST_USERNAME/PASSWORD or VMWARE_CREDENTIALS_FILE. REST usernames cannot contain colons.");
     const token = Buffer.from(`${username}:${password}`, "utf8").toString("base64");
     this.secrets.add(token);
@@ -486,10 +490,10 @@ var Credentials = class {
 };
 
 // src/vm-files.mjs
-var import_promises5 = __toESM(require("node:fs/promises"), 1);
+var import_promises9 = __toESM(require("node:fs/promises"), 1);
 var import_node_fs3 = require("node:fs");
-var import_node_path6 = __toESM(require("node:path"), 1);
-var import_node_crypto = require("node:crypto");
+var import_node_path10 = __toESM(require("node:path"), 1);
+var import_node_crypto2 = require("node:crypto");
 
 // node_modules/zod/v4/classic/external.js
 var external_exports = {};
@@ -1200,10 +1204,10 @@ function cached(getter) {
 function nullish(input2) {
   return input2 === null || input2 === void 0;
 }
-function cleanRegex(source) {
-  const start = source.startsWith("^") ? 1 : 0;
-  const end = source.endsWith("$") ? source.length - 1 : source.length;
-  return source.slice(start, end);
+function cleanRegex(source2) {
+  const start = source2.startsWith("^") ? 1 : 0;
+  const end = source2.endsWith("$") ? source2.length - 1 : source2.length;
+  return source2.slice(start, end);
 }
 function floatSafeRemainder(val, step) {
   const ratio = val / step;
@@ -1214,9 +1218,9 @@ function floatSafeRemainder(val, step) {
   return ratio - roundedRatio;
 }
 var EVALUATING = /* @__PURE__ */ Symbol("evaluating");
-function defineLazy(object2, key, getter) {
+function defineLazy(object2, key2, getter) {
   let value = void 0;
-  Object.defineProperty(object2, key, {
+  Object.defineProperty(object2, key2, {
     get() {
       if (value === EVALUATING) {
         return void 0;
@@ -1228,7 +1232,7 @@ function defineLazy(object2, key, getter) {
       return value;
     },
     set(v) {
-      Object.defineProperty(object2, key, {
+      Object.defineProperty(object2, key2, {
         value: v
         // configurable: true,
       });
@@ -1254,47 +1258,47 @@ function rawShape(def) {
 function sourceShape(schema) {
   return rawShape(schema._zod.def) ?? schema._zod.def.shape;
 }
-function deferProp(target, key, getter) {
-  Object.defineProperty(target, key, {
+function deferProp(target, key2, getter) {
+  Object.defineProperty(target, key2, {
     get() {
       const value = getter();
-      assignProp(this, key, value);
+      assignProp(this, key2, value);
       return value;
     },
     enumerable: true,
     configurable: true
   });
 }
-function putProp(target, key, value) {
-  if (key in target)
-    assignProp(target, key, value);
+function putProp(target, key2, value) {
+  if (key2 in target)
+    assignProp(target, key2, value);
   else
-    target[key] = value;
+    target[key2] = value;
 }
-function mirrorShape(target, source, keys, wrap) {
-  const raw = sourceShape(source);
-  for (const key of keys) {
-    const desc = Object.getOwnPropertyDescriptor(raw, key);
+function mirrorShape(target, source2, keys, wrap) {
+  const raw = sourceShape(source2);
+  for (const key2 of keys) {
+    const desc = Object.getOwnPropertyDescriptor(raw, key2);
     if (!desc.enumerable)
       continue;
     if (desc.get) {
-      deferProp(target, key, () => {
-        const value = source._zod.def.shape[key];
-        return wrap ? wrap(value, key) : value;
+      deferProp(target, key2, () => {
+        const value = source2._zod.def.shape[key2];
+        return wrap ? wrap(value, key2) : value;
       });
     } else
-      putProp(target, key, wrap ? wrap(desc.value, key) : desc.value);
+      putProp(target, key2, wrap ? wrap(desc.value, key2) : desc.value);
   }
 }
-function mirrorProps(target, source) {
-  for (const key of Reflect.ownKeys(source)) {
-    const desc = Object.getOwnPropertyDescriptor(source, key);
+function mirrorProps(target, source2) {
+  for (const key2 of Reflect.ownKeys(source2)) {
+    const desc = Object.getOwnPropertyDescriptor(source2, key2);
     if (!desc.enumerable)
       continue;
     if (desc.get)
-      deferProp(target, key, () => source[key]);
+      deferProp(target, key2, () => source2[key2]);
     else
-      putProp(target, key, desc.value);
+      putProp(target, key2, desc.value);
   }
 }
 function mergeDefs(...defs) {
@@ -1308,14 +1312,14 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path7) {
-  if (!path7)
+function getElementAtPath(obj, path11) {
+  if (!path11)
     return obj;
-  return path7.reduce((acc, key) => acc?.[key], obj);
+  return path11.reduce((acc, key2) => acc?.[key2], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
-  const promises = keys.map((key) => promisesObj[key]);
+  const promises = keys.map((key2) => promisesObj[key2]);
   return Promise.all(promises).then((results) => {
     const resolvedObj = {};
     for (let i = 0; i < keys.length; i++) {
@@ -1387,8 +1391,8 @@ function shallowClone(o) {
 }
 function numKeys(data) {
   let keyCount = 0;
-  for (const key in data) {
-    if (Object.prototype.hasOwnProperty.call(data, key)) {
+  for (const key2 in data) {
+    if (Object.prototype.hasOwnProperty.call(data, key2)) {
       keyCount++;
     }
   }
@@ -1542,12 +1546,12 @@ function pick(schema, mask) {
 function maskedKeys(schema, mask) {
   const raw = sourceShape(schema);
   const keys = [];
-  for (const key of Reflect.ownKeys(mask)) {
-    if (!Object.getOwnPropertyDescriptor(raw, key)?.enumerable) {
-      throw new Error(`Unrecognized key: "${String(key)}"`);
+  for (const key2 of Reflect.ownKeys(mask)) {
+    if (!Object.getOwnPropertyDescriptor(raw, key2)?.enumerable) {
+      throw new Error(`Unrecognized key: "${String(key2)}"`);
     }
-    if (mask[key])
-      keys.push(key);
+    if (mask[key2])
+      keys.push(key2);
   }
   return keys;
 }
@@ -1560,7 +1564,7 @@ function omit(schema, mask) {
   }
   const omitted = new Set(maskedKeys(schema, mask));
   const newShape = {};
-  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)).filter((key) => !omitted.has(key)));
+  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)).filter((key2) => !omitted.has(key2)));
   return clone(schema, mergeDefs(currDef, { shape: newShape, checks: [] }));
 }
 function extend(schema, shape) {
@@ -1571,8 +1575,8 @@ function extend(schema, shape) {
   const hasChecks = checks && checks.length > 0;
   if (hasChecks) {
     const existingShape = sourceShape(schema);
-    for (const key of Reflect.ownKeys(shape)) {
-      if (Object.getOwnPropertyDescriptor(existingShape, key) !== void 0) {
+    for (const key2 of Reflect.ownKeys(shape)) {
+      if (Object.getOwnPropertyDescriptor(existingShape, key2) !== void 0) {
         throw new Error("Cannot overwrite keys on object schemas containing refinements. Use `.safeExtend()` instead.");
       }
     }
@@ -1619,15 +1623,15 @@ function partial(Class2, schema, mask, name = "partial") {
   }
   const selected = mask ? new Set(maskedKeys(schema, mask)) : void 0;
   const newShape = {};
-  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)), Class2 && ((value, key) => selected && !selected.has(key) ? value : new Class2({ type: "optional", innerType: value })));
+  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)), Class2 && ((value, key2) => selected && !selected.has(key2) ? value : new Class2({ type: "optional", innerType: value })));
   return clone(schema, mergeDefs(schema._zod.def, { shape: newShape, checks: [] }));
 }
 function required(Class2, schema, mask) {
   const selected = mask ? new Set(maskedKeys(schema, mask)) : void 0;
   const newShape = {};
-  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)), (value, key) => (
+  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)), (value, key2) => (
     // overwrite with non-optional
-    selected && !selected.has(key) ? value : new Class2({ type: "nonoptional", innerType: value })
+    selected && !selected.has(key2) ? value : new Class2({ type: "nonoptional", innerType: value })
   ));
   return clone(schema, mergeDefs(schema._zod.def, { shape: newShape }));
 }
@@ -1651,11 +1655,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path7, issues) {
+function prefixIssues(path11, issues) {
   return issues.map((iss) => {
     var _a3;
     (_a3 = iss).path ?? (_a3.path = []);
-    iss.path.unshift(path7);
+    iss.path.unshift(path11);
     return iss;
   });
 }
@@ -1814,46 +1818,46 @@ var Class = class {
   }
 };
 function members(proto, table) {
-  for (const key in table) {
-    const desc = Object.getOwnPropertyDescriptor(table, key);
+  for (const key2 in table) {
+    const desc = Object.getOwnPropertyDescriptor(table, key2);
     if (desc.get)
-      Object.defineProperty(proto, key, { ...desc, enumerable: false });
+      Object.defineProperty(proto, key2, { ...desc, enumerable: false });
     else
-      defineBound(proto, key, desc.value);
+      defineBound(proto, key2, desc.value);
   }
 }
-function own(inst, key, value, enumerable = true) {
-  Object.defineProperty(inst, key, { configurable: true, writable: true, enumerable, value });
+function own(inst, key2, value, enumerable = true) {
+  Object.defineProperty(inst, key2, { configurable: true, writable: true, enumerable, value });
   return value;
 }
-function hide(inst, key, value) {
-  return own(inst, key, value, false);
+function hide(inst, key2, value) {
+  return own(inst, key2, value, false);
 }
 // @__NO_SIDE_EFFECTS__
 function derived(computes, table) {
-  for (const key in computes) {
-    const compute = computes[key];
-    Object.defineProperty(table, key, {
+  for (const key2 in computes) {
+    const compute = computes[key2];
+    Object.defineProperty(table, key2, {
       configurable: true,
       enumerable: true,
       get() {
-        return own(this, key, compute(this));
+        return own(this, key2, compute(this));
       },
       set(value) {
-        own(this, key, value);
+        own(this, key2, value);
       }
     });
   }
   return table;
 }
-function defineBound(proto, key, fn) {
-  Object.defineProperty(proto, key, {
+function defineBound(proto, key2, fn) {
+  Object.defineProperty(proto, key2, {
     configurable: true,
     get() {
-      return this == null ? fn : own(this, key, fn.bind(this));
+      return this == null ? fn : own(this, key2, fn.bind(this));
     },
     set(value) {
-      own(this, key, value);
+      own(this, key2, value);
     }
   });
 }
@@ -1870,53 +1874,53 @@ var breaker = {
     return void 0;
   }
 };
-function defineLazyInternal(inst, key, compute) {
+function defineLazyInternal(inst, key2, compute) {
   const proto = Object.getPrototypeOf(inst._zod);
-  if (key in proto && installing !== inst._zod) {
+  if (key2 in proto && installing !== inst._zod) {
     installing = void 0;
     return;
   }
   installing = inst._zod;
-  Object.defineProperty(proto, key, {
+  Object.defineProperty(proto, key2, {
     configurable: true,
     get() {
-      Object.defineProperty(this, key, breaker);
+      Object.defineProperty(this, key2, breaker);
       const outer = broke;
       broke = false;
       try {
         const value = compute(this);
         if (broke)
-          delete this[key];
+          delete this[key2];
         else
-          Object.defineProperty(this, key, { configurable: true, writable: true, value });
+          Object.defineProperty(this, key2, { configurable: true, writable: true, value });
         broke = broke || outer;
         return value;
       } catch (err) {
-        delete this[key];
+        delete this[key2];
         broke = broke || outer;
         throw err;
       }
     },
     set(value) {
-      Object.defineProperty(this, key, { configurable: true, writable: true, value });
+      Object.defineProperty(this, key2, { configurable: true, writable: true, value });
     }
   });
 }
-function installLazyProp(inst, key, make, enumerable) {
-  const proto = claim(inst, key);
+function installLazyProp(inst, key2, make, enumerable) {
+  const proto = claim(inst, key2);
   if (!proto)
     return;
-  Object.defineProperty(proto, key, {
+  Object.defineProperty(proto, key2, {
     configurable: true,
     get() {
       const desc = { configurable: true, writable: true, enumerable, value: void 0 };
-      Object.defineProperty(this, key, desc);
+      Object.defineProperty(this, key2, desc);
       desc.value = make(this);
-      Object.defineProperty(this, key, desc);
+      Object.defineProperty(this, key2, desc);
       return desc.value;
     },
     set(value) {
-      Object.defineProperty(this, key, { configurable: true, writable: true, enumerable, value });
+      Object.defineProperty(this, key2, { configurable: true, writable: true, enumerable, value });
     }
   });
 }
@@ -2093,15 +2097,15 @@ var $ZodError = $constructor("$ZodError", initializer);
 var $ZodRealError = $constructor("$ZodError", initializer, void 0, {
   Parent: Error
 });
-function node(obj, key, make) {
-  if (!Object.prototype.hasOwnProperty.call(obj, key)) {
-    if (key === "__proto__") {
-      Object.defineProperty(obj, key, { value: make(), writable: true, enumerable: true, configurable: true });
+function node(obj, key2, make) {
+  if (!Object.prototype.hasOwnProperty.call(obj, key2)) {
+    if (key2 === "__proto__") {
+      Object.defineProperty(obj, key2, { value: make(), writable: true, enumerable: true, configurable: true });
     } else {
-      obj[key] = make();
+      obj[key2] = make();
     }
   }
-  return obj[key];
+  return obj[key2];
 }
 function flattenError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = {};
@@ -2117,16 +2121,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path7 = []) => {
+  const processError = (error63, path11 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path7, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path11, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path11, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path11, ...issue2.path]);
       } else {
-        const fullpath = [...path7, ...issue2.path];
+        const fullpath = [...path11, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -2165,17 +2169,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path7 = []) => {
+  const processError = (error63, path11 = []) => {
     var _a3;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path7, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path11, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path11, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path7, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path11, ...issue2.path]);
       } else {
-        const fullpath = [...path7, ...issue2.path];
+        const fullpath = [...path11, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -2214,8 +2218,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path7 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path7) {
+  const path11 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path11) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -2517,8 +2521,8 @@ var creditCard = /^\d(?:[ -]?\d){11,18}$/;
 var currencyCode = /^(?:AED|AFN|ALL|AMD|AOA|ARS|AUD|AWG|AZN|BAM|BBD|BDT|BHD|BIF|BMD|BND|BOB|BOV|BRL|BSD|BTN|BWP|BYN|BZD|CAD|CDF|CHE|CHF|CHW|CLF|CLP|CNY|COP|COU|CRC|CUP|CVE|CZK|DJF|DKK|DOP|DZD|EGP|ERN|ETB|EUR|FJD|FKP|GBP|GEL|GHS|GIP|GMD|GNF|GTQ|GYD|HKD|HNL|HTG|HUF|IDR|ILS|INR|IQD|IRR|ISK|JMD|JOD|JPY|KES|KGS|KHR|KMF|KPW|KRW|KWD|KYD|KZT|LAK|LBP|LKR|LRD|LSL|LYD|MAD|MDL|MGA|MKD|MMK|MNT|MOP|MRU|MUR|MVR|MWK|MXN|MXV|MYR|MZN|NAD|NGN|NIO|NOK|NPR|NZD|OMR|PAB|PEN|PGK|PHP|PKR|PLN|PYG|QAR|RON|RSD|RUB|RWF|SAR|SBD|SCR|SDG|SEK|SGD|SHP|SLE|SOS|SRD|SSP|STN|SVC|SYP|SZL|THB|TJS|TMT|TND|TOP|TRY|TTD|TWD|TZS|UAH|UGX|USD|USN|UYI|UYU|UYW|UZS|VED|VES|VND|VUV|WST|XAD|XAF|XAG|XAU|XBA|XBB|XBC|XBD|XCD|XCG|XDR|XOF|XPD|XPF|XPT|XSU|XTS|XUA|XXX|YER|ZAR|ZMW|ZWG)$/;
 var iban = /^[A-Z]{2}(?!00|01|99)\d{2}[A-Z0-9]{11,30}$/;
 var dateSource = `(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))`;
-function anchor(source) {
-  return new RegExp(`^${source}$`);
+function anchor(source2) {
+  return new RegExp(`^${source2}$`);
 }
 var date = /* @__PURE__ */ anchor(dateSource);
 function timeSource(args) {
@@ -3010,16 +3014,16 @@ var $ZodCheckProperties = /* @__PURE__ */ $constructor("$ZodCheckProperties", (i
       payload.issues.push({ expected: "object", code: "invalid_type", input: payload.value, inst });
       return void 0;
     }
-    entries ?? (entries = Reflect.ownKeys(def.shape).map((key) => [key, def.shape[key]]));
+    entries ?? (entries = Reflect.ownKeys(def.shape).map((key2) => [key2, def.shape[key2]]));
     const input2 = payload.value;
     let proms;
-    for (const [key, schema] of entries) {
-      const result = schema._zod.run({ value: input2[key], issues: [] }, {});
+    for (const [key2, schema] of entries) {
+      const result = schema._zod.run({ value: input2[key2], issues: [] }, {});
       if (result instanceof Promise) {
         proms ?? (proms = []);
-        proms.push(result.then((result2) => handleCheckPropertyResult(result2, payload, key)));
+        proms.push(result.then((result2) => handleCheckPropertyResult(result2, payload, key2)));
       } else {
-        handleCheckPropertyResult(result, payload, key);
+        handleCheckPropertyResult(result, payload, key2);
       }
     }
     if (proms)
@@ -3474,11 +3478,11 @@ function isValidCIDRv6(value) {
   const parts = value.split("/");
   if (parts.length !== 2)
     return false;
-  const [address, prefix] = parts;
-  if (!prefix)
+  const [address, prefix2] = parts;
+  if (!prefix2)
     return false;
-  const prefixNum = Number(prefix);
-  if (`${prefixNum}` !== prefix)
+  const prefixNum = Number(prefix2);
+  if (`${prefixNum}` !== prefix2)
     return false;
   if (prefixNum < 0 || prefixNum > 128)
     return false;
@@ -3920,8 +3924,8 @@ var $ZodArray = /* @__PURE__ */ $constructor("$ZodArray", (inst, def) => {
   };
   capSize(inst, arraySize);
 });
-function handlePropertyResult(result, final, key, input2, optin, optout) {
-  const isPresent = key in input2;
+function handlePropertyResult(result, final, key2, input2, optin, optout) {
+  const isPresent = key2 in input2;
   const isOptionalOut = optout === "optional";
   if (!isPresent && isOptionalOut && optin === "optional") {
     return;
@@ -3930,7 +3934,7 @@ function handlePropertyResult(result, final, key, input2, optin, optout) {
     if (optin !== void 0 && isOptionalOut && !isPresent) {
       return;
     }
-    final.issues.push(...prefixIssues(key, result.issues));
+    final.issues.push(...prefixIssues(key2, result.issues));
   }
   if (!isPresent && optin === void 0) {
     if (!result.issues.length) {
@@ -3938,17 +3942,17 @@ function handlePropertyResult(result, final, key, input2, optin, optout) {
         code: "invalid_type",
         expected: "nonoptional",
         input: void 0,
-        path: [key]
+        path: [key2]
       });
     }
     return;
   }
   if (result.value === void 0) {
     if (isPresent || optin === "defaulted" && !isOptionalOut) {
-      final.value[key] = void 0;
+      final.value[key2] = void 0;
     }
   } else {
-    final.value[key] = result.value;
+    final.value[key2] = result.value;
   }
 }
 var NO_SYMBOL_KEYS = [];
@@ -3981,28 +3985,28 @@ function handleCatchall(proms, input2, payload, ctx, def, inst, abortEarly) {
   const optin = _catchall.optin;
   const optout = _catchall.optout;
   let seen = 0;
-  for (const key in input2) {
+  for (const key2 in input2) {
     if (abortEarly && payload.issues.length !== seen) {
       if (aborted(payload, seen))
         break;
       seen = payload.issues.length;
     }
-    if (keySet.has(key))
+    if (keySet.has(key2))
       continue;
-    if (key === "__proto__") {
+    if (key2 === "__proto__") {
       if (t === "never")
-        unrecognized.push(key);
+        unrecognized.push(key2);
       continue;
     }
     if (t === "never") {
-      unrecognized.push(key);
+      unrecognized.push(key2);
       continue;
     }
-    const r = _catchall.run({ value: input2[key], issues: [] }, ctx);
+    const r = _catchall.run({ value: input2[key2], issues: [] }, ctx);
     if (r instanceof Promise) {
-      proms.push(r.then((r2) => handlePropertyResult(r2, payload, key, input2, optin, optout)));
+      proms.push(r.then((r2) => handlePropertyResult(r2, payload, key2, input2, optin, optout)));
     } else {
-      handlePropertyResult(r, payload, key, input2, optin, optout);
+      handlePropertyResult(r, payload, key2, input2, optin, optout);
     }
   }
   if (unrecognized.length) {
@@ -4039,16 +4043,16 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
   defineLazyInternal(inst, "propValues", (zod) => {
     const shape = zod.def.shape;
     const propValues = {};
-    for (const key in shape) {
-      const field = shape[key]._zod;
+    for (const key2 in shape) {
+      const field = shape[key2]._zod;
       if (field.values) {
-        if (!Object.prototype.hasOwnProperty.call(propValues, key)) {
-          assignProp(propValues, key, /* @__PURE__ */ new Set());
+        if (!Object.prototype.hasOwnProperty.call(propValues, key2)) {
+          assignProp(propValues, key2, /* @__PURE__ */ new Set());
         }
         for (const v of field.values)
-          propValues[key].add(v);
+          propValues[key2].add(v);
         if (field.optin !== void 0)
-          propValues[key].add(void 0);
+          propValues[key2].add(void 0);
       }
     }
     return propValues;
@@ -4075,22 +4079,22 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
     const shape = value.shape;
     const abortEarly = ctx?.abortEarly;
     let seen = payload.issues.length;
-    for (const key of value.allKeys) {
+    for (const key2 of value.allKeys) {
       if (abortEarly && payload.issues.length !== seen) {
         if (aborted(payload, seen))
           break;
         seen = payload.issues.length;
       }
-      if (key === "__proto__")
+      if (key2 === "__proto__")
         continue;
-      const el = shape[key];
+      const el = shape[key2];
       const optin = el._zod.optin;
       const optout = el._zod.optout;
-      const r = el._zod.run({ value: input2[key], issues: [] }, ctx);
+      const r = el._zod.run({ value: input2[key2], issues: [] }, ctx);
       if (r instanceof Promise) {
-        proms.push(r.then((r2) => handlePropertyResult(r2, payload, key, input2, optin, optout)));
+        proms.push(r.then((r2) => handlePropertyResult(r2, payload, key2, input2, optin, optout)));
       } else {
-        handlePropertyResult(r, payload, key, input2, optin, optout);
+        handlePropertyResult(r, payload, key2, input2, optin, optout);
       }
     }
     if (!catchall) {
@@ -4124,17 +4128,17 @@ var $ZodObjectJIT = /* @__PURE__ */ $constructor("$ZodObjectJIT", (inst, def) =>
     doc.write(`const input = payload.value;`);
     const ids = /* @__PURE__ */ Object.create(null);
     let counter = 0;
-    for (const key of normalized.allKeys) {
-      ids[key] = `key_${counter++}`;
+    for (const key2 of normalized.allKeys) {
+      ids[key2] = `key_${counter++}`;
     }
     doc.write(memo2 ? `const newResult = memo.alloc(inst, payload, {}, ctx);` : `const newResult = {};`);
-    for (const key of normalized.allKeys) {
-      if (key === "__proto__")
+    for (const key2 of normalized.allKeys) {
+      if (key2 === "__proto__")
         continue;
-      const id = ids[key];
-      const k = typeof key === "symbol" ? `syms[${syms.indexOf(key)}]` : esc(key);
+      const id = ids[key2];
+      const k = typeof key2 === "symbol" ? `syms[${syms.indexOf(key2)}]` : esc(key2);
       const isPresent = `${k} in input`;
-      const schema = shape[key];
+      const schema = shape[key2];
       const optin = schema?._zod?.optin;
       const isOptionalIn = optin !== void 0;
       const isOptionalOut = schema?._zod?.optout === "optional";
@@ -4468,21 +4472,21 @@ function mergeValues(a, b) {
   }
   if (isPlainObject(a) && isPlainObject(b)) {
     const bKeys = Object.keys(b);
-    const sharedKeys = Object.keys(a).filter((key) => bKeys.indexOf(key) !== -1);
+    const sharedKeys = Object.keys(a).filter((key2) => bKeys.indexOf(key2) !== -1);
     const newObj = { ...a, ...b };
     if (Object.prototype.hasOwnProperty.call(newObj, "__proto__"))
       delete newObj.__proto__;
-    for (const key of sharedKeys) {
-      if (key === "__proto__")
+    for (const key2 of sharedKeys) {
+      if (key2 === "__proto__")
         continue;
-      const sharedValue = mergeValues(a[key], b[key]);
+      const sharedValue = mergeValues(a[key2], b[key2]);
       if (!sharedValue.valid) {
         return {
           valid: false,
-          mergeErrorPath: [key, ...sharedValue.mergeErrorPath]
+          mergeErrorPath: [key2, ...sharedValue.mergeErrorPath]
         };
       }
-      newObj[key] = sharedValue.data;
+      newObj[key2] = sharedValue.data;
     }
     return { valid: true, data: newObj };
   }
@@ -4641,9 +4645,9 @@ var $ZodTuple = /* @__PURE__ */ $constructor("$ZodTuple", (inst, def) => {
     return handleTupleResults(itemResults, payload, items, input2, optoutStart);
   };
 });
-function getTupleOptStart(items, key) {
+function getTupleOptStart(items, key2) {
   for (let i = items.length - 1; i >= 0; i--) {
-    const omittable = key === "optin" ? items[i]._zod.optin !== void 0 : items[i]._zod.optout === "optional";
+    const omittable = key2 === "optin" ? items[i]._zod.optin !== void 0 : items[i]._zod.optout === "optional";
     if (!omittable)
       return i + 1;
   }
@@ -4701,12 +4705,12 @@ var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
     if (values && !def.partial) {
       payload.value = memo2 ? memo2.alloc(inst, payload, {}, ctx) : {};
       const recordKeys = /* @__PURE__ */ new Set();
-      for (const key of values) {
-        if (typeof key === "string" || typeof key === "number" || typeof key === "symbol") {
-          recordKeys.add(typeof key === "number" ? key.toString() : key);
-          if (key === "__proto__")
+      for (const key2 of values) {
+        if (typeof key2 === "string" || typeof key2 === "number" || typeof key2 === "symbol") {
+          recordKeys.add(typeof key2 === "number" ? key2.toString() : key2);
+          if (key2 === "__proto__")
             continue;
-          const keyResult = def.keyType._zod.run({ value: key, issues: [] }, ctx);
+          const keyResult = def.keyType._zod.run({ value: key2, issues: [] }, ctx);
           if (keyResult instanceof Promise) {
             throw new Error("Async schemas not supported in object keys currently");
           }
@@ -4715,8 +4719,8 @@ var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
               code: "invalid_key",
               origin: "record",
               issues: keyResult.issues.map((iss) => finalizeIssue(iss, ctx, config())),
-              input: key,
-              path: [key],
+              input: key2,
+              path: [key2],
               inst
             });
             continue;
@@ -4724,32 +4728,32 @@ var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
           const outKey = keyResult.value;
           if (outKey === "__proto__")
             continue;
-          const result = def.valueType._zod.run({ value: input2[key], issues: [] }, ctx);
+          const result = def.valueType._zod.run({ value: input2[key2], issues: [] }, ctx);
           if (result instanceof Promise) {
             proms.push(result.then((result2) => {
               if (result2.issues.length) {
-                payload.issues.push(...prefixIssues(key, result2.issues));
+                payload.issues.push(...prefixIssues(key2, result2.issues));
               }
               payload.value[outKey] = result2.value;
             }));
           } else {
             if (result.issues.length) {
-              payload.issues.push(...prefixIssues(key, result.issues));
+              payload.issues.push(...prefixIssues(key2, result.issues));
             }
             payload.value[outKey] = result.value;
           }
         }
       }
       let unrecognized;
-      for (const key in input2) {
-        if (!recordKeys.has(key)) {
+      for (const key2 in input2) {
+        if (!recordKeys.has(key2)) {
           if (def.mode === "loose") {
-            if (key === "__proto__")
+            if (key2 === "__proto__")
               continue;
-            payload.value[key] = input2[key];
+            payload.value[key2] = input2[key2];
           } else {
             unrecognized = unrecognized ?? [];
-            unrecognized.push(key);
+            unrecognized.push(key2);
           }
         }
       }
@@ -4765,18 +4769,18 @@ var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
     } else {
       payload.value = memo2 ? memo2.alloc(inst, payload, {}, ctx) : {};
       let unrecognized;
-      for (const key of Reflect.ownKeys(input2)) {
-        if (key === "__proto__")
+      for (const key2 of Reflect.ownKeys(input2)) {
+        if (key2 === "__proto__")
           continue;
-        if (!Object.prototype.propertyIsEnumerable.call(input2, key))
+        if (!Object.prototype.propertyIsEnumerable.call(input2, key2))
           continue;
-        let keyResult = def.keyType._zod.run({ value: key, issues: [] }, ctx);
+        let keyResult = def.keyType._zod.run({ value: key2, issues: [] }, ctx);
         if (keyResult instanceof Promise) {
           throw new Error("Async schemas not supported in object keys currently");
         }
-        const checkNumericKey = typeof key === "string" && number.test(key) && keyResult.issues.length;
+        const checkNumericKey = typeof key2 === "string" && number.test(key2) && keyResult.issues.length;
         if (checkNumericKey) {
-          const retryResult = def.keyType._zod.run({ value: Number(key), issues: [] }, ctx);
+          const retryResult = def.keyType._zod.run({ value: Number(key2), issues: [] }, ctx);
           if (retryResult instanceof Promise) {
             throw new Error("Async schemas not supported in object keys currently");
           }
@@ -4786,17 +4790,17 @@ var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
         }
         if (keyResult.issues.length) {
           if (def.mode === "loose") {
-            payload.value[key] = input2[key];
+            payload.value[key2] = input2[key2];
           } else if (values) {
             unrecognized = unrecognized ?? [];
-            unrecognized.push(key);
+            unrecognized.push(key2);
           } else {
             payload.issues.push({
               code: "invalid_key",
               origin: "record",
               issues: keyResult.issues.map((iss) => finalizeIssue(iss, ctx, config())),
-              input: key,
-              path: [key],
+              input: key2,
+              path: [key2],
               inst
             });
           }
@@ -4805,17 +4809,17 @@ var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
         const outKey = keyResult.value;
         if (outKey === "__proto__")
           continue;
-        const result = def.valueType._zod.run({ value: input2[key], issues: [] }, ctx);
+        const result = def.valueType._zod.run({ value: input2[key2], issues: [] }, ctx);
         if (result instanceof Promise) {
           proms.push(result.then((result2) => {
             if (result2.issues.length) {
-              payload.issues.push(...prefixIssues(key, result2.issues));
+              payload.issues.push(...prefixIssues(key2, result2.issues));
             }
             payload.value[outKey] = result2.value;
           }));
         } else {
           if (result.issues.length) {
-            payload.issues.push(...prefixIssues(key, result.issues));
+            payload.issues.push(...prefixIssues(key2, result.issues));
           }
           payload.value[outKey] = result.value;
         }
@@ -4855,20 +4859,20 @@ var $ZodMap = /* @__PURE__ */ $constructor("$ZodMap", (inst, def) => {
     payload.value = memo2 ? memo2.alloc(inst, payload, /* @__PURE__ */ new Map(), ctx) : /* @__PURE__ */ new Map();
     const abortEarly = ctx?.abortEarly;
     let seen = payload.issues.length;
-    for (const [key, value] of input2) {
+    for (const [key2, value] of input2) {
       if (abortEarly && payload.issues.length !== seen) {
         if (aborted(payload, seen))
           break;
         seen = payload.issues.length;
       }
-      const keyResult = def.keyType._zod.run({ value: key, issues: [] }, ctx);
+      const keyResult = def.keyType._zod.run({ value: key2, issues: [] }, ctx);
       const valueResult = def.valueType._zod.run({ value, issues: [] }, ctx);
       if (keyResult instanceof Promise || valueResult instanceof Promise) {
         proms.push(Promise.all([keyResult, valueResult]).then(([keyResult2, valueResult2]) => {
-          handleMapResult(keyResult2, valueResult2, payload, key, input2, inst, ctx);
+          handleMapResult(keyResult2, valueResult2, payload, key2, input2, inst, ctx);
         }));
       } else {
-        handleMapResult(keyResult, valueResult, payload, key, input2, inst, ctx);
+        handleMapResult(keyResult, valueResult, payload, key2, input2, inst, ctx);
       }
     }
     if (proms.length)
@@ -4877,10 +4881,10 @@ var $ZodMap = /* @__PURE__ */ $constructor("$ZodMap", (inst, def) => {
   };
   capSize(inst, mapSize);
 });
-function handleMapResult(keyResult, valueResult, final, key, input2, inst, ctx) {
+function handleMapResult(keyResult, valueResult, final, key2, input2, inst, ctx) {
   if (keyResult.issues.length) {
-    if (propertyKeyTypes.has(typeof key)) {
-      final.issues.push(...prefixIssues(key, keyResult.issues));
+    if (propertyKeyTypes.has(typeof key2)) {
+      final.issues.push(...prefixIssues(key2, keyResult.issues));
     } else {
       final.issues.push({
         code: "invalid_key",
@@ -4892,15 +4896,15 @@ function handleMapResult(keyResult, valueResult, final, key, input2, inst, ctx) 
     }
   }
   if (valueResult.issues.length) {
-    if (propertyKeyTypes.has(typeof key)) {
-      final.issues.push(...prefixIssues(key, valueResult.issues));
+    if (propertyKeyTypes.has(typeof key2)) {
+      final.issues.push(...prefixIssues(key2, valueResult.issues));
     } else {
       final.issues.push({
         origin: "map",
         code: "invalid_element",
         input: input2,
         inst,
-        key,
+        key: key2,
         issues: valueResult.issues.map((iss) => finalizeIssue(iss, ctx, config()))
       });
     }
@@ -5369,11 +5373,11 @@ var $ZodTemplateLiteral = /* @__PURE__ */ $constructor("$ZodTemplateLiteral", (i
   const regexParts = [];
   for (const part of def.parts) {
     if (typeof part === "object" && part !== null) {
-      const source = partPattern(part);
-      if (!source) {
+      const source2 = partPattern(part);
+      if (!source2) {
         throw new Error(`Invalid template literal part, no pattern found: ${[...part._zod.traits].shift()}`);
       }
-      regexParts.push(cleanRegex(source));
+      regexParts.push(cleanRegex(source2));
     } else if (part === null || primitiveTypes.has(typeof part)) {
       regexParts.push(escapeRegex(`${part}`));
     } else {
@@ -5575,8 +5579,8 @@ function isRecursive(inst, stack, resolve) {
   };
   const shape = (sh, spread) => {
     let answer = NONE;
-    for (const key of Reflect.ownKeys(sh)) {
-      const desc = Object.getOwnPropertyDescriptor(sh, key);
+    for (const key2 of Reflect.ownKeys(sh)) {
+      const desc = Object.getOwnPropertyDescriptor(sh, key2);
       if (spread && !desc.enumerable)
         continue;
       const child = desc.get ? ASSUMED : desc.value?._zod ? isRecursive(desc.value, stack, resolve) : NONE;
@@ -5672,8 +5676,8 @@ function isRecursive(inst, stack, resolve) {
       break;
     default: {
       kind;
-      for (const key in def) {
-        const desc = Object.getOwnPropertyDescriptor(def, key);
+      for (const key2 in def) {
+        const desc = Object.getOwnPropertyDescriptor(def, key2);
         if (!desc || desc.get)
           continue;
         const value = desc.value;
@@ -13499,9 +13503,9 @@ function withParser(schema, parser) {
     installCompiledUserMethods(clone2, schema, parser);
   return clone2;
 }
-function installCompiledUserMethods(target, source, parser) {
+function installCompiledUserMethods(target, source2, parser) {
   const targetAny = target;
-  const sourceAny = source;
+  const sourceAny = source2;
   if (typeof sourceAny.safeParse === "function") {
     const originalSafeParse = sourceAny.safeParse;
     targetAny.safeParse = (data, params) => {
@@ -13806,11 +13810,11 @@ function generatePropertiesChecks(doc, ctx, def, accessor) {
   }
   doc.write(`if (${accessor} == null) return INVALID;`);
   const shape = def.shape;
-  for (const key of Reflect.ownKeys(shape)) {
-    const keyExpr = typeof key === "symbol" ? addConstant(ctx, key) : esc(key);
+  for (const key2 of Reflect.ownKeys(shape)) {
+    const keyExpr = typeof key2 === "symbol" ? addConstant(ctx, key2) : esc(key2);
     const inputVar = newVar(ctx);
     doc.write(`const ${inputVar} = ${accessor}[${keyExpr}];`);
-    compileChild(doc, ctx, shape[key], inputVar, false);
+    compileChild(doc, ctx, shape[key2], inputVar, false);
   }
 }
 function generatePropertyCheck(doc, ctx, def, accessor) {
@@ -13984,8 +13988,8 @@ function generateStringFormatCheck(doc, ctx, def, accessor, needsValue = true) {
       doc.write(`if (!${accessor}.includes(${esc(def.includes)})) return INVALID;`);
       break;
     case "starts_with": {
-      const prefix = def.prefix;
-      doc.write(`if (${accessor}.slice(0, ${prefix.length}) !== ${esc(prefix)}) return INVALID;`);
+      const prefix2 = def.prefix;
+      doc.write(`if (${accessor}.slice(0, ${prefix2.length}) !== ${esc(prefix2)}) return INVALID;`);
       break;
     }
     case "ends_with": {
@@ -14203,9 +14207,9 @@ function generateObjectCheck(doc, ctx, schema, accessor, buildsValue = true) {
     throw new ZodCompileUnsupportedError('object shape key "__proto__"');
   }
   const propOutputs = /* @__PURE__ */ new Map();
-  for (const key of allKeys) {
-    const propSchema = propShape[key];
-    const kx = keyExpr(key);
+  for (const key2 of allKeys) {
+    const propSchema = propShape[key2];
+    const kx = keyExpr(key2);
     const inputVar = newVar(ctx);
     doc.write(`const ${inputVar} = ${accessor}[${kx}];`);
     if (propSchema._zod.optin !== void 0) {
@@ -14226,14 +14230,14 @@ function generateObjectCheck(doc, ctx, schema, accessor, buildsValue = true) {
       } else {
         doc.write(`if (${outputVar2} === INVALID) return INVALID;`);
       }
-      propOutputs.set(key, outputVar2);
+      propOutputs.set(key2, outputVar2);
     } else {
       if (requiresPresenceCheck(propSchema)) {
         doc.write(`if (!(${kx} in ${accessor})) return INVALID;`);
       }
       const outputAccessor = compileChild(doc, ctx, propSchema, inputVar, buildsValue);
       if (outputAccessor !== null)
-        propOutputs.set(key, outputAccessor);
+        propOutputs.set(key2, outputAccessor);
     }
   }
   const catchall = def.catchall;
@@ -14654,9 +14658,9 @@ function generateTupleCheck(doc, ctx, schema, accessor) {
   }
   return outputVar;
 }
-function getTupleOptStart2(items, key) {
+function getTupleOptStart2(items, key2) {
   for (let i = items.length - 1; i >= 0; i--) {
-    const omittable = key === "optin" ? items[i]._zod.optin !== void 0 : items[i]._zod.optout === "optional";
+    const omittable = key2 === "optin" ? items[i]._zod.optin !== void 0 : items[i]._zod.optout === "optional";
     if (!omittable)
       return i + 1;
   }
@@ -14729,8 +14733,8 @@ function generateDiscriminatedUnionCheck(doc, ctx, def, accessor) {
       claimed.add(value);
     }
     const conditions = Array.from(values, (value) => literalEquality(ctx, discVar, value));
-    const prefix = firstBranch ? "if" : "else if";
-    doc.write(`${prefix} (${conditions.join(" || ")}) {`);
+    const prefix2 = firstBranch ? "if" : "else if";
+    doc.write(`${prefix2} (${conditions.join(" || ")}) {`);
     doc.indented((d) => {
       const branchOutput = generateCheck(d, ctx, option, accessor);
       d.write(`${outputVar} = ${branchOutput};`);
@@ -14786,16 +14790,16 @@ function generateRecordCheck(doc, ctx, schema, accessor) {
   const keyValues = recordDef.partial ? void 0 : def.keyType._zod.values;
   if (keyValues) {
     const inputKeys = [];
-    for (const key of keyValues) {
-      if (!(typeof key === "string" || typeof key === "number" || typeof key === "symbol")) {
-        throw new ZodCompileUnsupportedError(`record key value ${String(key)}`);
+    for (const key2 of keyValues) {
+      if (!(typeof key2 === "string" || typeof key2 === "number" || typeof key2 === "symbol")) {
+        throw new ZodCompileUnsupportedError(`record key value ${String(key2)}`);
       }
-      const inputKey = typeof key === "number" ? key.toString() : key;
+      const inputKey = typeof key2 === "number" ? key2.toString() : key2;
       if (inputKey === "__proto__") {
         throw new ZodCompileUnsupportedError('record key "__proto__"');
       }
       inputKeys.push(inputKey);
-      const keyConst = addConstant(ctx, key);
+      const keyConst = addConstant(ctx, key2);
       const outKey = generateCheck(doc, ctx, def.keyType, keyConst);
       const valueVar = newVar(ctx);
       doc.write(`const ${valueVar} = ${accessor}[${literalPropertyKey(ctx, inputKey)}];`);
@@ -14873,10 +14877,10 @@ function emitOwnKeys(doc, ctx, accessor, kVar, body, onSymbol) {
   });
   doc.write(`}`);
 }
-function literalPropertyKey(ctx, key) {
-  if (typeof key === "string")
-    return esc(key);
-  return addConstant(ctx, key);
+function literalPropertyKey(ctx, key2) {
+  if (typeof key2 === "string")
+    return esc(key2);
+  return addConstant(ctx, key2);
 }
 function generateMapCheck(doc, ctx, schema, accessor) {
   const def = schema._zod.def;
@@ -15678,12 +15682,12 @@ function _includes(includes, params) {
   });
 }
 // @__NO_SIDE_EFFECTS__
-function _startsWith(prefix, params) {
+function _startsWith(prefix2, params) {
   return new $ZodCheckStartsWith({
     check: "string_format",
     format: "starts_with",
     ...normalizeParams(params),
-    prefix
+    prefix: prefix2
   });
 }
 // @__NO_SIDE_EFFECTS__
@@ -15713,10 +15717,10 @@ function _properties(shape, params) {
   });
 }
 // @__NO_SIDE_EFFECTS__
-function _mime(types, params) {
+function _mime(types2, params) {
   return new $ZodCheckMimeType({
     check: "mime_type",
-    mime: types,
+    mime: types2,
     ...normalizeParams(params)
   });
 }
@@ -16047,7 +16051,7 @@ function _stringbool(Classes, _params) {
   const _String = Classes.String ?? $ZodString;
   const stringSchema = new _String({ type: "string", error: params.error });
   const booleanSchema = new _Boolean({ type: "boolean", error: params.error });
-  const codec2 = new _Codec({
+  const codec3 = new _Codec({
     type: "pipe",
     in: stringSchema,
     out: booleanSchema,
@@ -16065,7 +16069,7 @@ function _stringbool(Classes, _params) {
           expected: "stringbool",
           values: [...truthySet, ...falsySet],
           input: payload.value,
-          inst: codec2,
+          inst: codec3,
           continue: false
         });
         return {};
@@ -16080,10 +16084,10 @@ function _stringbool(Classes, _params) {
     }),
     error: params.error
   });
-  codec2._zod.bag.truthy = truthyArray;
-  codec2._zod.bag.falsy = falsyArray;
-  codec2._zod.bag.case = params.case ?? "insensitive";
-  return codec2;
+  codec3._zod.bag.truthy = truthyArray;
+  codec3._zod.bag.falsy = falsyArray;
+  codec3._zod.bag.case = params.case ?? "insensitive";
+  return codec3;
 }
 // @__NO_SIDE_EFFECTS__
 function _stringFormat(Class2, format, fnOrRegex, _params = {}) {
@@ -16104,10 +16108,10 @@ function _stringFormat(Class2, format, fnOrRegex, _params = {}) {
 
 // node_modules/zod/v4/core/to-json-schema.js
 function assignProps(target, ...sources) {
-  for (const source of sources) {
-    for (const key of Reflect.ownKeys(source)) {
-      if (Object.prototype.propertyIsEnumerable.call(source, key)) {
-        assignProp(target, key, source[key]);
+  for (const source2 of sources) {
+    for (const key2 of Reflect.ownKeys(source2)) {
+      if (Object.prototype.propertyIsEnumerable.call(source2, key2)) {
+        assignProp(target, key2, source2[key2]);
       }
     }
   }
@@ -16203,8 +16207,8 @@ function processSchema(schema, ctx, _params = { path: [], schemaPath: [] }) {
   const _result = ctx.seen.get(schema);
   return _result.schema;
 }
-function encodeJSONPointerSegment(segment) {
-  return segment.replace(/~/g, "~0").replace(/\//g, "~1");
+function encodeJSONPointerSegment(segment2) {
+  return segment2.replace(/~/g, "~0").replace(/\//g, "~1");
 }
 function extractDefs(ctx, schema) {
   const root = ctx.seen.get(schema);
@@ -16253,8 +16257,8 @@ function extractDefs(ctx, schema) {
     if (defId)
       seen.defId = defId;
     const schema2 = seen.schema;
-    for (const key in schema2) {
-      delete schema2[key];
+    for (const key2 in schema2) {
+      delete schema2[key2];
     }
     schema2.$ref = ref;
   };
@@ -16303,7 +16307,7 @@ function compactTypeUnion(schema) {
   const options = schema.anyOf;
   if (!Array.isArray(options) || options.length === 0 || schema.type !== void 0)
     return;
-  const types = [];
+  const types2 = [];
   for (const option of options) {
     if (!option || typeof option !== "object")
       return;
@@ -16315,12 +16319,12 @@ function compactTypeUnion(schema) {
     for (const member of Array.isArray(type) ? type : [type]) {
       if (typeof member !== "string")
         return;
-      if (!types.includes(member))
-        types.push(member);
+      if (!types2.includes(member))
+        types2.push(member);
     }
   }
   delete schema.anyOf;
-  schema.type = types.length === 1 ? types[0] : types;
+  schema.type = types2.length === 1 ? types2[0] : types2;
 }
 var FOLDABLE_KEYS = /* @__PURE__ */ new Set(["type", "properties", "required", "additionalProperties"]);
 var UNION_KEYS = ["oneOf", "anyOf"];
@@ -16335,8 +16339,8 @@ function foldObjects(members2) {
   for (const member of members2) {
     if (typeof member !== "object" || member.type !== "object")
       return null;
-    for (const key in member) {
-      if (!FOLDABLE_KEYS.has(key))
+    for (const key2 in member) {
+      if (!FOLDABLE_KEYS.has(key2))
         return null;
     }
     objects.push(member);
@@ -16344,22 +16348,22 @@ function foldObjects(members2) {
   const properties = {};
   const required2 = /* @__PURE__ */ new Set();
   for (const object2 of objects) {
-    for (const key in object2.properties) {
-      if (Object.prototype.hasOwnProperty.call(properties, key))
+    for (const key2 in object2.properties) {
+      if (Object.prototype.hasOwnProperty.call(properties, key2))
         continue;
       const parts = [];
       for (const other of objects) {
-        const part = other.properties?.[key] ?? undeclaredConstraint(other);
+        const part = other.properties?.[key2] ?? undeclaredConstraint(other);
         if (part === null || part === void 0)
           continue;
         if (!parts.some((seen) => JSON.stringify(seen) === JSON.stringify(part)))
           parts.push(part);
       }
       const merged = parts.length === 1 ? parts[0] : foldObjects(parts) ?? { allOf: parts };
-      assignProp(properties, key, merged);
+      assignProp(properties, key2, merged);
     }
-    for (const key of object2.required ?? [])
-      required2.add(key);
+    for (const key2 of object2.required ?? [])
+      required2.add(key2);
   }
   const folded = { type: "object", properties };
   if (required2.size)
@@ -16384,8 +16388,8 @@ function foldIntersection(json2) {
   const allOf = json2.allOf;
   if (!Array.isArray(allOf) || allOf.length < 2)
     return;
-  for (const key of FOLDABLE_KEYS)
-    if (key in json2)
+  for (const key2 of FOLDABLE_KEYS)
+    if (key2 in json2)
       return;
   const unions = allOf.filter((m) => UNION_KEYS.some((k) => Array.isArray(m[k])));
   let folded = null;
@@ -16432,20 +16436,20 @@ function finalize(ctx, schema) {
       assignProps(schema2, _cached);
       const isParentRef = zodSchema._zod.parent === ref;
       if (isParentRef) {
-        for (const key in schema2) {
-          if (key === "$ref" || key === "allOf")
+        for (const key2 in schema2) {
+          if (key2 === "$ref" || key2 === "allOf")
             continue;
-          if (!(key in _cached)) {
-            delete schema2[key];
+          if (!(key2 in _cached)) {
+            delete schema2[key2];
           }
         }
       }
       if (refSchema.$ref && refSeen.def) {
-        for (const key in schema2) {
-          if (key === "$ref" || key === "allOf")
+        for (const key2 in schema2) {
+          if (key2 === "$ref" || key2 === "allOf")
             continue;
-          if (key in refSeen.def && JSON.stringify(schema2[key]) === JSON.stringify(refSeen.def[key])) {
-            delete schema2[key];
+          if (key2 in refSeen.def && JSON.stringify(schema2[key2]) === JSON.stringify(refSeen.def[key2])) {
+            delete schema2[key2];
           }
         }
       }
@@ -16457,11 +16461,11 @@ function finalize(ctx, schema) {
       if (parentSeen?.schema.$ref) {
         schema2.$ref = parentSeen.schema.$ref;
         if (parentSeen.def) {
-          for (const key in schema2) {
-            if (key === "$ref" || key === "allOf")
+          for (const key2 in schema2) {
+            if (key2 === "$ref" || key2 === "allOf")
               continue;
-            if (key in parentSeen.def && JSON.stringify(schema2[key]) === JSON.stringify(parentSeen.def[key])) {
-              delete schema2[key];
+            if (key2 in parentSeen.def && JSON.stringify(schema2[key2]) === JSON.stringify(parentSeen.def[key2])) {
+              delete schema2[key2];
             }
           }
         }
@@ -16594,8 +16598,8 @@ function isTransforming(_schema, _ctx) {
     return isTransforming(def.in, ctx) || isTransforming(def.out, ctx);
   }
   if (def.type === "object") {
-    for (const key in def.shape) {
-      if (isTransforming(def.shape[key], ctx))
+    for (const key2 in def.shape) {
+      if (isTransforming(def.shape[key2], ctx))
         return true;
     }
     return false;
@@ -16633,13 +16637,13 @@ var createStandardJSONSchemaMethod = (schema, io, processors = {}) => (params) =
 };
 
 // node_modules/zod/v4/core/json-schema-processors.js
-var narrowMin = (agg, key, value) => {
-  if (agg[key] === void 0 || value > agg[key])
-    agg[key] = value;
+var narrowMin = (agg, key2, value) => {
+  if (agg[key2] === void 0 || value > agg[key2])
+    agg[key2] = value;
 };
-var narrowMax = (agg, key, value) => {
-  if (agg[key] === void 0 || value < agg[key])
-    agg[key] = value;
+var narrowMax = (agg, key2, value) => {
+  if (agg[key2] === void 0 || value < agg[key2])
+    agg[key2] = value;
 };
 var narrowBoth = (agg, value) => {
   narrowMin(agg, "minimum", value);
@@ -16977,17 +16981,17 @@ var objectProcessor = (schema, ctx, _json, params) => {
   }
   json2.type = "object";
   json2.properties = {};
-  for (const key in shape) {
-    assignProp(json2.properties, key, processSchema(shape[key], ctx, {
+  for (const key2 in shape) {
+    assignProp(json2.properties, key2, processSchema(shape[key2], ctx, {
       ...params,
-      path: [...params.path, "properties", key]
+      path: [...params.path, "properties", key2]
     }));
   }
   const requiredKeys = [];
-  for (const key of Object.keys(shape)) {
-    const field = def.shape[key];
+  for (const key2 of Object.keys(shape)) {
+    const field = def.shape[key2];
     if (ctx.io === "input" ? inputOptin(field) === void 0 : field._zod.optout === void 0) {
-      requiredKeys.push(key);
+      requiredKeys.push(key2);
     }
   }
   if (requiredKeys.length > 0) {
@@ -17119,8 +17123,8 @@ function stringifyKeyNames(bySchema, json2, visited) {
     if (mapped.some((branch, i) => branch !== branches[i]))
       json2 = { ...json2, [keyword]: mapped };
   }
-  const types = Array.isArray(json2.type) ? json2.type : [json2.type];
-  const numericType = !types.includes("string") && types.some((t) => t === "number" || t === "integer");
+  const types2 = Array.isArray(json2.type) ? json2.type : [json2.type];
+  const numericType = !types2.includes("string") && types2.some((t) => t === "number" || t === "integer");
   const values = json2.enum ?? (json2.const !== void 0 ? [json2.const] : void 0);
   if (!numericType && !values?.some((v) => typeof v === "number"))
     return json2;
@@ -17133,7 +17137,7 @@ function stringifyKeyNames(bySchema, json2, visited) {
     return rest;
   rest.type = "string";
   if (!values)
-    rest.pattern = (types.includes("number") ? number : integer).source;
+    rest.pattern = (types2.includes("number") ? number : integer).source;
   return rest;
 }
 var pendingRecords = /* @__PURE__ */ new WeakMap();
@@ -17362,9 +17366,9 @@ function toJSONSchema(input2, params) {
     };
     ctx2.external = external;
     for (const entry of registry2._idmap.entries()) {
-      const [key, schema] = entry;
+      const [key2, schema] = entry;
       extractDefs(ctx2, schema);
-      assignProp(schemas, key, finalize(ctx2, schema));
+      assignProp(schemas, key2, finalize(ctx2, schema));
     }
     if (Object.keys(defs).length > 0) {
       const defsSegment = ctx2.target === "draft-2020-12" ? "$defs" : "definitions";
@@ -17679,17 +17683,17 @@ __export(checks_exports2, {
 
 // node_modules/zod/v4/classic/errors.js
 var _installedErrorProtos = /* @__PURE__ */ new WeakSet([Object.prototype, Error.prototype]);
-function _lazyMethod(proto, key, make) {
-  Object.defineProperty(proto, key, {
+function _lazyMethod(proto, key2, make) {
+  Object.defineProperty(proto, key2, {
     configurable: true,
     enumerable: false,
     get() {
       const value = make(this);
-      Object.defineProperty(this, key, { value, configurable: true, writable: true });
+      Object.defineProperty(this, key2, { value, configurable: true, writable: true });
       return value;
     },
     set(value) {
-      Object.defineProperty(this, key, { value, configurable: true, writable: true });
+      Object.defineProperty(this, key2, { value, configurable: true, writable: true });
     }
   });
 }
@@ -18866,7 +18870,7 @@ var ZodFile = /* @__PURE__ */ $constructor("ZodFile", (inst, def) => {
   inst._zod.processJSONSchema = (ctx, json2, params) => fileProcessor(inst, ctx, json2, params);
   inst.min = (size, params) => inst.check(_minSize(size, params));
   inst.max = (size, params) => inst.check(_maxSize(size, params));
-  inst.mime = (types, params) => inst.check(_mime(Array.isArray(types) ? types : [types], params));
+  inst.mime = (types2, params) => inst.check(_mime(Array.isArray(types2) ? types2 : [types2], params));
 });
 function file(params) {
   return _file(ZodFile, params);
@@ -19056,8 +19060,8 @@ function codec(in_, out, params) {
     reverseTransform: params.encode
   });
 }
-function invertCodec(codec2) {
-  const def = codec2._zod.def;
+function invertCodec(codec3) {
+  const def = codec3._zod.def;
   return new ZodCodec({
     type: "pipe",
     in: def.out,
@@ -19346,24 +19350,24 @@ function detectVersion(schema, defaultTarget) {
 function applyMinItems(items, minItems) {
   return items.map((item, index) => index < minItems ? item : item.optional());
 }
-function decodeJSONPointerSegment(segment) {
-  return segment.replace(/~1/g, "/").replace(/~0/g, "~");
+function decodeJSONPointerSegment(segment2) {
+  return segment2.replace(/~1/g, "/").replace(/~0/g, "~");
 }
 function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path7 = ref.slice(1).split("/").filter(Boolean);
-  if (path7.length === 0) {
+  const path11 = ref.slice(1).split("/").filter(Boolean);
+  if (path11.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path7[0] === defsKey) {
-    const key = path7[1] === void 0 ? void 0 : decodeJSONPointerSegment(path7[1]);
-    if (!key || !ctx.defs[key]) {
+  if (path11[0] === defsKey) {
+    const key2 = path11[1] === void 0 ? void 0 : decodeJSONPointerSegment(path11[1]);
+    if (!key2 || !ctx.defs[key2]) {
       throw new Error(`Reference not found: ${ref}`);
     }
-    return ctx.defs[key];
+    return ctx.defs[key2];
   }
   throw new Error(`Reference not found: ${ref}`);
 }
@@ -19398,16 +19402,16 @@ function checkObjectGuards(objectSchema, guards) {
       });
     }
     if (guards.keySchema) {
-      for (const key of keys) {
-        const result = guards.keySchema.safeParse(key);
+      for (const key2 of keys) {
+        const result = guards.keySchema.safeParse(key2);
         if (result.success)
           continue;
         payload.issues.push({
           code: "invalid_key",
           origin: "record",
           issues: result.error.issues,
-          input: key,
-          path: [key],
+          input: key2,
+          path: [key2],
           continue: true
         });
       }
@@ -19432,20 +19436,20 @@ function canonicalKey(value, seen) {
     if (Array.isArray(value)) {
       const parts2 = [];
       for (const item of value) {
-        const key = canonicalKey(item, seen);
-        if (key === null)
+        const key2 = canonicalKey(item, seen);
+        if (key2 === null)
           return null;
-        parts2.push(key);
+        parts2.push(key2);
       }
       return `a${parts2.length}:[${parts2.join(",")}]`;
     }
     const keys = Object.keys(value).sort();
     const parts = [];
     for (const k of keys) {
-      const key = canonicalKey(value[k], seen);
-      if (key === null)
+      const key2 = canonicalKey(value[k], seen);
+      if (key2 === null)
         return null;
-      parts.push(`${k.length}:${k}=${key}`);
+      parts.push(`${k.length}:${k}=${key2}`);
     }
     return `o${parts.length}:{${parts.join(",")}}`;
   } finally {
@@ -19485,10 +19489,10 @@ function containsRef(value) {
     return value.some(containsRef);
   if (typeof value.$ref === "string")
     return true;
-  return Object.entries(value).some(([key, sub]) => {
-    if (SCHEMA_KEYWORDS.has(key))
+  return Object.entries(value).some(([key2, sub]) => {
+    if (SCHEMA_KEYWORDS.has(key2))
       return containsRef(sub);
-    if (!SCHEMA_MAP_KEYWORDS.has(key) || typeof sub !== "object" || sub === null)
+    if (!SCHEMA_MAP_KEYWORDS.has(key2) || typeof sub !== "object" || sub === null)
       return false;
     return Object.values(sub).some(containsRef);
   });
@@ -19504,12 +19508,12 @@ function checkArrayGuards(arraySchema, guards) {
     if (guards.uniqueItems === true) {
       const firstSeen = /* @__PURE__ */ new Map();
       for (let i = 0; i < items.length; i++) {
-        const key = canonicalKey(items[i], /* @__PURE__ */ new Set());
-        if (key === null)
+        const key2 = canonicalKey(items[i], /* @__PURE__ */ new Set());
+        if (key2 === null)
           continue;
-        const first = firstSeen.get(key);
+        const first = firstSeen.get(key2);
         if (first === void 0) {
-          firstSeen.set(key, i);
+          firstSeen.set(key2, i);
           continue;
         }
         payload.issues.push({
@@ -19748,9 +19752,9 @@ function convertBaseSchema(schema, ctx) {
       const properties = schema.properties || {};
       const requiredSet = new Set(schema.required || []);
       const additionalSchema = typeof schema.additionalProperties === "object" ? convertSchema(schema.additionalProperties, ctx) : void 0;
-      for (const [key, propSchema] of Object.entries(properties)) {
+      for (const [key2, propSchema] of Object.entries(properties)) {
         const propZodSchema = convertSchema(propSchema, ctx);
-        assignProp(shape, key, requiredSet.has(key) ? propZodSchema : propZodSchema.optional());
+        assignProp(shape, key2, requiredSet.has(key2) ? propZodSchema : propZodSchema.optional());
       }
       if (schema.patternProperties) {
         const patternProps = schema.patternProperties;
@@ -19785,12 +19789,12 @@ function convertBaseSchema(schema, ctx) {
             if (!isPlainObject(payload.value))
               return;
             const unrecognized = [];
-            for (const key of Object.keys(payload.value)) {
-              if (propertyKeys.includes(key))
+            for (const key2 of Object.keys(payload.value)) {
+              if (propertyKeys.includes(key2))
                 continue;
-              if (patterns.some((regex) => regex.test(key)))
+              if (patterns.some((regex) => regex.test(key2)))
                 continue;
-              unrecognized.push(key);
+              unrecognized.push(key2);
             }
             if (unrecognized.length) {
               payload.issues.push({
@@ -19921,38 +19925,38 @@ function convertSchema(schema, ctx) {
   }
   const extraMeta = {};
   const coreMetadataKeys = ["$id", "id", "$comment", "$anchor", "$vocabulary", "$dynamicRef", "$dynamicAnchor"];
-  for (const key of coreMetadataKeys) {
-    if (key in schema) {
-      extraMeta[key] = schema[key];
+  for (const key2 of coreMetadataKeys) {
+    if (key2 in schema) {
+      extraMeta[key2] = schema[key2];
     }
   }
   const contentMetadataKeys = ["contentEncoding", "contentMediaType", "contentSchema"];
-  for (const key of contentMetadataKeys) {
-    if (key in schema) {
-      extraMeta[key] = schema[key];
+  for (const key2 of contentMetadataKeys) {
+    if (key2 in schema) {
+      extraMeta[key2] = schema[key2];
     }
   }
   if (schema.type === "object" && schema.$ref === void 0) {
     if (schema.propertyNames !== void 0 && !containsRef(schema.propertyNames)) {
       extraMeta.propertyNames = schema.propertyNames;
     }
-    for (const key of ["minProperties", "maxProperties"]) {
-      if (schema[key] !== void 0)
-        extraMeta[key] = schema[key];
+    for (const key2 of ["minProperties", "maxProperties"]) {
+      if (schema[key2] !== void 0)
+        extraMeta[key2] = schema[key2];
     }
   }
   if (schema.type === "array" && schema.$ref === void 0) {
     if (schema.contains !== void 0 && !containsRef(schema.contains)) {
       extraMeta.contains = schema.contains;
     }
-    for (const key of ["uniqueItems", "minContains", "maxContains"]) {
-      if (schema[key] !== void 0)
-        extraMeta[key] = schema[key];
+    for (const key2 of ["uniqueItems", "minContains", "maxContains"]) {
+      if (schema[key2] !== void 0)
+        extraMeta[key2] = schema[key2];
     }
   }
-  for (const key of Object.keys(schema)) {
-    if (!RECOGNIZED_KEYS.has(key)) {
-      assignProp(extraMeta, key, schema[key]);
+  for (const key2 of Object.keys(schema)) {
+    if (!RECOGNIZED_KEYS.has(key2)) {
+      assignProp(extraMeta, key2, schema[key2]);
     }
   }
   if (Object.keys(extraMeta).length > 0) {
@@ -20208,6 +20212,1030 @@ function date4(params) {
   return _coercedDate(ZodDate, params);
 }
 
+// src/hardware-schemas.mjs
+var file2 = external_exports.string().min(1).max(4096).refine((v) => !/[\x00-\x1f]/.test(v));
+var confirm = external_exports.literal(true).describe("Set only after authorization for this exact offline hardware change.");
+var controllerSchema = external_exports.object({
+  type: external_exports.enum(["lsilogic", "pvscsi", "sata", "nvme"]),
+  index: external_exports.number().int().min(0).max(3)
+}).strict();
+var diskSchema = external_exports.object({
+  controller: external_exports.enum(["scsi", "sata", "nvme"]),
+  controller_index: external_exports.number().int().min(0).max(3),
+  unit: external_exports.number().int().min(0).max(29),
+  capacity_mb: external_exports.number().int().min(1).max(8388608)
+}).strict();
+var nicSchema = external_exports.object({
+  index: external_exports.number().int().min(0).max(9),
+  model: external_exports.enum(["e1000", "e1000e", "vmxnet3"]).optional(),
+  network: external_exports.enum(["nat", "bridged", "hostonly", "custom", "lan_segment"]).optional(),
+  vmnet: external_exports.string().regex(/^vmnet\d{1,3}$/).optional(),
+  segment: external_exports.string().min(1).max(256).optional(),
+  mac: external_exports.string().regex(/^00:50:56:[0-3][0-9a-f]:[0-9a-f]{2}:[0-9a-f]{2}$/i).optional().describe("Explicit VMware manual MAC in 00:50:56:00-3f:xx:xx. Omit to preserve identity or generate on a new adapter."),
+  start_connected: external_exports.boolean().optional()
+}).strict();
+var typedCreateFields = {
+  controllers: external_exports.array(controllerSchema).min(1).max(12).optional(),
+  disks: external_exports.array(diskSchema).min(1).max(64).optional().describe("New independent sparse disks; replaces disk_gb when supplied. Explicit controller and slot required."),
+  nics: external_exports.array(nicSchema).max(10).optional().describe("Explicit adapter indices; replaces network/vmnet defaults when supplied. Empty means no NICs."),
+  cores_per_socket: external_exports.number().int().min(1).max(32).optional(),
+  nested_virtualization: external_exports.boolean().optional(),
+  secure_boot: external_exports.boolean().optional(),
+  vtpm: external_exports.boolean().optional().describe("vTPM mutation is unsupported without a verified headless encryption backend.")
+};
+var hardwareSchemas = {
+  vm_hardware_capabilities: external_exports.object({}).strict(),
+  vm_hardware_get: external_exports.object({ vmx: file2 }).strict(),
+  vm_hardware_set: external_exports.object({
+    vmx: file2,
+    confirm,
+    cpus: external_exports.number().int().min(1).max(32).optional(),
+    cores_per_socket: typedCreateFields.cores_per_socket,
+    memory_mb: external_exports.number().int().min(256).max(131072).multipleOf(4).optional(),
+    nested_virtualization: typedCreateFields.nested_virtualization,
+    firmware: external_exports.enum(["bios", "efi"]).optional(),
+    secure_boot: typedCreateFields.secure_boot,
+    vtpm: typedCreateFields.vtpm,
+    controllers: typedCreateFields.controllers,
+    nics: typedCreateFields.nics.describe("Patch only the selected NICs; omitted adapters and identity fields are preserved. No removal.")
+  }).strict().refine((a) => Object.keys(a).some((k) => !["vmx", "confirm"].includes(k)), "Provide at least one hardware change.")
+};
+var usesTypedCreation = (a) => Object.keys(typedCreateFields).some((k) => a[k] !== void 0);
+
+// src/hardware.mjs
+var import_promises8 = __toESM(require("node:fs/promises"), 1);
+var import_node_path9 = __toESM(require("node:path"), 1);
+
+// src/vm-hardware.mjs
+var import_promises5 = __toESM(require("node:fs/promises"), 1);
+var import_node_path6 = __toESM(require("node:path"), 1);
+function hardwareError(code, message) {
+  throw Object.assign(new Error(message), { code, details: { action: "Inspect the selected VM, fully power it off and close other configuration writers before retrying." } });
+}
+async function readHardware(vmx2) {
+  const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(await import_promises5.default.readFile(vmx2));
+  const seen = /* @__PURE__ */ new Set();
+  for (const line of text.replace(/^\uFEFF/, "").split(/\r?\n/)) {
+    if (/^\s*(?:#.*)?$/.test(line)) continue;
+    const match = line.match(/^\s*([\w.:-]+)\s*=\s*"[^"\r\n]*"\s*$/);
+    if (!match || seen.has(match[1].toLowerCase())) hardwareError("UNSAFE_VM", "Malformed or duplicate VMX assignments prevent safe hardware inspection/editing.");
+    seen.add(match[1].toLowerCase());
+  }
+  const config2 = Object.fromEntries(Object.entries(parseAssignments(text)).map(([k, v]) => [k.toLowerCase(), v]));
+  if (config2[".encoding"] && !/^utf-?8$/i.test(config2[".encoding"])) hardwareError("UNSAFE_VM", "Hardware inspection/editing requires a UTF-8 VMX.");
+  return { text, config: config2 };
+}
+async function requireOffline(backend, vmx2) {
+  if ((await backend.details(vmx2)).running) hardwareError("VM_RUNNING", "Power off the VM; this hardware edit requires full power-off.");
+  const vm = await readHardware(vmx2);
+  if ((await import_promises5.default.stat(vmx2)).nlink > 1) hardwareError("UNSAFE_VM", "Hard-linked VMX files cannot be edited safely.");
+  if (Object.keys(vm.config).some((k) => /^(encryption\.|managedvm\.autoaddvtpm)/i.test(k))) hardwareError("UNSAFE_VM", "Encrypted/managed VM hardware editing is unsupported.");
+  if (vm.config["checkpoint.vmstate"] || vm.config["suspend.filename"]) hardwareError("VM_SUSPENDED", "VMX declares saved state; fully power off the VM before editing.");
+  const directories = /* @__PURE__ */ new Set([import_node_path6.default.dirname(vmx2)]);
+  for (const key2 of ["workingdir", "snapshot.directory"]) if (vm.config[key2]) directories.add(await backend.hostPath(import_node_path6.default.resolve(import_node_path6.default.dirname(vmx2), vm.config[key2]), "directory"));
+  for (const directory of directories) if ((await import_promises5.default.readdir(directory)).some((name) => /(?:\.lck|\.vmss|\.vmem)$/i.test(name))) hardwareError("VM_LOCKED_OR_SUSPENDED", "VM directory contains locks or saved/suspended memory. Fully power off and close the VM; never delete locks/state to bypass this check.");
+  return vm;
+}
+
+// src/disks.mjs
+var import_promises6 = __toESM(require("node:fs/promises"), 1);
+var import_node_path7 = __toESM(require("node:path"), 1);
+var file3 = external_exports.string().min(1).max(4096).refine((value) => !/[\x00-\x1f]/.test(value));
+var timeout = external_exports.number().int().min(1).max(3600).default(600);
+var capacity = external_exports.number().int().min(1).max(8388608).describe("Total virtual capacity in MiB, not an increment.");
+var vmPaths = external_exports.array(file3).max(256).default([]).describe("Additional unregistered VMX files that may reference this disk. Inventory is also checked.");
+var confirm2 = external_exports.literal(true).describe("Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk.");
+var source = { disk: file3, vmx_paths: vmPaths, confirm: confirm2, timeout_seconds: timeout };
+var slot = { vmx: file3, controller: external_exports.enum(["scsi", "sata", "ide", "nvme"]), controller_index: external_exports.number().int().min(0).max(3), unit: external_exports.number().int().min(0).max(63), confirm: confirm2 };
+var diskSchemas = {
+  disk_manager_status: external_exports.object({}).strict(),
+  disk_inspect: external_exports.object({ disk: file3 }).strict(),
+  disk_create: external_exports.object({ destination: file3.describe("Absolute .vmdk in a NEW parent directory; grandparent must exist."), capacity_mb: capacity, disk_type: external_exports.enum(["0", "1", "2", "3"]).default("0"), adapter: external_exports.enum(["ide", "buslogic", "lsilogic"]).default("lsilogic"), timeout_seconds: timeout }).strict(),
+  disk_expand: external_exports.object({ ...source, capacity_mb: capacity }).strict(),
+  disk_convert: external_exports.object({ ...source, destination: file3.describe("Absolute .vmdk in a NEW parent directory; source is preserved."), disk_type: external_exports.enum(["0", "1", "2", "3", "5"]).default("0") }).strict(),
+  disk_compact: external_exports.object(source).strict(),
+  disk_defragment: external_exports.object(source).strict(),
+  disk_attach: external_exports.object({ ...slot, disk: file3, vmx_paths: vmPaths }).strict(),
+  disk_detach: external_exports.object({ ...slot, disk: file3.describe("Expected backing disk; refuses a different disk at the selected slot."), vmx_paths: vmPaths }).strict()
+};
+var flags = { create: "-c", expand: "-x", convert: "-r", compact: "-k", defragment: "-d" };
+var types = /* @__PURE__ */ new Set(["monolithicSparse", "monolithicFlat", "twoGbMaxExtentSparse", "twoGbMaxExtentFlat", "streamOptimized"]);
+var sparse = /* @__PURE__ */ new Set(["monolithicSparse", "twoGbMaxExtentSparse"]);
+var key = (file4) => process.platform === "win32" ? file4.toLowerCase() : file4;
+var exists = async (file4) => {
+  try {
+    return await import_promises6.default.lstat(file4);
+  } catch (e) {
+    if (e.code === "ENOENT") return null;
+    throw e;
+  }
+};
+function fail(code, message, details = {}) {
+  throw Object.assign(new Error(message), { code, details });
+}
+function vmConfig(text) {
+  const seen = /* @__PURE__ */ new Set();
+  for (const line of text.split(/\r?\n/)) {
+    if (/^\s*(?:#.*)?$/.test(line)) continue;
+    const match = line.match(/^\s*([\w.:-]+)\s*=\s*".*"\s*$/);
+    if (!match || seen.has(match[1].toLowerCase())) fail("UNSAFE_VM", "Malformed or duplicate VMX settings prevent safe disk editing.");
+    seen.add(match[1].toLowerCase());
+  }
+  const config2 = Object.fromEntries(Object.entries(parseAssignments(text)).map(([k, v]) => [k.toLowerCase(), v]));
+  if (config2[".encoding"] && !/^utf-?8$/i.test(config2[".encoding"])) fail("UNSAFE_VM", "Disk edits require UTF-8 VMX files.");
+  return config2;
+}
+async function readDiskDescriptor(file4) {
+  const handle = await import_promises6.default.open(file4, "r");
+  try {
+    const stat = await handle.stat();
+    const header = Buffer.alloc(512);
+    const { bytesRead } = await handle.read(header, 0, header.length, 0);
+    let offset = 0;
+    let size = Math.min(stat.size, 1024 * 1024);
+    if (bytesRead >= 44 && header.toString("ascii", 0, 4) === "KDMV") {
+      const sectors = header.readBigUInt64LE(28);
+      const count = header.readBigUInt64LE(36);
+      if (!sectors || !count) fail("UNSUPPORTED_DISK", "VMDK extent has no embedded descriptor. Select its descriptor VMDK.");
+      if (sectors > BigInt(Math.floor(Number.MAX_SAFE_INTEGER / 512)) || count > 2048n) fail("UNSUPPORTED_DISK", "VMDK descriptor bounds are unsupported.");
+      offset = Number(sectors) * 512;
+      size = Number(count) * 512;
+    } else if (!header.subarray(0, bytesRead).toString("utf8").replace(/^\uFEFF/, "").startsWith("# Disk DescriptorFile")) {
+      fail("UNSUPPORTED_DISK", "Unrecognized VMDK descriptor. Raw devices, encrypted disks and extent-only inputs are unsupported.");
+    } else if (stat.size > 1024 * 1024) fail("UNSUPPORTED_DISK", "VMDK text descriptor exceeds 1 MiB.");
+    if (offset + size > stat.size) fail("UNSUPPORTED_DISK", "VMDK descriptor extends beyond its file.");
+    const buffer = Buffer.alloc(size);
+    const read = await handle.read(buffer, 0, size, offset);
+    if (read.bytesRead !== size) fail("UNSUPPORTED_DISK", "Incomplete VMDK descriptor.");
+    const text = buffer.toString("utf8").replace(/\0+$/, "");
+    const field = (name, quoted = false) => {
+      const matches = [...text.matchAll(new RegExp(`^\\s*${name}\\s*=\\s*${quoted ? '"([^"\\r\\n]+)"' : "([a-fA-F0-9]+)"}\\s*$`, "gm"))];
+      if (matches.length !== 1) fail("UNSUPPORTED_DISK", `VMDK must declare exactly one ${name}.`);
+      return matches[0][1];
+    };
+    const createType = field("createType", true);
+    const cid = field("CID");
+    const parentCID = field("parentCID");
+    const adapter2 = text.match(/^\s*ddb\.adapterType\s*=\s*"([^"]+)"\s*$/m)?.[1] || null;
+    if (!/^[a-f0-9]{8}$/i.test(cid) || !/^[a-f0-9]{8}$/i.test(parentCID) || !types.has(createType) || /encrypt|crypto|keySafe/i.test(text)) fail("UNSUPPORTED_DISK", "Raw, encrypted or unsupported VMDK format.");
+    const extents = [];
+    for (const line of text.split(/\r?\n/)) {
+      if (!/^\s*(RW|RDONLY|NOACCESS)\b/.test(line)) continue;
+      const match = line.match(/^\s*RW\s+(\d+)\s+(SPARSE|FLAT)\s+"([^"\r\n]+)"(?:\s+(\d+))?\s*$/);
+      if (!match || !Number.isSafeInteger(Number(match[1])) || Number(match[1]) <= 0) fail("UNSUPPORTED_DISK", "Unsupported VMDK extent declaration.");
+      const name = match[3];
+      if (import_node_path7.default.basename(name) !== name || /[\\/:\x00-\x1f]/.test(name) || [".", ".."].includes(name)) fail("UNSAFE_PATH", "VMDK extents must use flat local filenames.");
+      extents.push({ sectors: Number(match[1]), type: match[2], name, offset_sectors: Number(match[4] || 0) });
+    }
+    const capacityBytes = extents.reduce((sum, e) => sum + e.sectors * 512, 0);
+    if (!extents.length || !Number.isSafeInteger(capacityBytes) || capacityBytes <= 0) fail("UNSUPPORTED_DISK", "VMDK capacity cannot be established safely.");
+    return { create_type: createType, adapter: adapter2, cid, parent_cid: parentCID.toLowerCase(), has_parent_hint: /^\s*parentFileNameHint\s*=/mi.test(text), capacity_bytes: capacityBytes, extents };
+  } finally {
+    await handle.close();
+  }
+}
+var DiskManager = class {
+  constructor({ backend, vmFiles, space = import_promises6.default.statfs } = {}) {
+    this.backend = backend;
+    this.vmFiles = vmFiles;
+    this.space = space;
+  }
+  async status() {
+    let executable;
+    try {
+      const beside = await this.backend.executable().catch(() => void 0);
+      executable = await findVMwareExecutable("vmware-vdiskmanager", { env: this.backend.env, beside });
+      let output2;
+      const options = { shell: false, windowsHide: true, timeout: 15e3, maxBuffer: 1024 * 1024, encoding: "utf8" };
+      try {
+        const r = await this.backend.execute(executable, [], options);
+        output2 = [r.stdout, r.stderr].filter(Boolean).join("\n");
+      } catch (e) {
+        output2 = [e.stdout, e.stderr].filter(Boolean).join("\n");
+        if (e.killed) output2 = "";
+      }
+      if (!/Virtual Disk Manager/i.test(output2 || "") || !/Usage:/i.test(output2)) fail("CAPABILITY_UNAVAILABLE", "Cannot read installed disk-manager help. Check installation and permissions.");
+      const supported_flags = [...output2.matchAll(/^\s+(-[A-Za-z])(?:\s|$)/gm)].map((m) => m[1]);
+      const diskTypes = [...output2.split(/Disk types:/i)[1]?.matchAll(/^\s+([0-6])\s+:\s*(.+)$/gm) || []].map((m) => ({ id: m[1], description: m[2].trim() }));
+      return { available: true, executable, executable_discovered: true, help_verified: true, live_support: "unknown", version: output2.split(/\r?\n/)[0], supported_flags, disk_types: diskTypes, operations: Object.fromEntries(Object.entries(flags).map(([op, flag]) => [op, supported_flags.includes(flag)])) };
+    } catch (e) {
+      return { available: false, executable: executable || null, executable_discovered: !!executable, help_verified: false, live_support: "unknown", code: "CAPABILITY_UNAVAILABLE", message: e.message, action: "Install native VMware Workstation or set VMWARE_VDISKMANAGER_PATH to its absolute executable path." };
+    }
+  }
+  async available(operation, diskType) {
+    const status = await this.status();
+    if (!status.available) fail(status.code, status.message, { action: status.action });
+    const required2 = [flags[operation], ...["create", "convert"].includes(operation) ? ["-t"] : [], ...operation === "create" ? ["-a", "-s"] : []];
+    if (required2.some((flag) => !status.supported_flags.includes(flag)) || diskType && !status.disk_types.some((t) => t.id === diskType)) fail("UNSUPPORTED_CAPABILITY", "Installed disk manager does not advertise the required operation or disk type.", { operation, required_flags: required2, disk_type: diskType, action: "Inspect disk_manager_status and choose an advertised local disk type or install a supported Workstation build." });
+    return status;
+  }
+  async diskPath(input2) {
+    if (import_node_path7.default.extname(input2).toLowerCase() !== ".vmdk" || /:[^\\/]/.test(input2.slice(2))) fail("UNSAFE_PATH", "Select an absolute .vmdk file, without alternate streams.");
+    return this.backend.hostPath(input2, "input-file");
+  }
+  async inspect(input2) {
+    const a = diskSchemas.disk_inspect.parse(input2);
+    const disk = await this.diskPath(a.disk);
+    const descriptor = await readDiskDescriptor(disk);
+    const files = /* @__PURE__ */ new Map();
+    for (const extent of descriptor.extents) {
+      const backing = await this.backend.hostPath(import_node_path7.default.join(import_node_path7.default.dirname(disk), extent.name), "input-file");
+      if (!isWithin(import_node_path7.default.dirname(disk), backing)) fail("UNSAFE_PATH", "VMDK extent escapes the descriptor directory.");
+      const stat2 = await import_promises6.default.stat(backing);
+      if (extent.type === "FLAT" && stat2.size < (extent.offset_sectors + extent.sectors) * 512) fail("UNSUPPORTED_DISK", "Flat extent is shorter than its declared capacity.");
+      files.set(key(backing), { path: backing, size_bytes: stat2.size, modified_ms: stat2.mtimeMs, device: stat2.dev, inode: stat2.ino });
+    }
+    const stat = await import_promises6.default.stat(disk);
+    files.set(key(disk), { path: disk, size_bytes: stat.size, modified_ms: stat.mtimeMs, device: stat.dev, inode: stat.ino });
+    return { disk, ...descriptor, files: [...files.values()], independent: descriptor.parent_cid === "ffffffff" && !descriptor.has_parent_hint, note: "Descriptor inspection does not verify guest filesystem integrity. Increasing VMDK capacity does not resize guest partitions or filesystems." };
+  }
+  async safeVM(input2) {
+    const vmx2 = await this.backend.vmx(input2);
+    if ((await this.backend.details(vmx2)).running) fail("UNSAFE_VM", "Power off the VM before disk edits.");
+    await this.vmState(vmx2);
+    if ((await this.backend.snapshots(vmx2)).snapshots.length) fail("UNSAFE_VM", "Snapshots prevent safe disk edits. Prepare a fully powered-off VM without snapshots.");
+    return this.vmState(vmx2);
+  }
+  async vmState(vmx2) {
+    const text = await import_promises6.default.readFile(vmx2, "utf8");
+    const config2 = vmConfig(text);
+    if (Object.entries(config2).some(([k, v]) => /^encryption\./.test(k) && v || k === "vtpm.present" && /^true$/i.test(v))) fail("UNSAFE_VM", "Encrypted and vTPM VM configurations are unsupported for disk edits.");
+    const dirs = /* @__PURE__ */ new Set([import_node_path7.default.dirname(vmx2)]);
+    for (const k of ["workingdir", "snapshot.directory"]) if (config2[k]) dirs.add(await this.backend.hostPath(import_node_path7.default.resolve(import_node_path7.default.dirname(vmx2), config2[k]), "directory"));
+    for (const dir of dirs) if ((await import_promises6.default.readdir(dir)).some((name) => /\.(lck|vmss|vmem|vmsn)$/i.test(name))) fail("UNSAFE_VM", "Locked or suspended VM detected. Fully power off and close it before disk edits.");
+    if (config2["checkpoint.vmstate"] || config2["suspend.filename"]) fail("UNSAFE_VM", "Snapshots or saved state prevent safe disk edits. Prepare a fully powered-off VM without snapshots.");
+    for (const dir of dirs) for (const name of await import_promises6.default.readdir(dir)) if (/\.vmsd$/i.test(name)) {
+      const metadata = vmConfig(await import_promises6.default.readFile(import_node_path7.default.join(dir, name), "utf8"));
+      if (Number(metadata["snapshot.numsnapshots"] || 0) !== 0 || Object.keys(metadata).some((k) => /^snapshot\d+\./.test(k))) fail("UNSAFE_VM", "Snapshot metadata prevents safe disk edits.");
+    }
+    return { vmx: vmx2, text, config: config2 };
+  }
+  async references(info, extra) {
+    const inventory = await this.backend.listVMs();
+    if (inventory.warnings.length) fail("INVENTORY_UNAVAILABLE", "Cannot verify disk references because inventory is unavailable.", { action: "Restore a readable VMware inventory; include relevant unregistered VMs in vmx_paths." });
+    const raw = await import_promises6.default.readFile(this.backend.inventoryPath, "utf8");
+    const candidates = [...inventory.vms.map((v) => v.vmx), ...extra];
+    const inventoryKeys = /* @__PURE__ */ new Set();
+    for (const line of raw.split(/\r?\n/)) if (/^\s*vmlist\d+\.config\b/i.test(line)) {
+      const match = line.match(/^\s*(vmlist\d+\.config)\s*=\s*".*"\s*$/i);
+      if (!match || inventoryKeys.has(match[1].toLowerCase())) fail("INVENTORY_UNAVAILABLE", "Malformed/duplicate VMware inventory prevents disk-reference checks.");
+      inventoryKeys.add(match[1].toLowerCase());
+      const value = parseAssignments(line)[match[1]];
+      if (!value) continue;
+      if (!import_node_path7.default.isAbsolute(value) || import_node_path7.default.extname(value).toLowerCase() !== ".vmx") fail("INVENTORY_UNAVAILABLE", "Inventory VMX paths must be absolute.");
+      candidates.push(value);
+    }
+    for (const name of await import_promises6.default.readdir(import_node_path7.default.dirname(info.disk))) if (/\.vmx$/i.test(name)) candidates.push(import_node_path7.default.join(import_node_path7.default.dirname(info.disk), name));
+    const references = [];
+    const seen = /* @__PURE__ */ new Set();
+    const paths = new Set(info.files.map((f) => key(f.path)));
+    for (const input2 of candidates) {
+      if (!await exists(input2) && !extra.includes(input2)) continue;
+      const vmx2 = await this.backend.vmx(input2);
+      if (seen.has(key(vmx2))) continue;
+      seen.add(key(vmx2));
+      const text = await import_promises6.default.readFile(vmx2, "utf8");
+      const config2 = vmConfig(text);
+      for (const [name, value] of Object.entries(config2)) if (/^(scsi|sata|ide|nvme)\d+:\d+\.filename$/.test(name) && /\.vmdk$/i.test(value)) {
+        const backing = await this.diskPath(import_node_path7.default.resolve(import_node_path7.default.dirname(vmx2), value));
+        if (paths.has(key(backing))) references.push({ vmx: vmx2, slot: name.replace(/\.filename$/, ""), text });
+        else {
+          const other = await this.inspect({ disk: backing });
+          if (other.files.some((f) => paths.has(key(f.path)))) fail("UNSAFE_CHAIN", "Another VM references a shared disk extent.");
+          if (!other.independent) fail("UNSAFE_CHAIN", "Cannot establish independence from an inventoried dependent VMDK; transitive backing chains are unsupported.", { action: "Prepare independent inventoried disks using an offline chain-aware workflow before retrying. Do not edit an ancestor while dependent disks exist." });
+        }
+      }
+    }
+    return references;
+  }
+  async preflight(info, extra) {
+    if (!info.independent || info.create_type === "streamOptimized") fail("UNSAFE_CHAIN", "Snapshots, linked/backing chains and stream-optimized source disks are refused. Prepare an independent Workstation disk.");
+    if ((await import_promises6.default.readdir(import_node_path7.default.dirname(info.disk))).some((name) => /\.(lck|vmss|vmem|vmsn)$/i.test(name))) fail("UNSAFE_DISK", "Disk directory contains locks or saved/snapshot state.");
+    for (const f of info.files) if ((await import_promises6.default.stat(f.path)).nlink > 1) fail("UNSAFE_DISK", "Hard-linked disk files are unsafe to modify.");
+    for (const name of await import_promises6.default.readdir(import_node_path7.default.dirname(info.disk))) {
+      if (!/\.vmdk$/i.test(name) || info.files.some((f) => key(f.path) === key(import_node_path7.default.join(import_node_path7.default.dirname(info.disk), name)))) continue;
+      let descriptor;
+      try {
+        descriptor = await readDiskDescriptor(await this.diskPath(import_node_path7.default.join(import_node_path7.default.dirname(info.disk), name)));
+      } catch (e) {
+        if (e.code === "UNSUPPORTED_DISK" && /extent has no embedded|Unrecognized VMDK/.test(e.message) && /-(?:flat|[sf]\d+)\.vmdk$/i.test(name)) continue;
+        throw e;
+      }
+      if (descriptor.parent_cid === info.cid.toLowerCase() || descriptor.has_parent_hint) fail("UNSAFE_CHAIN", "A dependent/snapshot disk descriptor is present beside this disk.");
+      for (const extent of descriptor.extents) {
+        const backing = await this.backend.hostPath(import_node_path7.default.join(import_node_path7.default.dirname(info.disk), extent.name), "input-file");
+        if (info.files.some((f) => key(f.path) === key(backing))) fail("SHARED_DISK", "Another local descriptor references this disk or its extents.");
+      }
+    }
+    const references = await this.references(info, extra);
+    if (references.length > 1) fail("SHARED_DISK", "Disk is referenced by multiple VM devices. Detach other references before editing.");
+    for (const reference of references) await this.safeVM(reference.vmx);
+    return references;
+  }
+  async freeSpace(directory, bytes) {
+    const space = await this.space(directory);
+    const free = Number(space.bavail) * Number(space.bsize);
+    const required2 = Math.ceil(bytes * 1.1 + 64 * 1024 * 1024);
+    if (!Number.isSafeInteger(required2) || !Number.isFinite(free) || free < required2) fail("INSUFFICIENT_SPACE", "Insufficient or unknown free space for a conservative disk operation estimate.", { required_bytes: required2, available_bytes: free });
+  }
+  async output(input2) {
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9_.-]*\.vmdk$/i.test(import_node_path7.default.basename(input2))) fail("UNSAFE_PATH", "Destination needs a simple .vmdk filename.");
+    const disk = await this.backend.hostPath(input2, "output-file");
+    const directory = import_node_path7.default.dirname(disk);
+    await this.backend.hostPath(directory, "host-destination-directory");
+    await this.backend.hostPath(import_node_path7.default.dirname(directory), "directory");
+    if (await exists(directory)) fail("TARGET_EXISTS", "Disk output requires a NEW parent directory to protect all companion extents.");
+    return { disk, directory };
+  }
+  async run(status, args, seconds, partial2) {
+    try {
+      await this.backend.execute(status.executable, args, { shell: false, windowsHide: true, timeout: seconds * 1e3, maxBuffer: 1024 * 1024, encoding: "utf8" });
+    } catch (e) {
+      fail("DISK_OPERATION_FAILED", `Disk manager failed (${e.killed ? "timeout" : e.code || "execution error"}). Inspect state before retrying.`, { partial_output: partial2, action: "No automatic rollback or deletion. Inspect retained files; remove only the new output directory after confirming its contents are disposable. In-place operations may have partially changed the original." });
+    }
+  }
+  async perform(operation, input2) {
+    const a = diskSchemas[`disk_${operation}`].parse(input2);
+    const status = await this.available(operation, a.disk_type);
+    const output2 = a.destination ? await this.output(a.destination) : null;
+    const original = a.disk ? await this.inspect({ disk: a.disk }) : null;
+    const refs = original ? await this.references(original, a.vmx_paths) : [];
+    const resources = [...original ? [import_node_path7.default.dirname(original.disk), ...original.files.map((f) => f.path)] : [], ...refs.map((r) => r.vmx), ...output2 ? [output2.directory] : []];
+    return this.backend.resources.use(resources, async () => {
+      if (original) await this.preflight(original, a.vmx_paths);
+      if (["compact", "defragment"].includes(operation) && !sparse.has(original.create_type)) fail("UNSUPPORTED_DISK", "Compaction and defragmentation require a growable Workstation disk.");
+      const bytes = a.capacity_mb ? a.capacity_mb * 1024 * 1024 : original.capacity_bytes;
+      if (operation === "expand" && bytes <= original.capacity_bytes) fail("INVALID_CAPACITY", "New capacity must exceed the existing virtual capacity. Shrinking is unsupported.");
+      if ((a.adapter === "buslogic" || original?.adapter === "buslogic") && a.capacity_mb > 2040 * 1024) fail("INVALID_CAPACITY", "BusLogic disks are limited to 2040 GiB.");
+      await this.freeSpace(output2 ? import_node_path7.default.dirname(output2.directory) : import_node_path7.default.dirname(original.disk), bytes);
+      if (original) {
+        const current = await this.inspect({ disk: original.disk });
+        if (JSON.stringify(current) !== JSON.stringify(original)) fail("DISK_CHANGED", "Disk changed during preflight; inspect and retry.");
+        const currentRefs = await this.preflight(current, a.vmx_paths);
+        if (JSON.stringify(currentRefs) !== JSON.stringify(refs)) fail("DISK_CHANGED", "VM references changed during preflight; inspect and retry.");
+      }
+      if (output2) await import_promises6.default.mkdir(output2.directory);
+      const disk = output2?.disk || original.disk;
+      const args = operation === "create" ? ["-c", "-s", `${a.capacity_mb}MB`, "-a", a.adapter, "-t", a.disk_type, disk] : operation === "convert" ? ["-r", original.disk, "-t", a.disk_type, disk] : operation === "expand" ? ["-x", `${a.capacity_mb}MB`, disk] : [flags[operation], disk];
+      await this.run(status, args, a.timeout_seconds, output2?.directory || disk);
+      let result;
+      try {
+        result = await this.inspect({ disk });
+      } catch {
+        fail("OUTPUT_UNVERIFIED", "Disk manager returned success but the result could not be inspected.", { partial_output: output2?.directory || disk, action: "Inspect retained files before retrying. Original conversion source was preserved." });
+      }
+      if ((operation === "create" || operation === "expand") && result.capacity_bytes !== bytes) fail("OUTPUT_UNVERIFIED", "Disk manager result capacity differs from the request.", { partial_output: output2?.directory || disk });
+      return { operation, ...result, source_preserved: operation === "convert" ? true : void 0, cleanup: output2 ? "Output and any partial files are retained. No existing files were overwritten." : "In-place change; no automatic rollback.", checked_vms: refs.map((r) => r.vmx), note: "Increasing VMDK capacity does not resize guest partitions or filesystems. Reservations cover this server only; keep VMware GUIs and other disk writers closed." };
+    });
+  }
+  async edit(input2, detach) {
+    const a = diskSchemas[detach ? "disk_detach" : "disk_attach"].parse(input2);
+    const max = { scsi: 15, sata: 29, ide: 1, nvme: 14 }[a.controller];
+    if (a.unit > max || a.controller === "scsi" && a.unit === 7 || a.controller === "ide" && a.controller_index > 1) fail("INVALID_SLOT", "Invalid controller/unit index; SCSI unit 7 is reserved.");
+    const vmx2 = await this.backend.vmx(a.vmx);
+    const info = await this.inspect({ disk: a.disk });
+    return this.backend.resources.use([vmx2, import_node_path7.default.dirname(info.disk)], async () => {
+      const vm = await this.safeVM(vmx2);
+      const prefix2 = `${a.controller}${a.controller_index}:${a.unit}`;
+      if (await import_promises6.default.stat(vmx2).then((s) => s.nlink > 1)) fail("UNSAFE_VM", "Hard-linked VMX files cannot be edited safely.");
+      const refs = await this.preflight(info, [...a.vmx_paths, vmx2]);
+      const existing = vm.config[`${prefix2}.filename`];
+      if (detach) {
+        if (!existing || key(await this.diskPath(import_node_path7.default.resolve(import_node_path7.default.dirname(vmx2), existing))) !== key(info.disk)) fail("SLOT_MISMATCH", "Selected slot does not reference the expected VMDK.");
+      } else {
+        if (Object.keys(vm.config).some((k) => k.startsWith(prefix2 + "."))) fail("SLOT_OCCUPIED", "Slot already has settings. Choose an unused slot.");
+        if (refs.length) fail("SHARED_DISK", "Disk is already referenced by a VM device. Detach it first.");
+        if (a.controller !== "ide" && !/^true$/i.test(vm.config[`${a.controller}${a.controller_index}.present`] || "")) fail("CONTROLLER_MISSING", "Controller is not present. Create/configure the controller explicitly before attaching.");
+        if (a.controller === "scsi" && !["lsilogic", "lsisas1068", "pvscsi", "buslogic"].includes(vm.config[`scsi${a.controller_index}.virtualdev`])) fail("CONTROLLER_MISSING", "SCSI controller type is missing or unsupported.");
+        const adapter2 = a.controller === "ide" ? "ide" : a.controller === "scsi" && vm.config[`scsi${a.controller_index}.virtualdev`] === "buslogic" ? "buslogic" : "lsilogic";
+        if (info.adapter !== adapter2) fail("ADAPTER_MISMATCH", "Disk adapter metadata does not match the selected controller. Prepare a disk with the matching adapter before attaching.", { expected_adapter: adapter2, actual_adapter: info.adapter });
+      }
+      const settings = detach ? Object.fromEntries(Object.keys(vm.config).filter((k) => k.startsWith(prefix2 + ".")).map((k) => [k, null])) : { [`${prefix2}.present`]: "TRUE", [`${prefix2}.fileName`]: info.disk };
+      const updated = await this.vmFiles.configure({ vmx: vmx2, settings }, { expectedOriginal: vm.text, beforeCommit: async () => {
+        await this.safeVM(vmx2);
+        await this.preflight(info, [...a.vmx_paths, vmx2]);
+        if (JSON.stringify(await this.inspect({ disk: info.disk })) !== JSON.stringify(info)) fail("DISK_CHANGED", "Disk changed before VMX commit.");
+      } });
+      return { ...updated, disk: info.disk, slot: prefix2, attached: !detach, disk_deleted: false, note: "Backing VMDK and all extents are preserved. VMX backup is available at the returned path." };
+    });
+  }
+};
+
+// src/lan-segments.mjs
+var import_promises7 = __toESM(require("node:fs/promises"), 1);
+var import_node_path8 = __toESM(require("node:path"), 1);
+var import_node_crypto = require("node:crypto");
+var vmx = external_exports.string().min(1).describe("Absolute VMX path. Adapter changes require a powered-off, unlocked UTF-8 VM.");
+var segment = external_exports.string().min(1).max(256).describe("LAN segment name or pvnID returned by list_lan_segments. Use the ID if names are ambiguous.");
+var adapter = external_exports.number().int().min(0).max(255).describe("Zero-based VMX adapter index: 0 means ethernet0, not the REST NIC index.");
+var lanSegmentSchemas = {
+  list_lan_segments: external_exports.object({ vmx: vmx.optional() }).strict(),
+  create_lan_segment: external_exports.object({ name: external_exports.string().min(1).max(256).refine((value) => value === value.trim() && !/[\p{Cc}\p{Cs}]/u.test(value), "Use a nonblank name without control characters or surrounding whitespace.") }).strict(),
+  remove_lan_segment: external_exports.object({ segment, vmx_paths: external_exports.array(vmx).max(1024).default([]).describe("Additional unregistered VMX files to check for references. Registered and running VMs are always checked; detach references before removal.") }).strict(),
+  attach_vm_adapter_to_lan_segment: external_exports.object({ vmx, adapter, segment }).strict(),
+  detach_vm_adapter_from_lan_segment: external_exports.object({
+    vmx,
+    adapter,
+    segment,
+    network: external_exports.enum(["nat", "bridged", "hostonly", "custom"]).default("nat").describe("Replacement network mode. The adapter is left disconnected with startConnected=FALSE."),
+    vmnet: external_exports.string().regex(/^vmnet\d{1,3}$/).optional().describe("Required only for the custom replacement network.")
+  }).strict()
+};
+var idPattern = /^(?:[0-9a-f]{2} ){7}[0-9a-f]{2}-(?:[0-9a-f]{2} ){7}[0-9a-f]{2}$/i;
+var namespace = /^pref\.namedpvns(?:\.|\d+\.)/i;
+var assignment = /^\s*([\w.:-]+)\s*=\s*"([^"\r\n]*)"\s*$/;
+var unescapeBytes = (value) => value.replace(/\|([0-9a-f]{2})/gi, (_, hex3) => String.fromCharCode(parseInt(hex3, 16)));
+var idKey = (id) => id.toLowerCase();
+function codec2(label) {
+  if (!/^(utf-?8|windows-1252)$/i.test(label)) throw new Error("LAN segment preferences support UTF-8 and windows-1252 only; refusing to transcode this preferences file.");
+  const utf8 = /^utf-?8$/i.test(label);
+  const decoder = new TextDecoder(utf8 ? "utf-8" : "windows-1252", { fatal: true });
+  const table = utf8 ? null : new Map(Array.from({ length: 256 }, (_, byte) => [decoder.decode(Uint8Array.of(byte)), byte]));
+  return {
+    decode: (raw) => decoder.decode(Buffer.from(unescapeBytes(raw), "latin1")),
+    encode: (value) => {
+      const bytes = utf8 ? Buffer.from(value, "utf8") : Buffer.from([...value].map((char) => {
+        if (!table.has(char)) throw new Error("The segment name cannot be represented in windows-1252; use a representable name.");
+        return table.get(char);
+      }));
+      return [...bytes].map((byte) => byte === 34 || byte === 124 || byte < 32 ? `|${byte.toString(16).padStart(2, "0").toUpperCase()}` : String.fromCharCode(byte)).join("");
+    }
+  };
+}
+function parseLanPreferences(bytes, defaultEncoding = "UTF-8") {
+  const raw = bytes.toString("latin1");
+  const lines = raw.match(/[^\r\n]*(?:\r\n|\n|$)/g).filter(Boolean);
+  const entries = lines.map((line) => line.replace(/[\r\n]+$/, "").replace(/^\xef\xbb\xbf/, ""));
+  const encodingLines = entries.filter((line) => /^\s*\.encoding\b/i.test(line));
+  if (encodingLines.length > 1 || encodingLines.length && !encodingLines[0].match(assignment)) throw new Error("Malformed or duplicate preferences encoding.");
+  const encoding = encodingLines[0]?.match(assignment)?.[2] || defaultEncoding;
+  const encodingCodec = codec2(encoding);
+  const values = /* @__PURE__ */ new Map();
+  for (const line of entries) {
+    if (!/^\s*pref\.namedpvns/i.test(line)) continue;
+    const match = line.match(assignment);
+    if (!match || !/^pref\.namedpvns(?:\.count|\d+\.(?:name|pvnid))$/i.test(match[1])) throw new Error("Unrecognized LAN segment catalog entry; preferences were not changed.");
+    const key2 = match[1].toLowerCase();
+    if (values.has(key2)) throw new Error("Duplicate LAN segment preference key.");
+    values.set(key2, encodingCodec.decode(match[2]));
+  }
+  const count = values.get("pref.namedpvns.count") ?? (values.size ? null : "0");
+  if (!/^\d{1,5}$/.test(count ?? "") || Number(count) > 1e4) throw new Error("Invalid LAN segment catalog count.");
+  if (values.size !== (values.has("pref.namedpvns.count") ? 1 : 0) + Number(count) * 2) throw new Error("LAN segment catalog count does not match its entries.");
+  const segments = [];
+  const ids = /* @__PURE__ */ new Set();
+  for (let index = 0; index < Number(count); index++) {
+    const name = values.get(`pref.namedpvns${index}.name`);
+    const id = values.get(`pref.namedpvns${index}.pvnid`);
+    if (!name?.trim() || !idPattern.test(id || "") || ids.has(idKey(id))) throw new Error("Incomplete or duplicate LAN segment identity.");
+    ids.add(idKey(id));
+    segments.push({ name, id: idKey(id) });
+  }
+  return { lines, encoding, codec: encodingCodec, segments, newline: raw.includes("\r\n") ? "\r\n" : "\n", hasEncoding: !!encodingLines.length };
+}
+function renderPreferences(document, segments) {
+  const bom = document.lines[0]?.startsWith("\xEF\xBB\xBF") ? "\xEF\xBB\xBF" : "";
+  const lines = document.lines.map((line, index) => index === 0 ? line.replace(/^\xef\xbb\xbf/, "") : line).filter((line) => !namespace.test(line.trimStart()));
+  let text = bom + lines.join("");
+  const nl = document.newline;
+  if (text && !text.endsWith("\n")) text += nl;
+  if (!document.hasEncoding) text += `.encoding = "${document.encoding}"${nl}`;
+  text += `pref.namedPVNs.count = "${segments.length}"${nl}`;
+  segments.forEach((entry, index) => {
+    text += `pref.namedPVNs${index}.name = "${document.codec.encode(entry.name)}"${nl}`;
+    text += `pref.namedPVNs${index}.pvnID = "${entry.id}"${nl}`;
+  });
+  return Buffer.from(text, "latin1");
+}
+function resolveSegment(segments, selector) {
+  const matches = segments.filter((entry) => entry.name.toLowerCase() === selector.toLowerCase() || entry.id === selector.toLowerCase());
+  if (matches.length !== 1) throw new Error(matches.length ? "LAN segment name is ambiguous; use its pvnID." : "LAN segment was not found. Use list_lan_segments.");
+  return matches[0];
+}
+async function assertLanGUIClosed(backend, platform = process.platform, procRoot = "/proc") {
+  let names;
+  if (platform === "win32") {
+    const result = await backend.execute("pwsh", ["-NoProfile", "-NonInteractive", "-Command", "$ErrorActionPreference='Stop'; ConvertTo-Json -InputObject @(Get-Process | Where-Object { $_.ProcessName -in @('vmware','vmplayer') } | ForEach-Object { $_.ProcessName }) -Compress"], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4, maxBuffer: 1024 * 1024 });
+    names = result.stdout.trim() ? JSON.parse(result.stdout) : [];
+    if (!Array.isArray(names) || names.some((name) => typeof name !== "string")) throw new Error("Cannot verify Workstation GUI process state.");
+  } else if (platform === "linux") {
+    names = [];
+    for (const pid of (await import_promises7.default.readdir(procRoot)).filter((entry) => /^\d+$/.test(entry))) {
+      try {
+        names.push((await import_promises7.default.readFile(import_node_path8.default.join(procRoot, pid, "comm"), "utf8")).trim());
+      } catch (error62) {
+        if (error62.code !== "ENOENT" && error62.code !== "ESRCH") throw error62;
+      }
+    }
+  } else throw new Error("LAN segments support Windows and Linux Workstation hosts.");
+  if (names.some((name) => /^(?:vmware|vmplayer)(?:\.exe)?$/i.test(name))) throw new Error("Close the VMware Workstation/Player GUI before changing LAN segments or adapters; its cached settings can overwrite offline edits.");
+}
+var LanSegments = class {
+  constructor(backend, vmFiles, { assertGUIClosed = assertLanGUIClosed, protectFile } = {}) {
+    this.backend = backend;
+    this.vmFiles = vmFiles;
+    this.assertGUIClosed = () => assertGUIClosed(backend);
+    this.protectFile = protectFile;
+    this.filename = preferencesPath(backend.env);
+    this.tail = Promise.resolve();
+  }
+  async readCatalog() {
+    if (!import_node_path8.default.isAbsolute(this.filename) || /[\x00-\x1f]/.test(this.filename)) throw new Error("VMWARE_PREFERENCES_PATH must be an absolute path without control characters.");
+    let bytes = null;
+    try {
+      const stat = await import_promises7.default.lstat(this.filename);
+      if (!stat.isFile() || stat.nlink !== 1 || stat.size > 4 * 1024 * 1024) throw new Error("Preferences must be a regular, unlinked file no larger than 4 MiB.");
+      bytes = await import_promises7.default.readFile(this.filename);
+    } catch (error62) {
+      if (error62.code !== "ENOENT") throw error62;
+    }
+    return { bytes, document: parseLanPreferences(bytes || Buffer.alloc(0), process.platform === "win32" ? "windows-1252" : "UTF-8") };
+  }
+  async unchanged(catalog) {
+    const current = await this.readCatalog();
+    if (catalog.bytes === null ? current.bytes !== null : current.bytes === null || !catalog.bytes.equals(current.bytes)) throw new Error("LAN segment preferences changed concurrently; inspect and retry.");
+  }
+  exclusive(callback) {
+    const job = this.tail.then(async () => {
+      await this.readCatalog();
+      const lock = `${this.filename}.lan-segments.lock`;
+      try {
+        await import_promises7.default.mkdir(lock, { mode: 448 });
+      } catch (error62) {
+        if (error62.code === "EEXIST") throw new Error("LAN segment edit lock exists; another operation may be active. Inspect before removing a stale lock.");
+        throw error62;
+      }
+      try {
+        await this.assertGUIClosed();
+        return await callback();
+      } finally {
+        await import_promises7.default.rmdir(lock);
+      }
+    });
+    this.tail = job.catch(() => {
+    });
+    return job;
+  }
+  async writeCatalog(catalog, segments, beforeCommit) {
+    const bytes = renderPreferences(catalog.document, segments);
+    const backup = catalog.bytes === null ? null : `${this.filename}.backup-${(0, import_node_crypto.randomUUID)()}`;
+    const temporary = `${this.filename}.edit-${(0, import_node_crypto.randomUUID)()}`;
+    const write = async (filename, content) => {
+      await import_promises7.default.writeFile(filename, "", { flag: "wx", mode: 384 });
+      if (this.protectFile) await this.protectFile(filename);
+      await import_promises7.default.writeFile(filename, content);
+    };
+    try {
+      if (backup) await write(backup, catalog.bytes);
+      await write(temporary, bytes);
+      if (beforeCommit) await beforeCommit();
+      await this.assertGUIClosed();
+      await this.unchanged(catalog);
+      await import_promises7.default.rename(temporary, this.filename);
+    } catch (error62) {
+      await import_promises7.default.unlink(temporary).catch((cleanup) => {
+        if (cleanup.code !== "ENOENT") throw cleanup;
+      });
+      throw error62;
+    }
+    return { preferencesPath: this.filename, backup };
+  }
+  async readVM(input2) {
+    const vmx2 = await this.backend.vmx(input2);
+    const bytes = await import_promises7.default.readFile(vmx2);
+    const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes);
+    const values = /* @__PURE__ */ new Map();
+    for (const line of text.split(/\r?\n/)) {
+      const match = line.replace(/^\uFEFF/, "").match(assignment);
+      if (!match) {
+        if (/^\s*(?:ethernet\d+\.|\.encoding|checkpoint\.vmstate|suspend\.filename)/i.test(line)) throw new Error("Malformed VM network or state setting.");
+        continue;
+      }
+      const key2 = match[1].toLowerCase();
+      if (key2.startsWith("encryption.")) throw new Error("Encrypted VMX files cannot be inspected safely for LAN segment references.");
+      if (/^(ethernet\d+\.|\.encoding|checkpoint\.vmstate|suspend\.filename)/.test(key2)) {
+        const index = key2.match(/^ethernet(\d+)\./)?.[1];
+        if (index !== void 0 && (String(Number(index)) !== index || Number(index) > 255)) throw new Error("Unsupported VM adapter index; cannot verify LAN segment references.");
+        if (values.has(key2)) throw new Error("Duplicate VM network or state setting.");
+        values.set(key2, unescapeBytes(match[2]));
+      }
+    }
+    if (values.has(".encoding") && !/^utf-?8$/i.test(values.get(".encoding"))) throw new Error("LAN adapter inspection and editing require a UTF-8 VMX.");
+    return { vmx: vmx2, text, values };
+  }
+  adapters(vm, segments) {
+    const indices = [...new Set([...vm.values.keys()].map((key2) => key2.match(/^ethernet(\d+)\./)?.[1]).filter((value) => value !== void 0))].map(Number).sort((a, b) => a - b);
+    return indices.map((index) => {
+      const prefix2 = `ethernet${index}`;
+      const type = vm.values.get(`${prefix2}.connectiontype`) || null;
+      const id = vm.values.get(`${prefix2}.pvnid`)?.toLowerCase() || null;
+      return { adapter: index, device: prefix2, present: /^true$/i.test(vm.values.get(`${prefix2}.present`) || ""), network: type, segmentId: id, segmentName: segments.find((entry) => entry.id === id)?.name || null, startConnected: !/^false$/i.test(vm.values.get(`${prefix2}.startconnected`) || "") };
+    });
+  }
+  async list(input2 = {}) {
+    const a = lanSegmentSchemas.list_lan_segments.parse(input2);
+    const catalog = await this.readCatalog();
+    return { preferencesPath: this.filename, segments: catalog.document.segments, ...a.vmx ? { vmx: a.vmx, adapters: this.adapters(await this.readVM(a.vmx), catalog.document.segments) } : {}, note: "Catalog is per host user. Supply vmx to inspect adapters. Inventory is not a disk scan; unregistered VMs may also reference these segment IDs." };
+  }
+  async create(input2) {
+    const a = lanSegmentSchemas.create_lan_segment.parse(input2);
+    return this.exclusive(async () => {
+      const catalog = await this.readCatalog();
+      const existing = catalog.document.segments.filter((entry) => entry.name.toLowerCase() === a.name.toLowerCase());
+      if (existing.length > 1) throw new Error("LAN segment name is ambiguous; catalog was not changed.");
+      if (existing.length) return { created: false, segment: existing[0], backup: null };
+      if (catalog.document.segments.length >= 1e4) throw new Error("LAN segment catalog is full.");
+      let id;
+      do {
+        const bytes = (0, import_node_crypto.randomBytes)(16);
+        bytes[0] = 82;
+        const hex3 = [...bytes].map((byte) => byte.toString(16).padStart(2, "0"));
+        id = `${hex3.slice(0, 8).join(" ")}-${hex3.slice(8).join(" ")}`;
+      } while (catalog.document.segments.some((entry) => entry.id === id));
+      const segment2 = { name: a.name, id };
+      return { created: true, segment: segment2, ...await this.writeCatalog(catalog, [...catalog.document.segments, segment2]) };
+    });
+  }
+  async remove(input2) {
+    const a = lanSegmentSchemas.remove_lan_segment.parse(input2);
+    return this.exclusive(async () => {
+      const catalog = await this.readCatalog();
+      const segment2 = resolveSegment(catalog.document.segments, a.segment);
+      const inventoryBytes = await import_promises7.default.readFile(this.backend.inventoryPath);
+      for (const line of inventoryBytes.toString("utf8").split(/\r?\n/)) {
+        if (!/^\s*vmlist\d+\.config\b/i.test(line)) continue;
+        const entry = line.match(assignment);
+        const value = entry && unescapeBytes(entry[2]);
+        if (!entry || value && (!import_node_path8.default.isAbsolute(value) || import_node_path8.default.extname(value).toLowerCase() !== ".vmx")) throw new Error("Malformed VM inventory; cannot verify LAN segment references.");
+      }
+      const inventory = await this.backend.listVMs();
+      if (inventory.warnings.length) throw new Error("Cannot verify segment usage because VM inventory is unavailable. Restore inventory before removal.");
+      const references = [];
+      const skippedMissingVMs = [];
+      const scanned = /* @__PURE__ */ new Set();
+      const snapshots = [];
+      for (const input3 of [...inventory.vms.map((vm) => vm.vmx), ...a.vmx_paths]) {
+        let vm;
+        try {
+          vm = await this.readVM(input3);
+        } catch (error62) {
+          if (error62.code === "ENOENT" && !a.vmx_paths.includes(input3)) {
+            skippedMissingVMs.push(input3);
+            continue;
+          }
+          throw new Error(`Cannot inspect a VM for LAN segment references: ${error62.message}`);
+        }
+        const key2 = process.platform === "win32" ? vm.vmx.toLowerCase() : vm.vmx;
+        if (scanned.has(key2)) continue;
+        scanned.add(key2);
+        snapshots.push(vm);
+        for (const nic of this.adapters(vm, catalog.document.segments)) {
+          if (nic.segmentId === segment2.id) references.push({ vmx: vm.vmx, adapter: nic.adapter });
+        }
+      }
+      if (references.length) throw new Error(`LAN segment is referenced by VM adapters; detach them before removal: ${JSON.stringify(references)}`);
+      const recheck = async () => {
+        if (!inventoryBytes.equals(await import_promises7.default.readFile(this.backend.inventoryPath))) throw new Error("VM inventory changed during removal; inspect and retry.");
+        const current = await this.backend.listVMs();
+        if (current.warnings.length || JSON.stringify(current.vms) !== JSON.stringify(inventory.vms)) throw new Error("VM inventory or running state changed during removal; inspect and retry.");
+        for (const vm of snapshots) if (await import_promises7.default.readFile(vm.vmx, "utf8") !== vm.text) throw new Error("A VMX changed during segment removal; inspect and retry.");
+      };
+      return { removed: true, segment: segment2, checkedVMs: scanned.size, skippedMissingVMs, ...await this.writeCatalog(catalog, catalog.document.segments.filter((entry) => entry.id !== segment2.id), recheck), note: "Checked registered/running and explicitly supplied VMX files. Unregistered VMs outside this set were not scanned." };
+    });
+  }
+  async editAdapter(input2, detach) {
+    const a = lanSegmentSchemas[detach ? "detach_vm_adapter_from_lan_segment" : "attach_vm_adapter_to_lan_segment"].parse(input2);
+    if (detach && (a.network === "custom" ? !a.vmnet : a.vmnet !== void 0)) throw new Error("Supply vmnet only with network=custom; custom requires vmnet.");
+    return this.exclusive(async () => {
+      const catalog = await this.readCatalog();
+      const vm = await this.readVM(a.vmx);
+      const segment2 = detach && idPattern.test(a.segment) ? { id: a.segment.toLowerCase(), name: catalog.document.segments.find((entry) => entry.id === a.segment.toLowerCase())?.name || null } : resolveSegment(catalog.document.segments, a.segment);
+      const prefix2 = `ethernet${a.adapter}`;
+      const present2 = vm.values.get(`${prefix2}.present`) || "";
+      if (detach ? !/^(true|false)$/i.test(present2) : !/^true$/i.test(present2)) throw new Error("Selected network adapter is not present. LAN tools do not create or delete adapters.");
+      if (detach && vm.values.get(`${prefix2}.pvnid`)?.toLowerCase() !== segment2.id) throw new Error("Adapter is not attached to the selected LAN segment; VMX was not changed.");
+      for (const key2 of ["checkpoint.vmstate", "suspend.filename"]) {
+        const saved = vm.values.get(key2);
+        if (saved) {
+          try {
+            await import_promises7.default.access(import_node_path8.default.resolve(import_node_path8.default.dirname(vm.vmx), saved));
+            throw new Error("VM has a saved/suspended state; power it off first.");
+          } catch (error62) {
+            if (error62.code !== "ENOENT") throw error62;
+          }
+        }
+      }
+      const settings = {
+        [`${prefix2}.connectionType`]: detach ? a.network : "pvn",
+        [`${prefix2}.pvnID`]: detach ? null : segment2.id,
+        [`${prefix2}.vnet`]: detach && a.network === "custom" ? a.vmnet : null,
+        [`${prefix2}.startConnected`]: detach ? "FALSE" : "TRUE",
+        [`${prefix2}.connected`]: detach ? "FALSE" : "TRUE"
+      };
+      const result = await this.vmFiles.configure({ vmx: vm.vmx, settings }, { expectedOriginal: vm.text, beforeCommit: async () => {
+        await this.assertGUIClosed();
+        await this.unchanged(catalog);
+      } });
+      return { ...result, adapter: a.adapter, segment: segment2, attached: !detach, network: detach ? a.network : "pvn", startConnected: !detach };
+    });
+  }
+  attach(input2) {
+    return this.editAdapter(input2, false);
+  }
+  detach(input2) {
+    return this.editAdapter(input2, true);
+  }
+};
+
+// src/hardware.mjs
+var bus = (c) => ["lsilogic", "pvscsi"].includes(c.type) ? "scsi" : c.type;
+var prefix = (c) => `${bus(c)}${c.index}`;
+var bool = (v) => v === void 0 ? null : /^true$/i.test(v);
+var numeric = (v) => /^\d+$/.test(v || "") ? Number(v) : null;
+var truth = (v) => v ? "TRUE" : "FALSE";
+var encode3 = (v) => String(v).replace(/\|/g, "|7C").replace(/"/g, "|22").replace(/\r/g, "|0D").replace(/\n/g, "|0A");
+var present = (config2, p) => Object.keys(config2).some((k) => k.startsWith(`${p}.`));
+function productCapabilities(output2) {
+  const match = output2.match(/VMware Workstation(?: Pro)?\s+(\d+)\.(\d+)(?:\.(\d+))?\s+build[- ](\d+)/i);
+  if (!match) hardwareError("UNSUPPORTED_CAPABILITY", "Native vmware-vmx did not return a recognized Workstation product version.");
+  const major = Number(match[1]), minor = Number(match[2]);
+  const max = major === 17 && minor <= 6 ? minor >= 5 ? 21 : 20 : [25, 26].includes(major) && minor === 0 ? 22 : null;
+  if (!max) hardwareError("UNSUPPORTED_CAPABILITY", "Typed hardware has no compatibility profile for this Workstation release. No settings were guessed.");
+  return {
+    product_version: `${match[1]}.${match[2]}.${match[3] || "0"}`,
+    build: match[4],
+    minimum_hardware_version: 14,
+    maximum_hardware_version: max,
+    maximum_cpus: 32,
+    maximum_memory_mb: 131072,
+    controllers: ["lsilogic", "pvscsi", "sata", "nvme"],
+    nic_models: ["e1000", "e1000e", "vmxnet3"],
+    firmware: ["bios", "efi"],
+    secure_boot: true,
+    nested_virtualization: "configurable; host CPU/hypervisor support unverified",
+    vtpm: { configurable: false, reason: "No verified headless encryption/key-management backend. Configure encryption and vTPM separately in VMware; encrypted VMX edits are refused." },
+    live_support: "unknown",
+    evidence: "Installed native worker version and conservative compatibility profile; not a power-on or guest driver test."
+  };
+}
+function validateHardware(config2, caps) {
+  const hw = numeric(config2["virtualhw.version"]);
+  if (!hw || hw < caps.minimum_hardware_version || hw > caps.maximum_hardware_version) hardwareError("UNSUPPORTED_CAPABILITY", "Declared virtual hardware is outside the installed product compatibility profile (14 through " + caps.maximum_hardware_version + ").");
+  const cpus = numeric(config2.numvcpus), cores = numeric(config2["cpuid.corespersocket"]);
+  const memory = numeric(config2.memsize);
+  if (!cpus || cpus > caps.maximum_cpus || !cores || cpus % cores || cores > cpus) hardwareError("INVALID_TOPOLOGY", "Declare positive vCPUs and cores_per_socket that evenly divide vCPUs, within 32 vCPUs.");
+  if (!memory || memory < 256 || memory > caps.maximum_memory_mb || memory % 4) hardwareError("INVALID_MEMORY", "Memory must be 256 through 131072 MiB, divisible by four.");
+  if (!caps.firmware.includes(config2.firmware)) hardwareError("UNSUPPORTED_CAPABILITY", "Declare BIOS or EFI firmware explicitly.");
+  if (bool(config2["uefi.secureboot.enabled"]) && config2.firmware !== "efi") hardwareError("INCOMPATIBLE_HARDWARE", "Secure Boot requires EFI firmware.");
+}
+function controllerSettings(controllers, config2) {
+  const settings = {}, seen = /* @__PURE__ */ new Set();
+  for (const c of controllers || []) {
+    const p = prefix(c);
+    if (seen.has(p)) hardwareError("DUPLICATE_DEVICE", "Controller indices must be unique within each bus.");
+    seen.add(p);
+    if (Object.keys(config2).some((k) => k.startsWith(p + ":")) && !/^true$/i.test(config2[`${p}.present`] || "")) hardwareError("CONTROLLER_OCCUPIED", "A disabled or undeclared controller has device settings; inspect before changing it.");
+    if (present(config2, p) && (!/^true$/i.test(config2[`${p}.present`] || "") || bus(c) === "scsi" && config2[`${p}.virtualdev`] !== c.type)) hardwareError("CONTROLLER_OCCUPIED", "Existing controller identity/type is preserved. Choose a new controller index.");
+    settings[`${p}.present`] = "TRUE";
+    if (bus(c) === "scsi") settings[`${p}.virtualDev`] = c.type;
+  }
+  return settings;
+}
+function pcieSettings(config2) {
+  const settings = {};
+  if (present(config2, "pcibridge0") && bool(config2["pcibridge0.present"]) !== true) hardwareError("UNSUPPORTED_CAPABILITY", "Existing PCI bridge is disabled or incomplete; inspect it before adding PCIe devices.");
+  for (const i of [4, 5, 6, 7]) if (present(config2, `pcibridge${i}`) && (bool(config2[`pcibridge${i}.present`]) !== true || config2[`pcibridge${i}.virtualdev`]?.toLowerCase() !== "pcierootport")) hardwareError("UNSUPPORTED_CAPABILITY", "Existing PCIe root-port configuration is unsupported; inspect it before adding PCIe devices.");
+  if (!present(config2, "pcibridge0")) settings["pciBridge0.present"] = "TRUE";
+  for (const i of [4, 5, 6, 7]) if (!present(config2, `pcibridge${i}`)) Object.assign(settings, {
+    [`pciBridge${i}.present`]: "TRUE",
+    [`pciBridge${i}.virtualDev`]: "pcieRootPort",
+    [`pciBridge${i}.functions`]: "8"
+  });
+  return settings;
+}
+var HardwareManager = class {
+  constructor({ backend, vmFiles, disks, lan, platform = process.platform, assertGUIClosed = assertLanGUIClosed } = {}) {
+    this.backend = backend;
+    this.vmFiles = vmFiles;
+    this.disks = disks || new DiskManager({ backend, vmFiles });
+    this.lan = lan || new LanSegments(backend, vmFiles);
+    this.platform = platform;
+    this.assertGUIClosed = () => assertGUIClosed(backend);
+  }
+  async capabilities() {
+    let executable;
+    try {
+      const beside = await this.backend.executable();
+      executable = await findVMwareExecutable("vmware-vmx", { env: this.backend.env, beside });
+      const options = { shell: false, windowsHide: true, encoding: "utf8", timeout: 1e4, maxBuffer: 65536 };
+      const result = this.platform === "win32" ? await this.backend.execute("pwsh", ["-NoProfile", "-NonInteractive", "-Command", "$ErrorActionPreference='Stop'; $info=[Diagnostics.FileVersionInfo]::GetVersionInfo($env:VMWARE_HARDWARE_VERSION_TARGET); if ($info.OriginalFilename -ne 'vmware-vmx.exe' -or $info.ProductName -ne 'VMware Workstation') { throw 'Unexpected worker metadata' }; Write-Output ($info.ProductName + ' ' + $info.ProductVersion)"], { ...options, env: { ...this.backend.env, VMWARE_HARDWARE_VERSION_TARGET: executable } }) : await this.backend.execute(executable, ["-v"], options);
+      return { available: true, executable, ...productCapabilities([result.stdout, result.stderr].filter(Boolean).join("\n")) };
+    } catch (e) {
+      return { available: false, executable: executable || null, code: "UNSUPPORTED_CAPABILITY", message: e.code === "UNSUPPORTED_CAPABILITY" ? e.message : "Cannot verify the native Workstation worker version.", action: "Install a supported native Workstation and set VMWARE_VMX_PATH to vmware-vmx if needed. No GUI fallback.", live_support: "unknown" };
+    }
+  }
+  async available() {
+    const caps = await this.capabilities();
+    if (!caps.available) hardwareError(caps.code, caps.message);
+    return caps;
+  }
+  async get(input2) {
+    const a = hardwareSchemas.vm_hardware_get.parse(input2), vmx2 = await this.backend.vmx(a.vmx);
+    const { config: config2 } = await readHardware(vmx2);
+    const cpus = numeric(config2.numvcpus), cores = numeric(config2["cpuid.corespersocket"]);
+    const controllers = Object.keys(config2).filter((k) => /^(scsi|sata|nvme)\d+\.present$/.test(k)).sort().map((k) => {
+      const p = k.split(".")[0];
+      return { device: p, present: bool(config2[k]), type: p.startsWith("scsi") ? config2[`${p}.virtualdev`] || null : p.replace(/\d+$/, "") };
+    });
+    const indices = [...new Set(Object.keys(config2).flatMap((k) => k.match(/^ethernet(\d+)\./)?.slice(1) || []))].map(Number).sort((a2, b) => a2 - b);
+    return {
+      vmx: vmx2,
+      running: (await this.backend.details(vmx2)).running,
+      hardware_version: numeric(config2["virtualhw.version"]),
+      cpus,
+      cores_per_socket: cores,
+      sockets: cpus && cores && cpus % cores === 0 ? cpus / cores : null,
+      memory_mb: numeric(config2.memsize),
+      nested_virtualization: bool(config2["vhv.enable"]),
+      firmware: config2.firmware || null,
+      secure_boot: bool(config2["uefi.secureboot.enabled"]),
+      vtpm: bool(config2["vtpm.present"]),
+      encrypted: Object.keys(config2).some((k) => k.startsWith("encryption.")),
+      controllers,
+      disks: Object.keys(config2).filter((k) => /^(scsi|sata|ide|nvme)\d+:\d+\.filename$/.test(k) && /\.vmdk$/i.test(config2[k])).sort().map((k) => ({ device: k.split(".")[0], file: config2[k], present: bool(config2[k.replace("filename", "present")]) })),
+      nics: indices.map((index) => {
+        const p = `ethernet${index}`;
+        return {
+          index,
+          present: bool(config2[`${p}.present`]),
+          model: config2[`${p}.virtualdev`] || null,
+          network: config2[`${p}.connectiontype`] || null,
+          vmnet: config2[`${p}.vnet`] || null,
+          segment_id: config2[`${p}.pvnid`] || null,
+          address_type: config2[`${p}.addresstype`] || null,
+          mac: config2[`${p}.address`] || config2[`${p}.generatedaddress`] || null,
+          start_connected: bool(config2[`${p}.startconnected`])
+        };
+      }),
+      note: "Declared configuration only; omitted values are unknown, not inferred defaults. Guest driver and nested CPU support require live validation."
+    };
+  }
+  async nicSettings(nics, config2) {
+    const settings = {}, seen = /* @__PURE__ */ new Set(), macs = /* @__PURE__ */ new Set();
+    let catalog = null;
+    if (nics?.some((n) => n.segment !== void 0 || n.network === "lan_segment")) catalog = await this.lan.readCatalog();
+    for (const n of nics || []) {
+      if (seen.has(n.index)) hardwareError("DUPLICATE_DEVICE", "NIC indices must be unique.");
+      seen.add(n.index);
+      const p = `ethernet${n.index}`, existing = present(config2, p);
+      if (existing && !/^true$/i.test(config2[`${p}.present`] || "")) hardwareError("NIC_OCCUPIED", "Disabled/partial NIC settings are preserved; select a new index.");
+      if (existing && !config2[`${p}.virtualdev`]) hardwareError("UNSUPPORTED_CAPABILITY", "Existing NIC model is undeclared; refusing to guess its identity.");
+      const model = n.model || config2[`${p}.virtualdev`] || "e1000";
+      if (!["e1000", "e1000e", "vmxnet3"].includes(model)) hardwareError("UNSUPPORTED_CAPABILITY", "Unsupported existing NIC model.");
+      if (existing && n.model !== void 0 && model !== config2[`${p}.virtualdev`]) hardwareError("NIC_IDENTITY_CHANGE", "Changing an existing NIC model is refused to preserve identity. Add an adapter at an unused index.");
+      settings[`${p}.present`] = "TRUE";
+      settings[`${p}.virtualDev`] = model;
+      if (!existing) settings[`${p}.addressType`] = "generated";
+      if (n.mac) {
+        const mac3 = n.mac.toLowerCase();
+        if (macs.has(mac3) || Object.entries(config2).some(([k, v]) => /^ethernet\d+\.(?:address|generatedaddress)$/.test(k) && !k.startsWith(p + ".") && v.toLowerCase() === mac3)) hardwareError("DUPLICATE_MAC", "MAC is already assigned to another adapter in this VM.");
+        macs.add(mac3);
+        settings[`${p}.addressType`] = "static";
+        settings[`${p}.address`] = mac3;
+        settings[`${p}.generatedAddress`] = null;
+        settings[`${p}.generatedAddressOffset`] = null;
+      }
+      const network = n.network || (existing ? null : "nat");
+      if (n.vmnet !== void 0 && network !== "custom") hardwareError("INVALID_NETWORK", "vmnet requires network=custom.");
+      if (n.segment !== void 0 && network !== "lan_segment") hardwareError("INVALID_NETWORK", "segment requires network=lan_segment.");
+      if (network) {
+        settings[`${p}.vnet`] = null;
+        settings[`${p}.pvnID`] = null;
+        settings[`${p}.connectionType`] = network === "lan_segment" ? "pvn" : network;
+        if (network === "custom") {
+          if (!n.vmnet) hardwareError("INVALID_NETWORK", "Custom networking requires an explicit vmnet.");
+          settings[`${p}.vnet`] = n.vmnet;
+        }
+        if (network === "lan_segment") {
+          const matches = catalog.document.segments.filter((s) => s.id === n.segment?.toLowerCase() || s.name.toLowerCase() === n.segment?.toLowerCase());
+          if (matches.length !== 1) hardwareError("INVALID_NETWORK", "Select one unambiguous existing LAN segment by name or pvnID.");
+          settings[`${p}.pvnID`] = matches[0].id;
+        }
+      }
+      if (n.start_connected !== void 0 || !existing) settings[`${p}.startConnected`] = truth(n.start_connected ?? true);
+    }
+    const existingIndices = Object.keys(config2).flatMap((k) => k.match(/^ethernet(\d+)\.present$/)?.slice(1) || []);
+    if ((/* @__PURE__ */ new Set([...existingIndices.map(Number), ...seen])).size > 10) hardwareError("UNSUPPORTED_CAPABILITY", "At most ten NICs are supported.");
+    return { settings, catalog };
+  }
+  settings(a, config2, caps) {
+    if (a.vtpm !== void 0) hardwareError("UNSUPPORTED_CAPABILITY", caps.vtpm.reason);
+    const settings = controllerSettings(a.controllers, config2);
+    for (const [field, key2] of Object.entries({ cpus: "numvcpus", cores_per_socket: "cpuid.coresPerSocket", memory_mb: "memsize", firmware: "firmware" })) if (a[field] !== void 0) settings[key2] = String(a[field]);
+    if (a.nested_virtualization !== void 0) settings["vhv.enable"] = truth(a.nested_virtualization);
+    if (a.secure_boot !== void 0) settings["uefi.secureBoot.enabled"] = truth(a.secure_boot);
+    const combined = { ...config2, ...Object.fromEntries(Object.entries(settings).map(([k, v]) => [k.toLowerCase(), v])) };
+    validateHardware(combined, caps);
+    return settings;
+  }
+  async set(input2) {
+    const a = hardwareSchemas.vm_hardware_set.parse(input2), vmx2 = await this.backend.vmx(a.vmx);
+    return this.backend.resources.use([vmx2], async () => {
+      await this.assertGUIClosed();
+      const caps = await this.available(), vm = await requireOffline(this.backend, vmx2);
+      if (bool(vm.config["vtpm.present"])) hardwareError("UNSUPPORTED_CAPABILITY", "Existing vTPM hardware edits require a verified encryption backend.");
+      const settings = this.settings(a, vm.config, caps), nic = await this.nicSettings(a.nics, vm.config);
+      Object.assign(settings, nic.settings);
+      if (a.controllers?.some((c) => c.type === "nvme") || a.nics?.some((n) => !present(vm.config, `ethernet${n.index}`) && ["e1000e", "vmxnet3"].includes(n.model))) Object.assign(settings, pcieSettings(vm.config));
+      if (!Object.keys(settings).length) hardwareError("INVALID_CHANGE", "Provide at least one nonempty hardware change.");
+      if (Object.keys(settings).length > 128) hardwareError("INVALID_CHANGE", "Too many VMX settings for one edit; split into smaller requests.");
+      return { ...await this.vmFiles.configure({ vmx: vmx2, settings }, { expectedOriginal: vm.text, beforeCommit: async () => {
+        await this.assertGUIClosed();
+        await requireOffline(this.backend, vmx2);
+        if (nic.catalog) await this.lan.unchanged(nic.catalog);
+        if (JSON.stringify(await this.available()) !== JSON.stringify(caps)) hardwareError("CAPABILITY_CHANGED", "Installed worker capabilities changed before commit.");
+      } }), live_support: "unknown" };
+    });
+  }
+  async create(a) {
+    return this.vmFiles.exclusive(async () => {
+      const directory = await this.backend.hostPath(a.directory, "destination-directory");
+      await this.backend.hostPath(import_node_path9.default.dirname(directory), "directory");
+      await this.backend.hostPath(directory, "host-destination-directory");
+      const caps = await this.available();
+      const controllers = a.controllers ?? [{ type: "lsilogic", index: 0 }];
+      const disks = a.disks ?? [{ controller: "scsi", controller_index: 0, unit: 0, capacity_mb: a.disk_gb * 1024 }];
+      const nics = a.nics ?? (a.network === "none" ? [] : [{ index: 0, model: "e1000", network: a.network, ...a.vmnet ? { vmnet: a.vmnet } : {} }]);
+      const base = {
+        ".encoding": "UTF-8",
+        "config.version": "8",
+        "virtualhw.version": String(a.hardware_version),
+        displayName: a.name,
+        guestOS: a.guest_os,
+        memsize: String(a.memory_mb),
+        numvcpus: String(a.cpus),
+        "cpuid.corespersocket": String(a.cores_per_socket ?? 1),
+        firmware: a.firmware,
+        "floppy0.present": "FALSE",
+        "sound.present": "FALSE",
+        "usb.present": "FALSE",
+        ...pcieSettings({})
+      };
+      const settings = { ...base, ...this.settings({ ...a, controllers }, base, caps) };
+      const nic = await this.nicSettings(nics, {});
+      Object.assign(settings, nic.settings);
+      const slots = /* @__PURE__ */ new Set();
+      for (const d of disks) {
+        const p = `${d.controller}${d.controller_index}`, slot2 = `${p}:${d.unit}`;
+        if (!controllers.some((c) => prefix(c) === p)) hardwareError("CONTROLLER_MISSING", "Every disk requires an explicitly declared controller.");
+        if (slots.has(slot2)) hardwareError("DUPLICATE_DEVICE", "Disk slots must be unique.");
+        slots.add(slot2);
+        if (d.unit > { scsi: 15, sata: 29, nvme: 14 }[d.controller] || d.controller === "scsi" && d.unit === 7) hardwareError("INVALID_SLOT", "Invalid storage slot; SCSI unit 7 is reserved. NVMe supports units 0-14 in this conservative profile.");
+      }
+      if (a.iso_path) {
+        const iso = await this.backend.hostPath(a.iso_path, "input-file");
+        let slot2;
+        for (let i = 0; i < 30; i++) if (!slots.has(`sata0:${i}`)) {
+          slot2 = `sata0:${i}`;
+          break;
+        }
+        if (!slot2) hardwareError("INVALID_SLOT", "No free SATA0 slot for ISO.");
+        Object.assign(settings, { "sata0.present": "TRUE", [`${slot2}.present`]: "TRUE", [`${slot2}.deviceType`]: "cdrom-image", [`${slot2}.fileName`]: iso });
+      }
+      await this.disks.available("create", "0");
+      await this.disks.freeSpace(import_node_path9.default.dirname(directory), disks.reduce((sum, d) => sum + d.capacity_mb * 1048576, 0));
+      if (nic.catalog) {
+        await this.assertGUIClosed();
+        await this.lan.unchanged(nic.catalog);
+      }
+      await import_promises8.default.mkdir(directory, { mode: 448 });
+      const vmx2 = import_node_path9.default.join(directory, "machine.vmx"), createdDisks = [];
+      return this.backend.resources.use([directory], async () => {
+        try {
+          for (let i = 0; i < disks.length; i++) {
+            const d = disks[i], destination = import_node_path9.default.join(directory, `disk-${i}`, "disk.vmdk");
+            const result = await this.disks.perform("create", { destination, capacity_mb: d.capacity_mb, adapter: "lsilogic", disk_type: "0", timeout_seconds: a.timeout_seconds });
+            createdDisks.push(result.disk);
+            const slot2 = `${d.controller}${d.controller_index}:${d.unit}`;
+            settings[`${slot2}.present`] = "TRUE";
+            settings[`${slot2}.fileName`] = import_node_path9.default.relative(directory, result.disk);
+          }
+          if (nic.catalog) {
+            await this.assertGUIClosed();
+            await this.lan.unchanged(nic.catalog);
+          }
+          if (JSON.stringify(await this.available()) !== JSON.stringify(caps)) hardwareError("CAPABILITY_CHANGED", "Worker version changed during creation.");
+          const normalized = Object.fromEntries(Object.entries(settings).map(([k, v]) => [k.toLowerCase(), v]));
+          await import_promises8.default.writeFile(vmx2, Object.entries(normalized).filter(([, v]) => v !== null).map(([k, v]) => `${k} = "${encode3(v)}"`).join("\n") + "\n", { flag: "wx", mode: 384 });
+          return { created: true, vmx: vmx2, disk: createdDisks[0], disks: createdDisks, directory, registered: false, poweredOn: false, guestOSInstalled: false, live_support: "unknown", note: "Blank isolated hardware created. Guest drivers, OS installation and nested hypervisor execution require separate live validation." };
+        } catch (e) {
+          throw Object.assign(new Error("Typed VM creation failed. Partial files are retained in the new directory; inspect before retrying. No existing VM was overwritten."), { code: e.code || "CREATE_FAILED", details: { directory, reason: e.code || "DISK_OR_CONFIG_FAILED" } });
+        }
+      });
+    });
+  }
+};
+
 // src/vm-files.mjs
 var createVMSchema = external_exports.object({
   directory: external_exports.string().min(1).describe("Absolute NEW VM directory; its parent must exist. Existing directories are never overwritten."),
@@ -20221,7 +21249,8 @@ var createVMSchema = external_exports.object({
   network: external_exports.enum(["nat", "bridged", "hostonly", "custom", "none"]).default("nat"),
   vmnet: external_exports.string().optional(),
   iso_path: external_exports.string().optional().describe("Optional existing host ISO file. Creating a VM does not install a guest OS."),
-  timeout_seconds: external_exports.number().int().min(1).max(3600).default(120)
+  timeout_seconds: external_exports.number().int().min(1).max(3600).default(120),
+  ...typedCreateFields
 }).strict().refine((a) => a.network !== "custom" || !!a.vmnet, "Custom networking requires vmnet.");
 var configureVMSchema = external_exports.object({
   vmx: external_exports.string().min(1),
@@ -20242,17 +21271,20 @@ var VMFiles = class {
   }
   async create(input2) {
     const a = createVMSchema.parse(input2);
+    if (usesTypedCreation(a)) {
+      return new HardwareManager({ backend: this.backend, vmFiles: this }).create(a);
+    }
     return this.exclusive(async () => {
       const directory = await this.backend.hostPath(a.directory, "destination-directory");
       const iso = a.iso_path ? await this.backend.hostPath(a.iso_path, "input-file") : null;
       const vmrun = await this.backend.executable();
       const diskManager = await findVMwareExecutable("vmware-vdiskmanager", { env: this.backend.env, beside: vmrun });
-      await import_promises5.default.mkdir(directory);
-      const vmx = import_node_path6.default.join(directory, "machine.vmx");
-      const disk = import_node_path6.default.join(directory, "disk.vmdk");
+      await import_promises9.default.mkdir(directory);
+      const vmx2 = import_node_path10.default.join(directory, "machine.vmx");
+      const disk = import_node_path10.default.join(directory, "disk.vmdk");
       try {
         await this.backend.execute(diskManager, ["-c", "-s", `${a.disk_gb}GB`, "-a", "lsilogic", "-t", "0", disk], { windowsHide: true, shell: false, timeout: a.timeout_seconds * 1e3, maxBuffer: 1024 * 1024, encoding: "utf8" });
-        if (!(await import_promises5.default.stat(disk)).isFile()) throw new Error("Disk manager did not create the VMDK.");
+        if (!(await import_promises9.default.stat(disk)).isFile()) throw new Error("Disk manager did not create the VMDK.");
         const settings = {
           ".encoding": "UTF-8",
           "config.version": "8",
@@ -20277,9 +21309,9 @@ var VMFiles = class {
         if (a.network !== "none") settings["ethernet0.connectionType"] = a.network;
         if (a.network === "custom") settings["ethernet0.vnet"] = a.vmnet;
         if (iso) Object.assign(settings, { "sata0.present": "TRUE", "sata0:0.present": "TRUE", "sata0:0.deviceType": "cdrom-image", "sata0:0.fileName": iso });
-        const text = Object.entries(settings).map(([key, value]) => `${key} = "${encodeVMX(value)}"`).join("\n") + "\n";
-        await import_promises5.default.writeFile(vmx, text, { flag: "wx", encoding: "utf8" });
-        return { created: true, vmx, disk, directory, registered: false, poweredOn: false, guestOSInstalled: false, note: "Blank VM and sparse disk created. Open the VMX in Workstation or register through REST; install a guest OS separately." };
+        const text = Object.entries(settings).map(([key2, value]) => `${key2} = "${encodeVMX(value)}"`).join("\n") + "\n";
+        await import_promises9.default.writeFile(vmx2, text, { flag: "wx", encoding: "utf8" });
+        return { created: true, vmx: vmx2, disk, directory, registered: false, poweredOn: false, guestOSInstalled: false, note: "Blank VM and sparse disk created. Open the VMX in Workstation or register through REST; install a guest OS separately." };
       } catch (error62) {
         throw new Error(`VM creation failed (${error62.code || "disk/configuration error"}). Partial files may remain in ${directory}; inspect before retrying. No existing VM was overwritten.`);
       }
@@ -20287,79 +21319,79 @@ var VMFiles = class {
   }
   async configure(input2, { protectFile, expectedOriginal, beforeCommit } = {}) {
     const a = configureVMSchema.parse(input2);
-    const vmx = await this.backend.vmx(a.vmx);
-    return this.backend.resources.use([vmx], async () => {
-      const details = await this.backend.details(vmx);
+    const vmx2 = await this.backend.vmx(a.vmx);
+    return this.backend.resources.use([vmx2], async () => {
+      const details = await this.backend.details(vmx2);
       if (details.running) throw new Error("Power off the VM before editing its VMX.");
-      const lock = `${vmx}.lck`;
+      const lock = `${vmx2}.lck`;
       try {
-        await import_promises5.default.access(lock);
+        await import_promises9.default.access(lock);
         throw new Error("VMware holds a VMX lock; close or power off the VM before editing.");
       } catch (error62) {
         if (error62.code !== "ENOENT") throw error62;
       }
-      const original = await import_promises5.default.readFile(vmx, "utf8");
+      const original = await import_promises9.default.readFile(vmx2, "utf8");
       if (expectedOriginal !== void 0 && original !== expectedOriginal) throw new Error("VMX changed before editing; inspect and retry.");
       const config2 = parseAssignments(original);
-      const sensitiveKeys = Object.entries(config2).some(([key, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key) && value) || Object.entries(a.settings).some(([key, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key) && value);
+      const sensitiveKeys = Object.entries(config2).some(([key2, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key2) && value) || Object.entries(a.settings).some(([key2, value]) => /^remotedisplay\.vnc\.(password|key)$/i.test(key2) && value);
       if (!protectFile && sensitiveKeys) protectFile = this.protectSensitiveFile;
       if (config2[".encoding"] && !/^utf-?8$/i.test(config2[".encoding"])) throw new Error("Local VMX editing supports UTF-8 only. Use REST or convert the VMX encoding explicitly.");
       for (const value of [config2["checkpoint.vmState"], config2["suspend.filename"]].filter(Boolean)) {
         try {
-          await import_promises5.default.access(import_node_path6.default.resolve(import_node_path6.default.dirname(vmx), value));
+          await import_promises9.default.access(import_node_path10.default.resolve(import_node_path10.default.dirname(vmx2), value));
           throw new Error("VM has a saved/suspended state; fully power it off before editing hardware.");
         } catch (error62) {
           if (error62.code !== "ENOENT") throw error62;
         }
       }
       const updates = /* @__PURE__ */ new Map();
-      for (const [key, value] of Object.entries(a.settings)) {
-        if (updates.has(key.toLowerCase())) throw new Error("Duplicate VMX setting names differ only by case.");
+      for (const [key2, value] of Object.entries(a.settings)) {
+        if (updates.has(key2.toLowerCase())) throw new Error("Duplicate VMX setting names differ only by case.");
         if (value?.includes("\0")) throw new Error("VMX settings cannot contain NUL.");
-        if (key.toLowerCase() === ".encoding" && value !== "UTF-8") throw new Error("The .encoding setting must remain UTF-8.");
-        updates.set(key.toLowerCase(), { key, value });
+        if (key2.toLowerCase() === ".encoding" && value !== "UTF-8") throw new Error("The .encoding setting must remain UTF-8.");
+        updates.set(key2.toLowerCase(), { key: key2, value });
       }
       const lines = [];
       const seen = /* @__PURE__ */ new Set();
       for (const line of original.split(/\r?\n/)) {
-        const key = line.match(/^\s*([A-Za-z_.][A-Za-z0-9_.:-]*)\s*=/)?.[1]?.toLowerCase();
-        if (!updates.has(key)) {
+        const key2 = line.match(/^\s*([A-Za-z_.][A-Za-z0-9_.:-]*)\s*=/)?.[1]?.toLowerCase();
+        if (!updates.has(key2)) {
           lines.push(line);
           continue;
         }
-        const update = updates.get(key);
-        if (!seen.has(key) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
-        seen.add(key);
+        const update = updates.get(key2);
+        if (!seen.has(key2) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
+        seen.add(key2);
       }
-      for (const [key, update] of updates) if (!seen.has(key) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
-      const mode = (await import_promises5.default.stat(vmx)).mode & 511;
+      for (const [key2, update] of updates) if (!seen.has(key2) && update.value !== null) lines.push(`${update.key} = "${encodeVMX(update.value)}"`);
+      const mode = (await import_promises9.default.stat(vmx2)).mode & 511;
       if (beforeCommit) await beforeCommit();
-      const backup = `${vmx}.backup-${(0, import_node_crypto.randomUUID)()}`;
+      const backup = `${vmx2}.backup-${(0, import_node_crypto2.randomUUID)()}`;
       if (protectFile) {
-        await import_promises5.default.writeFile(backup, "", { flag: "wx", mode: 384 });
+        await import_promises9.default.writeFile(backup, "", { flag: "wx", mode: 384 });
         await protectFile(backup);
-        await import_promises5.default.writeFile(backup, original);
-      } else await import_promises5.default.copyFile(vmx, backup, import_node_fs3.constants.COPYFILE_EXCL);
-      const temporary = `${vmx}.edit-${(0, import_node_crypto.randomUUID)()}`;
+        await import_promises9.default.writeFile(backup, original);
+      } else await import_promises9.default.copyFile(vmx2, backup, import_node_fs3.constants.COPYFILE_EXCL);
+      const temporary = `${vmx2}.edit-${(0, import_node_crypto2.randomUUID)()}`;
       if (protectFile) {
-        await import_promises5.default.writeFile(temporary, "", { flag: "wx", mode: 384 });
+        await import_promises9.default.writeFile(temporary, "", { flag: "wx", mode: 384 });
         await protectFile(temporary);
       }
-      await import_promises5.default.writeFile(temporary, lines.join("\n").replace(/\n*$/, "\n"), { flag: protectFile ? "w" : "wx", mode });
-      if (await import_promises5.default.readFile(vmx, "utf8") !== original) {
-        await import_promises5.default.unlink(temporary);
+      await import_promises9.default.writeFile(temporary, lines.join("\n").replace(/\n*$/, "\n"), { flag: protectFile ? "w" : "wx", mode });
+      if (await import_promises9.default.readFile(vmx2, "utf8") !== original) {
+        await import_promises9.default.unlink(temporary);
         throw new Error(`VMX changed during editing; original retained. Backup: ${backup}`);
       }
       if (beforeCommit) {
         try {
           await beforeCommit();
         } catch (error62) {
-          await import_promises5.default.unlink(temporary);
+          await import_promises9.default.unlink(temporary);
           throw error62;
         }
       }
-      await import_promises5.default.rename(temporary, vmx);
-      return { vmx, updated: true, backup, changedSettings: Object.keys(a.settings), note: "VMX saved while VM was not running and had no detected saved state/VMX lock. Close/reopen its Workstation tab if it has cached settings." };
+      await import_promises9.default.rename(temporary, vmx2);
+      return { vmx: vmx2, updated: true, backup, changedSettings: Object.keys(a.settings), note: "VMX saved while VM was not running and had no detected saved state/VMX lock. Close/reopen its Workstation tab if it has cached settings." };
     });
   }
 };
@@ -20370,12 +21402,12 @@ async function main() {
   const credentials = new Credentials();
   try {
     const { values } = (0, import_node_util2.parseArgs)({ options: { vmx: { type: "string" }, port: { type: "string" }, profile: { type: "string", default: "default" } } });
-    const vmx = await backend.vmx(values.vmx);
+    const vmx2 = await backend.vmx(values.vmx);
     const port = Number(values.port);
     if (!/^\d+$/.test(values.port || "") || port < 1024 || port > 65535) throw new Error("Provide --port between 1024 and 65535, unique to this VM.");
-    const auth = await credentials.console(vmx, values.profile);
+    const auth = await credentials.console(vmx2, values.profile);
     const protectFile = localFileProtector(backend);
-    const result = await new VMFiles(backend).configure({ vmx, settings: { "RemoteDisplay.vnc.enabled": "TRUE", "RemoteDisplay.vnc.ip": "127.0.0.1", "RemoteDisplay.vnc.port": String(port), "RemoteDisplay.vnc.password": auth.password, "RemoteDisplay.vnc.key": null } }, { protectFile });
+    const result = await new VMFiles(backend).configure({ vmx: vmx2, settings: { "RemoteDisplay.vnc.enabled": "TRUE", "RemoteDisplay.vnc.ip": "127.0.0.1", "RemoteDisplay.vnc.port": String(port), "RemoteDisplay.vnc.password": auth.password, "RemoteDisplay.vnc.key": null } }, { protectFile });
     console.log(JSON.stringify({ ...result, port, host: "127.0.0.1", profile: auth.profile, note: "Native VNC configured offline; VMX and backup restricted to the current user. Power the VM on with vmrun_start mode=nogui. The VNC password is also stored in the VMX as required by VMware; do not share it." }));
   } catch (error62) {
     console.error(credentials.redact(error62.message));

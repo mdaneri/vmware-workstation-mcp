@@ -1,3 +1,4 @@
+import { assertCompatibleTool } from '../tests/tool-compatibility.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -29,33 +30,36 @@ try {
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [path.join(pluginRoot, 'server/server.cjs')], stderr: 'pipe' }));
   assert.equal(client.getServerVersion().version, manifest.version, 'Bundled server version must match plugin');
   const { tools } = await client.listTools();
-  assert.equal(tools.length, 134);
-  assert.equal(new Set(tools.map(t => t.name)).size, 134);
+  assert.equal(tools.length, 137);
+  assert.equal(new Set(tools.map(t => t.name)).size, 137);
+  const preHardware = JSON.parse(await fs.readFile('tests/fixtures/pre-hardware-tool-schemas.json', 'utf8'));
+  assert.equal(preHardware.tools.length, 134);
+  for (const prior of preHardware.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior);
   const preIso = JSON.parse(await fs.readFile('tests/fixtures/pre-iso-tool-schemas.json', 'utf8'));
   assert.equal(preIso.tools.length, 129);
-  for (const prior of preIso.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Pre-ISO compatibility: ${prior.name}`);
+  for (const prior of preIso.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior, `Pre-ISO compatibility: ${prior.name}`);
   const preGuestExec = JSON.parse(await fs.readFile('tests/fixtures/pre-guest-exec-tool-schemas.json', 'utf8'));
   assert.equal(preGuestExec.tools.length, 128);
-  for (const prior of preGuestExec.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Pre-guest-exec compatibility: ${prior.name}`);
+  for (const prior of preGuestExec.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior, `Pre-guest-exec compatibility: ${prior.name}`);
   const legacy = JSON.parse(await fs.readFile('tests/fixtures/legacy-tool-schemas.json', 'utf8'));
-  for (const prior of legacy.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Backward compatibility: ${prior.name}`);
+  for (const prior of legacy.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior, `Backward compatibility: ${prior.name}`);
   const preOvf = JSON.parse(await fs.readFile('tests/fixtures/pre-ovf-tool-schemas.json', 'utf8'));
   assert.equal(preOvf.tools.length, 98);
-  for (const prior of preOvf.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Pre-OVF compatibility: ${prior.name}`);
+  for (const prior of preOvf.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior, `Pre-OVF compatibility: ${prior.name}`);
   const preDisk = JSON.parse(await fs.readFile('tests/fixtures/pre-disk-tool-schemas.json', 'utf8'));
   assert.equal(preDisk.tools.length, 108);
-  for (const prior of preDisk.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Pre-disk compatibility: ${prior.name}`);
+  for (const prior of preDisk.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior, `Pre-disk compatibility: ${prior.name}`);
   const preSerial = JSON.parse(await fs.readFile('tests/fixtures/pre-serial-tool-schemas.json', 'utf8'));
   assert.equal(preSerial.tools.length, 117);
-  for (const prior of preSerial.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Pre-serial compatibility: ${prior.name}`);
+  for (const prior of preSerial.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior, `Pre-serial compatibility: ${prior.name}`);
   const preReadiness = JSON.parse(await fs.readFile('tests/fixtures/pre-readiness-tool-schemas.json', 'utf8'));
   assert.equal(preReadiness.tools.length, 123);
-  for (const prior of preReadiness.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Pre-readiness compatibility: ${prior.name}`);
+  for (const prior of preReadiness.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior, `Pre-readiness compatibility: ${prior.name}`);
   for (const tool of tools) {
     assert.ok(toolValidator.validateSchema(tool.inputSchema), `${tool.name}: invalid input schema`);
     assert.equal(tool.inputSchema.additionalProperties, false, `${tool.name}: tool arguments must be strict`);
     assert.equal(typeof tool.annotations.readOnlyHint, 'boolean');
   }
   await writeGenerated('vmware-workstation/tool-schemas.json', JSON.stringify({ tools }, null, 2) + '\n');
-  console.log('Both portable manifests and all 134 MCP schemas validated; all 129 previous tool definitions are unchanged.');
+  console.log('Both portable manifests and all 137 MCP schemas validated; 133 existing definitions unchanged and create_vm extended only with optional fields.');
 } finally { await client.close(); }

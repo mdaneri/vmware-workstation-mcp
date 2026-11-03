@@ -82,9 +82,19 @@ Read the [ISO guide](iso.md) for existing-VM mount/eject workflows, slot selecti
 | `vm_boot_status` | `vmx` |
 | `vm_boot_configure` | `vmx`, `firmware_once`, `boot_order`, `confirm` |
 
+## Typed hardware (3)
+
+Read the [hardware guide](hardware.md) for multi-controller and multi-NIC nested lab creation, safe typed patches and capability limits. Existing devices and NIC identity are retained. vTPM changes require an unavailable encryption backend and fail explicitly.
+
+| Tool | Arguments |
+| --- | --- |
+| `vm_hardware_capabilities` | (none) |
+| `vm_hardware_get` | `vmx` |
+| `vm_hardware_set` | `vmx`, `confirm`, `cpus`, `cores_per_socket`, `memory_mb`, `nested_virtualization`, `firmware`, `secure_boot`, `vtpm`, `controllers`, `nics` |
+
 ## New VM creation and local configuration
 
-`create_vm` creates a blank VMX and sparse VMDK in a new directory. Required: `directory`, `name`. Options: `guest_os`, `memory_mb`, `cpus`, `disk_gb`, `hardware_version`, `firmware`, `network`, `vmnet`, `iso_path`, `timeout_seconds`.
+`create_vm` creates a blank VMX and sparse VMDK in a new directory. Required: `directory`, `name`. Options: `guest_os`, `memory_mb`, `cpus`, `disk_gb`, `hardware_version`, `firmware`, `network`, `vmnet`, `iso_path`, `timeout_seconds`. Optional typed additions: `controllers`, `disks`, `nics`, `cores_per_socket`, `nested_virtualization`, `secure_boot`, `vtpm`. Omitting every addition uses the original creation path and defaults.
 
 `configure_vm` edits a powered-off UTF-8 VMX with a backup. Required: `vmx`, `settings` (VMX keys to string values, or null to remove). It rejects running/locked/detected suspended VMs.
 
@@ -208,4 +218,4 @@ All console tools accept `vm_id`: an absolute VMX path, a unique inventory name,
 
 ## Convenience tools (9) and capabilities
 
-`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **134 MCP tools**.
+`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **137 MCP tools**.
