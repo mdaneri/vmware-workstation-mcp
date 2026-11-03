@@ -248,6 +248,10 @@ All console tools accept `vm_id`: an absolute VMX path, a unique inventory name,
 | `console_scroll` | `vm_id`, `direction`, `amount` |
 | `console_status` | `vm_id` |
 
+## Read-only security inspection (2)
+
+`vm_security_capabilities` discovers native worker/version and vmcli help without selecting a VM or credentials. `vm_security_status` takes `vmx` and reads selected declarations only. Encryption state/mode and actual TPM presence stay unknown without independent native proof. No security mutation backend or encryption mode is supported. See [feasibility evidence and remaining provisioning work](security.md).
+
 ## Convenience tools (9) and capabilities
 
-`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **148 MCP tools**.
+`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **150 MCP tools**.

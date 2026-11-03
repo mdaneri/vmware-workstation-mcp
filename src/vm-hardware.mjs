@@ -7,7 +7,11 @@ export function hardwareError(code, message) { throw Object.assign(new Error(mes
 // Strict, case-insensitive view for typed hardware edits. Unknown settings stay
 // in the original text and are preserved by VMFiles.configure.
 export async function readHardware(vmx) {
-  const text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(await fs.readFile(vmx));
+  return parseHardware(await fs.readFile(vmx));
+}
+
+export function parseHardware(bytes) {
+  const text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);
   const seen = new Set();
   for (const line of text.replace(/^\uFEFF/, '').split(/\r?\n/)) {
     if (/^\s*(?:#.*)?$/.test(line)) continue;

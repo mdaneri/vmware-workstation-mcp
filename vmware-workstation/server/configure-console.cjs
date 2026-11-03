@@ -56,7 +56,7 @@ function credentialsPath(env = process.env, platform = process.platform, home = 
 async function findVMwareExecutable(name, { env = process.env, platform = process.platform, beside } = {}) {
   if (!["win32", "linux"].includes(platform)) throw new Error("VMware Workstation hosts supported by this plugin are Windows and Linux.");
   const filename = `${name}${platform === "win32" ? ".exe" : ""}`;
-  const setting = { vmrun: "VMRUN_PATH", "vmware-vdiskmanager": "VMWARE_VDISKMANAGER_PATH", "vmware-vmx": "VMWARE_VMX_PATH", ovftool: "VMWARE_OVFTOOL_PATH" }[name];
+  const setting = { vmrun: "VMRUN_PATH", vmcli: "VMWARE_VMCLI_PATH", "vmware-vdiskmanager": "VMWARE_VDISKMANAGER_PATH", "vmware-vmx": "VMWARE_VMX_PATH", ovftool: "VMWARE_OVFTOOL_PATH" }[name];
   if (!setting) throw new Error("Unsupported VMware executable.");
   const validFile = async (candidate) => {
     if (!import_node_path.default.isAbsolute(candidate) || !(await import_promises.default.stat(candidate)).isFile()) return false;
@@ -20327,7 +20327,10 @@ function hardwareError(code, message) {
   throw Object.assign(new Error(message), { code, details: { action: "Inspect the selected VM, fully power it off and close other configuration writers before retrying." } });
 }
 async function readHardware(vmx2) {
-  const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(await import_promises5.default.readFile(vmx2));
+  return parseHardware(await import_promises5.default.readFile(vmx2));
+}
+function parseHardware(bytes) {
+  const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes);
   const seen = /* @__PURE__ */ new Set();
   for (const line of text.replace(/^\uFEFF/, "").split(/\r?\n/)) {
     if (/^\s*(?:#.*)?$/.test(line)) continue;

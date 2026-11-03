@@ -4,7 +4,7 @@
 
 # VMware Workstation Plugin
 
-An independent Windows and Linux MCP plugin for VMware Workstation with **148 tools** for multi-VM labs, declarative VM templates, typed hardware, VMDK lifecycle, ISO media, background jobs, readiness diagnostics, VM management, OVF/OVA appliances, LAN segments, verified guest execution, file transfers, direct headless VNC/RFB console control, and optional serial consoles. It is not an official VMware or Broadcom product.
+An independent Windows and Linux MCP plugin for VMware Workstation with **150 tools** for multi-VM labs, declarative VM templates, typed hardware, VMDK lifecycle, ISO media, background jobs, readiness diagnostics, VM management, OVF/OVA appliances, LAN segments, verified guest execution, file transfers, direct headless VNC/RFB console control, and optional serial consoles. It is not an official VMware or Broadcom product.
 
 The plugin package lives in `vmware-workstation/`. Start with the [configuration guide](vmware-workstation/README.md), [native console setup](vmware-workstation/console.md), or [complete tool reference](vmware-workstation/reference.md).
 
@@ -33,6 +33,7 @@ Requires Windows or Linux, Node.js 22.12 or newer on PATH, and a separately inst
 | Goal | Where to start |
 | --- | --- |
 | Deploy several VMs on a private LAN with startup dependencies | [Plan a lab, deploy explicitly, inspect status and tear down tracked resources](vmware-workstation/labs.md) |
+| Inspect encryption/vTPM declarations and headless backend availability | [Read-only security inspection and feasibility limits](vmware-workstation/security.md) |
 | Create a Linux, Windows Server or nested ESXi VM from a reusable recipe | [List templates, validate a read-only plan, then deploy explicitly](vmware-workstation/templates.md) |
 | Configure multiple disks/NICs, CPU topology or nested virtualization | [Inspect capabilities and apply typed hardware changes](vmware-workstation/hardware.md) |
 | Attach installer media or inspect boot support | [List optical drives and mount/eject an ISO](vmware-workstation/iso.md) |
@@ -41,6 +42,8 @@ Requires Windows or Linux, Node.js 22.12 or newer on PATH, and a separately inst
 | Capture guest stdout/stderr and verify its exit code | [Run a program or script with guest_exec](vmware-workstation/guest-exec.md) |
 
 ## Develop
+
+Version 0.15.0 adds two [read-only security inspection tools](vmware-workstation/security.md) for the feasibility slice of [issue #27](https://github.com/mdaneri/vmware-workstation-mcp/issues/27). Native Windows 26.0.1 help probes and Broadcom engineering guidance identified no verified headless encryption/vTPM provisioning backend. Encryption enablement and TPM provisioning/persistence remain blocked; this release does not complete #27. All 148 previous tool definitions remain unchanged.
 
 Version 0.14.0 adds six [multi-VM lab tools](vmware-workstation/labs.md): versioned recipes, dependency/readiness ordering, private ownership manifests, explicit safe recovery and tracked-resource teardown. Two/three-VM private-LAN and nested ESXi examples reuse templates/hardware/disk/LAN infrastructure. All mutations default to dry-run; actual deployment/start/stop/destroy require confirmation. Uncertain creation and changed ownership fail explicitly; unexpected files remain. All 142 previous tool definitions are unchanged. Native VMware lab deployment, guest connectivity and lifecycle validation remain unverified; the opt-in live harness is not part of default tests. See [issue #12](https://github.com/mdaneri/vmware-workstation-mcp/issues/12) and [tracker #6](https://github.com/mdaneri/vmware-workstation-mcp/issues/6).
 
@@ -77,11 +80,11 @@ npm run package
 
 `src/workstation.mjs` wraps vmrun with separate executable arguments and no shell. `src/server.mjs` registers the MCP tools using the official MCP SDK. `src/console.mjs` manages direct RFB sessions; `rfb2` has no runtime dependencies, and `pngjs` encodes only VM framebuffer pixels. `npm run build` bundles runtime dependencies into the plugin so installation requires Node but no npm download. Rebuild after changing source.
 
-The plugin implements all **47 reference vmrun commands and 28 reference REST operations**, plus six multi-VM lab tools, four declarative template tools, blank VM creation, backed-up VMX editing, six direct VNC/RFB console tools, five LAN segment tools, ten OVF/job tools, reusable job submission, nine disk tools, six optional serial tools, five readiness/diagnostics tools, verified guest execution, five ISO/boot tools, three typed hardware tools, convenience tools, and coverage discovery: **148 tools**. All 142 previous tool definitions are checked against saved baselines; earlier `create_vm` additions remain optional. Setup, credentials, and runnable examples are in the [practical guide](vmware-workstation/README.md), the [console guide](vmware-workstation/console.md), and the [operation reference](vmware-workstation/reference.md).
+The plugin implements all **47 reference vmrun commands and 28 reference REST operations**, plus two read-only security inspection tools, six multi-VM lab tools, four declarative template tools, blank VM creation, backed-up VMX editing, six direct VNC/RFB console tools, five LAN segment tools, ten OVF/job tools, reusable job submission, nine disk tools, six optional serial tools, five readiness/diagnostics tools, verified guest execution, five ISO/boot tools, three typed hardware tools, convenience tools, and coverage discovery: **150 tools**. All 148 previous tool definitions are checked against saved baselines; earlier `create_vm` additions remain optional. Setup, credentials, and runnable examples are in the [practical guide](vmware-workstation/README.md), the [console guide](vmware-workstation/console.md), and the [operation reference](vmware-workstation/reference.md).
 
 Tests use a fake process runner, temporary VMX files, and a mock HTTP service. They do not change real VMs. The smoke script starts the actual bundled MCP process, discovers tools, and reads host status/inventory. If a running VM exists it reads selected hardware, snapshots, Tools state, and guest IP. It also reads host networks and checks the installed command coverage. It never powers VMs on/off or changes snapshots. `npm run smoke:rest` reads VM and network inventory from the real REST service after credentials are configured.
 
-Packaging writes `dist/vmware-workstation-0.14.0.zip` and verifies its required entries and contents on both hosts. It includes one plugin and excludes source development dependencies, test VMs/credentials, and the repo marketplace.
+Packaging writes `dist/vmware-workstation-0.15.0.zip` and verifies its required entries and contents on both hosts. It includes one plugin and excludes source development dependencies, test VMs/credentials, and the repo marketplace.
 
 ## Validation
 
@@ -91,7 +94,7 @@ On 2026-11-02, the [live VMDK workflow](vmware-workstation/disks.md#validation) 
 
 On 2026-11-02, Workstation 26.0.1 build 25688693 was verified to expose native per-VM RFB 3.8 with VNC password authentication and a 127.0.0.1 listener. The opt-in live console test connected to new BIOS and UEFI VMs simultaneously, captured their firmware displays, and verified RFB keys changed both displays while a non-VMware app stayed foreground in all 142 observed samples. Click/type/scroll/status calls also completed. Test VMs were stopped, VNC disabled, and temporary credentials deleted. No host screenshot, mouse/keyboard injection, or window activation was used. An actual PXE server and OS installation ISO were not part of that run.
 
-The automated suite adds RFB 3.3/3.7/3.8 authentication, framebuffer pixels, multi-VM isolation, key modifiers, resize handling, listener/credential rejection, and file permission preparation checks to the original VM/REST tests. `npm run validate` checks the 148 tool schemas, the original 87-tool, pre-OVF 98-tool and pre-disk 108-tool and pre-serial 117-tool and pre-readiness 123-tool and pre-guest-exec 128-tool and pre-ISO 129-tool and pre-hardware 134-tool and pre-jobs 137-tool and pre-template 138-tool and pre-lab 142-tool baselines, and platform credential-file protection. Graphical console input/capture uses RFB; the read-only focus observer exists only in the opt-in live test.
+The automated suite adds RFB 3.3/3.7/3.8 authentication, framebuffer pixels, multi-VM isolation, key modifiers, resize handling, listener/credential rejection, and file permission preparation checks to the original VM/REST tests. `npm run validate` checks the 150 tool schemas, the original 87-tool, pre-OVF 98-tool and pre-disk 108-tool and pre-serial 117-tool and pre-readiness 123-tool and pre-guest-exec 128-tool and pre-ISO 129-tool and pre-hardware 134-tool and pre-jobs 137-tool and pre-template 138-tool and pre-lab 142-tool and pre-security 148-tool baselines, and platform credential-file protection. Graphical console input/capture uses RFB; the read-only focus observer exists only in the opt-in live test.
 
 The automated suite covers all 47 CLI argument contracts, all 28 REST request contracts, direct RFB sessions, VM configuration, Linux credential permissions and native socket ownership. CI runs tests and package validation on Windows and Ubuntu without requiring VMware or accessing a real VM. Linux integration tests use the bundled MCP process, actual Linux subprocesses and authenticated RFB test doubles; a native Linux VMware hypervisor has not been live-validated.
 

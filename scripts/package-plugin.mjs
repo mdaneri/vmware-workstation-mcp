@@ -15,6 +15,7 @@ async function collect(directory) {
   }
 }
 await collect(root);
+assert.ok(files['security.md'], 'Package must include security inspection evidence and provisioning limitations.');
 assert.ok(files['readiness.md'], 'Package must include the readiness and diagnostics guide.');
 assert.ok(files['guest-exec.md'], 'Package must include the verified guest execution guide.');
 assert.ok(files['jobs.md'], 'Package must include durable job operations and recovery guidance.');

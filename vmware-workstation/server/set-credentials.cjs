@@ -51,7 +51,7 @@ function credentialsPath(env = process.env, platform = process.platform, home = 
 async function findVMwareExecutable(name, { env = process.env, platform = process.platform, beside } = {}) {
   if (!["win32", "linux"].includes(platform)) throw new Error("VMware Workstation hosts supported by this plugin are Windows and Linux.");
   const filename = `${name}${platform === "win32" ? ".exe" : ""}`;
-  const setting = { vmrun: "VMRUN_PATH", "vmware-vdiskmanager": "VMWARE_VDISKMANAGER_PATH", "vmware-vmx": "VMWARE_VMX_PATH", ovftool: "VMWARE_OVFTOOL_PATH" }[name];
+  const setting = { vmrun: "VMRUN_PATH", vmcli: "VMWARE_VMCLI_PATH", "vmware-vdiskmanager": "VMWARE_VDISKMANAGER_PATH", "vmware-vmx": "VMWARE_VMX_PATH", ovftool: "VMWARE_OVFTOOL_PATH" }[name];
   if (!setting) throw new Error("Unsupported VMware executable.");
   const validFile = async (candidate) => {
     if (!import_node_path.default.isAbsolute(candidate) || !(await import_promises.default.stat(candidate)).isFile()) return false;

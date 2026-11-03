@@ -4,7 +4,7 @@
 
 # VMware Workstation
 
-Local Windows and Linux MCP plugin, version 0.14.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 148 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), five [LAN segment tools](#lan-segments), ten [OVF/OVA and background job tools](ovf.md), reusable [job submission](jobs.md), nine [VMDK lifecycle tools](disks.md), six [optional serial tools](serial.md), five [readiness and diagnostics tools](readiness.md), [verified guest execution](guest-exec.md), five [ISO media/boot capability tools](iso.md), three [typed hardware tools](hardware.md), four [declarative VM template tools](templates.md), and six [multi-VM lab tools](#multi-vm-labs). All 142 previous tool definitions are unchanged. Portable templates provide validation, read-only plans, sanitized export and explicit no-overwrite deployment with optional registration/power-on. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
+Local Windows and Linux MCP plugin, version 0.15.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 150 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), five [LAN segment tools](#lan-segments), ten [OVF/OVA and background job tools](ovf.md), reusable [job submission](jobs.md), nine [VMDK lifecycle tools](disks.md), six [optional serial tools](serial.md), five [readiness and diagnostics tools](readiness.md), [verified guest execution](guest-exec.md), five [ISO media/boot capability tools](iso.md), three [typed hardware tools](hardware.md), four [declarative VM template tools](templates.md), six [multi-VM lab tools](#multi-vm-labs), and two [read-only security inspection tools](security.md). All 148 previous tool definitions are unchanged. Portable templates provide validation, read-only plans, sanitized export and explicit no-overwrite deployment with optional registration/power-on. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
 
 Requires VMware Workstation with vmrun, Node.js 22.12+, PowerShell 7 for setup helpers, and a host with local stdio MCP support. REST tools additionally need a running, authenticated vmrest service. Guest OS commands need VMware Tools running and a guest OS account; console tools need neither and work before the OS boots. The plugin runs as your local user and opens no HTTP listener. Native VNC listeners are configured on the VM itself and restricted to localhost.
 
@@ -17,6 +17,7 @@ See [the full command and endpoint reference](reference.md) for the exact operat
 | Inventory and configuration | Registered/running VMs, selected local hardware details, REST VM settings, restrictions, registration, arbitrary supported config parameters |
 | Multi-VM labs | [Coordinate templates, private LANs, dependency/readiness ordering, recovery and tracked-resource teardown](labs.md) |
 | VM templates | [List portable Linux/Windows Server/nested ESXi hardware recipes, validate read-only plans, export sanitized hardware and deploy explicitly](templates.md); OS installation is separate |
+| Security inspection | [Inspect native backend discovery and selected VM declarations](security.md); encryption/vTPM provisioning remains unsupported |
 | Typed hardware | [Inspect capabilities and configure controllers, disks, NICs, CPU topology, nested virtualization, firmware and Secure Boot](hardware.md) |
 | Power | Start, soft/hard stop/reset/suspend, pause/unpause, REST power state and operations |
 | Snapshots | List flat/tree, create, revert, delete one or delete with children |
@@ -32,7 +33,11 @@ See [the full command and endpoint reference](reference.md) for the exact operat
 | VM lifecycle | Full/linked clones, snapshot-based clones, deletion, hardware upgrade, Tools installation/status, Photon VM download |
 | Networking | Host networks, network creation, NAT port forwarding, DHCP MAC/IP bindings, VM NIC create/update/delete, guest address and NIC/IP-stack information |
 
-This covers the reference vmrun and Workstation API interfaces. Blank VM creation and [VMDK lifecycle tools](disks.md) use VMware Virtual Disk Manager; optional [OVF Tool support](ovf.md) adds local appliance workflows. Separate management interfaces such as ESXi/vCenter and vmcli are outside this scope.
+This covers the reference vmrun and Workstation API interfaces. Blank VM creation and [VMDK lifecycle tools](disks.md) use VMware Virtual Disk Manager; optional [OVF Tool support](ovf.md) adds local appliance workflows. Separate management interfaces such as ESXi/vCenter and vmcli mutations are outside this scope; read-only security capability discovery can probe vmcli help/version.
+
+## Security inspection
+
+Use `vm_security_capabilities` to distinguish installed tool discovery from a verified encryption/vTPM backend, and `vm_security_status` with an allowlisted `vmx` path to read selected declarations. Encryption state/mode and actual TPM presence remain unknown without independent native verification. No security mutations or encryption modes are enabled. Read [native feasibility evidence, examples, credentials and recovery limits](security.md); issue #27 remains incomplete.
 
 ## Multi-VM labs
 

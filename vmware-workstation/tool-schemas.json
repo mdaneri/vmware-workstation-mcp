@@ -1,6 +1,53 @@
 {
   "tools": [
     {
+      "name": "vm_security_capabilities",
+      "description": "Read-only native worker/version and vmcli help discovery. Separates installed tools from a verified encryption/vTPM backend. No security mutations or encryption modes are supported; no VM or credentials are opened.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vm_security_status",
+      "description": "Read selected allowlisted VM security declarations without returning encryption keys, TPM contents or arbitrary VMX values. Encryption state/mode and actual vTPM presence remain unknown without independent native verification. No unlock, power or configuration changes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
       "name": "lab_validate",
       "description": "Read-only versioned multi-VM lab validation and plan. Reuses template/hardware preflight, checks dependency graph, network/media mappings and aggregate disk space. Plans private LANs without creating them. No OS installation or readiness is implied.",
       "inputSchema": {

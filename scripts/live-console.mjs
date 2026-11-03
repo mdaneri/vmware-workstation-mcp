@@ -53,7 +53,7 @@ try {
   for (let i = 0; !focus.length && i < 100; i++) await delay(50);
   assert.ok(focus.length && focus[0].processName && !/^vmware/i.test(focus[0].processName), 'Bring a non-VMware app to the foreground before running this test.');
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [path.resolve('vmware-workstation/server/server.cjs')], env: testEnv, stderr: 'pipe' })); connected = true;
-  const tools = (await client.listTools()).tools; assert.equal(tools.length, 148);
+  const tools = (await client.listTools()).tools; assert.equal(tools.length, 150);
   for (const firmware of ['bios', 'efi']) {
     const alias = firmware === 'bios' ? 'bios_console' : 'uefi_console';
     const created = (await call('create_vm', { directory: path.join(root, alias), name: `MCP VNC ${firmware.toUpperCase()} Integration`, firmware, memory_mb: 256, cpus: 1, disk_gb: 1, network: 'none' })).data;
