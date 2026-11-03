@@ -222,7 +222,7 @@ export class DiskManager {
     return { disk, directory };
   }
   async run(status, args, seconds, partial) {
-    try { await this.backend.execute(status.executable, args, { shell: false, windowsHide: true, timeout: seconds * 1000, maxBuffer: 1024 * 1024, encoding: 'utf8' }); }
+    try { await this.backend.nativeRun(status.executable, args, { shell: false, windowsHide: true, timeout: seconds * 1000, maxBuffer: 1024 * 1024, encoding: 'utf8' }); }
     catch (e) { fail('DISK_OPERATION_FAILED', `Disk manager failed (${e.killed ? 'timeout' : e.code || 'execution error'}). Inspect state before retrying.`, { partial_output: partial, action: 'No automatic rollback or deletion. Inspect retained files; remove only the new output directory after confirming its contents are disposable. In-place operations may have partially changed the original.' }); }
   }
   async perform(operation, input) {

@@ -1,5 +1,11 @@
 # Contributing
 
+Reusable background jobs use [the job guide](vmware-workstation/jobs.md).
+Default tests cover native subprocess concurrency/cancellation, journal privacy,
+restart recovery, shared locks and bundled MCP workflows without VMware.
+`npm run test:jobs:live` requires separate disposable-workload authorization and
+`VMWARE_JOBS_LIVE=1`; it creates only new powered-off targets and retains artifacts.
+
 Typed hardware changes use [the hardware guide](vmware-workstation/hardware.md).
 Default tests cover mocked Windows/Linux capability evidence, nested ESXi
 layouts and bundled MCP contracts. `npm run test:hardware:live` requires
@@ -14,7 +20,7 @@ npm test
 npm run package
 ```
 
-The package command builds all bundled entrypoints, refreshes the operation reference and dependency notices, validates portable manifests and all 134 MCP tool schemas, checks compatibility with all 129 previous tools, verifies platform credential-file protection, and creates the plugin ZIP. CI performs these checks on Windows and Ubuntu. Run `npm run build` before testing changes to bundled helpers or the Linux MCP integration test.
+The package command builds all bundled entrypoints, refreshes the operation reference and dependency notices, validates portable manifests and all 138 MCP tool schemas, checks compatibility with all 137 previous tool inputs and annotations, verifies platform credential-file protection, and creates the plugin ZIP. CI performs these checks on Windows and Ubuntu. Run `npm run build` before testing changes to bundled helpers or the Linux MCP integration test.
 
 Commit source changes together with updated generated files under `vmware-workstation/`. The repository includes built entrypoints so Git-backed plugin installation does not require an npm install. CI checks that a fresh build reproduces the committed generated files.
 

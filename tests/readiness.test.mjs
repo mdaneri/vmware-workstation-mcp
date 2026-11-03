@@ -91,10 +91,11 @@ test('TCP acceptance and HTTP expected status do not retain bodies or follow red
 
 test('deadline/cancellation includes time waiting in Workstation command queue', async t => {
   const f = await fixture(t); let release;
-  f.backend.tail = new Promise(resolve => { release = resolve; });
+  const queued = new Promise(resolve => { release = resolve; });
+  f.backend.queues.set('host:list', queued);
   const start = performance.now(); const result = await f.manager.wait('boot', f.args);
   assert.ok(performance.now() - start < 2000); assert.equal(result.timed_out, true); assert.equal(f.calls.length, 0);
-  release(); await f.backend.tail; assert.equal(f.calls.length, 0, 'Expired observation must never execute later');
+  release(); await queued; await new Promise(resolve => setImmediate(resolve)); assert.equal(f.calls.length, 0, 'Expired observation must never execute later');
 });
 
 test('selected-VM bundles bound and normalize logs, omit secret VMX/snapshots/output, never overwrite', async t => {

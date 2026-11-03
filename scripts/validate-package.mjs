@@ -30,8 +30,11 @@ try {
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [path.join(pluginRoot, 'server/server.cjs')], stderr: 'pipe' }));
   assert.equal(client.getServerVersion().version, manifest.version, 'Bundled server version must match plugin');
   const { tools } = await client.listTools();
-  assert.equal(tools.length, 137);
-  assert.equal(new Set(tools.map(t => t.name)).size, 137);
+  assert.equal(tools.length, 138);
+  assert.equal(new Set(tools.map(t => t.name)).size, 138);
+  const preJobs = JSON.parse(await fs.readFile('tests/fixtures/pre-jobs-tool-schemas.json', 'utf8'));
+  assert.equal(preJobs.tools.length, 137);
+  for (const prior of preJobs.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior);
   const preHardware = JSON.parse(await fs.readFile('tests/fixtures/pre-hardware-tool-schemas.json', 'utf8'));
   assert.equal(preHardware.tools.length, 134);
   for (const prior of preHardware.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior);
@@ -61,5 +64,5 @@ try {
     assert.equal(typeof tool.annotations.readOnlyHint, 'boolean');
   }
   await writeGenerated('vmware-workstation/tool-schemas.json', JSON.stringify({ tools }, null, 2) + '\n');
-  console.log('Both portable manifests and all 137 MCP schemas validated; 133 existing definitions unchanged and create_vm extended only with optional fields.');
+  console.log('Both portable manifests and all 138 MCP schemas validated; existing inputs/annotations preserved; three job descriptions updated for durable history and process trees.');
 } finally { await client.close(); }

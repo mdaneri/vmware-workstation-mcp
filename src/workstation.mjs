@@ -5,6 +5,7 @@ import path from 'node:path';
 import { isIP } from 'node:net';
 import { inventoryPath, findVMwareExecutable } from './host-platform.mjs';
 import { Resources } from './resources.mjs';
+import { AsyncLocalStorage } from 'node:async_hooks';
 
 const execute = promisify(execFile);
 
@@ -34,7 +35,8 @@ export class Workstation {
   constructor({ env = process.env, run = execute } = {}) {
     this.env = env;
     this.execute = run;
-    this.tail = Promise.resolve();
+    this.queues = new Map();
+    this.execution = new AsyncLocalStorage();
     this.inventoryPath = inventoryPath(env);
     this.resources = new Resources();
   }
@@ -44,8 +46,13 @@ export class Workstation {
   }
 
   async run(args, { mutation = false, authentication = [], timeout = 120000, deadline, signal } = {}) {
+    const context = this.execution.getStore();
+    signal ||= context?.signal;
+    signal?.throwIfAborted();
     if (mutation && args[1] && path.isAbsolute(args[1])) this.resources.assert([args[1]]);
-    const job = this.tail.then(async () => {
+    const key = args[1] && path.isAbsolute(args[1]) ? this.resources.key(args[1]) : `host:${args[0]}`;
+    const previous = this.queues.get(key) || Promise.resolve();
+    const job = previous.then(async () => {
       if (mutation && args[1] && path.isAbsolute(args[1])) this.resources.assert([args[1]]);
       const binary = await this.executable();
       signal?.throwIfAborted();
@@ -54,9 +61,10 @@ export class Workstation {
         if (timeout <= 0) throw Object.assign(new Error('Observation deadline expired while waiting for vmrun.'), { code: 'OBSERVATION_DEADLINE' });
       }
       try {
-        const result = await this.execute(binary, ['-T', 'ws', ...authentication, ...args], {
+        const invoke = () => this.nativeRun(binary, ['-T', 'ws', ...authentication, ...args], {
           windowsHide: true, shell: false, timeout, signal, maxBuffer: 1024 * 1024, encoding: 'utf8',
         });
+        const result = mutation && args[1] && path.isAbsolute(args[1]) ? await this.resources.use([args[1]], invoke) : await invoke();
         return result.stdout.trim();
       } catch (error) {
         const details = [error.stderr, error.stdout].filter(Boolean).join('\n').trim().slice(0, 4000);
@@ -64,8 +72,10 @@ export class Workstation {
         throw Object.assign(new Error(`vmrun ${args[0] || 'help'} failed (${error.killed ? 'timeout' : error.code || 'unknown error'}).${uncertain}${details ? ` ${details}` : ''}`), { code: error.killed ? 'VMRUN_TIMEOUT' : 'VMRUN_FAILED' });
       }
     });
-    this.tail = job.catch(() => {});
-    if (!signal) return job;
+    const tail = job.catch(() => {});
+    this.queues.set(key, tail);
+    void tail.then(() => { if (this.queues.get(key) === tail) this.queues.delete(key); });
+    if (!signal || context) return job;
     // Queued observations stop waiting when their own deadline/cancellation
     // fires; the queued job checks the same signal before executing.
     return new Promise((resolve, reject) => {
@@ -74,6 +84,15 @@ export class Workstation {
       else signal.addEventListener('abort', abort, { once: true });
       job.then(resolve, reject).finally(() => signal.removeEventListener('abort', abort));
     });
+  }
+
+  async nativeRun(file, args, options = {}) {
+    const context = this.execution.getStore();
+    if (!context) return this.execute(file, args, options);
+    context.signal.throwIfAborted();
+    const result = await context.run(file, args, { ...options, env: options.env || this.env, logOutput: false, progress: null });
+    if (result.code !== 0) throw Object.assign(new Error('Native job command failed.'), { code: result.code, stderr: result.output });
+    return { stdout: result.output, stderr: '' };
   }
 
   async help() {

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import path from 'node:path';
 
 const s = (name, extra = {}) => ({ name, type: 'string', ...extra });
 const e = (name, values, extra = {}) => ({ name, type: 'enum', values, ...extra });
@@ -83,11 +84,16 @@ export function commandSchema(command) {
 export async function executeCommand(backend, credentials, command, input) {
   const a = commandSchema(command).parse(input);
   const argv = [command.command];
+  const resources = [];
   if (command.vmx) argv.push(await backend.vmx(a.vmx));
+  if (command.vmx) resources.push(command.command === 'clone' ? path.dirname(argv[1]) : argv[1]);
   for (const p of command.parameters) {
     let value = a[p.name];
     if (value === undefined || (p.type === 'boolean' && !value)) continue;
-    if (p.hostPath) value = await backend.hostPath(value, p.hostPath, a.overwrite);
+    if (p.hostPath) {
+      value = await backend.hostPath(value, p.hostPath, a.overwrite);
+      if (!command.readOnly) resources.push(p.hostPath === 'new-vmx' ? path.dirname(value) : value);
+    }
     if (p.flag) argv.push(p.flag);
     else if (p.prefix) argv.push(p.prefix + value);
     else if (p.type === 'strings') argv.push(...value);
@@ -99,6 +105,7 @@ export async function executeCommand(backend, credentials, command, input) {
     const auth = await credentials.guest(a.guest_profile);
     authentication.push('-gu', auth.username, '-gp', auth.password);
   }
-  const output = await backend.run(argv, { mutation: !command.readOnly, authentication, timeout: a.timeout_seconds * 1000 });
+  const run = () => backend.run(argv, { mutation: !command.readOnly, authentication, timeout: a.timeout_seconds * 1000 });
+  const output = command.readOnly || !backend.resources ? await run() : await backend.resources.use(resources, run);
   return { command: command.command, commandSucceeded: true, output: credentials.redact(output) };
 }

@@ -6,8 +6,9 @@ if (-not $IsWindows) {
     if ($LASTEXITCODE) { throw 'Could not restrict file access to the current user.' }
     return
 }
-if (-not (Test-Path -LiteralPath $LiteralPath -PathType Leaf)) { throw 'Expected an existing regular file.' }
-$fileInfo = [IO.FileInfo]::new([IO.Path]::GetFullPath($LiteralPath))
+if (-not (Test-Path -LiteralPath $LiteralPath)) { throw 'Expected an existing file or directory.' }
+$fileInfo = Get-Item -LiteralPath $LiteralPath -Force
+if ($fileInfo.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Links cannot hold protected local state.' }
 $acl = [IO.FileSystemAclExtensions]::GetAccessControl($fileInfo, [Security.AccessControl.AccessControlSections]::Access)
 $acl.SetAccessRuleProtection($true, $false)
 $identity = [Security.Principal.WindowsIdentity]::GetCurrent().User
