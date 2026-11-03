@@ -1,6 +1,6 @@
 {
   "name": "vmware-workstation-plugin-dev",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "private": true,
   "license": "MIT",
   "repository": {
@@ -21,7 +21,8 @@
     "test:disk:live": "node scripts/live-disks.mjs",
     "test:serial:live": "node scripts/live-serial.mjs",
     "test:readiness:live": "node scripts/live-readiness.mjs",
-    "test:guest-exec:live": "node scripts/live-guest-exec.mjs"
+    "test:guest-exec:live": "node scripts/live-guest-exec.mjs",
+    "test:iso:live": "node scripts/live-iso.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.2",

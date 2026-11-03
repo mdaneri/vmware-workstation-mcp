@@ -70,6 +70,18 @@ Optional VMware OVF Tool is discovered automatically or configured with an absol
 
 Only flat local appliances are supported. VMX exports refuse running/locked/suspended/encrypted/vTPM/snapshot sources and external backings. OVF/VMX targets require new parent directories; only a single OVA file can be explicitly overwritten. Import registration and headless power-on default to false. Jobs are bounded and session-scoped; cancellation/timeouts/interruption may leave partial files and never imply rollback. Full cross-tool orchestration remains a later roadmap phase.
 
+## ISO media and boot capabilities (5)
+
+Read the [ISO guide](iso.md) for existing-VM mount/eject workflows, slot selection and capability failures. All media edits require confirmation, full power-off and exclusive configuration access. Boot writes and live hot-swap are unsupported. Connection fields are configuration, not verified runtime state.
+
+| Tool | Arguments |
+| --- | --- |
+| `iso_list` | `vmx` |
+| `iso_mount` | `vmx`, `iso_path`, `device`, `start_connected`, `confirm` |
+| `iso_eject` | `vmx`, `device`, `confirm` |
+| `vm_boot_status` | `vmx` |
+| `vm_boot_configure` | `vmx`, `firmware_once`, `boot_order`, `confirm` |
+
 ## New VM creation and local configuration
 
 `create_vm` creates a blank VMX and sparse VMDK in a new directory. Required: `directory`, `name`. Options: `guest_os`, `memory_mb`, `cpus`, `disk_gb`, `hardware_version`, `firmware`, `network`, `vmnet`, `iso_path`, `timeout_seconds`.
@@ -196,4 +208,4 @@ All console tools accept `vm_id`: an absolute VMX path, a unique inventory name,
 
 ## Convenience tools (9) and capabilities
 
-`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **129 MCP tools**.
+`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **134 MCP tools**.

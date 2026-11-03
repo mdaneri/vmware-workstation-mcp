@@ -1,6 +1,200 @@
 {
   "tools": [
     {
+      "name": "iso_list",
+      "description": "Inspect optical devices, ISO backings and configured connection/start-connected state. Does not claim live connection state or mount anything.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "iso_mount",
+      "description": "Attach an existing allowlisted local ISO to an optical or unused IDE/SATA slot, with VMX backup. Requires confirm=true and fully powered-off, unlocked VM. Refuses ambiguous devices and occupied disk slots. No live hot-swap or power-on.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "iso_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "device": {
+            "description": "Exact optical or unused IDE/SATA slot. Omit to select the sole optical drive or allocate an unused slot.",
+            "type": "string",
+            "pattern": "^(?:ide[01]:[01]|sata[0-3]:(?:[0-9]|[12][0-9])|scsi[0-3]:(?:[0-6]|[89]|1[0-5]))$"
+          },
+          "start_connected": {
+            "default": true,
+            "type": "boolean"
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after authorization for this VM/media change, with exclusive configuration access."
+          }
+        },
+        "required": [
+          "vmx",
+          "iso_path",
+          "confirm"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "iso_eject",
+      "description": "Disable the selected optical device and remove its backing path, with VMX backup. Requires confirm=true and full power-off. Preserves ISO files, controller and unrelated devices. A later mount re-enables the slot.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "device": {
+            "type": "string",
+            "pattern": "^(?:ide[01]:[01]|sata[0-3]:(?:[0-9]|[12][0-9])|scsi[0-3]:(?:[0-6]|[89]|1[0-5]))$"
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after authorization for this VM/media change, with exclusive configuration access."
+          }
+        },
+        "required": [
+          "vmx",
+          "confirm"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vm_boot_status",
+      "description": "Inspect firmware/boot VMX values and installed vmrun version. Boot-order and next-boot firmware writes report unsupported until installed-version compatibility is proven; no configuration or power changes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "vmx"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "vm_boot_configure",
+      "description": "Request boot-order or next-boot firmware configuration. Currently fails explicitly with UNSUPPORTED_CAPABILITY and writes nothing: no installed-version-verified headless backend is available.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "firmware_once": {
+            "type": "boolean"
+          },
+          "boot_order": {
+            "minItems": 1,
+            "maxItems": 4,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "cdrom",
+                "hdd",
+                "ethernet",
+                "floppy"
+              ]
+            }
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after authorization for this VM/media change, with exclusive configuration access."
+          }
+        },
+        "required": [
+          "vmx",
+          "confirm"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
       "name": "guest_exec",
       "description": "Execute an explicitly authorized guest program with literal arguments or an explicit interpreter/script using a required local credential profile. Captures bounded redacted stdout/stderr and verifies exit codes through a unique completion record. Requires Tools and Python 3 on Linux or Windows PowerShell 5.1. Transport success alone never means guest success. Timeout/cancellation may leave a running guest process; never retry automatically.",
       "inputSchema": {

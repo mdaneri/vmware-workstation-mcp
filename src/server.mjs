@@ -16,6 +16,7 @@ import { DiskManager, diskSchemas } from './disks.mjs';
 import { SerialManager, serialSchemas } from './serial.mjs';
 import { Readiness, readinessSchemas } from './readiness.mjs';
 import { GuestExec, guestExecSchema } from './guest-exec.mjs';
+import { IsoManager, isoSchemas } from './iso.mjs';
 
 const backend = new Workstation();
 const credentials = new Credentials();
@@ -29,9 +30,16 @@ const disks = new DiskManager({ backend, vmFiles });
 const serial = new SerialManager({ backend, vmFiles, credentials, rest });
 const readiness = new Readiness({ backend, credentials, consoles, protectFile: localFileProtector(backend) });
 const guestExec = new GuestExec({ backend, credentials, protectFile: localFileProtector(backend) });
-const server = new McpServer({ name: 'vmware-workstation', version: '0.9.0' });
+const media = new IsoManager({ backend, vmFiles });
+const server = new McpServer({ name: 'vmware-workstation', version: '0.10.0' });
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
+
+tool('iso_list', 'Inspect optical devices, ISO backings and configured connection/start-connected state. Does not claim live connection state or mount anything.', isoSchemas.iso_list, true, a => media.list(a));
+tool('iso_mount', 'Attach an existing allowlisted local ISO to an optical or unused IDE/SATA slot, with VMX backup. Requires confirm=true and fully powered-off, unlocked VM. Refuses ambiguous devices and occupied disk slots. No live hot-swap or power-on.', isoSchemas.iso_mount, false, a => media.edit(a));
+tool('iso_eject', 'Disable the selected optical device and remove its backing path, with VMX backup. Requires confirm=true and full power-off. Preserves ISO files, controller and unrelated devices. A later mount re-enables the slot.', isoSchemas.iso_eject, false, a => media.edit(a, true));
+tool('vm_boot_status', 'Inspect firmware/boot VMX values and installed vmrun version. Boot-order and next-boot firmware writes report unsupported until installed-version compatibility is proven; no configuration or power changes.', isoSchemas.vm_boot_status, true, a => media.bootStatus(a));
+tool('vm_boot_configure', 'Request boot-order or next-boot firmware configuration. Currently fails explicitly with UNSUPPORTED_CAPABILITY and writes nothing: no installed-version-verified headless backend is available.', isoSchemas.vm_boot_configure, false, a => media.configureBoot(a));
 tool('guest_exec', 'Execute an explicitly authorized guest program with literal arguments or an explicit interpreter/script using a required local credential profile. Captures bounded redacted stdout/stderr and verifies exit codes through a unique completion record. Requires Tools and Python 3 on Linux or Windows PowerShell 5.1. Transport success alone never means guest success. Timeout/cancellation may leave a running guest process; never retry automatically.', guestExecSchema, false, (a, extra) => guestExec.execute(a, extra), true, true, false);
 for (const kind of ['boot', 'ip', 'service']) tool(`vm_wait_for_${kind}`, {
   boot: 'Wait for VMware Tools running in the selected VM, indicating OS agent readiness only. Power-on, login and application readiness are separate. Bounded total timeout, polling and MCP cancellation; never starts a VM.',
