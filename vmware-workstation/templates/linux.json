@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0", "id": "linux", "name": "Linux guest", "guest_os": "otherlinux-64", "hardware_version": 21,
+  "cpu": { "cpus": 2, "cores_per_socket": 1, "nested_virtualization": false }, "memory_mb": 2048,
+  "firmware": "efi", "security": { "secure_boot": false, "vtpm": false },
+  "controllers": [{ "type": "lsilogic", "index": 0 }],
+  "disks": [{ "controller": "scsi", "controller_index": 0, "unit": 0, "capacity_mb": 20480 }],
+  "nics": [{ "index": 0, "model": "e1000e", "network": "primary", "start_connected": true }],
+  "boot": { "mode": "default" }
+}

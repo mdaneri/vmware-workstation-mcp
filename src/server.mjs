@@ -21,6 +21,8 @@ import { HardwareManager } from './hardware.mjs';
 import { hardwareSchemas } from './hardware-schemas.mjs';
 import { JobStore, jobDirectory } from './job-store.mjs';
 import { JobOperations, jobStartSchema } from './job-operations.mjs';
+import { TemplateManager } from './templates.mjs';
+import { templateSchemas } from './template-schemas.mjs';
 
 const backend = new Workstation();
 const credentials = new Credentials();
@@ -38,9 +40,15 @@ const guestExec = new GuestExec({ backend, credentials, protectFile: localFilePr
 const media = new IsoManager({ backend, vmFiles });
 const hardware = new HardwareManager({ backend, vmFiles, disks, lan: lanSegments });
 const jobOperations = new JobOperations({ backend, jobs, disks, ovf });
-const server = new McpServer({ name: 'vmware-workstation', version: '0.12.1' });
+const templates = new TemplateManager({ backend, hardware, rest });
+const server = new McpServer({ name: 'vmware-workstation', version: '0.13.0' });
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
+
+tool('template_list', 'List bundled portable versioned JSON templates for Linux, Windows Server and nested ESXi. Returns complete editable recipes without reading host files or credentials.', templateSchemas.template_list, true, () => templates.list());
+tool('template_validate', 'Read-only template validation and deployment plan: checks schema, supported installed hardware/disk capabilities, explicit local network/ISO bindings, new destination, allowlists and conservative free space. Shows VMX, disk paths and resource requirements. Reserves nothing.', templateSchemas.template_validate, true, a => templates.validate(a));
+tool('template_export', 'Read an offline VM as a portable blank hardware recipe. Caller supplies new identity. Omits disk contents, UUIDs/MACs, host paths, network identity, secrets and arbitrary VMX fields; requires explicit local rebinding. Does not save a file or clone a guest.', templateSchemas.template_export, true, a => templates.export(a));
+tool('template_deploy', 'Plan by default (dry_run=true). Real deployment requires dry_run=false and confirm=true after authorization. Creates blank sparse disks and VMX in a NEW directory with repeated preflight; never overwrites. Optional register/power_on default false. Partial files and failed post-actions are retained; inspect before retrying. No OS installation, vTPM/encryption or forced boot order.', templateSchemas.template_deploy, false, (a, extra) => templates.deploy(a, extra), false);
 
 tool('vm_hardware_capabilities', 'Inspect installed native Workstation product version and conservative typed hardware limits. No power or configuration changes. vTPM writes require an unavailable encryption backend; nested CPU and guest driver support remain unverified.', hardwareSchemas.vm_hardware_capabilities, true, () => hardware.capabilities());
 tool('vm_hardware_get', 'Read typed declared CPU topology, memory, nested virtualization, firmware/security, storage and NIC configuration. Omits unrelated VMX secrets and does not infer missing values or claim live device support.', hardwareSchemas.vm_hardware_get, true, a => hardware.get(a));

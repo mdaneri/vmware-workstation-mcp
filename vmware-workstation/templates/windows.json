@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0", "id": "windows", "name": "Windows Server guest", "guest_os": "windows2019srv-64", "hardware_version": 21,
+  "cpu": { "cpus": 4, "cores_per_socket": 2, "nested_virtualization": false }, "memory_mb": 8192,
+  "firmware": "efi", "security": { "secure_boot": true, "vtpm": false },
+  "controllers": [{ "type": "lsilogic", "index": 0 }],
+  "disks": [{ "controller": "scsi", "controller_index": 0, "unit": 0, "capacity_mb": 65536 }],
+  "nics": [{ "index": 0, "model": "e1000e", "network": "primary", "start_connected": true }],
+  "boot": { "mode": "default" }
+}
