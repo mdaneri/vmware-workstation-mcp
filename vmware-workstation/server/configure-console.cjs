@@ -21211,61 +21211,77 @@ var HardwareManager = class {
       } }), live_support: "unknown" };
     });
   }
+  // Shared read-only preflight for typed creation and declarative template plans.
+  async planCreate(a) {
+    const directory = await this.backend.hostPath(a.directory, "destination-directory");
+    await this.backend.hostPath(import_node_path9.default.dirname(directory), "directory");
+    await this.backend.hostPath(directory, "host-destination-directory");
+    try {
+      await import_promises8.default.lstat(directory);
+      hardwareError("TARGET_EXISTS", "VM creation requires a NEW destination directory.");
+    } catch (e) {
+      if (e.code !== "ENOENT") throw e;
+    }
+    const caps = await this.available();
+    const controllers = a.controllers ?? [{ type: "lsilogic", index: 0 }];
+    const disks = a.disks ?? [{ controller: "scsi", controller_index: 0, unit: 0, capacity_mb: a.disk_gb * 1024 }];
+    const nics = a.nics ?? (a.network === "none" ? [] : [{ index: 0, model: "e1000", network: a.network, ...a.vmnet ? { vmnet: a.vmnet } : {} }]);
+    const base = {
+      ".encoding": "UTF-8",
+      "config.version": "8",
+      "virtualHW.version": String(a.hardware_version),
+      displayName: a.name,
+      guestOS: a.guest_os,
+      memsize: String(a.memory_mb),
+      numvcpus: String(a.cpus),
+      "cpuid.coresPerSocket": String(a.cores_per_socket ?? 1),
+      firmware: a.firmware,
+      "floppy0.present": "FALSE",
+      "sound.present": "FALSE",
+      "usb.present": "FALSE",
+      ...pcieSettings({})
+    };
+    const config2 = Object.fromEntries(Object.entries(base).map(([k, v]) => [k.toLowerCase(), v]));
+    const settings = { ...base, ...this.settings({ ...a, controllers }, config2, caps) };
+    const nic = await this.nicSettings(nics, {});
+    Object.assign(settings, nic.settings);
+    const slots = /* @__PURE__ */ new Set();
+    for (const d of disks) {
+      const p = `${d.controller}${d.controller_index}`, slot2 = `${p}:${d.unit}`;
+      if (!controllers.some((c) => prefix(c) === p)) hardwareError("CONTROLLER_MISSING", "Every disk requires an explicitly declared controller.");
+      if (slots.has(slot2)) hardwareError("DUPLICATE_DEVICE", "Disk slots must be unique.");
+      slots.add(slot2);
+      if (d.unit > { scsi: 15, sata: 29, nvme: 14 }[d.controller] || d.controller === "scsi" && d.unit === 7) hardwareError("INVALID_SLOT", "Invalid storage slot; SCSI unit 7 is reserved. NVMe supports units 0-14 in this conservative profile.");
+    }
+    if (a.iso_path) {
+      const iso = await this.backend.hostPath(a.iso_path, "input-file");
+      let slot2;
+      for (let i = 0; i < 30; i++) if (!slots.has(`sata0:${i}`)) {
+        slot2 = `sata0:${i}`;
+        break;
+      }
+      if (!slot2) hardwareError("INVALID_SLOT", "No free SATA0 slot for ISO.");
+      Object.assign(settings, { "sata0.present": "TRUE", [`${slot2}.present`]: "TRUE", [`${slot2}.deviceType`]: "cdrom-image", [`${slot2}.fileName`]: iso });
+    }
+    await this.disks.available("create", "0");
+    await this.disks.freeSpace(import_node_path9.default.dirname(directory), disks.reduce((sum, d) => sum + d.capacity_mb * 1048576, 0));
+    if (nic.catalog) {
+      await this.assertGUIClosed();
+      await this.lan.unchanged(nic.catalog);
+    }
+    for (let i = 0; i < disks.length; i++) {
+      const d = disks[i], slot2 = `${d.controller}${d.controller_index}:${d.unit}`;
+      settings[`${slot2}.present`] = "TRUE";
+      settings[`${slot2}.fileName`] = import_node_path9.default.join(`disk-${i}`, "disk.vmdk");
+    }
+    return { directory, caps, disks, settings, nic };
+  }
   async create(a) {
     return this.vmFiles.exclusive(async () => {
-      const directory = await this.backend.hostPath(a.directory, "destination-directory");
-      await this.backend.hostPath(import_node_path9.default.dirname(directory), "directory");
-      await this.backend.hostPath(directory, "host-destination-directory");
-      const caps = await this.available();
-      const controllers = a.controllers ?? [{ type: "lsilogic", index: 0 }];
-      const disks = a.disks ?? [{ controller: "scsi", controller_index: 0, unit: 0, capacity_mb: a.disk_gb * 1024 }];
-      const nics = a.nics ?? (a.network === "none" ? [] : [{ index: 0, model: "e1000", network: a.network, ...a.vmnet ? { vmnet: a.vmnet } : {} }]);
-      const base = {
-        ".encoding": "UTF-8",
-        "config.version": "8",
-        "virtualHW.version": String(a.hardware_version),
-        displayName: a.name,
-        guestOS: a.guest_os,
-        memsize: String(a.memory_mb),
-        numvcpus: String(a.cpus),
-        "cpuid.coresPerSocket": String(a.cores_per_socket ?? 1),
-        firmware: a.firmware,
-        "floppy0.present": "FALSE",
-        "sound.present": "FALSE",
-        "usb.present": "FALSE",
-        ...pcieSettings({})
-      };
-      const config2 = Object.fromEntries(Object.entries(base).map(([k, v]) => [k.toLowerCase(), v]));
-      const settings = { ...base, ...this.settings({ ...a, controllers }, config2, caps) };
-      const nic = await this.nicSettings(nics, {});
-      Object.assign(settings, nic.settings);
-      const slots = /* @__PURE__ */ new Set();
-      for (const d of disks) {
-        const p = `${d.controller}${d.controller_index}`, slot2 = `${p}:${d.unit}`;
-        if (!controllers.some((c) => prefix(c) === p)) hardwareError("CONTROLLER_MISSING", "Every disk requires an explicitly declared controller.");
-        if (slots.has(slot2)) hardwareError("DUPLICATE_DEVICE", "Disk slots must be unique.");
-        slots.add(slot2);
-        if (d.unit > { scsi: 15, sata: 29, nvme: 14 }[d.controller] || d.controller === "scsi" && d.unit === 7) hardwareError("INVALID_SLOT", "Invalid storage slot; SCSI unit 7 is reserved. NVMe supports units 0-14 in this conservative profile.");
-      }
-      if (a.iso_path) {
-        const iso = await this.backend.hostPath(a.iso_path, "input-file");
-        let slot2;
-        for (let i = 0; i < 30; i++) if (!slots.has(`sata0:${i}`)) {
-          slot2 = `sata0:${i}`;
-          break;
-        }
-        if (!slot2) hardwareError("INVALID_SLOT", "No free SATA0 slot for ISO.");
-        Object.assign(settings, { "sata0.present": "TRUE", [`${slot2}.present`]: "TRUE", [`${slot2}.deviceType`]: "cdrom-image", [`${slot2}.fileName`]: iso });
-      }
-      await this.disks.available("create", "0");
-      await this.disks.freeSpace(import_node_path9.default.dirname(directory), disks.reduce((sum, d) => sum + d.capacity_mb * 1048576, 0));
-      if (nic.catalog) {
-        await this.assertGUIClosed();
-        await this.lan.unchanged(nic.catalog);
-      }
-      await import_promises8.default.mkdir(directory, { mode: 448 });
+      const { directory, caps, disks, settings, nic } = await this.planCreate(a);
       const vmx2 = import_node_path9.default.join(directory, "machine.vmx"), createdDisks = [];
       return this.backend.resources.use([directory], async () => {
+        await import_promises8.default.mkdir(directory, { mode: 448 });
         try {
           for (let i = 0; i < disks.length; i++) {
             const d = disks[i], destination = import_node_path9.default.join(directory, `disk-${i}`, "disk.vmdk");

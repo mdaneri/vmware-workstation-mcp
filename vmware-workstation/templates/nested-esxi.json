@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0", "id": "nested-esxi", "name": "Nested ESXi lab", "guest_os": "vmkernel8", "hardware_version": 21,
+  "cpu": { "cpus": 4, "cores_per_socket": 2, "nested_virtualization": true }, "memory_mb": 16384,
+  "firmware": "efi", "security": { "secure_boot": false, "vtpm": false },
+  "controllers": [{ "type": "lsilogic", "index": 0 }, { "type": "pvscsi", "index": 1 }],
+  "disks": [{ "controller": "scsi", "controller_index": 0, "unit": 0, "capacity_mb": 32768 }, { "controller": "scsi", "controller_index": 1, "unit": 0, "capacity_mb": 65536 }],
+  "nics": [{ "index": 0, "model": "vmxnet3", "network": "management", "start_connected": true }, { "index": 1, "model": "vmxnet3", "network": "lab", "start_connected": true }],
+  "boot": { "mode": "default" }
+}

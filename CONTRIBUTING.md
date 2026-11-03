@@ -1,5 +1,13 @@
 # Contributing
 
+Declarative VM templates use [the template guide](vmware-workstation/templates.md).
+Default tests verify portable schema/examples, no-write plans, deployment/export,
+privacy and failure paths, including bundled MCP contracts on Windows/Ubuntu.
+`npm run test:templates:live` needs separate disposable-workload authorization
+and `VMWARE_TEMPLATES_LIVE=1`; it retains two new powered-off VMs/evidence and
+never registers or boots them. The template JSON schema is generated from Zod;
+edit `src/template-schemas.mjs` and rebuild rather than hand-editing it.
+
 Reusable background jobs use [the job guide](vmware-workstation/jobs.md).
 Default tests cover native subprocess concurrency/cancellation, journal privacy,
 restart recovery, shared locks and bundled MCP workflows without VMware.
@@ -20,7 +28,7 @@ npm test
 npm run package
 ```
 
-The package command builds all bundled entrypoints, refreshes the operation reference and dependency notices, validates portable manifests and all 138 MCP tool schemas, checks compatibility with all 137 previous tool inputs and annotations, verifies platform credential-file protection, and creates the plugin ZIP. CI performs these checks on Windows and Ubuntu. Run `npm run build` before testing changes to bundled helpers or the Linux MCP integration test.
+The package command builds all bundled entrypoints, refreshes the operation reference and dependency notices, validates portable manifests and all 142 MCP tool schemas, checks compatibility with all 138 previous tool definitions, verifies platform credential-file protection, and creates the plugin ZIP. CI performs these checks on Windows and Ubuntu. Run `npm run build` before testing changes to bundled helpers or the Linux MCP integration test.
 
 Commit source changes together with updated generated files under `vmware-workstation/`. The repository includes built entrypoints so Git-backed plugin installation does not require an npm install. CI checks that a fresh build reproduces the committed generated files.
 

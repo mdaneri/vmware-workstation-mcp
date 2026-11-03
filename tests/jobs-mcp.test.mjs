@@ -47,7 +47,7 @@ cp.spawn = (file, args, options) => {
     return { client, transport, call, finish };
   };
   const f = await connect();
-  const tools = (await f.client.listTools()).tools; assert.equal(tools.length, 138);
+  const tools = (await f.client.listTools()).tools; assert.equal(tools.length, 142);
   const prior = JSON.parse(await fs.readFile('tests/fixtures/pre-jobs-tool-schemas.json', 'utf8'));
   for (const tool of prior.tools) assertCompatibleTool(tools.find(t => t.name === tool.name), tool);
   assert.equal((await f.client.callTool({ name: 'job_start', arguments: { steps: [] } })).isError, true);

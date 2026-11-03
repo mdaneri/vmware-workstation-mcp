@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._()-]*$"
+    },
+    "guest_os": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "hardware_version": {
+      "type": "integer",
+      "minimum": 14,
+      "maximum": 22
+    },
+    "cpu": {
+      "type": "object",
+      "properties": {
+        "cpus": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "cores_per_socket": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "nested_virtualization": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cpus",
+        "cores_per_socket",
+        "nested_virtualization"
+      ],
+      "additionalProperties": false
+    },
+    "memory_mb": {
+      "type": "integer",
+      "minimum": 256,
+      "maximum": 131072,
+      "multipleOf": 4
+    },
+    "firmware": {
+      "type": "string",
+      "enum": [
+        "bios",
+        "efi"
+      ]
+    },
+    "security": {
+      "type": "object",
+      "properties": {
+        "secure_boot": {
+          "type": "boolean"
+        },
+        "vtpm": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "secure_boot",
+        "vtpm"
+      ],
+      "additionalProperties": false
+    },
+    "controllers": {
+      "minItems": 1,
+      "maxItems": 12,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "lsilogic",
+              "pvscsi",
+              "sata",
+              "nvme"
+            ]
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          }
+        },
+        "required": [
+          "type",
+          "index"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "disks": {
+      "minItems": 1,
+      "maxItems": 64,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "controller": {
+            "type": "string",
+            "enum": [
+              "scsi",
+              "sata",
+              "nvme"
+            ]
+          },
+          "controller_index": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "unit": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 29
+          },
+          "capacity_mb": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8388608
+          }
+        },
+        "required": [
+          "controller",
+          "controller_index",
+          "unit",
+          "capacity_mb"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "nics": {
+      "maxItems": 10,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "model": {
+            "type": "string",
+            "enum": [
+              "e1000",
+              "e1000e",
+              "vmxnet3"
+            ]
+          },
+          "network": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+          },
+          "start_connected": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "index",
+          "model",
+          "network",
+          "start_connected"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "boot": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "default",
+            "iso",
+            "pxe"
+          ]
+        },
+        "media": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "name",
+    "guest_os",
+    "hardware_version",
+    "cpu",
+    "memory_mb",
+    "firmware",
+    "security",
+    "controllers",
+    "disks",
+    "nics",
+    "boot"
+  ],
+  "additionalProperties": false
+}

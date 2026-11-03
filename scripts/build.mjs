@@ -2,6 +2,9 @@ import { build } from 'esbuild';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { writeGenerated } from './write-generated.mjs';
+import { z } from 'zod';
+import { templateSchema } from '../src/template-schemas.mjs';
+await writeGenerated('vmware-workstation/templates/schema-v1.json', JSON.stringify(z.toJSONSchema(templateSchema), null, 2) + '\n');
 const result = await build({
   entryPoints: ['src/server.mjs', 'src/configure-console.mjs', 'src/set-credentials.mjs'], outdir: 'vmware-workstation/server', outExtension: { '.js': '.cjs' },
   bundle: true, platform: 'node', target: 'node22', format: 'cjs',

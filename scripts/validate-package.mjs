@@ -7,6 +7,8 @@ import Ajv from 'ajv';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { writeGenerated } from './write-generated.mjs';
+import { templateSchema } from '../src/template-schemas.mjs';
+import { z } from 'zod';
 
 const pluginRoot = path.resolve('vmware-workstation');
 const ajv = new Ajv2020({ strict: false });
@@ -34,8 +36,17 @@ try {
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [path.join(pluginRoot, 'server/server.cjs')], stderr: 'pipe' }));
   assert.equal(client.getServerVersion().version, manifest.version, 'Bundled server version must match plugin');
   const { tools } = await client.listTools();
-  assert.equal(tools.length, 138);
-  assert.equal(new Set(tools.map(t => t.name)).size, 138);
+  assert.equal(tools.length, 142);
+  assert.equal(new Set(tools.map(t => t.name)).size, 142);
+  const preTemplate = JSON.parse(await fs.readFile('tests/fixtures/pre-template-tool-schemas.json', 'utf8'));
+  assert.equal(preTemplate.tools.length, 138);
+  for (const prior of preTemplate.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Pre-template contract: ${prior.name}`);
+  const templateJSON = JSON.parse(await fs.readFile(path.join(pluginRoot, 'templates/schema-v1.json'), 'utf8'));
+  assert.deepEqual(templateJSON, z.toJSONSchema(templateSchema), 'Published template JSON schema must match runtime');
+  for (const name of ['linux', 'windows', 'nested-esxi']) {
+    const example = JSON.parse(await fs.readFile(path.join(pluginRoot, `templates/${name}.json`), 'utf8'));
+    assert.ok(ajv.validate(templateJSON, example), JSON.stringify(ajv.errors));
+  }
   const preJobs = JSON.parse(await fs.readFile('tests/fixtures/pre-jobs-tool-schemas.json', 'utf8'));
   assert.equal(preJobs.tools.length, 137);
   for (const prior of preJobs.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior);
@@ -68,5 +79,5 @@ try {
     assert.equal(typeof tool.annotations.readOnlyHint, 'boolean');
   }
   await writeGenerated('vmware-workstation/tool-schemas.json', JSON.stringify({ tools }, null, 2) + '\n');
-  console.log('Both portable manifests and all 138 MCP schemas validated; existing inputs/annotations preserved; three job descriptions updated for durable history and process trees.');
+  console.log('Both portable manifests, template schema/examples and all 142 MCP schemas validated; all 138 previous tool definitions unchanged.');
 } finally { await client.close(); }

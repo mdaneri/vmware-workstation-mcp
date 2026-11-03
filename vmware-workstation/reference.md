@@ -2,6 +2,17 @@
 
 Generated from the command implementations and installed REST contract. Source version: vmrun 1.17.0.25688693; vmrest 1.3.1 build 25688693.
 
+## Declarative VM templates (4)
+
+Read the [template guide](templates.md) for portable JSON recipes, local network/media bindings, read-only planning, sanitized export and explicit deployment. Schema v1 and Linux/Windows Server/nested ESXi examples are packaged in `templates/`. Deployment defaults to dry-run; registration/power-on are opt-in. Unsupported forced PXE boot order and vTPM fail explicitly.
+
+| Tool | Arguments |
+| --- | --- |
+| `template_list` | (none) |
+| `template_validate` | `template`, `directory`, `networks`, `media` |
+| `template_export` | `vmx`, `id`, `name` |
+| `template_deploy` | `template`, `directory`, `networks`, `media`, `dry_run`, `confirm`, `register`, `power_on`, `timeout_seconds` |
+
 ## Reusable asynchronous jobs (1 new submission tool)
 
 Read the [job guide](jobs.md) for sequential disk/clone/power steps, concurrent unrelated jobs, shared reservations, process-tree cancellation and private durable history. `job_start` requires explicit confirmation for every step. `job_status`, `job_list`, `job_logs` and `job_cancel` are shared with the OVF workflow. Progress stays null unless supplied by the native backend.
@@ -226,4 +237,4 @@ All console tools accept `vm_id`: an absolute VMX path, a unique inventory name,
 
 ## Convenience tools (9) and capabilities
 
-`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **138 MCP tools**.
+`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **142 MCP tools**.
