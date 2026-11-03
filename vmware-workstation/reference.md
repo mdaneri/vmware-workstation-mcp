@@ -2,6 +2,14 @@
 
 Generated from the command implementations and installed REST contract. Source version: vmrun 1.17.0.25688693; vmrest 1.3.1 build 25688693.
 
+## Verified guest execution (1)
+
+Read the [guest execution guide](guest-exec.md) for explicit profiles, program and script examples, runtime prerequisites, bounded output, transport versus guest exit status, timeout and cleanup semantics. No automatic retries or console fallback.
+
+| Tool | Arguments |
+| --- | --- |
+| `guest_exec` | `vmx`, `guest_profile`, `vm_password_profile`, `guest_os`, `program`, `arguments`, `script`, `interpreter`, `interpreter_arguments`, `guest_temp_directory`, `timeout_seconds`, `max_output_bytes`, `confirm` |
+
 ## Optional direct serial console (6)
 
 Read the [serial guide](serial.md) for explicit powered-off setup, guest prerequisites and runnable byte I/O examples. Windows uses local named pipes; Linux uses private local UNIX sockets. Endpoints are generated per canonical VMX and port (0-3). Connect verifies the native VMware worker and never starts a VM. Read/write require an explicit session. Reads, writes, waits, buffers and session counts are bounded; disconnect cancels pending I/O. No remote sockets, host terminal, desktop capture or keyboard injection.
@@ -188,4 +196,4 @@ All console tools accept `vm_id`: an absolute VMX path, a unique inventory name,
 
 ## Convenience tools (9) and capabilities
 
-`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **128 MCP tools**.
+`workstation_status`, `list_vms`, `get_vm_details`, `vm_power`, `list_snapshots`, `create_snapshot`, `revert_snapshot`, `delete_snapshot`, and `get_guest_ip` provide short workflows over vmrun. `workstation_capabilities` reports installed coverage and tool mappings. Total: **129 MCP tools**.

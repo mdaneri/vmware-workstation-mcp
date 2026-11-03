@@ -1,6 +1,6 @@
 # VMware Workstation
 
-Local Windows and Linux MCP plugin, version 0.8.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 128 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), five [LAN segment tools](#lan-segments), ten [OVF/OVA and background job tools](ovf.md), nine [VMDK lifecycle tools](disks.md), six [optional serial tools](serial.md), and five [readiness and diagnostics tools](readiness.md). All 123 previous tool names, input schemas, and annotations remain unchanged. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
+Local Windows and Linux MCP plugin, version 0.9.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 129 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), five [LAN segment tools](#lan-segments), ten [OVF/OVA and background job tools](ovf.md), nine [VMDK lifecycle tools](disks.md), six [optional serial tools](serial.md), five [readiness and diagnostics tools](readiness.md), and [verified guest execution](guest-exec.md). All 128 previous tool names, input schemas, and annotations remain unchanged. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
 
 Requires VMware Workstation with vmrun, Node.js 22.12+, PowerShell 7 for setup helpers, and a host with local stdio MCP support. REST tools additionally need a running, authenticated vmrest service. Guest OS commands need VMware Tools running and a guest OS account; console tools need neither and work before the OS boots. The plugin runs as your local user and opens no HTTP listener. Native VNC listeners are configured on the VM itself and restricted to localhost.
 
@@ -94,6 +94,8 @@ REST VM IDs are separate from VMX paths: call `rest_get_all_vms` to obtain IDs, 
 
 ## Practical guest workflows
 
+For captured stdout/stderr and a verified guest process exit code, use [`guest_exec`](guest-exec.md) with an explicitly selected `guest_profile`, guest OS, command or script interpreter, bounded output and `confirm: true` after authorization. The guide covers runnable Linux/Windows examples, required runtimes, transport versus guest result status, timeout and cleanup behavior. Existing low-level tools below retain their original behavior.
+
 To discover a guest address without credentials, call `get_guest_ip` with its `vmx`. A successful result remains `{ "vmx": "...", "address": "..." }`. On failure it returns an MCP error with code `GUEST_IP_UNAVAILABLE`, the original native error in `message`, `addressAvailable: false`, and a separate `toolsState` observation. The diagnostic calls `checkToolsState` once with a five-second process timeout; if that call fails, times out, or returns an unfamiliar value, its state is `unknown` and its output/error is retained. Target validation failures are returned before either query.
 
 The recognized Tools states are `running`, `installed`, and `unknown`, as documented in the [VMware Workstation vmrun reference](https://techdocs2-prod.adobecqms.net/content/dam/broadcom/techdocs/us/en/pdf/vmware/desktop-hypervisors/workstation/vmware-workstation-pro-17-0.pdf#page=197).
@@ -146,7 +148,7 @@ Copy the resulting file to Windows:
 
 Use `vmrun_copy_file_from_host_to_guest` with `host_path` and `guest_path` to send a local file into the guest. Existing host files are protected unless `overwrite=true`; VMware may overwrite an existing guest destination. For Windows guests, use `vmrun_run_program_in_guest` with `program` such as `C:\Windows\System32\cmd.exe` and `arguments` such as `["/c", "ver > C:\Windows\Temp\version.txt 2>&1"]`, then copy that file back.
 
-Guest execution returns vmrun's operation status. It does **not** capture guest stdout/stderr or establish the guest program's exit code. Redirect output in the guest and transfer the resulting file. Use `no_wait`, `interactive`, and `active_window` only when that behavior is needed.
+The low-level `vmrun_run_program_in_guest` and `vmrun_run_script_in_guest` return vmrun's operation status. They do **not** capture guest stdout/stderr or establish the guest program's exit code. Redirect output in the guest and transfer the resulting file, or use [`guest_exec`](guest-exec.md) for verified results. Use `no_wait`, `interactive`, and `active_window` only when that behavior is needed.
 
 To change VM memory via REST:
 

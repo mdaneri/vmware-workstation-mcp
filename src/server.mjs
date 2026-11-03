@@ -15,6 +15,7 @@ import { JobManager, jobSchemas } from './jobs.mjs';
 import { DiskManager, diskSchemas } from './disks.mjs';
 import { SerialManager, serialSchemas } from './serial.mjs';
 import { Readiness, readinessSchemas } from './readiness.mjs';
+import { GuestExec, guestExecSchema } from './guest-exec.mjs';
 
 const backend = new Workstation();
 const credentials = new Credentials();
@@ -27,9 +28,11 @@ const ovf = new OvfManager({ backend, credentials, jobs, rest });
 const disks = new DiskManager({ backend, vmFiles });
 const serial = new SerialManager({ backend, vmFiles, credentials, rest });
 const readiness = new Readiness({ backend, credentials, consoles, protectFile: localFileProtector(backend) });
-const server = new McpServer({ name: 'vmware-workstation', version: '0.8.0' });
+const guestExec = new GuestExec({ backend, credentials, protectFile: localFileProtector(backend) });
+const server = new McpServer({ name: 'vmware-workstation', version: '0.9.0' });
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
+tool('guest_exec', 'Execute an explicitly authorized guest program with literal arguments or an explicit interpreter/script using a required local credential profile. Captures bounded redacted stdout/stderr and verifies exit codes through a unique completion record. Requires Tools and Python 3 on Linux or Windows PowerShell 5.1. Transport success alone never means guest success. Timeout/cancellation may leave a running guest process; never retry automatically.', guestExecSchema, false, (a, extra) => guestExec.execute(a, extra), true, true, false);
 for (const kind of ['boot', 'ip', 'service']) tool(`vm_wait_for_${kind}`, {
   boot: 'Wait for VMware Tools running in the selected VM, indicating OS agent readiness only. Power-on, login and application readiness are separate. Bounded total timeout, polling and MCP cancellation; never starts a VM.',
   ip: 'Wait for a valid guest IP published by VMware Tools. Does not establish network reachability or service readiness. Bounded total timeout and cancellation; never starts a VM.',
@@ -143,6 +146,7 @@ tool('workstation_capabilities', 'Show full vmrun/REST tool coverage, compare th
     diskManager: await disks.status(),
     diskTools: Object.keys(diskSchemas),
     readinessTools: Object.keys(readinessSchemas),
+    guestExecution: { tool: 'guest_exec', backend: 'vmware_tools', verifiedExitCode: 'matching_completion_record_only', linuxRequires: '/usr/bin/python3', windowsRequires: 'Windows PowerShell 5.1', liveSupport: 'unknown' },
     capabilityEvidence: { diskManager: 'Installed help when available; no live disk operation is performed.', ovfTool: 'Installed version/help when available; no live appliance operation is performed.', nativeHypervisor: 'not_proven_by_discovery', firmwareBoot: { configurable: ['bios', 'efi', 'bootOrder', 'bootDelay', 'forceSetupOnce'], evidence: 'VMX configuration implementation; not a live firmware test', liveSupport: 'unknown', consoleRequires: 'Explicit per-VM native VNC setup; console_status proves only that VM connection.' } },
     note: 'Coverage describes callable implementations. It does not prove a REST service is running, credentials work, or guest operations succeed.',
   };

@@ -7,7 +7,7 @@ npm test
 npm run package
 ```
 
-The package command builds all bundled entrypoints, refreshes the operation reference and dependency notices, validates portable manifests and all 128 MCP tool schemas, checks compatibility with all 123 previous tools, verifies platform credential-file protection, and creates the plugin ZIP. CI performs these checks on Windows and Ubuntu. Run `npm run build` before testing changes to bundled helpers or the Linux MCP integration test.
+The package command builds all bundled entrypoints, refreshes the operation reference and dependency notices, validates portable manifests and all 129 MCP tool schemas, checks compatibility with all 128 previous tools, verifies platform credential-file protection, and creates the plugin ZIP. CI performs these checks on Windows and Ubuntu. Run `npm run build` before testing changes to bundled helpers or the Linux MCP integration test.
 
 Commit source changes together with updated generated files under `vmware-workstation/`. The repository includes built entrypoints so Git-backed plugin installation does not require an npm install. CI checks that a fresh build reproduces the committed generated files.
 
@@ -18,3 +18,5 @@ Keep credentials, machine-specific configuration, VMs, VM screenshots, and local
 The opt-in `npm run test:readiness:live` creates new disposable live-ISO guests and validates Tools/IP/service criteria. Optional configured guest profiles, read-only REST inventory and two-VM LAN-segment checks record separate exercised/skipped results. It refuses WSL; native Linux hypervisor results require an actual native Linux VMware host. Read [readiness validation](vmware-workstation/readiness.md#validation) and the script prerequisites before authorizing a live run. Default regression tests do not execute this harness.
 
 The serial live test requires `VMWARE_SERIAL_LIVE=1` and a user-selected `VMWARE_SERIAL_LIVE_ISO` already configured for ttyS0 output. It creates one new disposable VM, configures serial offline, boots headlessly, reads a bounded expected marker, then stops that VM. It sends no guest input and retains evidence without a transcript. Read [the serial guide](vmware-workstation/serial.md#validation) before an authorized native run. Automated serial tests use local pipe/socket doubles; Windows native tests compile a tiny fake vmrun with the installed .NET Framework C# compiler, and Linux tests use a shebang stub. Both run the bundled MCP process and real endpoint-owner verification.
+
+The opt-in `npm run test:guest-exec:live` full-clones an explicitly selected offline template and runs fixed guest execution checks only in the NEW disposable clone. It requires separate workload authorization and never runs in hosted CI. Read [guest execution validation](vmware-workstation/guest-exec.md#validation) for prerequisites and cleanup limits. Default guest execution tests use mocked VMware transports and local native runner subprocesses without VMware.

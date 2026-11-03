@@ -16,6 +16,7 @@ async function collect(directory) {
 }
 await collect(root);
 assert.ok(files['readiness.md'], 'Package must include the readiness and diagnostics guide.');
+assert.ok(files['guest-exec.md'], 'Package must include the verified guest execution guide.');
 const { version } = JSON.parse(files['plugin.json'].toString('utf8'));
 assert.match(version, /^\d+\.\d+\.\d+$/);
 await fs.mkdir('dist', { recursive: true });

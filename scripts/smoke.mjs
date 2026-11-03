@@ -8,7 +8,7 @@ const transport = new StdioClientTransport({ command: process.execPath, args: [p
 try {
   await client.connect(transport);
   const { tools } = await client.listTools();
-  assert.equal(tools.length, 128);
+  assert.equal(tools.length, 129);
   console.log(`MCP connected; discovered ${tools.length} tools.`);
   const capabilities = await client.callTool({ name: 'workstation_capabilities', arguments: {} });
   assert.ok(!capabilities.isError, JSON.stringify(capabilities));
