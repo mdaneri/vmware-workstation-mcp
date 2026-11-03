@@ -22,6 +22,10 @@ const manifest = JSON.parse(await fs.readFile(path.join(pluginRoot, 'plugin.json
 const development = JSON.parse(await fs.readFile('package.json', 'utf8'));
 assert.equal(manifest.version, development.version, 'Plugin and source versions must agree');
 const ui = manifest.extensions['com.openai'].interface;
+assert.equal(manifest.homepage, 'https://github.com/mdaneri/vmware-workstation-mcp');
+assert.equal(ui.websiteURL, manifest.homepage, 'Listing website must match the project homepage');
+assert.equal(ui.supportURL, `${manifest.repository}/issues`, 'Listing support must point to the project issue tracker');
+assert.equal(ui.developerName, manifest.author.name, 'Listing developer must match the project author');
 assert.ok(ui.shortDescription.length <= 30);
 assert.equal(ui.category, 'Developer Tools');
 for (const key of ['logo', 'composerIcon']) assert.ok((await fs.stat(path.join(pluginRoot, ui[key]))).isFile());

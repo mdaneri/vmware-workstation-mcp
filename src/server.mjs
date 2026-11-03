@@ -38,7 +38,7 @@ const guestExec = new GuestExec({ backend, credentials, protectFile: localFilePr
 const media = new IsoManager({ backend, vmFiles });
 const hardware = new HardwareManager({ backend, vmFiles, disks, lan: lanSegments });
 const jobOperations = new JobOperations({ backend, jobs, disks, ovf });
-const server = new McpServer({ name: 'vmware-workstation', version: '0.12.0' });
+const server = new McpServer({ name: 'vmware-workstation', version: '0.12.1' });
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
 
