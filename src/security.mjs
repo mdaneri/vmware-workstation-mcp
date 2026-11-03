@@ -22,24 +22,27 @@ const unknown = () => ({ encryption: { state: 'unknown', mode: 'unknown', config
 async function readDeclarations(vmx) {
   const handle = await fs.open(vmx, 'r');
   try {
-    const before = await handle.stat();
-    if (!before.isFile() || before.size > 4 * 1024 * 1024) throw new Error('Unsupported configuration size/type');
+    // Preserve full native file IDs and timestamp precision, including Windows
+    // inode values above JavaScript's safe integer range.
+    const before = await handle.stat({ bigint: true });
+    if (!before.isFile() || before.size > 4n * 1024n * 1024n) throw new Error('Unsupported configuration size/type');
+    const size = Number(before.size); // Exact after the bounded size check.
     // Bounded even if another writer grows the file after stat. A spare byte
     // detects growth without returning a partial configuration as complete.
-    const bytes = Buffer.alloc(before.size + 1);
+    const bytes = Buffer.alloc(size + 1);
     let count = 0;
     while (count < bytes.length) {
       const { bytesRead } = await handle.read(bytes, count, bytes.length - count, null);
       if (!bytesRead) break;
       count += bytesRead;
     }
-    const after = await handle.stat(), current = await fs.stat(vmx);
+    const after = await handle.stat({ bigint: true }), current = await fs.stat(vmx, { bigint: true });
     // Windows path stat can report dev=0 while handle stat reports the volume
     // serial. Compare every available identity field without rejecting that
     // documented-by-observation difference; inode and timestamps still match.
-    if (count !== before.size || [after, current].some(stat =>
-      ((process.platform !== 'win32' || stat.dev !== 0) && before.dev !== stat.dev) ||
-      before.ino !== stat.ino || before.size !== stat.size || before.mtimeMs !== stat.mtimeMs || before.ctimeMs !== stat.ctimeMs)) throw new Error('Concurrent change');
+    if (count !== size || [after, current].some(stat =>
+      ((process.platform !== 'win32' || stat.dev !== 0n) && before.dev !== stat.dev) ||
+      before.ino !== stat.ino || before.size !== stat.size || before.mtimeNs !== stat.mtimeNs || before.ctimeNs !== stat.ctimeNs)) throw new Error('Concurrent change');
     return parseHardware(bytes.subarray(0, count)).config;
   } finally { await handle.close(); }
 }

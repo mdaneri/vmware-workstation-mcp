@@ -95,15 +95,34 @@ test('security schemas reject credentials, mutation flags and options; canonical
   await assert.rejects(f.manager.status({ vmx: path.join(f.root, 'missing.vmx') }));
 });
 
-test('detected concurrent path replacement discards all declarations', async t => {
+for (const replaced of [false, true]) test(`large file IDs preserve exact identity and ${replaced ? 'detect replacement' : 'allow unchanged declarations'}`, async t => {
   const f = await fixture(t);
   await fs.writeFile(f.vmx, 'vtpm.present = "TRUE"\n');
-  const stat = fs.stat.bind(fs); let calls = 0;
-  t.mock.method(fs, 'stat', async (...args) => {
-    const result = await stat(...args);
-    if (args[0] === f.vmx && ++calls === 2) return { ...result, ino: result.ino + 1 };
+  const inode = 2n ** 63n;
+  // These different native IDs collapse to the same JavaScript Number.
+  assert.equal(Number(inode), Number(inode + 1n));
+  const open = fs.open.bind(fs), stat = fs.stat.bind(fs); let handleStats = 0, pathStats = 0;
+  t.mock.method(fs, 'open', async (...args) => {
+    const handle = await open(...args), handleStat = handle.stat.bind(handle);
+    t.mock.method(handle, 'stat', async options => {
+      assert.equal(options?.bigint, true);
+      handleStats++;
+      const result = await handleStat(options);
+      result.ino = inode;
+      return result;
+    });
+    return handle;
+  });
+  t.mock.method(fs, 'stat', async (file, options) => {
+    const result = await stat(file, options);
+    if (file === f.vmx && options?.bigint) {
+      pathStats++;
+      result.ino = inode + (replaced ? 1n : 0n);
+    }
     return result;
   });
   const result = await f.manager.status({ vmx: f.vmx });
-  assert.equal(result.inspection, 'unknown'); assert.equal(result.vtpm.declared_present, null);
+  assert.equal(handleStats, 2); assert.equal(pathStats, 1);
+  assert.equal(result.inspection, replaced ? 'unknown' : 'configuration_only');
+  assert.equal(result.vtpm.declared_present, replaced ? null : true);
 });

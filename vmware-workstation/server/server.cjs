@@ -58455,17 +58455,18 @@ var unknown2 = () => ({
 async function readDeclarations(vmx3) {
   const handle = await import_promises26.default.open(vmx3, "r");
   try {
-    const before = await handle.stat();
-    if (!before.isFile() || before.size > 4 * 1024 * 1024) throw new Error("Unsupported configuration size/type");
-    const bytes = Buffer.alloc(before.size + 1);
+    const before = await handle.stat({ bigint: true });
+    if (!before.isFile() || before.size > 4n * 1024n * 1024n) throw new Error("Unsupported configuration size/type");
+    const size = Number(before.size);
+    const bytes = Buffer.alloc(size + 1);
     let count = 0;
     while (count < bytes.length) {
       const { bytesRead } = await handle.read(bytes, count, bytes.length - count, null);
       if (!bytesRead) break;
       count += bytesRead;
     }
-    const after = await handle.stat(), current = await import_promises26.default.stat(vmx3);
-    if (count !== before.size || [after, current].some((stat) => (process.platform !== "win32" || stat.dev !== 0) && before.dev !== stat.dev || before.ino !== stat.ino || before.size !== stat.size || before.mtimeMs !== stat.mtimeMs || before.ctimeMs !== stat.ctimeMs)) throw new Error("Concurrent change");
+    const after = await handle.stat({ bigint: true }), current = await import_promises26.default.stat(vmx3, { bigint: true });
+    if (count !== size || [after, current].some((stat) => (process.platform !== "win32" || stat.dev !== 0n) && before.dev !== stat.dev || before.ino !== stat.ino || before.size !== stat.size || before.mtimeNs !== stat.mtimeNs || before.ctimeNs !== stat.ctimeNs)) throw new Error("Concurrent change");
     return parseHardware(bytes.subarray(0, count)).config;
   } finally {
     await handle.close();
