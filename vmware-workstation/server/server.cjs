@@ -55922,6 +55922,7 @@ var SerialManager = class {
       signal?.addEventListener("abort", abort, { once: true });
       const timer = setTimeout(() => this.drop(session, serialError("SERIAL_TIMEOUT", "Timed out connecting to serial.")), a.timeout_ms);
       try {
+        if (signal?.aborted) throw cancelled();
         session.stream = await this.connector(endpoint, { signal: session.controller.signal, timeoutMs: a.timeout_ms, platform: this.platform });
         session.stream.on("error", () => this.drop(session, serialError("SERIAL_IO_FAILED", "Serial transport failed. Inspect guest state before reconnecting.")));
         if (session.closed || this.closed) {

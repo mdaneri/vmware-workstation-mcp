@@ -173,6 +173,24 @@ test('strict byte validation, missing ports, stopped/locked/saved VMs, unsafe mo
   await assert.rejects(manager.read(target), /does not match/); assert.equal(manager.sessions.size, 0);
 });
 
+test('cancellation during asynchronous connection preflight never opens a transport', async t => {
+  const f = await fixture(t);
+  await f.manager.configure({ ...f.target, confirm: true }); f.setRunning(true);
+  const details = f.backend.details.bind(f.backend);
+  let enter; let release;
+  const entered = new Promise(resolve => { enter = resolve; });
+  const preflight = new Promise(resolve => { release = resolve; });
+  f.backend.details = async vmx => { enter(); await preflight; return details(vmx); };
+  const abort = new AbortController();
+  const pending = f.manager.connect(f.target, { signal: abort.signal });
+  const rejected = assert.rejects(pending, { code: 'SERIAL_CANCELLED' });
+  await entered; abort.abort(); release(); await rejected;
+  assert.equal(f.streams.length, 0); assert.equal(f.manager.sessions.size, 0);
+  // Cancellation must release the VM reservation so an explicit retry works.
+  assert.equal((await f.manager.connect(f.target)).connected, true);
+  assert.equal(f.streams.length, 1);
+});
+
 test('connection cancellation/timeout and shutdown close late transports', async t => {
   for (const cancel of [false, true]) {
     const f = await fixture(t, { connector: async (_, { signal }) => { await new Promise((_, reject) => signal.addEventListener('abort', () => reject(new Error('aborted')), { once: true })); } });
