@@ -82,7 +82,7 @@ export class Workstation {
     if (kind === 'directory' && !stat?.isDirectory()) throw new Error('Host directory must already exist.');
     if (kind === 'new-vmx' && (stat || path.extname(absolute).toLowerCase() !== '.vmx')) throw new Error('Clone destination must be a new .vmx file.');
     if (kind === 'output-file' && (stat?.isDirectory() || (stat && !overwrite))) throw new Error('Host destination exists; choose another file or explicitly set overwrite=true.');
-    if (kind === 'destination-directory' && stat && !stat.isDirectory()) throw new Error('Destination must be a directory path.');
+    if (['destination-directory', 'host-destination-directory'].includes(kind) && stat && !stat.isDirectory()) throw new Error('Destination must be a directory path.');
     let ancestor = absolute;
     const missing = [];
     while (true) {

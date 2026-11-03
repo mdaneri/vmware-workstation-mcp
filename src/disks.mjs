@@ -125,13 +125,22 @@ export class DiskManager {
     return { disk, ...descriptor, files: [...files.values()], independent: descriptor.parent_cid === 'ffffffff' && !descriptor.has_parent_hint, note: 'Descriptor inspection does not verify guest filesystem integrity. Increasing VMDK capacity does not resize guest partitions or filesystems.' };
   }
   async safeVM(input) {
-    const vmx = await this.backend.vmx(input); const text = await fs.readFile(vmx, 'utf8'); const config = vmConfig(text);
+    const vmx = await this.backend.vmx(input);
     if ((await this.backend.details(vmx)).running) fail('UNSAFE_VM', 'Power off the VM before disk edits.');
+    await this.vmState(vmx);
+    // Native snapshot discovery may normalize a newly created VMX (including
+    // extendedConfigFile and line endings). Capture and validate the edit
+    // baseline afterwards, while still refusing unsafe state before the query.
+    if ((await this.backend.snapshots(vmx)).snapshots.length) fail('UNSAFE_VM', 'Snapshots prevent safe disk edits. Prepare a fully powered-off VM without snapshots.');
+    return this.vmState(vmx);
+  }
+  async vmState(vmx) {
+    const text = await fs.readFile(vmx, 'utf8'); const config = vmConfig(text);
     if (Object.entries(config).some(([k, v]) => (/^encryption\./.test(k) && v) || (k === 'vtpm.present' && /^true$/i.test(v)))) fail('UNSAFE_VM', 'Encrypted and vTPM VM configurations are unsupported for disk edits.');
     const dirs = new Set([path.dirname(vmx)]);
     for (const k of ['workingdir', 'snapshot.directory']) if (config[k]) dirs.add(await this.backend.hostPath(path.resolve(path.dirname(vmx), config[k]), 'directory'));
     for (const dir of dirs) if ((await fs.readdir(dir)).some(name => /\.(lck|vmss|vmem|vmsn)$/i.test(name))) fail('UNSAFE_VM', 'Locked or suspended VM detected. Fully power off and close it before disk edits.');
-    if (config['checkpoint.vmstate'] || config['suspend.filename'] || (await this.backend.snapshots(vmx)).snapshots.length) fail('UNSAFE_VM', 'Snapshots or saved state prevent safe disk edits. Prepare a fully powered-off VM without snapshots.');
+    if (config['checkpoint.vmstate'] || config['suspend.filename']) fail('UNSAFE_VM', 'Snapshots or saved state prevent safe disk edits. Prepare a fully powered-off VM without snapshots.');
     // Saved snapshots may be outside the default directory; reject retained metadata too.
     for (const dir of dirs) for (const name of await fs.readdir(dir)) if (/\.vmsd$/i.test(name)) {
       const metadata = vmConfig(await fs.readFile(path.join(dir, name), 'utf8'));
@@ -202,7 +211,7 @@ export class DiskManager {
   async output(input) {
     if (!/^[a-zA-Z0-9][a-zA-Z0-9_.-]*\.vmdk$/i.test(path.basename(input))) fail('UNSAFE_PATH', 'Destination needs a simple .vmdk filename.');
     const disk = await this.backend.hostPath(input, 'output-file'); const directory = path.dirname(disk);
-    await this.backend.hostPath(directory, 'destination-directory');
+    await this.backend.hostPath(directory, 'host-destination-directory');
     await this.backend.hostPath(path.dirname(directory), 'directory');
     if (await exists(directory)) fail('TARGET_EXISTS', 'Disk output requires a NEW parent directory to protect all companion extents.');
     return { disk, directory };

@@ -47819,7 +47819,7 @@ var Workstation = class {
     if (kind === "directory" && !stat?.isDirectory()) throw new Error("Host directory must already exist.");
     if (kind === "new-vmx" && (stat || import_node_path3.default.extname(absolute).toLowerCase() !== ".vmx")) throw new Error("Clone destination must be a new .vmx file.");
     if (kind === "output-file" && (stat?.isDirectory() || stat && !overwrite)) throw new Error("Host destination exists; choose another file or explicitly set overwrite=true.");
-    if (kind === "destination-directory" && stat && !stat.isDirectory()) throw new Error("Destination must be a directory path.");
+    if (["destination-directory", "host-destination-directory"].includes(kind) && stat && !stat.isDirectory()) throw new Error("Destination must be a directory path.");
     let ancestor = absolute;
     const missing = [];
     while (true) {
@@ -55417,14 +55417,19 @@ var DiskManager = class {
   }
   async safeVM(input2) {
     const vmx3 = await this.backend.vmx(input2);
+    if ((await this.backend.details(vmx3)).running) fail("UNSAFE_VM", "Power off the VM before disk edits.");
+    await this.vmState(vmx3);
+    if ((await this.backend.snapshots(vmx3)).snapshots.length) fail("UNSAFE_VM", "Snapshots prevent safe disk edits. Prepare a fully powered-off VM without snapshots.");
+    return this.vmState(vmx3);
+  }
+  async vmState(vmx3) {
     const text2 = await import_promises13.default.readFile(vmx3, "utf8");
     const config2 = vmConfig(text2);
-    if ((await this.backend.details(vmx3)).running) fail("UNSAFE_VM", "Power off the VM before disk edits.");
     if (Object.entries(config2).some(([k, v]) => /^encryption\./.test(k) && v || k === "vtpm.present" && /^true$/i.test(v))) fail("UNSAFE_VM", "Encrypted and vTPM VM configurations are unsupported for disk edits.");
     const dirs = /* @__PURE__ */ new Set([import_node_path12.default.dirname(vmx3)]);
     for (const k of ["workingdir", "snapshot.directory"]) if (config2[k]) dirs.add(await this.backend.hostPath(import_node_path12.default.resolve(import_node_path12.default.dirname(vmx3), config2[k]), "directory"));
     for (const dir of dirs) if ((await import_promises13.default.readdir(dir)).some((name2) => /\.(lck|vmss|vmem|vmsn)$/i.test(name2))) fail("UNSAFE_VM", "Locked or suspended VM detected. Fully power off and close it before disk edits.");
-    if (config2["checkpoint.vmstate"] || config2["suspend.filename"] || (await this.backend.snapshots(vmx3)).snapshots.length) fail("UNSAFE_VM", "Snapshots or saved state prevent safe disk edits. Prepare a fully powered-off VM without snapshots.");
+    if (config2["checkpoint.vmstate"] || config2["suspend.filename"]) fail("UNSAFE_VM", "Snapshots or saved state prevent safe disk edits. Prepare a fully powered-off VM without snapshots.");
     for (const dir of dirs) for (const name2 of await import_promises13.default.readdir(dir)) if (/\.vmsd$/i.test(name2)) {
       const metadata = vmConfig(await import_promises13.default.readFile(import_node_path12.default.join(dir, name2), "utf8"));
       if (Number(metadata["snapshot.numsnapshots"] || 0) !== 0 || Object.keys(metadata).some((k) => /^snapshot\d+\./.test(k))) fail("UNSAFE_VM", "Snapshot metadata prevents safe disk edits.");
@@ -55502,7 +55507,7 @@ var DiskManager = class {
     if (!/^[a-zA-Z0-9][a-zA-Z0-9_.-]*\.vmdk$/i.test(import_node_path12.default.basename(input2))) fail("UNSAFE_PATH", "Destination needs a simple .vmdk filename.");
     const disk = await this.backend.hostPath(input2, "output-file");
     const directory = import_node_path12.default.dirname(disk);
-    await this.backend.hostPath(directory, "destination-directory");
+    await this.backend.hostPath(directory, "host-destination-directory");
     await this.backend.hostPath(import_node_path12.default.dirname(directory), "directory");
     if (await exists2(directory)) fail("TARGET_EXISTS", "Disk output requires a NEW parent directory to protect all companion extents.");
     return { disk, directory };

@@ -51,6 +51,8 @@ Packaging writes `dist/vmware-workstation-0.6.0.zip` and verifies its required e
 
 ## Validation
 
+On 2026-11-02, the [live VMDK workflow](vmware-workstation/disks.md#validation) passed on Windows/Workstation 26.0.1: create/inspect/expand, local types 0–3 and streaming type 5 conversion, backed-up attach/detach, compact and defragment. Conversion preserved the source hash and detach preserved the backing hash. Only new disposable targets were mutated; the existing running VM set was unchanged. No guest partition/filesystem resize or native Linux VMware mutation is claimed.
+
 On 2026-11-02, Workstation 26.0.1 build 25688693 was verified to expose native per-VM RFB 3.8 with VNC password authentication and a 127.0.0.1 listener. The opt-in live console test connected to new BIOS and UEFI VMs simultaneously, captured their firmware displays, and verified RFB keys changed both displays while a non-VMware app stayed foreground in all 142 observed samples. Click/type/scroll/status calls also completed. Test VMs were stopped, VNC disabled, and temporary credentials deleted. No host screenshot, mouse/keyboard injection, or window activation was used. An actual PXE server and OS installation ISO were not part of that run.
 
 The automated suite adds RFB 3.3/3.7/3.8 authentication, framebuffer pixels, multi-VM isolation, key modifiers, resize handling, listener/credential rejection, and file permission preparation checks to the original VM/REST tests. `npm run validate` checks the 117 tool schemas, the original 87-tool, pre-OVF 98-tool and pre-disk 108-tool baselines, and platform credential-file protection. All new console input/capture uses RFB; the read-only focus observer exists only in the opt-in live test.

@@ -8,7 +8,7 @@ Call `disk_manager_status {}` first. It reports the executable, version, exact c
 
 Set `VMWARE_VDISKMANAGER_PATH` to the absolute `vmware-vdiskmanager.exe` (Windows) or executable `vmware-vdiskmanager` launcher (native Linux), or let discovery check beside vmrun, the Workstation installation and PATH. Linux launchers retain their original name. An invalid explicit override fails without silently choosing another binary. Restart the application launching the MCP process after changing its environment.
 
-All disk files and extents honor `VMWARE_ALLOWED_HOST_ROOTS`; VMX files honor `VMWARE_ALLOWED_ROOTS`. Set both for a restricted deployment. Paths must be absolute and use host-native syntax. The examples use Windows paths; on Linux use paths such as `/srv/vms/data/disk.vmdk`.
+All disk files, new disk output directories and extents honor `VMWARE_ALLOWED_HOST_ROOTS`; VMX files honor `VMWARE_ALLOWED_ROOTS`. These roots can be separate VMX and disk-storage directories. Set both for a restricted deployment. Paths must be absolute and use host-native syntax. The examples use Windows paths; on Linux use paths such as `/srv/vms/data/disk.vmdk`.
 
 ## Create and inspect a disk
 
@@ -64,7 +64,7 @@ Use an existing controller. Controller creation and hardware tuning remain separ
 
 This selects `scsi0:1`; indices are zero-based. SCSI controllers use units 0–15 excluding reserved unit 7, SATA 0–29, IDE 0–1 with controller indices 0–1, and NVMe 0–14. Other controller indices range from 0–3. SCSI requires a known configured controller type; SATA/NVMe require `present=TRUE`. IDE is implicit. Disk adapter metadata must match: `ide` for IDE, `buslogic` for BusLogic SCSI, and `lsilogic` for other supported controllers (as disk-manager help directs). Occupied or stale slot settings are refused. A disk referenced by any other known device cannot be attached again.
 
-Call `disk_detach` with the same arguments. It verifies the **expected disk** at that exact slot, removes the slot's VMX settings, and preserves all VMDK and extent files. Both changes use the existing UTF-8 VMX backup/protection mechanism and return the backup path. Detach never deletes disks or removes the controller. Restore only after inspecting current VM state and the backup.
+Call `disk_detach` with the same arguments. It verifies the **expected disk** at that exact slot, removes the slot's VMX settings, and preserves all VMDK and extent files. Both changes use the existing UTF-8 VMX backup/protection mechanism and return the backup path. Native snapshot discovery can normalize a new VMX; the edit baseline is captured and revalidated after that discovery. Detach never deletes disks or removes the controller. Restore only after inspecting current VM state and the backup.
 
 ## Conflicts and failures
 
@@ -76,4 +76,6 @@ Errors have a JSON `code`, `message` and actionable detail. Missing/unsupported 
 
 `npm test` exercises native argument contracts and failure/safety paths with temporary fixture disks on Windows and Linux CI. `npm run package` verifies all 117 schemas, all 108 previous definitions, generated reference and required archive entries.
 
-`npm run test:disk:live` is opt-in and requires authorization for disposable VM/disk creation and mutation. It creates an isolated powered-off VM and disks under ignored `test-vms/`, tests create/inspect/expand/convert/attach/detach and supported compact/defragment, and retains evidence plus artifacts. Its isolated inventory/roots deliberately exclude existing VMs; it never boots, registers or deletes a VM. Mock tests and WSL runs do not establish native Linux VMware behavior. A live result applies only to the host/build on which that script actually passed.
+`npm run test:disk:live` is opt-in and requires authorization for disposable VM/disk creation and mutation. It creates an isolated powered-off VM and disks under ignored `test-vms/`, tests create/inspect/expand/convert/attach/detach and supported compact/defragment, and retains evidence plus artifacts. It uses a fresh inventory and guards every explicit mutation target against its disposable directory, including canonical ancestor checks. Since `vmrun` reports all running VMs regardless of inventory, the harness permits read-only reference scans outside the disposable directory; it verifies the existing running VM set is unchanged. It never boots, registers or deletes a VM. Conversion and detach verify source/backing SHA-256 hashes are unchanged. Mock tests and WSL runs do not establish native Linux VMware behavior. A live result applies only to the host/build on which that script actually passed.
+
+On 2026-11-02, the workflow passed on Windows with VMware Workstation 26.0.1 / Virtual Disk Manager build 25688693: disk types 0–3 were created and converted, type 5 streaming output was converted, a growable disk expanded from 8 to 16 to 24 MiB, and attach/detach, compact and defragment completed. The disposable VM remained unstarted and artifacts/evidence were retained locally. Guest boot, partition/filesystem resizing and native Linux VMware mutation were not tested.

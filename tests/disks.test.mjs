@@ -67,6 +67,30 @@ async function fixture(t) {
 }
 const nativeCalls = f => f.calls.filter(c => c.file === f.diskManager && c.args.length);
 
+test('disk output directories honor host-file roots independently of VMX roots', async t => {
+  const f = await fixture(t);
+  const storage = path.join(f.root, 'disk-storage'); await fs.mkdir(storage);
+  f.backend.env.VMWARE_ALLOWED_ROOTS = f.directory;
+  f.backend.env.VMWARE_ALLOWED_HOST_ROOTS = storage;
+  const disk = path.join(storage, 'created', 'data.vmdk');
+  await f.disks.perform('create', { destination: disk, capacity_mb: 1 });
+  const converted = path.join(storage, 'converted', 'data.vmdk');
+  await f.disks.perform('convert', { disk, destination: converted, confirm: true });
+  await fs.access(converted);
+  for (const operation of ['create', 'convert']) {
+    const destination = path.join(f.directory, `forbidden-${operation}`, 'disk.vmdk');
+    const args = operation === 'create' ? { destination, capacity_mb: 1 } : { destination, disk, confirm: true };
+    await assert.rejects(f.disks.perform(operation, args), /outside the configured allowed roots/);
+    await assert.rejects(fs.stat(path.dirname(destination)), { code: 'ENOENT' });
+  }
+  const occupied = path.join(storage, 'occupied'); await fs.writeFile(occupied, 'retained file');
+  await assert.rejects(f.disks.perform('create', { destination: path.join(occupied, 'disk.vmdk'), capacity_mb: 1 }), /directory|ENOTDIR/);
+  if (process.platform !== 'win32') {
+    await fs.symlink(f.directory, path.join(storage, 'escape'));
+    await assert.rejects(f.disks.perform('create', { destination: path.join(storage, 'escape', 'new', 'disk.vmdk'), capacity_mb: 1 }), /outside/);
+  }
+});
+
 test('runtime help parses exact case-sensitive flags and advertised types; missing/unsupported capabilities are actionable', async t => {
   const f = await fixture(t); const status = await f.disks.status();
   assert.equal(status.available, true); assert.equal(status.operations.convert, true); assert.ok(status.disk_types.some(t => t.id === '3'));
@@ -305,4 +329,25 @@ test('VMX replacement rechecks disk state and retains the original on an externa
   };
   await assert.rejects(f.disks.edit({ vmx: f.vmx, disk: f.disk, controller: 'scsi', controller_index: 0, unit: 1, confirm: true }, false), { code: 'DISK_CHANGED' });
   assert.equal(await fs.readFile(f.vmx, 'utf8'), f.originalVM);
+});
+
+test('attach captures the VMX baseline after native snapshot discovery normalizes it', async t => {
+  const f = await fixture(t); let normalized = false;
+  f.backend.snapshots = async () => {
+    if (!normalized) { normalized = true; await fs.writeFile(f.vmx, (f.originalVM + 'extendedConfigFile = "machine.vmxf"\n').replaceAll('\n', '\r\n')); }
+    return { vmx: f.vmx, snapshots: [] };
+  };
+  const result = await f.disks.edit({ vmx: f.vmx, disk: f.disk, controller: 'scsi', controller_index: 0, unit: 1, confirm: true }, false);
+  assert.equal(result.attached, true);
+  assert.match(await fs.readFile(result.backup, 'utf8'), /extendedConfigFile = "machine.vmxf"\r\n/);
+  assert.equal(parseAssignments(await fs.readFile(f.vmx, 'utf8'))['scsi0:1.fileName'], f.disk);
+});
+
+test('unsafe VM state is refused before native snapshot discovery can normalize the VMX', async t => {
+  const f = await fixture(t);
+  f.backend.snapshots = async () => { assert.fail('Unsafe VMX must be refused before native discovery.'); };
+  for (const setting of ['encryption.keySafe = "encrypted"', 'checkpoint.vmState = "saved.vmss"']) {
+    await fs.writeFile(f.vmx, f.originalVM + setting + '\n');
+    await assert.rejects(f.disks.safeVM(f.vmx), { code: 'UNSAFE_VM' });
+  }
 });
