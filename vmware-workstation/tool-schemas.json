@@ -354,6 +354,490 @@
       }
     },
     {
+      "name": "disk_manager_status",
+      "description": "Discover native VMware Virtual Disk Manager and the exact flags/disk types advertised by its installed help. Missing capabilities return actionable status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_inspect",
+      "description": "Read a local VMDK descriptor, capacity, extents and backing-chain metadata. No disk-manager repair, guest mount or filesystem access.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "disk": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "disk"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_create",
+      "description": "Create a local VMDK in a NEW parent directory to protect companion extents. Supports installed growable/preallocated single/split disk types 0-3.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "Absolute .vmdk in a NEW parent directory; grandparent must exist."
+          },
+          "capacity_mb": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8388608,
+            "description": "Total virtual capacity in MiB, not an increment."
+          },
+          "disk_type": {
+            "default": "0",
+            "type": "string",
+            "enum": [
+              "0",
+              "1",
+              "2",
+              "3"
+            ]
+          },
+          "adapter": {
+            "default": "lsilogic",
+            "type": "string",
+            "enum": [
+              "ide",
+              "buslogic",
+              "lsilogic"
+            ]
+          },
+          "timeout_seconds": {
+            "default": 600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "destination",
+          "capacity_mb"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_expand",
+      "description": "Expand an independent offline VMDK to total capacity_mb. Requires explicit confirmation; refuses snapshots, locks, shared/backing chains. Does not resize guest partitions or filesystems.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "disk": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "vmx_paths": {
+            "default": [],
+            "description": "Additional unregistered VMX files that may reference this disk. Inventory is also checked.",
+            "maxItems": 256,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk."
+          },
+          "timeout_seconds": {
+            "default": 600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          },
+          "capacity_mb": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8388608,
+            "description": "Total virtual capacity in MiB, not an increment."
+          }
+        },
+        "required": [
+          "disk",
+          "confirm",
+          "capacity_mb"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_convert",
+      "description": "Convert an independent offline local VMDK into a NEW parent directory, preserving the original. Supports advertised types 0-3 and stream-optimized output type 5. Partial output is retained on failure.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "disk": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "vmx_paths": {
+            "default": [],
+            "description": "Additional unregistered VMX files that may reference this disk. Inventory is also checked.",
+            "maxItems": 256,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk."
+          },
+          "timeout_seconds": {
+            "default": 600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          },
+          "destination": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "Absolute .vmdk in a NEW parent directory; source is preserved."
+          },
+          "disk_type": {
+            "default": "0",
+            "type": "string",
+            "enum": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "5"
+            ]
+          }
+        },
+        "required": [
+          "disk",
+          "confirm",
+          "destination"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_compact",
+      "description": "Compact an independent offline growable VMDK using installed -k capability. Requires explicit confirmation. Guest free-space preparation is separate; no guest filesystem resize.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "disk": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "vmx_paths": {
+            "default": [],
+            "description": "Additional unregistered VMX files that may reference this disk. Inventory is also checked.",
+            "maxItems": 256,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk."
+          },
+          "timeout_seconds": {
+            "default": 600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "disk",
+          "confirm"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_defragment",
+      "description": "Defragment an independent offline growable VMDK using installed -d capability. Requires explicit confirmation and conservative free-space checks.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "disk": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "vmx_paths": {
+            "default": [],
+            "description": "Additional unregistered VMX files that may reference this disk. Inventory is also checked.",
+            "maxItems": 256,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk."
+          },
+          "timeout_seconds": {
+            "default": 600,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [
+          "disk",
+          "confirm"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_attach",
+      "description": "Attach an independent VMDK to an existing controller and explicit unused unit in a powered-off VMX, with a backup. Refuses snapshots, locked/suspended VMs and known shared disks. confirm requires authorization.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "controller": {
+            "type": "string",
+            "enum": [
+              "scsi",
+              "sata",
+              "ide",
+              "nvme"
+            ]
+          },
+          "controller_index": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "unit": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 63
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk."
+          },
+          "disk": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "vmx_paths": {
+            "default": [],
+            "description": "Additional unregistered VMX files that may reference this disk. Inventory is also checked.",
+            "maxItems": 256,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          }
+        },
+        "required": [
+          "vmx",
+          "controller",
+          "controller_index",
+          "unit",
+          "confirm",
+          "disk"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "disk_detach",
+      "description": "Remove the explicit VMX disk slot after verifying its expected VMDK, with a backup. Never deletes the underlying VMDK or extents. Requires authorization and a powered-off snapshot-free VM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vmx": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "controller": {
+            "type": "string",
+            "enum": [
+              "scsi",
+              "sata",
+              "ide",
+              "nvme"
+            ]
+          },
+          "controller_index": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "unit": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 63
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Set only after the user authorizes this exact change and confirms no unregistered VM, other process or host uses this disk."
+          },
+          "disk": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "Expected backing disk; refuses a different disk at the selected slot."
+          },
+          "vmx_paths": {
+            "default": [],
+            "description": "Additional unregistered VMX files that may reference this disk. Inventory is also checked.",
+            "maxItems": 256,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          }
+        },
+        "required": [
+          "vmx",
+          "controller",
+          "controller_index",
+          "unit",
+          "confirm",
+          "disk"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
       "name": "ovf_tool_status",
       "description": "Discover optional local VMware OVF Tool, version and supported flags. VMWARE_OVFTOOL_PATH overrides automatic discovery with an absolute executable path.",
       "inputSchema": {

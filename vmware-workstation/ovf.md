@@ -117,7 +117,7 @@ Supported pairs are OVF/OVA to VMX, VMX to OVF/OVA, and OVF/OVA to OVF/OVA. VMX-
 
 `job_cancel` requests termination of the native OVF Tool process. A timed-out or cancelled job may have partial output. Completed registration/power changes can also remain. Inspect before retrying; no automatic deletion or rollback occurs. OVF/VMX output directories and unsuccessful OVA staging directories are retained for diagnosis.
 
-Jobs and logs are memory-only, with four concurrent jobs and at most 100 retained records. New jobs evict the oldest completed records when needed. Overlapping source/output directories are reserved against other OVF jobs; unrelated jobs may run concurrently. These reservations do not coordinate existing low-level vmrun/REST tools or other Workstation processes. Do not change a source VM or its files while a transfer is running. Full cross-tool orchestration is a later roadmap phase.
+Jobs and logs are memory-only, with four concurrent jobs and at most 100 retained records. New jobs evict the oldest completed records when needed. Overlapping source/output paths are reserved against other OVF jobs, disk operations, VMX edits and local vmrun/loopback REST VM mutations in this server; unrelated operations may proceed. These reservations do not coordinate other server instances, remote REST origins or Workstation processes. Keep sources stable throughout a transfer. Full cross-tool orchestration is a later roadmap phase.
 
 On orderly shutdown, active children are terminated and jobs are interrupted. After restart, a previous session's job ID reports `interrupted` with an **unknown outcome**. A forcibly killed server may leave an OVF Tool process; inspect local processes and output before retrying. Logs/results do not survive restart.
 

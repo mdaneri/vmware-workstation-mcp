@@ -1,6 +1,6 @@
 # VMware Workstation
 
-Local Windows and Linux MCP plugin, version 0.5.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 108 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), five [LAN segment tools](#lan-segments), and ten [OVF/OVA and background job tools](ovf.md). All 98 previous tool names, input schemas, and annotations remain unchanged. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
+Local Windows and Linux MCP plugin, version 0.6.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 117 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), five [LAN segment tools](#lan-segments), ten [OVF/OVA and background job tools](ovf.md), and nine [VMDK lifecycle tools](disks.md). All 108 previous tool names, input schemas, and annotations remain unchanged. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
 
 Requires VMware Workstation with vmrun, Node.js 22.12+, PowerShell 7 for setup helpers, and a host with local stdio MCP support. REST tools additionally need a running, authenticated vmrest service. Guest OS commands need VMware Tools running and a guest OS account; console tools need neither and work before the OS boots. The plugin runs as your local user and opens no HTTP listener. Native VNC listeners are configured on the VM itself and restricted to localhost.
 
@@ -13,6 +13,7 @@ See [the full command and endpoint reference](reference.md) for the exact operat
 | Inventory and configuration | Registered/running VMs, selected local hardware details, REST VM settings, restrictions, registration, arbitrary supported config parameters |
 | Power | Start, soft/hard stop/reset/suspend, pause/unpause, REST power state and operations |
 | Snapshots | List flat/tree, create, revert, delete one or delete with children |
+| VMDK lifecycle | [Discover disk-manager flags, inspect/create/expand/convert/compact/defragment, and explicit controller/slot attach/detach](disks.md); no guest filesystem resizing |
 | Guest execution | Programs, scripts, interactive/active-window/no-wait modes, processes, termination, variables, keystrokes |
 | Files and directories | Both transfer directions, existence checks, list/create/delete directories, delete/rename files, create temp files |
 | Host integration | Shared-folder add/remove/enable/disable/access changes; device connect/disconnect; screenshots |

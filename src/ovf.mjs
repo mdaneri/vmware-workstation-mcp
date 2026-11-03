@@ -105,7 +105,7 @@ export class OvfManager {
     }
     const status = await this.available(operation === 'ovf_validate' ? ['schemaValidate', 'hideEula'] : ['hideEula']);
     return this.jobs.start({ operation, resources: [key(path.dirname(inputPath)), ...(directory ? [key(directory)] : [])], timeout: a.timeout_seconds * 1000,
-      task: context => this.perform(operation, { ...a, source: inputPath, destination, directory, target, ext }, status, context) });
+      task: context => this.backend.resources.use([ext === 'vmx' ? path.dirname(inputPath) : inputPath, ...(directory ? [directory] : [])], () => this.perform(operation, { ...a, source: inputPath, destination, directory, target, ext }, status, context)) });
   }
   async vmSource(vmx) {
     vmx = await this.backend.vmx(vmx);

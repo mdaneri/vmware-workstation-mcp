@@ -12,17 +12,18 @@ import { localFileProtector } from './local-file-security.mjs';
 import { LanSegments, lanSegmentSchemas } from './lan-segments.mjs';
 import { OvfManager, ovfSchemas } from './ovf.mjs';
 import { JobManager, jobSchemas } from './jobs.mjs';
-import { findVMwareExecutable } from './host-platform.mjs';
+import { DiskManager, diskSchemas } from './disks.mjs';
 
 const backend = new Workstation();
 const credentials = new Credentials();
-const rest = new RestClient({ credentials, backend });
+const rest = new RestClient({ credentials, backend, coordinateDiskEdits: true });
 const vmFiles = new VMFiles(backend, { protectSensitiveFile: localFileProtector(backend) });
 const lanSegments = new LanSegments(backend, vmFiles, { protectFile: localFileProtector(backend) });
 const consoles = new ConsoleManager({ backend, credentials, rest });
 const jobs = new JobManager({ redact: text => credentials.redact(text) });
 const ovf = new OvfManager({ backend, credentials, jobs, rest });
-const server = new McpServer({ name: 'vmware-workstation', version: '0.5.0' });
+const disks = new DiskManager({ backend, vmFiles });
+const server = new McpServer({ name: 'vmware-workstation', version: '0.6.0' });
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
 function tool(name, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false) {
@@ -35,7 +36,7 @@ function tool(name, description, schema, readOnly, callback, destructive = !read
       if (Array.isArray(result?.content)) return { content: result.content.map(block => block.type === 'text' ? { ...block, text: credentials.redact(block.text) } : block) };
       return { content: [{ type: 'text', text: credentials.redact(JSON.stringify(result, null, 2)) }] };
     } catch (error) {
-      return { isError: true, content: [{ type: 'text', text: credentials.redact(error.message) }] };
+      return { isError: true, content: [{ type: 'text', text: credentials.redact(error.details || name.startsWith('disk_') ? JSON.stringify({ code: error.code || 'DISK_PREFLIGHT_FAILED', message: error.message, action: 'Inspect the target and disk_manager_status before retrying.', ...error.details }) : error.message) }] };
     }
   });
 }
@@ -47,6 +48,16 @@ tool('console_scroll', 'Send RFB wheel events to the VM at the last console poin
 tool('console_status', 'Check this VM native loopback-only VNC configuration and authenticated RFB session. Does not start the VM or modify its VNC settings.', consoleSchemas.console_status, true, a => consoles.status(a.vm_id));
 tool('create_vm', 'Create a new blank VMX and sparse virtual disk in a NEW directory using VMware Virtual Disk Manager. Configure CPUs, memory, firmware, networking and optional ISO. Does not install a guest OS or power on/register the VM.', createVMSchema, false, a => vmFiles.create(a), false);
 tool('configure_vm', 'Edit a powered-off UTF-8 VMX with a backup. Set arbitrary VMX key/value strings or null to remove keys. Refuses running, locked, or detected suspended VMs. Use for CPU, memory, boot media, network and other VMX configuration.', configureVMSchema, false, a => vmFiles.configure(a));
+
+tool('disk_manager_status', 'Discover native VMware Virtual Disk Manager and the exact flags/disk types advertised by its installed help. Missing capabilities return actionable status.', diskSchemas.disk_manager_status, true, () => disks.status());
+tool('disk_inspect', 'Read a local VMDK descriptor, capacity, extents and backing-chain metadata. No disk-manager repair, guest mount or filesystem access.', diskSchemas.disk_inspect, true, a => disks.inspect(a));
+tool('disk_create', 'Create a local VMDK in a NEW parent directory to protect companion extents. Supports installed growable/preallocated single/split disk types 0-3.', diskSchemas.disk_create, false, a => disks.perform('create', a), false);
+tool('disk_expand', 'Expand an independent offline VMDK to total capacity_mb. Requires explicit confirmation; refuses snapshots, locks, shared/backing chains. Does not resize guest partitions or filesystems.', diskSchemas.disk_expand, false, a => disks.perform('expand', a));
+tool('disk_convert', 'Convert an independent offline local VMDK into a NEW parent directory, preserving the original. Supports advertised types 0-3 and stream-optimized output type 5. Partial output is retained on failure.', diskSchemas.disk_convert, false, a => disks.perform('convert', a), false);
+tool('disk_compact', 'Compact an independent offline growable VMDK using installed -k capability. Requires explicit confirmation. Guest free-space preparation is separate; no guest filesystem resize.', diskSchemas.disk_compact, false, a => disks.perform('compact', a));
+tool('disk_defragment', 'Defragment an independent offline growable VMDK using installed -d capability. Requires explicit confirmation and conservative free-space checks.', diskSchemas.disk_defragment, false, a => disks.perform('defragment', a));
+tool('disk_attach', 'Attach an independent VMDK to an existing controller and explicit unused unit in a powered-off VMX, with a backup. Refuses snapshots, locked/suspended VMs and known shared disks. confirm requires authorization.', diskSchemas.disk_attach, false, a => disks.edit(a, false));
+tool('disk_detach', 'Remove the explicit VMX disk slot after verifying its expected VMDK, with a backup. Never deletes the underlying VMDK or extents. Requires authorization and a powered-off snapshot-free VM.', diskSchemas.disk_detach, false, a => disks.edit(a, true));
 
 tool('ovf_tool_status', 'Discover optional local VMware OVF Tool, version and supported flags. VMWARE_OVFTOOL_PATH overrides automatic discovery with an absolute executable path.', ovfSchemas.ovf_tool_status, true, () => ovf.status());
 tool('ovf_inspect', 'Start a read-only background appliance probe. job_status.result reports hardware, disks, NICs, properties, deployment options and manifest checks. Local flat OVF/OVA packages only.', ovfSchemas.ovf_inspect, true, a => ovf.start('ovf_inspect', a));
@@ -101,7 +112,8 @@ tool('workstation_capabilities', 'Show full vmrun/REST tool coverage, compare th
     ovfTool: await ovf.status(),
     ovfTools: Object.keys(ovfSchemas),
     backgroundJobTools: Object.keys(jobSchemas),
-    diskManager: await findVMwareExecutable('vmware-vdiskmanager', { env: backend.env, beside: await backend.executable() }).then(executable => ({ available: true, executable, features: ['create_vm sparse disk creation; advanced disk tools are not implemented'] })).catch(error => ({ available: false, error: error.message })),
+    diskManager: await disks.status(),
+    diskTools: Object.keys(diskSchemas),
     note: 'Coverage describes callable implementations. It does not prove a REST service is running, credentials work, or guest operations succeed.',
   };
 });
