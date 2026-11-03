@@ -112,6 +112,11 @@ synced manifest writes record the recipe, bindings, ownership identity, creation
 intent, completed VM/disk files, created segment IDs and failure summaries. It
 contains local paths and should stay private. It never stores guest credentials,
 raw native error text, command output or guest service responses.
+Original media bindings remain part of the recipe used for resume matching;
+separate `media_paths` records hold the canonical paths actually deployed. ISO
+aliases and equivalent path spellings therefore work throughout the lifecycle.
+Retargeting an alias does not change an existing lab's selected installer, and
+removing installer media does not prevent verifying or tearing down its VM files.
 
 For `LAB_PARTIAL_FAILURE`, inspect `lab_status`. Set `resume:true` on `lab_deploy`
 with the SAME recipe and bindings after inspecting the retained state. Completed

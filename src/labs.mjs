@@ -63,6 +63,7 @@ export class LabManager {
     if (m.schema_version !== '1.0' || m.directory !== directory || !same(rootStat, m.identity) || !/^[0-9a-f-]{36}$/.test(m.owner) || await read(markerName) !== m.owner) fail('UNSAFE_MANIFEST', 'Lab ownership does not match this root.');
     const { lab, order } = orderLab(m.lab);
     if (JSON.stringify(order) !== JSON.stringify(m.order) || m.recipe !== digest({ lab, networks: m.bindings, media: m.media }) || !Array.isArray(m.vms) || m.vms.length !== lab.vms.length || !Array.isArray(m.segments) || m.segments.length > Object.keys(lab.networks).length) fail('UNSAFE_MANIFEST', 'Invalid lab manifest recipe or resources.');
+    if (m.media_paths !== undefined && (!m.media_paths || Array.isArray(m.media_paths) || typeof m.media_paths !== 'object' || Object.keys(m.media_paths).length !== Object.keys(m.media).length || Object.keys(m.media).some(key => typeof m.media_paths[key] !== 'string' || !path.isAbsolute(m.media_paths[key]) || path.resolve(m.media_paths[key]) !== m.media_paths[key]))) fail('UNSAFE_MANIFEST', 'Resolved media paths must match the original binding names and be absolute normalized paths.');
     for (let i = 0; i < m.vms.length; i++) {
       const v = m.vms[i];
       if (v.id !== lab.vms[i].id || !Array.isArray(v.files) || v.files.length > 1024 || v.files.some(f => typeof f.path !== 'string' || path.isAbsolute(f.path) || !isWithin(path.join(directory, v.id), path.resolve(directory, f.path)))) fail('UNSAFE_MANIFEST', 'Manifest paths must stay inside the named VM directory.');
@@ -71,6 +72,9 @@ export class LabManager {
     return m;
   }
   segmentName(m, key) { return `lab-${m.lab.id}-${m.owner}-${key}`; }
+  async canonicalMedia(media) {
+    return Object.fromEntries(await Promise.all(Object.entries(media).map(async ([key, file]) => [key, await this.backend.hostPath(file, 'input-file')])));
+  }
   async plan(input) {
     const { lab, order } = orderLab(input.lab), directory = await this.root(input.directory);
     if (await exists(directory)) fail('TARGET_EXISTS', 'Choose a NEW lab directory, or explicitly resume the matching manifest.');
@@ -79,6 +83,7 @@ export class LabManager {
     if (Object.keys(input.networks).length !== required.length || required.some(k => !Object.hasOwn(input.networks, k))) fail('INVALID_NETWORK', 'Supply exactly the external lab network bindings. Private LANs are created by the lab.');
     const mediaNames = new Set(lab.vms.flatMap(v => Object.values(v.media)));
     if (Object.keys(input.media).length !== mediaNames.size || [...mediaNames].some(k => !Object.hasOwn(input.media, k))) fail('INVALID_MEDIA', 'Supply exactly the mapped lab media bindings.');
+    const mediaPaths = await this.canonicalMedia(input.media);
     const bindings = { ...input.networks }, plannedSegments = [];
     for (const [key, network] of Object.entries(lab.networks)) if (network.kind === 'private_lan') {
       // Internal synthetic identifiers exist only in this read-only plan. The
@@ -88,13 +93,13 @@ export class LabManager {
     const plans = [];
     for (const id of order) {
       const v = lab.vms.find(v => v.id === id);
-      const a = this.templateArgs(v, directory, bindings, input.media);
+      const a = this.templateArgs(v, directory, bindings, mediaPaths);
       const { plan } = await this.templates.prepare(a, { plannedParent: path.dirname(directory), plannedSegments });
       plans.push({ id, depends_on: v.depends_on, readiness: v.readiness, ...plan });
     }
     const bytes = plans.reduce((n, p) => n + p.resources.virtual_disk_bytes, 0);
     await this.templates.hardware.disks.freeSpace(path.dirname(directory), bytes);
-    return { valid: true, dry_run: true, plan: { schema_version: '1.0', directory, order, networks: lab.networks, vms: plans,
+    return { valid: true, dry_run: true, plan: { schema_version: '1.0', directory, order, networks: lab.networks, media_paths: mediaPaths, vms: plans,
       resources: { cpus: plans.reduce((n, p) => n + p.resources.cpus, 0), memory_mb: plans.reduce((n, p) => n + p.resources.memory_mb, 0), virtual_disk_bytes: bytes },
       warnings: ['Blank VMs; no OS installation or guest readiness is implied.', 'Private LAN IDs are allocated at deployment; external networks/media remain unowned.', 'Reservations coordinate this server only. Keep external writers closed.', 'Destroy removes only recorded files; unexpected runtime/user files are retained. Ambiguous creation intents require manual inspection.'] } };
   }
@@ -125,9 +130,13 @@ export class LabManager {
     if (await exists(vmx)) {
       await this.backend.vmx(vmx);
       const { config } = await readHardware(vmx);
+      // Older manifests did not persist resolved media. Resolve those bindings
+      // read-only; new manifests retain deployment paths even if an alias moves
+      // or installer media is subsequently removed. Recipe bindings stay intact.
+      const mediaPaths = new Set(Object.values(m.media_paths ?? await this.canonicalMedia(m.media)).map(file => this.backend.resources.key(file)));
       for (const [key, value] of Object.entries(config)) if (/\.filename$|^workingdir$|^snapshot\.directory$|^checkpoint\.vmstate$|^suspend\.filename$/.test(key) && value) {
         // Original ISO bindings may be outside the lab and remain unowned.
-        if (/\.filename$/.test(key) && config[key.replace('filename', 'devicetype')] === 'cdrom-image' && Object.values(m.media).includes(value)) continue;
+        if (/\.filename$/.test(key) && config[key.replace('filename', 'devicetype')] === 'cdrom-image' && mediaPaths.has(this.backend.resources.key(path.resolve(directory, value)))) continue;
         if (!isWithin(directory, path.resolve(directory, value))) fail('EXTERNAL_BACKING', 'VM now references storage/state outside its owned directory.');
       }
     }
@@ -147,12 +156,13 @@ export class LabManager {
         await this.protectFile.preflight?.(); extra.signal?.throwIfAborted();
         await fs.mkdir(root, { mode: 0o700 });
         m = { schema_version: '1.0', directory: root, identity: identity(await fs.lstat(root)), owner: randomUUID(), lab: orderLab(a.lab).lab,
-          order: planned.plan.order, bindings: a.networks, media: a.media, state: 'deploying', segments: [],
+          order: planned.plan.order, bindings: a.networks, media: a.media, media_paths: planned.plan.media_paths, state: 'deploying', segments: [],
           vms: a.lab.vms.map(v => ({ id: v.id, state: 'pending', files: [] })) };
         m.recipe = digest({ lab: m.lab, networks: m.bindings, media: m.media });
         await this.writePrivate(path.join(root, markerName), m.owner); await this.save(m);
       }
       return this.record(m, 'deploy', async () => {
+        m.media_paths ??= await this.canonicalMedia(m.media);
         const bindings = { ...m.bindings };
         for (const [key, n] of Object.entries(m.lab.networks)) if (n.kind === 'private_lan') {
           extra.signal?.throwIfAborted(); let s = m.segments.find(s => s.key === key);
@@ -172,7 +182,7 @@ export class LabManager {
           if (v.state === 'created') { await this.verifyVM(m, v); continue; }
           if (!['pending', 'creating'].includes(v.state) || await exists(path.join(root, id))) fail('UNCERTAIN_RESOURCE', 'Partial VM directory exists. It is never adopted or overwritten; inspect it before recovery.');
           v.state = 'creating'; await this.save(m);
-          await this.templates.deploy({ ...this.templateArgs(node, root, bindings, m.media, a.timeout_seconds), dry_run: false, confirm: true }, extra);
+          await this.templates.deploy({ ...this.templateArgs(node, root, bindings, m.media_paths, a.timeout_seconds), dry_run: false, confirm: true }, extra);
           const directory = path.join(root, id); v.identity = identity(await fs.lstat(directory)); v.files = await this.inventory(directory, root); v.state = 'created'; await this.save(m);
         }
         m.state = 'deployed'; await this.save(m);

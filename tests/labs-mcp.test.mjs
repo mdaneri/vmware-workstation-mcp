@@ -46,15 +46,20 @@ require('node:child_process').execFile = stub;
   for (const prior of previous.tools) assert.deepEqual(tools.find(t => t.name === prior.name), prior);
   const call = async (name, args) => { const r = await client.callTool({name, arguments: args}); assert.ok(!r.isError, JSON.stringify(r)); return JSON.parse(r.content[0].text); };
   const listed = await call('template_list', {});
+  const mediaDirectory = path.join(root, 'media'); await fs.mkdir(mediaDirectory); await fs.mkdir(path.join(mediaDirectory, 'subdir'));
+  const iso = path.join(mediaDirectory, 'installer.iso'); await fs.writeFile(iso, 'external installer');
+  const mediaBinding = `${mediaDirectory}${path.sep}subdir${path.sep}..${path.sep}installer.iso`;
   for (const example of ['two-vm', 'nested-esxi']) {
     const lab = JSON.parse(await fs.readFile(`vmware-workstation/labs/${example}.json`, 'utf8'));
     for (const v of lab.vms) { v.template = structuredClone(listed.templates.find(t => t.id === v.template)); v.template.disks.forEach(d => { d.capacity_mb = 1; }); }
-    const args = { lab, directory: path.join(root,example), networks: example === 'nested-esxi' ? { management: { network: 'nat' } } : {} };
+    if (example === 'two-vm') for (const v of lab.vms) { v.template.boot = { mode: 'iso', media: 'installer' }; v.media = { installer: 'install' }; }
+    const args = { lab, directory: path.join(root,example), networks: example === 'nested-esxi' ? { management: { network: 'nat' } } : {}, media: example === 'two-vm' ? { install: mediaBinding } : {} };
     const plan = await call('lab_validate', args); assert.equal(plan.valid,true);
     assert.deepEqual((await call('lab_deploy',args)).plan, plan.plan);
     await assert.rejects(fs.stat(args.directory), {code:'ENOENT'});
     assert.equal((await client.callTool({name:'lab_deploy',arguments:{...args,dry_run:false}})).isError,true);
     const deployed = await call('lab_deploy',{...args,dry_run:false,confirm:true});
+    if (example === 'two-vm') { assert.equal(deployed.manifest.media.install, mediaBinding); assert.equal(deployed.manifest.media_paths.install, await fs.realpath(iso)); }
     const status = await call('lab_status',{directory:args.directory}); assert.equal(status.observations.length,lab.vms.length);
     const segment = deployed.manifest.segments[0].id;
     const selected = example === 'two-vm' ? 'gateway' : 'esxi';
@@ -69,5 +74,6 @@ require('node:child_process').execFile = stub;
     const retained = path.join(args.directory,selected,'user-file.txt'); await fs.writeFile(retained,'keep');
     const destroyed = await call('lab_destroy',{directory:args.directory,dry_run:false,confirm:true}); assert.equal(destroyed.manifest.state,'destroyed');
     assert.equal(await fs.readFile(retained,'utf8'),'keep');
+    assert.equal(await fs.readFile(iso,'utf8'),'external installer');
   }
 });

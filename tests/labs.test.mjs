@@ -116,6 +116,59 @@ test('readiness retries are bounded, gate dependents and resume does not duplica
   assert.equal(f.running.size, 2); assert.equal(f.calls.filter(c => c.args[2] === 'start').length, 2);
 });
 
+for (const binding of ['dot-segments', 'directory-alias']) test(`canonical ISO ${binding} bindings survive resume/start/stop/destroy without owning the ISO`, async t => {
+  const f = await fixture(t), media = path.join(f.root, 'media'); await fs.mkdir(media);
+  const iso = path.join(media, 'installer.iso'); await fs.writeFile(iso, 'installer');
+  let input;
+  if (binding === 'dot-segments') {
+    await fs.mkdir(path.join(media, 'subdir')); input = `${media}${path.sep}subdir${path.sep}..${path.sep}installer.iso`;
+  } else {
+    const alias = path.join(f.root, 'media-alias'); await fs.symlink(media, alias, process.platform === 'win32' ? 'junction' : 'dir'); input = path.join(alias, 'installer.iso');
+  }
+  for (const v of f.lab.vms) { v.template.boot = { mode: 'iso', media: 'installer' }; v.media = { installer: 'install' }; }
+  const args = { ...f.args, media: { install: input } }, canonical = await fs.realpath(iso);
+  const plan = await f.manager.validate(args); assert.deepEqual(plan.plan.media_paths, { install: canonical });
+  await f.manager.deploy({ ...args, dry_run: false, confirm: true });
+  const saved = await f.manager.read(args.directory); assert.equal(saved.media.install, input); assert.equal(saved.media_paths.install, canonical);
+  assert.ok((await f.manager.status({ directory: args.directory })).observations.every(v => v.running === false));
+  await f.manager.deploy({ ...args, dry_run: false, confirm: true, resume: true });
+  await f.manager.action('start', { directory: args.directory, dry_run: false, confirm: true }); assert.equal(f.running.size, 2);
+  await f.manager.action('stop', { directory: args.directory, dry_run: false, confirm: true });
+  if (binding === 'directory-alias') {
+    if (process.platform === 'win32') await fs.rmdir(path.join(f.root, 'media-alias'));
+    else await fs.unlink(path.join(f.root, 'media-alias'));
+    const other = path.join(f.root, 'other-media'); await fs.mkdir(other); await fs.writeFile(path.join(other, 'installer.iso'), 'unselected');
+    await fs.symlink(other, path.join(f.root, 'media-alias'), process.platform === 'win32' ? 'junction' : 'dir');
+    await f.manager.deploy({ ...args, dry_run: false, confirm: true, resume: true });
+  }
+  await f.manager.action('destroy', { directory: args.directory, dry_run: false, confirm: true });
+  assert.equal(await fs.readFile(iso, 'utf8'), 'installer');
+});
+
+test('stored canonical media paths allow cleanup after source removal and reject an unselected ISO', async t => {
+  const f = await fixture(t), iso = path.join(f.root, 'selected.iso'), other = path.join(f.root, 'other.iso');
+  await fs.writeFile(iso, 'selected'); await fs.writeFile(other, 'unselected');
+  for (const v of f.lab.vms) { v.template.boot = { mode: 'iso', media: 'installer' }; v.media = { installer: 'install' }; }
+  await f.deploy({ media: { install: iso } });
+  const vmx = path.join(f.args.directory, 'gateway', 'machine.vmx'), original = await fs.readFile(vmx, 'utf8');
+  await fs.writeFile(vmx, original.replace(iso, other));
+  await assert.rejects(f.manager.action('start', { directory: f.args.directory, dry_run: false, confirm: true }), e => e.details.failure.code === 'EXTERNAL_BACKING');
+  await fs.writeFile(vmx, original); await fs.unlink(iso);
+  await f.manager.action('destroy', { directory: f.args.directory, dry_run: false, confirm: true });
+  assert.equal(await fs.readFile(other, 'utf8'), 'unselected');
+});
+
+test('legacy manifest media bindings resolve read-only and gain canonical paths on resume', async t => {
+  const f = await fixture(t), iso = path.join(f.root, 'installer.iso'); await fs.writeFile(iso, 'installer');
+  for (const v of f.lab.vms) { v.template.boot = { mode: 'iso', media: 'installer' }; v.media = { installer: 'install' }; }
+  const media = { install: `${f.root}${path.sep}.${path.sep}installer.iso` }; await f.deploy({ media });
+  const m = await f.manager.read(f.args.directory); delete m.media_paths; await f.manager.save(m);
+  const before = await fs.readFile(path.join(f.args.directory, 'lab-manifest.json'), 'utf8');
+  assert.ok((await f.manager.status({ directory: f.args.directory })).observations.every(v => v.running === false));
+  assert.equal(await fs.readFile(path.join(f.args.directory, 'lab-manifest.json'), 'utf8'), before);
+  await f.deploy({ media, resume: true }); assert.equal((await f.manager.read(f.args.directory)).media_paths.install, await fs.realpath(iso));
+});
+
 test('failed second VM records partial resources; restart refuses adoption and leaves first VM intact', async t => {
   const f = await fixture(t), realDeploy = f.templates.deploy.bind(f.templates);
   f.templates.deploy = async (a, extra) => { if (a.directory.endsWith('client')) { await fs.mkdir(a.directory); await fs.writeFile(path.join(a.directory, 'partial'), 'keep'); throw new Error('secret=never-journal'); } return realDeploy(a, extra); };
