@@ -58564,7 +58564,7 @@ var import_node_crypto12 = require("node:crypto");
 // package.json
 var package_default = {
   name: "vmware-workstation-plugin-dev",
-  version: "0.16.0",
+  version: "0.16.1",
   private: true,
   license: "MIT",
   repository: {
@@ -58613,6 +58613,8 @@ var package_default = {
 
 // src/plugin-catalog.mjs
 var pluginVersion = package_default.version;
+var earlyCatalogTools = ["a_vmware_catalog", "a_vmware_mutate", "a_vmware_query"];
+var entrypoints = /* @__PURE__ */ new Set([...earlyCatalogTools, "plugin_catalog", "plugin_query", "plugin_mutate"]);
 var catalogSchema = external_exports.object({
   tool: external_exports.string().regex(/^[a-z][a-z0-9_]*$/).max(128).optional().describe("Existing tool name to discover its exact input schema, annotations and bridge route. No operation is executed."),
   observed_tools: external_exports.array(external_exports.string().regex(/^[a-z][a-z0-9_]*$/).max(128)).max(512).optional().describe("Optional complete assistant-visible VMware tool names, without namespace prefixes. Compared with this running server, never used to execute tools.")
@@ -58629,11 +58631,11 @@ var PluginCatalog = class {
     this.entries.set(name2, entry);
   }
   bridgeNames(readOnly) {
-    return [...this.entries].filter(([name2, entry]) => !name2.startsWith("plugin_") && entry.annotations.readOnlyHint === readOnly).map(([name2]) => name2).sort();
+    return [...this.entries].filter(([name2, entry]) => !entrypoints.has(name2) && entry.annotations.readOnlyHint === readOnly).map(([name2]) => name2).sort();
   }
-  bridgeSchema(readOnly) {
+  bridgeSchema(readOnly, discovery = "plugin_catalog") {
     return external_exports.object({
-      tool: external_exports.enum(this.bridgeNames(readOnly)).describe("Exact existing tool name discovered with plugin_catalog."),
+      tool: external_exports.enum(this.bridgeNames(readOnly)).describe(`Exact existing tool name discovered with ${discovery}.`),
       arguments: external_exports.record(external_exports.string(), external_exports.unknown()).default({}).describe("Original tool arguments. Validated against that tool's unchanged strict schema before execution; no raw CLI or arbitrary operations."),
       ...!readOnly ? { confirm: external_exports.literal(true).describe("Required after authorization for the exact target and effects. Original tool confirmation fields are also required.") } : {}
     }).strict();
@@ -58670,7 +58672,7 @@ var PluginCatalog = class {
         description: entry.description,
         inputSchema: external_exports.toJSONSchema(entry.schema, { target: "draft-7", io: "input" }),
         annotations: entry.annotations,
-        bridge: tool2.startsWith("plugin_") ? null : entry.annotations.readOnlyHint ? "plugin_query" : "plugin_mutate"
+        bridge: entrypoints.has(tool2) ? null : entry.annotations.readOnlyHint ? "a_vmware_query" : "a_vmware_mutate"
       } : null,
       comparison: observed === null ? null : {
         observed_count: observed.length,
@@ -58680,7 +58682,7 @@ var PluginCatalog = class {
         alphabetical_prefix_only: observed.length > 0 && observed.length < tool_names.length && JSON.stringify(observed) === JSON.stringify(tool_names.slice(0, observed.length))
       },
       scope: "Running server registration only. Cannot observe the desktop client catalog, its filters, cache, or another server process. No VMware commands or credentials are accessed.",
-      action: "For a missing operation, discover its schema using tool, then use the indicated plugin_query or plugin_mutate route with the original arguments. These routes reuse the registered handlers and protections; never use them to evade intentional client policy. Compare server version and tool_names with raw MCP and assistant-visible catalogs, then reconnect/restart if stale. Never replay mutations or use raw CLI/guest execution to bypass missing tools."
+      action: "For a missing operation, discover its schema with a_vmware_catalog using tool, then use the indicated a_vmware_query or a_vmware_mutate route with the original arguments. These routes reuse the registered handlers and protections; never use them to evade intentional client policy. Compare server version and tool_names with raw MCP and assistant-visible catalogs, then reconnect/restart in a fresh chat if stale. Never replay mutations or use raw CLI/guest execution to bypass missing tools."
     };
   }
 };
@@ -58710,7 +58712,7 @@ var templates = new TemplateManager({ backend, hardware, rest });
 var labs = new LabManager({ backend, templates, lan: lanSegments, readiness: readiness2, protectFile: localFileProtector(backend) });
 var catalog = new PluginCatalog();
 var server = new McpServer({ name: "vmware-workstation", version: pluginVersion }, {
-  instructions: "If a VMware tool is missing, call plugin_catalog with tool=<exact name> to discover its schema and route through plugin_query (read-only) or plugin_mutate (authorized changes, confirm=true). Both reuse original strict validation and handlers. Never bypass intentional client policy. get_guest_ip supports bounded waiting. Never replay mutations or substitute raw CLI/guest execution."
+  instructions: "If a VMware tool is missing, call a_vmware_catalog with tool=<exact name> to discover its schema and route through a_vmware_query (read-only) or a_vmware_mutate (authorized changes, confirm=true). Both reuse original strict validation and handlers. Never bypass intentional client policy. get_guest_ip supports bounded waiting. Never replay mutations or substitute raw CLI/guest execution."
 });
 var vmx2 = external_exports.string().min(1).describe("Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.");
 var name = external_exports.string().min(1).max(256).describe("Exact snapshot name.");
@@ -58759,7 +58761,6 @@ function tool(name2, description, schema, readOnly, callback, destructive = !rea
     }
   };
   catalog.add(name2, { description, schema: inputSchema, annotations, invoke });
-  server.registerTool(name2, { description, inputSchema, annotations }, invoke);
 }
 tool("serial_status", "Inspect optional per-VM serial capability/configuration and session state without connecting or starting a VM. Only a connected session proves native endpoint ownership.", serialSchemas.serial_status, true, (a) => serial.status(a));
 tool("serial_configure", "Explicitly replace or disable one serial port configuration in a powered-off unlocked VMX, with a backup. Requires confirm=true after authorization. Uses only a generated per-VM local pipe/socket; never starts a VM.", serialSchemas.serial_configure, false, (a) => serial.configure(a));
@@ -58881,6 +58882,19 @@ tool("workstation_capabilities", "Show full vmrun/REST tool coverage, compare th
 });
 tool("plugin_query", "Call a discovered read-only VMware operation when its direct tool is missing. First use plugin_catalog with tool to obtain the original strict argument schema. Reuses the same handler, deadlines, cancellation and redaction. Cannot call mutations or arbitrary commands; never bypass intentional policy.", catalog.bridgeSchema(true), true, (a, extra) => catalog.invoke(true, a, extra), false, true, false);
 tool("plugin_mutate", "Call a discovered state-changing VMware operation when its direct tool is missing. First obtain its schema from plugin_catalog. Requires authorization for exact target/effects, confirm=true and every original confirmation. Reuses original validation, locks, credentials and handler; never retries. Do not bypass intentional policy.", catalog.bridgeSchema(false), false, (a, extra) => catalog.invoke(false, a, extra), true, true, false);
+for (const [alias, original] of [["a_vmware_catalog", "plugin_catalog"], ["a_vmware_mutate", "plugin_mutate"], ["a_vmware_query", "plugin_query"]]) {
+  const entry = catalog.entries.get(original);
+  catalog.add(alias, {
+    ...entry,
+    schema: original === "plugin_catalog" ? entry.schema : catalog.bridgeSchema(original === "plugin_query", "a_vmware_catalog"),
+    description: entry.description.replaceAll("plugin_catalog", "a_vmware_catalog")
+  });
+}
+var registrationOrder = [...earlyCatalogTools, ...[...catalog.names].filter((name2) => !earlyCatalogTools.includes(name2))];
+for (const name2 of registrationOrder) {
+  const entry = catalog.entries.get(name2);
+  server.registerTool(name2, { description: entry.description, inputSchema: entry.schema, annotations: entry.annotations }, entry.invoke);
+}
 async function shutdown() {
   serial.close();
   consoles.close();

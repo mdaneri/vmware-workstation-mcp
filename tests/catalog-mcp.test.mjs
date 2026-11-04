@@ -38,8 +38,55 @@ require('node:child_process').execFile = deny;
   const client = await connect();
   const raw = await client.listTools();
   assert.equal(raw.nextCursor, undefined);
-  assert.equal(raw.tools.length, 153);
+  assert.equal(raw.tools.length, 156);
+  assert.deepEqual(raw, JSON.parse(await fs.readFile('vmware-workstation/tool-schemas.json', 'utf8')), 'Generated catalog must match the bundled MCP response');
   const names = raw.tools.map(tool => tool.name).sort();
+  // #40: a 46-name prefix ends before all of the original plugin_* bridges.
+  // Recovery must work using only names actually present in that client view.
+  const early = ['a_vmware_catalog', 'a_vmware_mutate', 'a_vmware_query'];
+  assert.deepEqual(names.slice(0, 3), early);
+  assert.deepEqual(raw.tools.slice(0, 3).map(tool => tool.name), early);
+  for (const name of ['a_vmware_query', 'a_vmware_mutate']) assert.match(raw.tools.find(tool => tool.name === name).inputSchema.properties.tool.description, /a_vmware_catalog/);
+  const previous = JSON.parse(await fs.readFile('tests/fixtures/pre-early-catalog-tool-schemas.json', 'utf8'));
+  assert.equal(previous.tools.length, 153);
+  for (const original of previous.tools) assert.deepEqual(raw.tools.find(tool => tool.name === original.name), original);
+  for (const count of [46, 74]) {
+    await t.test(`recovery through a ${count}-name assistant-visible prefix`, async () => {
+      const visible = new Set(names.slice(0, count));
+      const visibleCall = async (name, args = {}) => {
+        assert.ok(visible.has(name), `Hidden entrypoint: ${name}`);
+        return client.callTool({ name, arguments: args });
+      };
+      if (count === 46) for (const name of ['plugin_catalog', 'plugin_query', 'plugin_mutate']) assert.ok(!visible.has(name));
+      assert.ok(!visible.has('vmrun_get_guest_ip_address'));
+      const selected = JSON.parse((await visibleCall('a_vmware_catalog', { tool: 'vmrun_get_guest_ip_address', observed_tools: [...visible] })).content[0].text);
+      assert.equal(selected.comparison.alphabetical_prefix_only, true);
+      assert.equal(selected.selected_tool.bridge, 'a_vmware_query');
+      assert.deepEqual(selected.selected_tool.inputSchema, raw.tools.find(tool => tool.name === 'vmrun_get_guest_ip_address').inputSchema);
+      const templates = await visibleCall('a_vmware_query', { tool: 'template_list' });
+      assert.ok(!templates.isError, JSON.stringify(templates));
+      assert.equal(JSON.parse(templates.content[0].text).templates.length, 3);
+      for (const name of ['vm_get_recent_errors', 'vm_hardware_capabilities', 'workstation_status', 'vm_wait_for_ip']) {
+        const found = JSON.parse((await visibleCall('a_vmware_catalog', { tool: name })).content[0].text);
+        assert.equal(found.selected_tool.bridge, 'a_vmware_query');
+      }
+      for (const name of [...early, 'plugin_catalog', 'plugin_query', 'plugin_mutate', 'vm_power']) {
+        assert.equal((await visibleCall('a_vmware_query', { tool: name })).isError, true);
+      }
+      for (const name of [...early, 'plugin_catalog', 'plugin_query', 'plugin_mutate', 'template_list']) {
+        assert.equal((await visibleCall('a_vmware_mutate', { tool: name, confirm: true })).isError, true);
+      }
+      for (const name of early) {
+        const selected = JSON.parse((await visibleCall('a_vmware_catalog', { tool: name })).content[0].text);
+        assert.equal(selected.selected_tool.bridge, null);
+      }
+      assert.equal((await visibleCall('a_vmware_mutate', { tool: 'vm_boot_configure', arguments: { vmx: 'relative.vmx', confirm: true } })).isError, true);
+      assert.equal((await visibleCall('a_vmware_mutate', { tool: 'vm_boot_configure', confirm: true, arguments: { vmx: 'relative.vmx' } })).isError, true);
+      const unsupported = await visibleCall('a_vmware_mutate', { tool: 'vm_boot_configure', confirm: true, arguments: { vmx: 'relative.vmx', confirm: true } });
+      assert.equal(unsupported.isError, true);
+      assert.deepEqual(unsupported, await client.callTool({ name: 'vm_boot_configure', arguments: { vmx: 'relative.vmx', confirm: true } }));
+    });
+  }
   const prior = JSON.parse(await fs.readFile('tests/fixtures/pre-catalog-tool-schemas.json', 'utf8'));
   assert.equal(prior.tools.length, 150);
   for (const tool of prior.tools) {
@@ -80,7 +127,7 @@ require('node:child_process').execFile = deny;
     const direct = raw.tools.find(t => t.name === original.name);
     assert.deepEqual(selected.inputSchema, direct.inputSchema);
     assert.deepEqual(selected.annotations, direct.annotations);
-    assert.equal(selected.bridge, direct.annotations.readOnlyHint ? 'plugin_query' : 'plugin_mutate');
+    assert.equal(selected.bridge, direct.annotations.readOnlyHint ? 'a_vmware_query' : 'a_vmware_mutate');
   }
   const templates = await client.callTool({ name: 'plugin_query', arguments: { tool: 'template_list' } });
   assert.ok(!templates.isError, JSON.stringify(templates));
@@ -129,8 +176,8 @@ test('packaged catalog diagnostic reports raw server identity without VMware', a
   const { stdout } = await promisify(execFile)(process.execPath, [path.join(root, 'server/inspect-catalog.cjs'), root], { windowsHide: true, timeout: 30000 });
   const report = JSON.parse(stdout);
   assert.equal(report.inspection, 'fresh_stdio_connection_only');
-  assert.equal(report.tool_count, 153);
-  assert.equal(report.unique_tool_count, 153);
+  assert.equal(report.tool_count, 156);
+  assert.equal(report.unique_tool_count, 156);
   assert.equal(report.server.version, report.installed_version);
   assert.equal(report.bundle_sha256, createHash('sha256').update(await fs.readFile(path.join(root, 'server/server.cjs'))).digest('hex'));
 });

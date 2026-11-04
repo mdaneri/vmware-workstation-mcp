@@ -26,7 +26,7 @@ import { templateSchemas } from './template-schemas.mjs';
 import { LabManager } from './labs.mjs';
 import { labSchemas } from './lab-schemas.mjs';
 import { SecurityManager, securitySchemas } from './security.mjs';
-import { PluginCatalog, catalogSchema, pluginVersion } from './plugin-catalog.mjs';
+import { PluginCatalog, catalogSchema, pluginVersion, earlyCatalogTools } from './plugin-catalog.mjs';
 
 const backend = new Workstation();
 const credentials = new Credentials();
@@ -49,7 +49,7 @@ const templates = new TemplateManager({ backend, hardware, rest });
 const labs = new LabManager({ backend, templates, lan: lanSegments, readiness, protectFile: localFileProtector(backend) });
 const catalog = new PluginCatalog();
 const server = new McpServer({ name: 'vmware-workstation', version: pluginVersion }, {
-  instructions: 'If a VMware tool is missing, call plugin_catalog with tool=<exact name> to discover its schema and route through plugin_query (read-only) or plugin_mutate (authorized changes, confirm=true). Both reuse original strict validation and handlers. Never bypass intentional client policy. get_guest_ip supports bounded waiting. Never replay mutations or substitute raw CLI/guest execution.',
+  instructions: 'If a VMware tool is missing, call a_vmware_catalog with tool=<exact name> to discover its schema and route through a_vmware_query (read-only) or a_vmware_mutate (authorized changes, confirm=true). Both reuse original strict validation and handlers. Never bypass intentional client policy. get_guest_ip supports bounded waiting. Never replay mutations or substitute raw CLI/guest execution.',
 });
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
@@ -103,7 +103,8 @@ function tool(name, description, schema, readOnly, callback, destructive = !read
     }
   };
   catalog.add(name, { description, schema: inputSchema, annotations, invoke });
-  server.registerTool(name, { description, inputSchema, annotations }, invoke);
+  // Register after collecting every operation, so bridge enums are complete and
+  // recovery entrypoints can lead both registration-order and sorted listings.
 }
 
 tool('serial_status', 'Inspect optional per-VM serial capability/configuration and session state without connecting or starting a VM. Only a connected session proves native endpoint ownership.', serialSchemas.serial_status, true, a => serial.status(a));
@@ -214,6 +215,20 @@ tool('workstation_capabilities', 'Show full vmrun/REST tool coverage, compare th
 });
 tool('plugin_query', 'Call a discovered read-only VMware operation when its direct tool is missing. First use plugin_catalog with tool to obtain the original strict argument schema. Reuses the same handler, deadlines, cancellation and redaction. Cannot call mutations or arbitrary commands; never bypass intentional policy.', catalog.bridgeSchema(true), true, (a, extra) => catalog.invoke(true, a, extra), false, true, false);
 tool('plugin_mutate', 'Call a discovered state-changing VMware operation when its direct tool is missing. First obtain its schema from plugin_catalog. Requires authorization for exact target/effects, confirm=true and every original confirmation. Reuses original validation, locks, credentials and handler; never retries. Do not bypass intentional policy.', catalog.bridgeSchema(false), false, (a, extra) => catalog.invoke(false, a, extra), true, true, false);
+// Preserve legacy descriptors exactly; aliases share their strict schemas,
+// annotations and wrapped handlers, including errors, images and cancellation.
+for (const [alias, original] of [['a_vmware_catalog', 'plugin_catalog'], ['a_vmware_mutate', 'plugin_mutate'], ['a_vmware_query', 'plugin_query']]) {
+  const entry = catalog.entries.get(original);
+  catalog.add(alias, { ...entry,
+    schema: original === 'plugin_catalog' ? entry.schema : catalog.bridgeSchema(original === 'plugin_query', 'a_vmware_catalog'),
+    description: entry.description.replaceAll('plugin_catalog', 'a_vmware_catalog'),
+  });
+}
+const registrationOrder = [...earlyCatalogTools, ...[...catalog.names].filter(name => !earlyCatalogTools.includes(name))];
+for (const name of registrationOrder) {
+  const entry = catalog.entries.get(name);
+  server.registerTool(name, { description: entry.description, inputSchema: entry.schema, annotations: entry.annotations }, entry.invoke);
+}
 async function shutdown() { serial.close(); consoles.close(); await jobs.close(); }
 process.stdin.once('end', () => { void shutdown(); });
 process.once('SIGTERM', () => { void shutdown().finally(() => process.exit(0)); });
