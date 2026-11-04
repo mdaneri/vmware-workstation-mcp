@@ -4,13 +4,24 @@
 
 # VMware Workstation
 
-Local Windows and Linux MCP plugin, version 0.16.1. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 156 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), five [LAN segment tools](#lan-segments), ten [OVF/OVA and background job tools](ovf.md), reusable [job submission](jobs.md), nine [VMDK lifecycle tools](disks.md), six [optional serial tools](serial.md), five [readiness and diagnostics tools](readiness.md), [verified guest execution](guest-exec.md), five [ISO media/boot capability tools](iso.md), three [typed hardware tools](hardware.md), four [declarative VM template tools](templates.md), six [multi-VM lab tools](#multi-vm-labs), two [read-only security inspection tools](security.md), and six [catalog discovery and validated bridge entrypoints](catalog.md). All 150 previous tools remain registered; `get_guest_ip` adds optional bounded-wait fields and updated guidance. Portable templates provide validation, read-only plans, sanitized export and explicit no-overwrite deployment with optional registration/power-on. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
+Local Windows and Linux MCP plugin, version 0.17.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 156 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), five [LAN segment tools](#lan-segments), ten [OVF/OVA and background job tools](ovf.md), reusable [job submission](jobs.md), nine [VMDK lifecycle tools](disks.md), six [optional serial tools](serial.md), five [readiness and diagnostics tools](readiness.md), [verified guest execution](guest-exec.md), five [ISO media/boot capability tools](iso.md), three [typed hardware tools](hardware.md), four [declarative VM template tools](templates.md), six [multi-VM lab tools](#multi-vm-labs), two [read-only security inspection tools](security.md), and six [catalog discovery and validated bridge entrypoints](catalog.md). All 150 previous tools remain registered; `get_guest_ip` adds optional bounded-wait fields and updated guidance. Portable templates provide validation, read-only plans, sanitized export and explicit no-overwrite deployment with optional registration/power-on. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
 
 Requires VMware Workstation with vmrun, Node.js 22.12+, PowerShell 7 for setup helpers, and a host with local stdio MCP support. REST tools additionally need a running, authenticated vmrest service. Guest OS commands need VMware Tools running and a guest OS account; console tools need neither and work before the OS boots. The plugin runs as your local user and opens no HTTP listener. Native VNC listeners are configured on the VM itself and restricted to localhost.
 
 See [the full command and endpoint reference](reference.md) for the exact operation-to-tool mapping and argument names. `workstation_capabilities` compares the implemented catalog with the locally installed CLI; newer Workstation releases may add operations that require a plugin update. The REST schema was imported from the installed `swagger.zip/json/swagger_WS.json`, SHA-256 `71c8094a4ab765151111ac4fd68a2bf8ace1061d470ef4ac2c5dc6f86aebb3f7`. The installed vmrest reports version 1.3.1 build 25688693.
 
 For missing documented tools, start with [catalog diagnostics and reconnect checks](catalog.md). `a_vmware_catalog` reports the running version and discovers exact operation schemas. Use its `a_vmware_query` or `a_vmware_mutate` route if a direct tool is missing; the original validation and handlers remain in force. Raw MCP and assistant-visible catalogs must be compared separately.
+
+## Connect in Claude
+
+For Claude Code, install the native marketplace plugin:
+
+```powershell
+claude plugin marketplace add mdaneri/vmware-workstation-mcp
+claude plugin install vmware-workstation@vmware-local
+```
+
+Claude Desktop uses the versioned `.mcpb` release asset through **Install Extension** and its managed Node runtime. See [Claude installation and optional settings](claude-installation.md) for prerequisites, updates, removal and catalog diagnostics.
 
 ## What you can do
 
@@ -126,7 +137,7 @@ codex plugin add vmware-workstation@vmware-local
 codex plugin list --marketplace vmware-local --json
 ```
 
-`plugin add` alone uses the existing marketplace snapshot and can reinstall an older release. Reopen Codex and start a fresh local chat with the plugin enabled. Call `a_vmware_catalog` with `{"tool":"vmrun_get_guest_ip_address"}` and check version `0.16.1`, `tool_count: 156` and `selected_tool.bridge: "a_vmware_query"`; an old directory remaining in the cache does not prove that version is active. See [catalog diagnostics](catalog.md) if the installed and running versions or exposed tools differ.
+`plugin add` alone uses the existing marketplace snapshot and can reinstall an older release. Reopen Codex and start a fresh local chat with the plugin enabled. Call `a_vmware_catalog` with `{"tool":"vmrun_get_guest_ip_address"}` and check version `0.17.0`, `tool_count: 156` and `selected_tool.bridge: "a_vmware_query"`; an old directory remaining in the cache does not prove that version is active. See [catalog diagnostics](catalog.md) if the installed and running versions or exposed tools differ.
 
 For a marketplace registered from a local directory, update that directory and rebuild after source changes before running `plugin add`. `marketplace upgrade` refreshes Git-backed sources only; `codex plugin marketplace list` shows the registered source root.
 

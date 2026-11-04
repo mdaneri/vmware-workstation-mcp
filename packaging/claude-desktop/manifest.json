@@ -1,0 +1,766 @@
+{
+  "manifest_version": "0.3",
+  "name": "vmware-workstation",
+  "display_name": "VMware Workstation",
+  "version": "0.17.0",
+  "description": "Manage VMware Workstation with vmrun, REST, LAN segments, direct headless VNC/RFB console screenshots and input, and optional serial consoles.",
+  "author": {
+    "name": "mdaneri",
+    "url": "https://github.com/mdaneri"
+  },
+  "homepage": "https://github.com/mdaneri/vmware-workstation-mcp",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mdaneri/vmware-workstation-mcp.git"
+  },
+  "documentation": "https://github.com/mdaneri/vmware-workstation-mcp/blob/main/vmware-workstation/claude-installation.md",
+  "support": "https://github.com/mdaneri/vmware-workstation-mcp/issues",
+  "license": "MIT",
+  "keywords": [
+    "vmware",
+    "workstation",
+    "virtual-machines",
+    "snapshots",
+    "windows",
+    "linux"
+  ],
+  "long_description": "Independent community integration for native VMware Workstation on Windows and Linux (Claude Desktop Linux is beta). VMware Workstation must be installed locally. Inventory requires no credentials. REST requires vmrest and local credentials; guest operations require VMware Tools and guest credentials. VNC consoles require per-VM authenticated loopback setup. Runs as your local user using stdio and opens no new network listener. Encryption and vTPM provisioning are unsupported.",
+  "icon": "assets/icon.png",
+  "server": {
+    "type": "node",
+    "entry_point": "server/claude-desktop.cjs",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/server/claude-desktop.cjs"
+      ],
+      "env": {
+        "VMWARE_DESKTOP_CREDENTIALS_FILE": "${user_config.credentials_file}",
+        "VMWARE_DESKTOP_VMRUN_PATH": "${user_config.vmrun_path}",
+        "VMWARE_DESKTOP_DISK_MANAGER_PATH": "${user_config.disk_manager_path}",
+        "VMWARE_DESKTOP_OVFTOOL_PATH": "${user_config.ovftool_path}",
+        "VMWARE_DESKTOP_VMCLI_PATH": "${user_config.vmcli_path}",
+        "VMWARE_DESKTOP_VMX_PATH": "${user_config.vmx_path}",
+        "VMWARE_DESKTOP_INVENTORY_PATH": "${user_config.inventory_path}",
+        "VMWARE_DESKTOP_PREFERENCES_PATH": "${user_config.preferences_path}",
+        "VMWARE_DESKTOP_ALLOWED_ROOTS": "${user_config.allowed_roots}",
+        "VMWARE_DESKTOP_ALLOWED_HOST_ROOTS": "${user_config.allowed_host_roots}",
+        "VMWARE_DESKTOP_REST_URL": "${user_config.rest_url}"
+      }
+    }
+  },
+  "compatibility": {
+    "platforms": [
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=22.12.0"
+    }
+  },
+  "tools": [
+    {
+      "name": "a_vmware_catalog",
+      "description": "Read running plugin version, process identity and complete registered tool names without VMware or credentials. Optionally compare assistant-visible names to diagnose missing tools, including an alphabetical cutoff. Cannot refresh the client catalog."
+    },
+    {
+      "name": "a_vmware_mutate",
+      "description": "Call a discovered state-changing VMware operation when its direct tool is missing. First obtain its schema from a_vmware_catalog. Requires authorization for exact target/effects, confirm=true and every original confirmation. Reuses original validation, locks, credentials and handler; never retries. Do not bypass intentional policy."
+    },
+    {
+      "name": "a_vmware_query",
+      "description": "Call a discovered read-only VMware operation when its direct tool is missing. First use a_vmware_catalog with tool to obtain the original strict argument schema. Reuses the same handler, deadlines, cancellation and redaction. Cannot call mutations or arbitrary commands; never bypass intentional policy."
+    },
+    {
+      "name": "vm_security_capabilities",
+      "description": "Read-only native worker/version and vmcli help discovery. Separates installed tools from a verified encryption/vTPM backend. No security mutations or encryption modes are supported; no VM or credentials are opened."
+    },
+    {
+      "name": "vm_security_status",
+      "description": "Read selected allowlisted VM security declarations without returning encryption keys, TPM contents or arbitrary VMX values. Encryption state/mode and actual vTPM presence remain unknown without independent native verification. No unlock, power or configuration changes."
+    },
+    {
+      "name": "lab_validate",
+      "description": "Read-only versioned multi-VM lab validation and plan. Reuses template/hardware preflight, checks dependency graph, network/media mappings and aggregate disk space. Plans private LANs without creating them. No OS installation or readiness is implied."
+    },
+    {
+      "name": "lab_deploy",
+      "description": "Plan by default. Explicit dry_run=false and confirm=true create a NEW lab root, private ownership manifest, optional owned LAN segments and blank template VMs. start=true opts into headless dependency/readiness-ordered startup. resume=true requires the identical recipe and bindings; completed verified VMs are skipped and uncertain partial creation is refused. No implicit rollback, overwrite or registration."
+    },
+    {
+      "name": "lab_status",
+      "description": "Read the selected private lab manifest and observe VM ownership/power. Completed steps and uncertain intents are separate from live guest readiness. Does not scan for or adopt resources."
+    },
+    {
+      "name": "lab_start",
+      "description": "Plan by default; explicit dry_run=false and confirm=true start only verified lab VMs headlessly in dependency order. Bounded Tools/IP/service readiness gates dependents; retries apply only to read-only readiness observations. Already running VMs are rechecked. No automatic replay of VM creation or power commands."
+    },
+    {
+      "name": "lab_stop",
+      "description": "Plan by default; explicit dry_run=false and confirm=true stop only verified lab VMs in reverse dependency order. Soft shutdown is default, hard stop requires explicit mode=hard authorization. No hard fallback. Partial or uncertain outcomes remain in the manifest."
+    },
+    {
+      "name": "lab_destroy",
+      "description": "Plan by default; explicit dry_run=false and confirm=true remove only recorded lab files and owned LAN segments. Requires fully offline, unlocked VMs; never stops implicitly. Refuses changed identity, links, external backings and uncertain creation. Keeps unknown files, empty member directories and the recovery manifest; never deletes external networks, media or unrelated files."
+    },
+    {
+      "name": "template_list",
+      "description": "List bundled portable versioned JSON templates for Linux, Windows Server and nested ESXi. Returns complete editable recipes without reading host files or credentials."
+    },
+    {
+      "name": "template_validate",
+      "description": "Read-only template validation and deployment plan: checks schema, supported installed hardware/disk capabilities, explicit local network/ISO bindings, new destination, allowlists and conservative free space. Shows VMX, disk paths and resource requirements. Reserves nothing."
+    },
+    {
+      "name": "template_export",
+      "description": "Read an offline VM as a portable blank hardware recipe. Caller supplies new identity. Omits disk contents, UUIDs/MACs, host paths, network identity, secrets and arbitrary VMX fields; requires explicit local rebinding. Does not save a file or clone a guest."
+    },
+    {
+      "name": "template_deploy",
+      "description": "Plan by default (dry_run=true). Real deployment requires dry_run=false and confirm=true after authorization. Creates blank sparse disks and VMX in a NEW directory with repeated preflight; never overwrites. Optional register/power_on default false. Partial files and failed post-actions are retained; inspect before retrying. No OS installation, vTPM/encryption or forced boot order."
+    },
+    {
+      "name": "vm_hardware_capabilities",
+      "description": "Inspect installed native Workstation product version and conservative typed hardware limits. No power or configuration changes. vTPM writes require an unavailable encryption backend; nested CPU and guest driver support remain unverified."
+    },
+    {
+      "name": "vm_hardware_get",
+      "description": "Read typed declared CPU topology, memory, nested virtualization, firmware/security, storage and NIC configuration. Omits unrelated VMX secrets and does not infer missing values or claim live device support."
+    },
+    {
+      "name": "vm_hardware_set",
+      "description": "Apply explicit typed offline hardware changes with VMX backup and concurrency checks. Requires confirm=true, supported installed worker, full power-off and closed VMware GUI. Preserves omitted devices and NIC identity; no disk replacement, encryption or vTPM mutation."
+    },
+    {
+      "name": "iso_list",
+      "description": "Inspect optical devices, ISO backings and configured connection/start-connected state. Does not claim live connection state or mount anything."
+    },
+    {
+      "name": "iso_mount",
+      "description": "Attach an existing allowlisted local ISO to an optical or unused IDE/SATA slot, with VMX backup. Requires confirm=true and fully powered-off, unlocked VM. Refuses ambiguous devices and occupied disk slots. No live hot-swap or power-on."
+    },
+    {
+      "name": "iso_eject",
+      "description": "Disable the selected optical device and remove its backing path, with VMX backup. Requires confirm=true and full power-off. Preserves ISO files, controller and unrelated devices. A later mount re-enables the slot."
+    },
+    {
+      "name": "vm_boot_status",
+      "description": "Inspect firmware/boot VMX values and installed vmrun version. Boot-order and next-boot firmware writes report unsupported until installed-version compatibility is proven; no configuration or power changes."
+    },
+    {
+      "name": "vm_boot_configure",
+      "description": "Request boot-order or next-boot firmware configuration. Currently fails explicitly with UNSUPPORTED_CAPABILITY and writes nothing: no installed-version-verified headless backend is available."
+    },
+    {
+      "name": "guest_exec",
+      "description": "Execute an explicitly authorized guest program with literal arguments or an explicit interpreter/script using a required local credential profile. Captures bounded redacted stdout/stderr and verifies exit codes through a unique completion record. Requires Tools and Python 3 on Linux or Windows PowerShell 5.1. Transport success alone never means guest success. Timeout/cancellation may leave a running guest process; never retry automatically."
+    },
+    {
+      "name": "vm_wait_for_boot",
+      "description": "Wait for VMware Tools running in the selected VM, indicating OS agent readiness only. Power-on, login and application readiness are separate. Bounded total timeout, polling and MCP cancellation; never starts a VM."
+    },
+    {
+      "name": "vm_wait_for_ip",
+      "description": "Wait for a valid guest IP published by VMware Tools. Does not establish network reachability or service readiness. Bounded total timeout and cancellation; never starts a VM."
+    },
+    {
+      "name": "vm_wait_for_service",
+      "description": "Probe only the selected VM Tools-reported IP and explicit port. TCP means connection accepted; HTTP(S) means expected status, with no redirects or retained body/headers. Does not execute guest commands. Bounded deadline and cancellation."
+    },
+    {
+      "name": "vm_get_recent_errors",
+      "description": "Read bounded current vmware.log data only after verifying its selected VM identity. Returns normalized error excerpts and actions; arbitrary log text/paths/secrets are omitted. No host log scan."
+    },
+    {
+      "name": "vm_collect_diagnostics",
+      "description": "Save selected VM allowlisted hardware, lifecycle, Tools/IP, snapshot count and normalized log excerpts into a NEW approved directory. Optional direct VNC guest pixels are unredacted: review before sharing. Never captures host desktop or executes guest commands."
+    },
+    {
+      "name": "serial_status",
+      "description": "Inspect optional per-VM serial capability/configuration and session state without connecting or starting a VM. Only a connected session proves native endpoint ownership."
+    },
+    {
+      "name": "serial_configure",
+      "description": "Explicitly replace or disable one serial port configuration in a powered-off unlocked VMX, with a backup. Requires confirm=true after authorization. Uses only a generated per-VM local pipe/socket; never starts a VM."
+    },
+    {
+      "name": "serial_connect",
+      "description": "Explicitly connect to the configured VM serial pipe/socket after verifying native VMware ownership. Guest serial output must be enabled separately. No host terminal, desktop or remote TCP access."
+    },
+    {
+      "name": "serial_read",
+      "description": "Read at most max_bytes from an explicitly connected VM serial port. Bounded wait returns timed_out with empty data. Base64 preserves bytes; UTF-8 also returns raw_base64. MCP cancellation preserves unread bytes."
+    },
+    {
+      "name": "serial_write",
+      "description": "Send 1-65536 UTF-8 or canonical base64 bytes to an explicitly connected VM serial port. Can change guest state; requires authorization for the intended input. Timeout/cancellation may leave partial input; never replay automatically."
+    },
+    {
+      "name": "serial_disconnect",
+      "description": "Close this VM serial session, cancel pending I/O and discard its buffer. Does not stop the VM or change its serial hardware."
+    },
+    {
+      "name": "console_screenshot",
+      "description": "Capture a fresh PNG from this VM native VNC/RFB framebuffer. Never captures the host desktop. Works during BIOS/UEFI, PXE and installation without VMware Tools."
+    },
+    {
+      "name": "console_click",
+      "description": "Click VM framebuffer coordinates using a direct RFB PointerEvent. No host mouse, window activation or desktop focus is used."
+    },
+    {
+      "name": "console_key",
+      "description": "Send a named key or chord to this VM via RFB, for example F2, Escape, Enter, ArrowDown, Ctrl+Alt+Delete. No host keyboard input is used."
+    },
+    {
+      "name": "console_type",
+      "description": "Type text into the VM via RFB key events, including at pre-OS prompts. Does not use the clipboard, guest agents, or host keyboard injection. Guest keyboard layout affects text."
+    },
+    {
+      "name": "console_scroll",
+      "description": "Send RFB wheel events to the VM at the last console pointer position or framebuffer center. amount is the number of wheel ticks."
+    },
+    {
+      "name": "console_status",
+      "description": "Check this VM native loopback-only VNC configuration and authenticated RFB session. Does not start the VM or modify its VNC settings."
+    },
+    {
+      "name": "create_vm",
+      "description": "Create a new blank VMX and sparse virtual disk in a NEW directory using VMware Virtual Disk Manager. Configure CPUs, memory, firmware, networking and optional ISO. Does not install a guest OS or power on/register the VM."
+    },
+    {
+      "name": "configure_vm",
+      "description": "Edit a powered-off UTF-8 VMX with a backup. Set arbitrary VMX key/value strings or null to remove keys. Refuses running, locked, or detected suspended VMs. Use for CPU, memory, boot media, network and other VMX configuration."
+    },
+    {
+      "name": "disk_manager_status",
+      "description": "Discover native VMware Virtual Disk Manager and the exact flags/disk types advertised by its installed help. Missing capabilities return actionable status."
+    },
+    {
+      "name": "disk_inspect",
+      "description": "Read a local VMDK descriptor, capacity, extents and backing-chain metadata. No disk-manager repair, guest mount or filesystem access."
+    },
+    {
+      "name": "disk_create",
+      "description": "Create a local VMDK in a NEW parent directory to protect companion extents. Supports installed growable/preallocated single/split disk types 0-3."
+    },
+    {
+      "name": "disk_expand",
+      "description": "Expand an independent offline VMDK to total capacity_mb. Requires explicit confirmation; refuses snapshots, locks, shared/backing chains. Does not resize guest partitions or filesystems."
+    },
+    {
+      "name": "disk_convert",
+      "description": "Convert an independent offline local VMDK into a NEW parent directory, preserving the original. Supports advertised types 0-3 and stream-optimized output type 5. Partial output is retained on failure."
+    },
+    {
+      "name": "disk_compact",
+      "description": "Compact an independent offline growable VMDK using installed -k capability. Requires explicit confirmation. Guest free-space preparation is separate; no guest filesystem resize."
+    },
+    {
+      "name": "disk_defragment",
+      "description": "Defragment an independent offline growable VMDK using installed -d capability. Requires explicit confirmation and conservative free-space checks."
+    },
+    {
+      "name": "disk_attach",
+      "description": "Attach an independent VMDK to an existing controller and explicit unused unit in a powered-off VMX, with a backup. Refuses snapshots, locked/suspended VMs and known shared disks. confirm requires authorization."
+    },
+    {
+      "name": "disk_detach",
+      "description": "Remove the explicit VMX disk slot after verifying its expected VMDK, with a backup. Never deletes the underlying VMDK or extents. Requires authorization and a powered-off snapshot-free VM."
+    },
+    {
+      "name": "ovf_tool_status",
+      "description": "Discover optional local VMware OVF Tool, version and supported flags. VMWARE_OVFTOOL_PATH overrides automatic discovery with an absolute executable path."
+    },
+    {
+      "name": "ovf_inspect",
+      "description": "Start a read-only background appliance probe. job_status.result reports hardware, disks, NICs, properties, deployment options and manifest checks. Local flat OVF/OVA packages only."
+    },
+    {
+      "name": "ovf_validate",
+      "description": "Start read-only local OVF/OVA schema and manifest validation. Returns a job ID. Remote-host compatibility, signer trust and guest boot are not established."
+    },
+    {
+      "name": "ovf_import",
+      "description": "Start an OVF/OVA import into a NEW VM directory. Supports typed network/property mappings and explicit EULA acceptance. Registration through REST and headless power-on are opt-in. Returns a job ID; poll job_status."
+    },
+    {
+      "name": "ovf_export",
+      "description": "Start a powered-off VMX export to OVF/OVA. Refuses snapshots, locks, saved state, external backings, encryption and vTPM. OVF needs a new parent directory. Only OVA permits explicit overwrite=true. Returns a job ID."
+    },
+    {
+      "name": "ovf_convert",
+      "description": "Start a local OVF/OVA/VMX conversion using VMware OVF Tool. VMX sources require power-off and no snapshots. OVF/VMX targets need new parent directories; overwrite is limited to OVA. Returns a job ID."
+    },
+    {
+      "name": "job_start",
+      "description": "Start a bounded background job of explicit disk conversion/expansion, full offline cloning or headless VM power steps. Requires confirm=true for every target and action. Steps run sequentially and stop on failure; separate unrelated jobs run concurrently. Returns a job ID; inspect status, partial results and artifact paths before retrying."
+    },
+    {
+      "name": "job_status",
+      "description": "Read background state, genuine backend progress and verified result/error from private bounded journals. Unfinished prior-session jobs report interrupted with unknown outcome and are never replayed."
+    },
+    {
+      "name": "job_list",
+      "description": "List up to 100 current and retained historical jobs from private redacted journals, retained for at most seven days. History does not imply a previous process has stopped."
+    },
+    {
+      "name": "job_cancel",
+      "description": "Request cancellation of a current job and its native process tree. Locks remain until process cleanup finishes. Partial files and VM changes may remain; inspect before retrying."
+    },
+    {
+      "name": "job_logs",
+      "description": "Read bounded, redacted background job output. Raw probe metadata/property defaults are omitted. A truncated log is explicitly marked."
+    },
+    {
+      "name": "list_lan_segments",
+      "description": "List the current host user LAN segment catalog. Optionally supply vmx to inspect adapter indices and segment associations, including orphaned IDs. Does not scan disks or change VMs."
+    },
+    {
+      "name": "create_lan_segment",
+      "description": "Create a named private LAN segment in Workstation preferences with a backup, or return the uniquely named existing segment. Close the Workstation/Player GUI first. Does not create a VMnet, DHCP server or VM adapter."
+    },
+    {
+      "name": "remove_lan_segment",
+      "description": "Remove a LAN segment from Workstation preferences with a backup. Refuses references in registered/running and supplied unregistered VMX files; detach those adapters first. Cannot discover other unregistered VMs. Close the Workstation/Player GUI first."
+    },
+    {
+      "name": "attach_vm_adapter_to_lan_segment",
+      "description": "Attach an existing powered-off VM adapter to a LAN segment. adapter is the zero-based ethernetN index. Backs up the UTF-8 VMX, clears any custom VMnet, and enables connection at next power-on. Close the Workstation/Player GUI first."
+    },
+    {
+      "name": "detach_vm_adapter_from_lan_segment",
+      "description": "Detach an existing powered-off VM adapter from the specified LAN segment, preserving the adapter. Backs up the UTF-8 VMX, removes its segment ID, selects a replacement network (default NAT), and leaves the adapter disconnected at next power-on. Close the Workstation/Player GUI first."
+    },
+    {
+      "name": "workstation_status",
+      "description": "Check local vmrun availability and count running VMs without changing them."
+    },
+    {
+      "name": "list_vms",
+      "description": "List registered and running VMs. Stale inventory entries are retained and marked. This does not scan disks."
+    },
+    {
+      "name": "get_vm_details",
+      "description": "Read selected VM hardware configuration and whether the VM is running. Does not expose the full VMX."
+    },
+    {
+      "name": "vm_power",
+      "description": "Start, gracefully stop, reset, suspend, pause or unpause a VM. Defaults to soft mode. Hard stop/reset can lose data; use only when explicitly requested. No automatic hard fallback."
+    },
+    {
+      "name": "list_snapshots",
+      "description": "List snapshot names without changing the VM."
+    },
+    {
+      "name": "create_snapshot",
+      "description": "Create a named snapshot on the selected VM. Requires a user request to create it."
+    },
+    {
+      "name": "revert_snapshot",
+      "description": "Revert the VM to an existing snapshot. Discards later VM state; requires explicit user authorization for this VM and snapshot."
+    },
+    {
+      "name": "delete_snapshot",
+      "description": "Delete one named snapshot, preserving children. Removes a restore point; requires explicit user authorization for this VM and snapshot."
+    },
+    {
+      "name": "get_guest_ip",
+      "description": "Get the IP address reported by VMware Tools in a running VM. Optional wait=true uses a bounded native wait; timeout_seconds defaults to 120. No guest login, power changes or automatic retries."
+    },
+    {
+      "name": "plugin_catalog",
+      "description": "Read running plugin version, process identity and complete registered tool names without VMware or credentials. Optionally compare assistant-visible names to diagnose missing tools, including an alphabetical cutoff. Cannot refresh the client catalog."
+    },
+    {
+      "name": "vmrun_start",
+      "description": "Start a VM; optionally show its Workstation window."
+    },
+    {
+      "name": "vmrun_stop",
+      "description": "stop a VM. Soft mode is the default; hard mode requires explicit authorization."
+    },
+    {
+      "name": "vmrun_reset",
+      "description": "reset a VM. Soft mode is the default; hard mode requires explicit authorization."
+    },
+    {
+      "name": "vmrun_suspend",
+      "description": "suspend a VM. Soft mode is the default; hard mode requires explicit authorization."
+    },
+    {
+      "name": "vmrun_pause",
+      "description": "pause a VM."
+    },
+    {
+      "name": "vmrun_unpause",
+      "description": "unpause a VM."
+    },
+    {
+      "name": "vmrun_list_snapshots",
+      "description": "List VM snapshots; show_tree returns the hierarchy."
+    },
+    {
+      "name": "vmrun_snapshot",
+      "description": "Create a named VM snapshot."
+    },
+    {
+      "name": "vmrun_delete_snapshot",
+      "description": "Delete a named snapshot. Optionally delete its children as explicitly requested."
+    },
+    {
+      "name": "vmrun_revert_to_snapshot",
+      "description": "Revert to a named snapshot; later VM state is discarded."
+    },
+    {
+      "name": "vmrun_list_host_networks",
+      "description": "List VMware virtual host networks."
+    },
+    {
+      "name": "vmrun_list_port_forwardings",
+      "description": "List port forwarding rules on a host network."
+    },
+    {
+      "name": "vmrun_set_port_forwarding",
+      "description": "Add or update a host network port forwarding rule."
+    },
+    {
+      "name": "vmrun_delete_port_forwarding",
+      "description": "Delete a host network port forwarding rule."
+    },
+    {
+      "name": "vmrun_run_program_in_guest",
+      "description": "Execute a program in the guest. This returns vmrun status, not guest stdout or a reliable guest program exit code."
+    },
+    {
+      "name": "vmrun_file_exists_in_guest",
+      "description": "Check whether a guest file exists."
+    },
+    {
+      "name": "vmrun_directory_exists_in_guest",
+      "description": "Check whether a guest directory exists."
+    },
+    {
+      "name": "vmrun_set_shared_folder_state",
+      "description": "Set a shared folder host path and write access."
+    },
+    {
+      "name": "vmrun_add_shared_folder",
+      "description": "Add a host directory as a guest shared folder."
+    },
+    {
+      "name": "vmrun_remove_shared_folder",
+      "description": "Remove a shared folder mapping."
+    },
+    {
+      "name": "vmrun_enable_shared_folders",
+      "description": "Enable shared folders; runtime_only avoids a persistent change."
+    },
+    {
+      "name": "vmrun_disable_shared_folders",
+      "description": "Disable shared folders."
+    },
+    {
+      "name": "vmrun_list_processes_in_guest",
+      "description": "List guest processes."
+    },
+    {
+      "name": "vmrun_kill_process_in_guest",
+      "description": "Terminate a guest process by process ID."
+    },
+    {
+      "name": "vmrun_run_script_in_guest",
+      "description": "Run script text with a guest interpreter. Redirect script output to a guest file and copy it back if output is needed."
+    },
+    {
+      "name": "vmrun_delete_file_in_guest",
+      "description": "Delete a guest file."
+    },
+    {
+      "name": "vmrun_create_directory_in_guest",
+      "description": "Create a guest directory."
+    },
+    {
+      "name": "vmrun_delete_directory_in_guest",
+      "description": "Delete a guest directory."
+    },
+    {
+      "name": "vmrun_create_tempfile_in_guest",
+      "description": "Create a temporary file in the guest."
+    },
+    {
+      "name": "vmrun_list_directory_in_guest",
+      "description": "List a guest directory."
+    },
+    {
+      "name": "vmrun_copy_file_from_host_to_guest",
+      "description": "Copy a local host file to a guest path. The destination may be overwritten by VMware."
+    },
+    {
+      "name": "vmrun_copy_file_from_guest_to_host",
+      "description": "Copy a guest file to a local host path. Existing host files are protected unless overwrite=true."
+    },
+    {
+      "name": "vmrun_rename_file_in_guest",
+      "description": "Rename a guest file."
+    },
+    {
+      "name": "vmrun_type_keystrokes_in_guest",
+      "description": "Type text into the guest console."
+    },
+    {
+      "name": "vmrun_connect_named_device",
+      "description": "Connect a named virtual device."
+    },
+    {
+      "name": "vmrun_disconnect_named_device",
+      "description": "Disconnect a named virtual device."
+    },
+    {
+      "name": "vmrun_capture_screen",
+      "description": "Capture the VM display into a local file."
+    },
+    {
+      "name": "vmrun_write_variable",
+      "description": "Write a VM runtimeConfig, guestEnv, or guestVar variable."
+    },
+    {
+      "name": "vmrun_read_variable",
+      "description": "Read a VM runtimeConfig, guestEnv, or guestVar variable."
+    },
+    {
+      "name": "vmrun_get_guest_ip_address",
+      "description": "Read the guest address reported by VMware Tools; optionally wait until available."
+    },
+    {
+      "name": "vmrun_list",
+      "description": "List running VMX paths."
+    },
+    {
+      "name": "vmrun_upgradevm",
+      "description": "Upgrade a VM virtual hardware/file format."
+    },
+    {
+      "name": "vmrun_install_tools",
+      "description": "Start VMware Tools installation in the guest."
+    },
+    {
+      "name": "vmrun_check_tools_state",
+      "description": "Inspect VMware Tools state."
+    },
+    {
+      "name": "vmrun_delete_vm",
+      "description": "Delete the selected VM and its VMware-managed files. Requires explicit authorization for the exact VM."
+    },
+    {
+      "name": "vmrun_clone",
+      "description": "Create a full or linked clone of a VM, optionally from a named snapshot."
+    },
+    {
+      "name": "vmrun_download_photon_vm",
+      "description": "Download a Photon template VM into a selected host directory."
+    },
+    {
+      "name": "rest_get_all_vms",
+      "description": "VM Management: getAllVMs. Calls GET /api/vms on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_create_vm",
+      "description": "VM Management: createVM. Calls POST /api/vms on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_get_vm",
+      "description": "VM Management: getVM. Calls GET /api/vms/{id} on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_update_vm",
+      "description": "VM Management: updateVM. Calls PUT /api/vms/{id} on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_delete_vm",
+      "description": "VM Management: deleteVM. Calls DELETE /api/vms/{id} on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_get_vm_restrictions",
+      "description": "VM Management: getVMRestrictions. Calls GET /api/vms/{id}/restrictions on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_register_vm",
+      "description": "VM Management: registerVM. Calls POST /api/vms/registration on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_get_vm_params",
+      "description": "VM Management: getVMParams. Calls GET /api/vms/{id}/params/{name} on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_config_vm_params",
+      "description": "VM Management: configVMParams. Calls PUT /api/vms/{id}/configparams on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_get_power_state",
+      "description": "VM Power Management: getPowerState. Calls GET /api/vms/{id}/power on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_change_power_state",
+      "description": "VM Power Management: changePowerState. Calls PUT /api/vms/{id}/power on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_get_all_shared_folders",
+      "description": "VM Shared Folders Management: getAllSharedFolders. Calls GET /api/vms/{id}/sharedfolders on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_create_shared_folder",
+      "description": "VM Shared Folders Management: createSharedFolder. Calls POST /api/vms/{id}/sharedfolders on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_delete_shared_folder",
+      "description": "VM Shared Folders Management: deleteSharedFolder. Calls DELETE /api/vms/{id}/sharedfolders/{folder id} on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_update_shared_folder",
+      "description": "VM Shared Folders Management: updataSharedFolder. Calls PUT /api/vms/{id}/sharedfolders/{folder id} on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_get_all_nic_devices",
+      "description": "VM Network Adapters Management: getAllNICDevices. Calls GET /api/vms/{id}/nic on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_create_nic_device",
+      "description": "VM Network Adapters Management: createNICDevice. Calls POST /api/vms/{id}/nic on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_delete_nic_device",
+      "description": "VM Network Adapters Management: deleteNICDevice. Calls DELETE /api/vms/{id}/nic/{index} on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_update_nic_device",
+      "description": "VM Network Adapters Management: updateNICDevice. Calls PUT /api/vms/{id}/nic/{index} on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_get_ip_address",
+      "description": "VM Network Adapters Management: getIPAddress. Calls GET /api/vms/{id}/ip on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_get_nic_info",
+      "description": "VM Network Adapters Management: getNicInfo. Calls GET /api/vms/{id}/nicips on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_create_network",
+      "description": "Host Networks Management: createNetwork. Calls POST /api/vmnets on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_get_all_networks",
+      "description": "Host Networks Management: getAllNetworks. Calls GET /api/vmnet on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_get_portforwards",
+      "description": "Host Networks Management: getPortforwards. Calls GET /api/vmnet/{vmnet}/portforward on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_get_mac_to_ips",
+      "description": "Host Networks Management: getMACToIPs. Calls GET /api/vmnet/{vmnet}/mactoip on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_update_mac_to_ip",
+      "description": "Host Networks Management: updateMacToIP. Calls PUT /api/vmnet/{vmnet}/mactoip/{mac} on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_update_portforward",
+      "description": "Host Networks Management: updatePortforward. Calls PUT /api/vmnet/{vmnet}/portforward/{protocol}/{port} on the configured Workstation REST service."
+    },
+    {
+      "name": "rest_delete_portforward",
+      "description": "Host Networks Management: deletePortforward. Calls DELETE /api/vmnet/{vmnet}/portforward/{protocol}/{port} on the configured Workstation REST service."
+    },
+    {
+      "name": "workstation_capabilities",
+      "description": "Show full vmrun/REST tool coverage, compare the installed vmrun help against the implemented catalog, and report REST configuration without exposing secrets."
+    },
+    {
+      "name": "plugin_query",
+      "description": "Call a discovered read-only VMware operation when its direct tool is missing. First use plugin_catalog with tool to obtain the original strict argument schema. Reuses the same handler, deadlines, cancellation and redaction. Cannot call mutations or arbitrary commands; never bypass intentional policy."
+    },
+    {
+      "name": "plugin_mutate",
+      "description": "Call a discovered state-changing VMware operation when its direct tool is missing. First obtain its schema from plugin_catalog. Requires authorization for exact target/effects, confirm=true and every original confirmation. Reuses original validation, locks, credentials and handler; never retries. Do not bypass intentional policy."
+    }
+  ],
+  "user_config": {
+    "credentials_file": {
+      "type": "file",
+      "title": "Credentials file",
+      "description": "Optional absolute path to the existing private credentials JSON. Leave blank to use your per-user default.",
+      "required": false,
+      "default": ""
+    },
+    "vmrun_path": {
+      "type": "file",
+      "title": "vmrun executable",
+      "description": "Optional absolute native vmrun executable path. Leave blank for automatic discovery.",
+      "required": false,
+      "default": ""
+    },
+    "disk_manager_path": {
+      "type": "file",
+      "title": "Virtual disk manager",
+      "description": "Optional absolute vmware-vdiskmanager executable path.",
+      "required": false,
+      "default": ""
+    },
+    "ovftool_path": {
+      "type": "file",
+      "title": "OVF Tool",
+      "description": "Optional absolute ovftool executable path.",
+      "required": false,
+      "default": ""
+    },
+    "vmcli_path": {
+      "type": "file",
+      "title": "vmcli executable",
+      "description": "Optional absolute vmcli executable path for read-only capability inspection.",
+      "required": false,
+      "default": ""
+    },
+    "vmx_path": {
+      "type": "file",
+      "title": "VMware worker executable",
+      "description": "Optional absolute vmware-vmx executable path for native worker verification.",
+      "required": false,
+      "default": ""
+    },
+    "inventory_path": {
+      "type": "file",
+      "title": "VM inventory",
+      "description": "Optional absolute inventory.vmls path. Leave blank for the current user inventory.",
+      "required": false,
+      "default": ""
+    },
+    "preferences_path": {
+      "type": "file",
+      "title": "VMware preferences",
+      "description": "Optional absolute preferences file path for LAN segment configuration.",
+      "required": false,
+      "default": ""
+    },
+    "allowed_roots": {
+      "type": "string",
+      "title": "Allowed VM directories",
+      "description": "Optional absolute directories separated by semicolons on Windows or colons on Linux. Blank preserves inherited policy or existing unrestricted defaults. Inventory still lists paths outside these roots.",
+      "required": false,
+      "default": ""
+    },
+    "allowed_host_roots": {
+      "type": "string",
+      "title": "Allowed host directories",
+      "description": "Optional absolute directories for host files, separated by semicolons on Windows or colons on Linux. Blank preserves inherited policy or existing defaults.",
+      "required": false,
+      "default": ""
+    },
+    "rest_url": {
+      "type": "string",
+      "title": "REST origin",
+      "description": "Optional VMware REST origin. Default: http://127.0.0.1:8697. Remote services require HTTPS. Credentials stay in the local credentials file.",
+      "required": false,
+      "default": ""
+    }
+  }
+}

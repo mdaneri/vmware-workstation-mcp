@@ -11,7 +11,10 @@ async function main() {
   const bundle = path.join(root, 'server/server.cjs');
   const client = new Client({ name: 'vmware-catalog-inspection', version: '1' });
   try {
-    const metadata = JSON.parse(await fs.readFile(path.join(root, 'plugin.json'), 'utf8'));
+    const metadata = JSON.parse(await fs.readFile(path.join(root, 'plugin.json'), 'utf8').catch(error => {
+      if (error.code !== 'ENOENT') throw error;
+      return fs.readFile(path.join(root, 'manifest.json'), 'utf8');
+    }));
     const bundle_sha256 = createHash('sha256').update(await fs.readFile(bundle)).digest('hex');
     await client.connect(new StdioClientTransport({ command: process.execPath, args: [bundle], cwd: root, stderr: 'pipe' }), { timeout: 15000 });
     const tools = [];
@@ -35,7 +38,7 @@ async function main() {
       scope: 'Independent raw MCP tools/list, not the running desktop connection or assistant-visible catalog. No VMware tools called.',
     }, null, 2));
   } catch {
-    console.error('Catalog inspection failed. Check the selected plugin root, plugin.json, server/server.cjs and Node.js. No VMware tool was called.');
+    console.error('Catalog inspection failed. Check the selected plugin root, plugin.json or manifest.json, server/server.cjs and Node.js. No VMware tool was called.');
     process.exitCode = 1;
   } finally { await client.close(); }
 }
