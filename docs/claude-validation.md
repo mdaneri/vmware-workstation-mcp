@@ -15,12 +15,14 @@ The v0.17.0 implementation is based on upstream v0.16.1 (`27cfe0d`). It retains 
 | Extracted full tool descriptors/order, catalog identity, read-only bridge behavior and diagnostic helper | Both passed; 156 tools and version 0.17.0 |
 | Optional Desktop settings | Blank/inherited/explicit precedence, Windows/Linux root lists, invalid settings and redacted startup rejection passed |
 | Native Claude Code local marketplace installation | Passed; installed/enabled version 0.17.0 |
+| Native Claude Code GitHub marketplace installation | Passed from `mdaneri/vmware-workstation-mcp#feat/41-claude-distribution`; no source build/npm steps; cached server bytes match the canonical bundle |
 | Native Claude Code catalog and inventory in a fresh session | Passed; catalog returned 0.17.0/156 tools and inventory returned 34 entries |
-| Assistant-visible Claude Code tool count | Assistant reported 156 before calling the catalog; this is its report, separate from raw discovery |
+| Assistant-visible Claude Code tool names | A fresh Git-installed session enumerated 156 unique names, exactly matching the canonical list; this is assistant enumeration, separate from raw discovery. An earlier approximate count of 154 conflicted and is not treated as confirmed filtering |
+| Native Claude Code recovery entrypoints | `a_vmware_catalog` discovered the `console_status` schema and `a_vmware_query` route; `a_vmware_query` successfully called `template_list`, returning all three bundled templates |
 | Native Claude Desktop extension installation/managed runtime | Pending; user requested CLI-only native validation |
 | Native Linux VMware/Claude installation | Not exercised locally; automated portability checks run in Ubuntu CI |
 
-The native CLI session used default permission mode, disabled built-in tools, permitted only the VMware catalog/inventory names, and denied unapproved permission prompts. Its local transcript contains successful `plugin_catalog` and `list_vms` results with no mutation tool calls. Tool names SHA-256: `414f04e224b0df54e742f38e3f45852fde249c9c36cfc91b90ff84b100473921`. Machine-specific VM names, paths, credentials and transcripts are not published.
+The native CLI sessions used default permission mode, disabled built-in tools, permitted only the selected read-only VMware entrypoints, and denied unapproved permission prompts. Their local transcripts contain successful catalog, inventory and template-query results with no mutation tool calls. Tool names SHA-256: `414f04e224b0df54e742f38e3f45852fde249c9c36cfc91b90ff84b100473921`. Machine-specific VM names, paths, credentials and transcripts are not published.
 
 ## Reproduce the automated checks
 
