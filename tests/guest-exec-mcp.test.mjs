@@ -46,7 +46,7 @@ require('node:child_process').execFile = stub;
     ...process.env, VMRUN_PATH: binary, VMWARE_ALLOWED_ROOTS: root, VMWARE_ALLOWED_HOST_ROOTS: root, VMWARE_GUEST_EXEC_ROOT: root,
     VMWARE_GUEST_LAB_USERNAME: 'test-user', VMWARE_GUEST_LAB_PASSWORD: password,
   } }));
-  const tools = (await client.listTools()).tools; assert.equal(tools.length, 150);
+  const tools = (await client.listTools()).tools; assert.equal(tools.length, 153);
   const previous = JSON.parse(await fs.readFile('tests/fixtures/pre-guest-exec-tool-schemas.json', 'utf8'));
   for (const prior of previous.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior);
   const args = { vmx, guest_profile: 'lab', guest_os: 'linux', program: '/usr/bin/id', confirm: true };

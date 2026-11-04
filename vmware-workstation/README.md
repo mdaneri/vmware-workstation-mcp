@@ -4,11 +4,13 @@
 
 # VMware Workstation
 
-Local Windows and Linux MCP plugin, version 0.15.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 150 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), five [LAN segment tools](#lan-segments), ten [OVF/OVA and background job tools](ovf.md), reusable [job submission](jobs.md), nine [VMDK lifecycle tools](disks.md), six [optional serial tools](serial.md), five [readiness and diagnostics tools](readiness.md), [verified guest execution](guest-exec.md), five [ISO media/boot capability tools](iso.md), three [typed hardware tools](hardware.md), four [declarative VM template tools](templates.md), six [multi-VM lab tools](#multi-vm-labs), and two [read-only security inspection tools](security.md). All 148 previous tool definitions are unchanged. Portable templates provide validation, read-only plans, sanitized export and explicit no-overwrite deployment with optional registration/power-on. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
+Local Windows and Linux MCP plugin, version 0.16.0. It implements **all 47 commands in the reference vmrun 1.17.0.25688693 help and all 28 operations in the reference Workstation REST schema**. The bundled MCP server exposes 153 tools: the original 87 tools, six [direct native VNC/RFB console tools](console.md), five [LAN segment tools](#lan-segments), ten [OVF/OVA and background job tools](ovf.md), reusable [job submission](jobs.md), nine [VMDK lifecycle tools](disks.md), six [optional serial tools](serial.md), five [readiness and diagnostics tools](readiness.md), [verified guest execution](guest-exec.md), five [ISO media/boot capability tools](iso.md), three [typed hardware tools](hardware.md), four [declarative VM template tools](templates.md), six [multi-VM lab tools](#multi-vm-labs), two [read-only security inspection tools](security.md), and three [catalog discovery and validated bridge tools](catalog.md). All 150 previous tools remain registered; `get_guest_ip` adds optional bounded-wait fields and updated guidance. Portable templates provide validation, read-only plans, sanitized export and explicit no-overwrite deployment with optional registration/power-on. See [Linux setup and WSL testing](linux.md) for native paths, credentials and validation limits; installed VMware versions/platforms may expose different commands.
 
 Requires VMware Workstation with vmrun, Node.js 22.12+, PowerShell 7 for setup helpers, and a host with local stdio MCP support. REST tools additionally need a running, authenticated vmrest service. Guest OS commands need VMware Tools running and a guest OS account; console tools need neither and work before the OS boots. The plugin runs as your local user and opens no HTTP listener. Native VNC listeners are configured on the VM itself and restricted to localhost.
 
 See [the full command and endpoint reference](reference.md) for the exact operation-to-tool mapping and argument names. `workstation_capabilities` compares the implemented catalog with the locally installed CLI; newer Workstation releases may add operations that require a plugin update. The REST schema was imported from the installed `swagger.zip/json/swagger_WS.json`, SHA-256 `71c8094a4ab765151111ac4fd68a2bf8ace1061d470ef4ac2c5dc6f86aebb3f7`. The installed vmrest reports version 1.3.1 build 25688693.
+
+For missing documented tools, start with [catalog diagnostics and reconnect checks](catalog.md). `plugin_catalog` reports the running version and discovers exact operation schemas. Use its `plugin_query` or `plugin_mutate` route if a direct tool is missing; the original validation and handlers remain in force. Raw MCP and assistant-visible catalogs must be compared separately.
 
 ## What you can do
 
@@ -160,17 +162,17 @@ REST VM IDs are separate from VMX paths: call `rest_get_all_vms` to obtain IDs, 
 
 For captured stdout/stderr and a verified guest process exit code, use [`guest_exec`](guest-exec.md) with an explicitly selected `guest_profile`, guest OS, command or script interpreter, bounded output and `confirm: true` after authorization. The guide covers runnable Linux/Windows examples, required runtimes, transport versus guest result status, timeout and cleanup behavior. Existing low-level tools below retain their original behavior.
 
-To discover a guest address without credentials, call `get_guest_ip` with its `vmx`. A successful result remains `{ "vmx": "...", "address": "..." }`. On failure it returns an MCP error with code `GUEST_IP_UNAVAILABLE`, the original native error in `message`, `addressAvailable: false`, and a separate `toolsState` observation. The diagnostic calls `checkToolsState` once with a five-second process timeout; if that call fails, times out, or returns an unfamiliar value, its state is `unknown` and its output/error is retained. Target validation failures are returned before either query.
+To discover a guest address without credentials, call `get_guest_ip` with its `vmx`. A successful result remains `{ "vmx": "...", "address": "..." }`. On failure it returns an MCP error with code `GUEST_IP_UNAVAILABLE`, the original native error in `message`, `addressAvailable: false`, and a separate `toolsState` observation. The diagnostic calls `checkToolsState` at most once, with up to five seconds within the remaining deadline; if that call fails, times out, or returns an unfamiliar value, its state is `unknown` and its output/error is retained. Target validation failures are returned before either query.
 
 The recognized Tools states are `running`, `installed`, and `unknown`, as documented in the [VMware Workstation vmrun reference](https://techdocs2-prod.adobecqms.net/content/dam/broadcom/techdocs/us/en/pdf/vmware/desktop-hypervisors/workstation/vmware-workstation-pro-17-0.pdf#page=197).
 
 `toolsState.state: "running"` can accompany an IP lookup error saying Tools is not running. These are separate observations: neither the native error nor the later Tools check establishes the underlying cause. Running Tools does not establish IP publication, network reachability, or guest application readiness. Inspect networking and IP publication before considering a service restart or power change. The plugin does not retry the query or replay a mutation automatically.
 
-For a bounded read-only wait during startup, use the existing native wait option with an explicit timeout:
+For a bounded read-only wait during startup, use the convenience native wait option (0.16.0+) with an explicit timeout:
 
 ```json
 {
-  "tool": "vmrun_get_guest_ip_address",
+  "tool": "get_guest_ip",
   "arguments": {
     "vmx": "C:/VMs/Linux/Linux.vmx",
     "wait": true,
@@ -179,7 +181,7 @@ For a bounded read-only wait during startup, use the existing native wait option
 }
 ```
 
-Allow a matching client timeout. VMware can return immediately when networking is unavailable, so `wait` does not guarantee recovery. This low-level tool returns native command status/output; it does not add the convenience tool's Tools cross-check. A timeout remains a failed observation and does not authorize replaying an earlier power or configuration operation.
+Allow a client timeout longer than the requested bound. VMware can return immediately when networking is unavailable, so `wait` does not guarantee recovery. The convenience tool validates the address and keeps its separate Tools cross-check within the same deadline. The existing `vmrun_get_guest_ip_address` accepts the same native wait option and returns native command status/output. A timeout remains a failed observation and does not authorize replaying an earlier power or configuration operation.
 
 After configuring guest credentials, ask: "Run uname on my Linux lab and copy the output to my host." The corresponding tool arguments are shown below. Replace VMX and host paths with your actual paths; create the host transfer directory first.
 

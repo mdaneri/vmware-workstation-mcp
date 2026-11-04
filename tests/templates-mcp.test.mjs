@@ -35,9 +35,9 @@ require('node:child_process').execFile = stub;
     ...process.env, VMRUN_PATH: path.join(root, 'vmrun' + ext), VMWARE_VMX_PATH: path.join(root, 'vmware-vmx' + ext), VMWARE_VDISKMANAGER_PATH: path.join(root, 'vmware-vdiskmanager' + ext),
     VMWARE_ALLOWED_ROOTS: root, VMWARE_ALLOWED_HOST_ROOTS: root,
   } }));
-  const tools = (await client.listTools()).tools; assert.equal(tools.length, 150);
+  const tools = (await client.listTools()).tools; assert.equal(tools.length, 153);
   const previous = JSON.parse(await fs.readFile('tests/fixtures/pre-template-tool-schemas.json','utf8'));
-  for (const prior of previous.tools) assert.deepEqual(tools.find(t => t.name === prior.name), prior);
+  for (const prior of previous.tools) assertCompatibleTool(tools.find(t => t.name === prior.name), prior);
   const call = async (name, args) => { const r = await client.callTool({name, arguments: args}); assert.ok(!r.isError, JSON.stringify(r)); return JSON.parse(r.content[0].text); };
   const listed = await call('template_list', {}); assert.equal(listed.templates.length,3);
   const template = listed.templates.find(t => t.id === 'nested-esxi');

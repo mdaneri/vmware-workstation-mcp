@@ -4982,7 +4982,7 @@
     },
     {
       "name": "get_guest_ip",
-      "description": "Get the IP address reported by VMware Tools in a running VM. Does not log into the guest or wait for startup.",
+      "description": "Get the IP address reported by VMware Tools in a running VM. Optional wait=true uses a bounded native wait; timeout_seconds defaults to 120. No guest login, power changes or automatic retries.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -4990,11 +4990,55 @@
             "type": "string",
             "minLength": 1,
             "description": "Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user."
+          },
+          "wait": {
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
           }
         },
         "required": [
           "vmx"
         ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "plugin_catalog",
+      "description": "Read running plugin version, process identity and complete registered tool names without VMware or credentials. Optionally compare assistant-visible names to diagnose missing tools, including an alphabetical cutoff. Cannot refresh the client catalog.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tool": {
+            "description": "Existing tool name to discover its exact input schema, annotations and bridge route. No operation is executed.",
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "observed_tools": {
+            "description": "Optional complete assistant-visible VMware tool names, without namespace prefixes. Compared with this running server, never used to execute tools.",
+            "maxItems": 512,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 128,
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          }
+        },
         "$schema": "http://json-schema.org/draft-07/schema#",
         "additionalProperties": false
       },
@@ -8603,6 +8647,238 @@
         "destructiveHint": false,
         "idempotentHint": true,
         "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "plugin_query",
+      "description": "Call a discovered read-only VMware operation when its direct tool is missing. First use plugin_catalog with tool to obtain the original strict argument schema. Reuses the same handler, deadlines, cancellation and redaction. Cannot call mutations or arbitrary commands; never bypass intentional policy.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tool": {
+            "type": "string",
+            "enum": [
+              "console_screenshot",
+              "console_status",
+              "disk_inspect",
+              "disk_manager_status",
+              "get_guest_ip",
+              "get_vm_details",
+              "iso_list",
+              "job_list",
+              "job_logs",
+              "job_status",
+              "lab_status",
+              "lab_validate",
+              "list_lan_segments",
+              "list_snapshots",
+              "list_vms",
+              "ovf_inspect",
+              "ovf_tool_status",
+              "ovf_validate",
+              "rest_get_all_networks",
+              "rest_get_all_nic_devices",
+              "rest_get_all_shared_folders",
+              "rest_get_all_vms",
+              "rest_get_ip_address",
+              "rest_get_mac_to_ips",
+              "rest_get_nic_info",
+              "rest_get_portforwards",
+              "rest_get_power_state",
+              "rest_get_vm",
+              "rest_get_vm_params",
+              "rest_get_vm_restrictions",
+              "serial_read",
+              "serial_status",
+              "template_export",
+              "template_list",
+              "template_validate",
+              "vm_boot_status",
+              "vm_get_recent_errors",
+              "vm_hardware_capabilities",
+              "vm_hardware_get",
+              "vm_security_capabilities",
+              "vm_security_status",
+              "vm_wait_for_boot",
+              "vm_wait_for_ip",
+              "vm_wait_for_service",
+              "vmrun_check_tools_state",
+              "vmrun_directory_exists_in_guest",
+              "vmrun_file_exists_in_guest",
+              "vmrun_get_guest_ip_address",
+              "vmrun_list",
+              "vmrun_list_directory_in_guest",
+              "vmrun_list_host_networks",
+              "vmrun_list_port_forwardings",
+              "vmrun_list_processes_in_guest",
+              "vmrun_list_snapshots",
+              "vmrun_read_variable",
+              "workstation_capabilities",
+              "workstation_status"
+            ],
+            "description": "Exact existing tool name discovered with plugin_catalog."
+          },
+          "arguments": {
+            "default": {},
+            "description": "Original tool arguments. Validated against that tool's unchanged strict schema before execution; no raw CLI or arbitrary operations.",
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "tool"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "plugin_mutate",
+      "description": "Call a discovered state-changing VMware operation when its direct tool is missing. First obtain its schema from plugin_catalog. Requires authorization for exact target/effects, confirm=true and every original confirmation. Reuses original validation, locks, credentials and handler; never retries. Do not bypass intentional policy.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tool": {
+            "type": "string",
+            "enum": [
+              "attach_vm_adapter_to_lan_segment",
+              "configure_vm",
+              "console_click",
+              "console_key",
+              "console_scroll",
+              "console_type",
+              "create_lan_segment",
+              "create_snapshot",
+              "create_vm",
+              "delete_snapshot",
+              "detach_vm_adapter_from_lan_segment",
+              "disk_attach",
+              "disk_compact",
+              "disk_convert",
+              "disk_create",
+              "disk_defragment",
+              "disk_detach",
+              "disk_expand",
+              "guest_exec",
+              "iso_eject",
+              "iso_mount",
+              "job_cancel",
+              "job_start",
+              "lab_deploy",
+              "lab_destroy",
+              "lab_start",
+              "lab_stop",
+              "ovf_convert",
+              "ovf_export",
+              "ovf_import",
+              "remove_lan_segment",
+              "rest_change_power_state",
+              "rest_config_vm_params",
+              "rest_create_network",
+              "rest_create_nic_device",
+              "rest_create_shared_folder",
+              "rest_create_vm",
+              "rest_delete_nic_device",
+              "rest_delete_portforward",
+              "rest_delete_shared_folder",
+              "rest_delete_vm",
+              "rest_register_vm",
+              "rest_update_mac_to_ip",
+              "rest_update_nic_device",
+              "rest_update_portforward",
+              "rest_update_shared_folder",
+              "rest_update_vm",
+              "revert_snapshot",
+              "serial_configure",
+              "serial_connect",
+              "serial_disconnect",
+              "serial_write",
+              "template_deploy",
+              "vm_boot_configure",
+              "vm_collect_diagnostics",
+              "vm_hardware_set",
+              "vm_power",
+              "vmrun_add_shared_folder",
+              "vmrun_capture_screen",
+              "vmrun_clone",
+              "vmrun_connect_named_device",
+              "vmrun_copy_file_from_guest_to_host",
+              "vmrun_copy_file_from_host_to_guest",
+              "vmrun_create_directory_in_guest",
+              "vmrun_create_tempfile_in_guest",
+              "vmrun_delete_directory_in_guest",
+              "vmrun_delete_file_in_guest",
+              "vmrun_delete_port_forwarding",
+              "vmrun_delete_snapshot",
+              "vmrun_delete_vm",
+              "vmrun_disable_shared_folders",
+              "vmrun_disconnect_named_device",
+              "vmrun_download_photon_vm",
+              "vmrun_enable_shared_folders",
+              "vmrun_install_tools",
+              "vmrun_kill_process_in_guest",
+              "vmrun_pause",
+              "vmrun_remove_shared_folder",
+              "vmrun_rename_file_in_guest",
+              "vmrun_reset",
+              "vmrun_revert_to_snapshot",
+              "vmrun_run_program_in_guest",
+              "vmrun_run_script_in_guest",
+              "vmrun_set_port_forwarding",
+              "vmrun_set_shared_folder_state",
+              "vmrun_snapshot",
+              "vmrun_start",
+              "vmrun_stop",
+              "vmrun_suspend",
+              "vmrun_type_keystrokes_in_guest",
+              "vmrun_unpause",
+              "vmrun_upgradevm",
+              "vmrun_write_variable"
+            ],
+            "description": "Exact existing tool name discovered with plugin_catalog."
+          },
+          "arguments": {
+            "default": {},
+            "description": "Original tool arguments. Validated against that tool's unchanged strict schema before execution; no raw CLI or arbitrary operations.",
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Required after authorization for the exact target and effects. Original tool confirmation fields are also required."
+          }
+        },
+        "required": [
+          "tool",
+          "confirm"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
       },
       "execution": {
         "taskSupport": "forbidden"

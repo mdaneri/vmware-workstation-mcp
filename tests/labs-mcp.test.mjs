@@ -1,3 +1,4 @@
+import { assertCompatibleTool } from './tool-compatibility.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -41,9 +42,9 @@ require('node:child_process').execFile = stub;
     VMWARE_ALLOWED_ROOTS: root, VMWARE_ALLOWED_HOST_ROOTS: root, VMWARE_PREFERENCES_PATH: path.join(root, 'preferences'), VMWARE_INVENTORY_PATH: path.join(root, 'inventory'),
   } };
   await client.connect(new StdioClientTransport(connection));
-  const tools = (await client.listTools()).tools; assert.equal(tools.length, 150);
+  const tools = (await client.listTools()).tools; assert.equal(tools.length, 153);
   const previous = JSON.parse(await fs.readFile('tests/fixtures/pre-lab-tool-schemas.json','utf8'));
-  for (const prior of previous.tools) assert.deepEqual(tools.find(t => t.name === prior.name), prior);
+  for (const prior of previous.tools) assertCompatibleTool(tools.find(t => t.name === prior.name), prior);
   const call = async (name, args) => { const r = await client.callTool({name, arguments: args}); assert.ok(!r.isError, JSON.stringify(r)); return JSON.parse(r.content[0].text); };
   const listed = await call('template_list', {});
   const mediaDirectory = path.join(root, 'media'); await fs.mkdir(mediaDirectory); await fs.mkdir(path.join(mediaDirectory, 'subdir'));

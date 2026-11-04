@@ -26,6 +26,7 @@ import { templateSchemas } from './template-schemas.mjs';
 import { LabManager } from './labs.mjs';
 import { labSchemas } from './lab-schemas.mjs';
 import { SecurityManager, securitySchemas } from './security.mjs';
+import { PluginCatalog, catalogSchema, pluginVersion } from './plugin-catalog.mjs';
 
 const backend = new Workstation();
 const credentials = new Credentials();
@@ -46,7 +47,10 @@ const security = new SecurityManager({ backend, hardware });
 const jobOperations = new JobOperations({ backend, jobs, disks, ovf });
 const templates = new TemplateManager({ backend, hardware, rest });
 const labs = new LabManager({ backend, templates, lan: lanSegments, readiness, protectFile: localFileProtector(backend) });
-const server = new McpServer({ name: 'vmware-workstation', version: '0.15.0' });
+const catalog = new PluginCatalog();
+const server = new McpServer({ name: 'vmware-workstation', version: pluginVersion }, {
+  instructions: 'If a VMware tool is missing, call plugin_catalog with tool=<exact name> to discover its schema and route through plugin_query (read-only) or plugin_mutate (authorized changes, confirm=true). Both reuse original strict validation and handlers. Never bypass intentional client policy. get_guest_ip supports bounded waiting. Never replay mutations or substitute raw CLI/guest execution.',
+});
 const vmx = z.string().min(1).describe('Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.');
 const name = z.string().min(1).max(256).describe('Exact snapshot name.');
 
@@ -83,22 +87,23 @@ for (const kind of ['boot', 'ip', 'service']) tool(`vm_wait_for_${kind}`, {
 tool('vm_get_recent_errors', 'Read bounded current vmware.log data only after verifying its selected VM identity. Returns normalized error excerpts and actions; arbitrary log text/paths/secrets are omitted. No host log scan.', readinessSchemas.vm_get_recent_errors, true, a => readiness.recentErrors(a));
 tool('vm_collect_diagnostics', 'Save selected VM allowlisted hardware, lifecycle, Tools/IP, snapshot count and normalized log excerpts into a NEW approved directory. Optional direct VNC guest pixels are unredacted: review before sharing. Never captures host desktop or executes guest commands.', readinessSchemas.vm_collect_diagnostics, false, (a, extra) => readiness.collect(a, extra), false, false, false);
 function tool(name, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false, idempotent = readOnly) {
-  server.registerTool(name, {
-    description, inputSchema: schema instanceof z.ZodObject ? schema : z.object(schema).strict(),
-    annotations: { readOnlyHint: readOnly, destructiveHint: destructive, idempotentHint: idempotent, openWorldHint: openWorld },
-  }, async (args, extra) => {
+  const inputSchema = schema instanceof z.ZodObject ? schema : z.object(schema).strict();
+  const annotations = { readOnlyHint: readOnly, destructiveHint: destructive, idempotentHint: idempotent, openWorldHint: openWorld };
+  const invoke = async (args, extra) => {
     try {
       if (name.startsWith('job_') || name.startsWith('ovf_') && name !== 'ovf_tool_status') await jobs.initialize();
       const result = await callback(args, extra);
       if (result?.job_id || name === 'job_list') return { content: [{ type: 'text', text: JSON.stringify(jobs.publicResult(result), null, 2) }] };
-      if (Array.isArray(result?.content)) return { content: result.content.map(block => block.type === 'text' ? { ...block, text: credentials.redact(block.text) } : block) };
+      if (Array.isArray(result?.content)) return { ...(result.isError ? { isError: true } : {}), content: result.content.map(block => block.type === 'text' ? { ...block, text: credentials.redact(block.text) } : block) };
       return { content: [{ type: 'text', text: credentials.redact(JSON.stringify(result, null, 2)) }] };
     } catch (error) {
       if (name.startsWith('lab_')) return { isError: true, content: [{ type: 'text', text: credentials.redact(JSON.stringify({ code: error.code || 'LAB_PREFLIGHT_FAILED', message: error.message, ...error.details })) }] };
       if (name.startsWith('serial_')) return { isError: true, content: [{ type: 'text', text: credentials.redact(JSON.stringify({ code: error.code || 'SERIAL_SETUP_REQUIRED', message: error.message })) }] };
       return { isError: true, content: [{ type: 'text', text: credentials.redact(error.details || name.startsWith('disk_') ? JSON.stringify({ code: error.code || 'DISK_PREFLIGHT_FAILED', message: error.message, action: 'Inspect the target and disk_manager_status before retrying.', ...error.details }) : error.message) }] };
     }
-  });
+  };
+  catalog.add(name, { description, schema: inputSchema, annotations, invoke });
+  server.registerTool(name, { description, inputSchema, annotations }, invoke);
 }
 
 tool('serial_status', 'Inspect optional per-VM serial capability/configuration and session state without connecting or starting a VM. Only a connected session proves native endpoint ownership.', serialSchemas.serial_status, true, a => serial.status(a));
@@ -154,7 +159,16 @@ tool('list_snapshots', 'List snapshot names without changing the VM.', { vmx }, 
 tool('create_snapshot', 'Create a named snapshot on the selected VM. Requires a user request to create it.', { vmx, name }, false, a => backend.snapshot(a.vmx, 'snapshot', a.name), false);
 tool('revert_snapshot', 'Revert the VM to an existing snapshot. Discards later VM state; requires explicit user authorization for this VM and snapshot.', { vmx, name }, false, a => backend.snapshot(a.vmx, 'revertToSnapshot', a.name));
 tool('delete_snapshot', 'Delete one named snapshot, preserving children. Removes a restore point; requires explicit user authorization for this VM and snapshot.', { vmx, name }, false, a => backend.snapshot(a.vmx, 'deleteSnapshot', a.name));
-tool('get_guest_ip', 'Get the IP address reported by VMware Tools in a running VM. Does not log into the guest or wait for startup.', { vmx }, true, a => backend.guestIP(a.vmx));
+tool('get_guest_ip', 'Get the IP address reported by VMware Tools in a running VM. Optional wait=true uses a bounded native wait; timeout_seconds defaults to 120. No guest login, power changes or automatic retries.', {
+  vmx, wait: z.boolean().optional(), timeout_seconds: z.number().int().min(1).max(3600).optional(),
+}, true, async (a, extra) => {
+  try { return await backend.guestIP(a.vmx, { ...a, signal: extra.signal }); }
+  catch (error) {
+    if (error.details) error.details.server = catalog.identity();
+    throw error;
+  }
+});
+tool('plugin_catalog', 'Read running plugin version, process identity and complete registered tool names without VMware or credentials. Optionally compare assistant-visible names to diagnose missing tools, including an alphabetical cutoff. Cannot refresh the client catalog.', catalogSchema, true, a => catalog.inspect(a));
 for (const command of commands) {
   tool(`vmrun_${snake(command.command)}`, command.description, commandSchema(command), !!command.readOnly,
     a => executeCommand(backend, credentials, command, a), !command.readOnly, ['runProgramInGuest', 'runScriptInGuest', 'downloadPhotonVM'].includes(command.command));
@@ -198,6 +212,8 @@ tool('workstation_capabilities', 'Show full vmrun/REST tool coverage, compare th
     note: 'Coverage describes callable implementations. It does not prove a REST service is running, credentials work, or guest operations succeed.',
   };
 });
+tool('plugin_query', 'Call a discovered read-only VMware operation when its direct tool is missing. First use plugin_catalog with tool to obtain the original strict argument schema. Reuses the same handler, deadlines, cancellation and redaction. Cannot call mutations or arbitrary commands; never bypass intentional policy.', catalog.bridgeSchema(true), true, (a, extra) => catalog.invoke(true, a, extra), false, true, false);
+tool('plugin_mutate', 'Call a discovered state-changing VMware operation when its direct tool is missing. First obtain its schema from plugin_catalog. Requires authorization for exact target/effects, confirm=true and every original confirmation. Reuses original validation, locks, credentials and handler; never retries. Do not bypass intentional policy.', catalog.bridgeSchema(false), false, (a, extra) => catalog.invoke(false, a, extra), true, true, false);
 async function shutdown() { serial.close(); consoles.close(); await jobs.close(); }
 process.stdin.once('end', () => { void shutdown(); });
 process.once('SIGTERM', () => { void shutdown().finally(() => process.exit(0)); });

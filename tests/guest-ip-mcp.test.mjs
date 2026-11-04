@@ -58,7 +58,8 @@ require('node:child_process').execFile = execFile;
   assert.equal(details.vmx, await fs.realpath(vmx));
   assert.equal(details.addressAvailable, false);
   assert.deepEqual(details.toolsState, { state: 'running', output: 'running' });
-  assert.match(details.action, /vmrun_get_guest_ip_address.*wait=true.*timeout_seconds/);
+  assert.match(details.action, /get_guest_ip.*wait=true.*timeout_seconds/);
+  assert.equal(details.server.tool_count, 153);
   assert.doesNotMatch(JSON.stringify(details), /DISK_PREFLIGHT|disk_manager_status/);
 
   const failedProbe = await call({ ipError: nativeError, toolsError: 'probe timeout test-password' });
@@ -83,4 +84,28 @@ require('node:child_process').execFile = execFile;
   assert.deepEqual(log.map(call => call.args[2]), [...Array(4).fill(['getGuestIPAddress', 'checkToolsState']).flat(), 'getGuestIPAddress']);
   assert.ok(log.every(call => call.args.length === 4 && call.args[3] === details.vmx));
   assert.ok(log.filter(call => call.args[2] === 'checkToolsState').every(call => call.timeout === 5000));
+
+  await fs.writeFile(scenario, JSON.stringify({ ipOutput: '2001:db8::10' }));
+  const waited = await client.callTool({ name: 'get_guest_ip', arguments: { vmx, wait: true, timeout_seconds: 2 } });
+  assert.ok(!waited.isError, JSON.stringify(waited));
+  assert.equal(JSON.parse(waited.content[0].text).address, '2001:db8::10');
+  const bounded = (await fs.readFile(calls, 'utf8')).trim().split('\n').map(JSON.parse).at(-1);
+  assert.deepEqual(bounded.args, ['-T', 'ws', 'getGuestIPAddress', details.vmx, '-wait']);
+  assert.ok(bounded.timeout > 0 && bounded.timeout <= 2000);
+  for (const args of [{ wait: 'yes' }, { timeout_seconds: 0 }, { timeout_seconds: 3601 }, { password: 'never-accepted' }]) {
+    assert.equal((await client.callTool({ name: 'get_guest_ip', arguments: { vmx, ...args } })).isError, true);
+  }
+  const afterInvalid = (await fs.readFile(calls, 'utf8')).trim().split('\n');
+  assert.equal(afterInvalid.length, log.length + 1);
+  const query = args => client.callTool({ name: 'plugin_query', arguments: { tool: 'vmrun_get_guest_ip_address', arguments: { vmx, wait: true, timeout_seconds: 2, ...args } } });
+  const hiddenNativeWait = await query({});
+  assert.ok(!hiddenNativeWait.isError, JSON.stringify(hiddenNativeWait));
+  assert.equal(JSON.parse(hiddenNativeWait.content[0].text).commandSucceeded, true);
+  const bridgedCall = (await fs.readFile(calls, 'utf8')).trim().split('\n').map(JSON.parse).at(-1);
+  assert.deepEqual(bridgedCall.args, ['-T', 'ws', 'getGuestIPAddress', details.vmx, '-wait']);
+  assert.equal(bridgedCall.timeout, 2000);
+  await fs.writeFile(scenario, JSON.stringify({ ipError: 'native failed test-password' }));
+  const failedWait = await query({});
+  assert.equal(failedWait.isError, true);
+  assert.doesNotMatch(JSON.stringify(failedWait), /test-password/);
 });
