@@ -28,6 +28,41 @@ Restart the desktop app after installation and open a fresh local chat with VMwa
 
 Requires Windows or Linux, Node.js 22.12 or newer on PATH, and a separately installed native VMware Workstation. PowerShell 7 is used by the setup/validation helpers and Windows listener checks. Linux listener checks use `/proc` directly. See [Linux setup and WSL testing](vmware-workstation/linux.md) for native executable paths, XDG credentials and permissions. REST tools require vmrest and local credentials; guest OS operations require VMware Tools and guest credentials. Native console tools require neither a guest OS nor VMware Tools. A web/mobile-only chat cannot launch this local stdio process.
 
+### Update the plugin
+
+Let any plugin background jobs finish, then fully quit the desktop app and close other Codex sessions using this plugin. Run these commands from an external terminal:
+
+```powershell
+codex plugin marketplace upgrade vmware-local
+codex plugin add vmware-workstation@vmware-local
+codex plugin list --marketplace vmware-local --json
+```
+
+The first command refreshes the Git marketplace snapshot; `plugin add` installs from that snapshot. Running `plugin add` alone can therefore reinstall an older version. Check the listed `version`, reopen the desktop app, and start a fresh local chat with the plugin enabled. Ask it to call `plugin_catalog` to verify the running server version. An older version directory remaining in the cache does not establish which version the chat uses. See [catalog diagnostics](vmware-workstation/catalog.md) if versions or tools still differ.
+
+For a marketplace registered from a local directory, update that source directory and rebuild after source changes before running `plugin add`; `marketplace upgrade` refreshes Git-backed sources only. Use `codex plugin marketplace list` to check the registered source root.
+
+On Windows, `failed to back up plugin cache entry: Access is denied` can occur while a Codex session holds the cached runtime open. Close the sessions using the plugin and retry from the external terminal. Do not manually delete the cache or terminate an active plugin job to force an update. The commands follow the [official Codex CLI reference](https://developers.openai.com/codex/cli/reference).
+
+### Remove the plugin
+
+Let plugin background jobs finish and fully quit Codex sessions using the plugin. From an external terminal:
+
+```powershell
+codex plugin remove vmware-workstation@vmware-local
+codex plugin list --marketplace vmware-local --json
+```
+
+Verify that the plugin is absent from the `installed` list. Removal clears its Codex registration and cache; it does not uninstall VMware Workstation or delete your VMs or separately stored credentials.
+
+If you no longer use the marketplace, optionally remove its registration too:
+
+```powershell
+codex plugin marketplace remove vmware-local
+```
+
+Reopen Codex after removal. Marketplace removal is separate from plugin removal; remove the plugin first.
+
 ## Practical workflows
 
 | Goal | Where to start |

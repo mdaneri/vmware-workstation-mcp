@@ -116,6 +116,41 @@ For manual MCP configuration, replace the example with the extracted absolute pa
 
 An account upload does not give web/mobile chats access to local VMware processes.
 
+### Update the plugin
+
+Let any plugin background jobs finish, then fully quit the desktop app and close other Codex sessions using this plugin. From an external terminal, refresh the Git marketplace snapshot, install from it, and check the version:
+
+```powershell
+codex plugin marketplace upgrade vmware-local
+codex plugin add vmware-workstation@vmware-local
+codex plugin list --marketplace vmware-local --json
+```
+
+`plugin add` alone uses the existing marketplace snapshot and can reinstall an older release. Reopen Codex and start a fresh local chat with the plugin enabled. Call `plugin_catalog` to confirm the running server version; an old directory remaining in the cache does not prove that version is active. See [catalog diagnostics](catalog.md) if the installed and running versions or exposed tools differ.
+
+For a marketplace registered from a local directory, update that directory and rebuild after source changes before running `plugin add`. `marketplace upgrade` refreshes Git-backed sources only; `codex plugin marketplace list` shows the registered source root.
+
+On Windows, a running Codex session can hold the cached runtime open, causing `failed to back up plugin cache entry: Access is denied`. Close the sessions using the plugin and retry from the external terminal. Do not manually delete the cache or terminate an active plugin job to force an update. See the [official Codex CLI reference](https://developers.openai.com/codex/cli/reference) for these commands.
+
+### Remove the plugin
+
+Let plugin background jobs finish and fully quit Codex sessions using the plugin. From an external terminal:
+
+```powershell
+codex plugin remove vmware-workstation@vmware-local
+codex plugin list --marketplace vmware-local --json
+```
+
+The plugin should be absent from the `installed` list. Removal clears its Codex registration and cache, while VMware Workstation, your VMs and separately stored credentials remain.
+
+If you no longer use the marketplace, optionally remove its registration after removing the plugin:
+
+```powershell
+codex plugin marketplace remove vmware-local
+```
+
+Reopen Codex after removal. Removing a marketplace registration is separate from uninstalling its plugin.
+
 ## Configure credentials locally
 
 On Windows, the plugin automatically reads `%APPDATA%\VMwareWorkstationPlugin\credentials.json`. On Linux, it reads `${XDG_CONFIG_HOME:-$HOME/.config}/vmware-workstation-mcp/credentials.json`. Override either default using an absolute `VMWARE_CREDENTIALS_FILE` path. Credentials never belong in chat/tool arguments. Create or update profiles with PowerShell 7, using the packaged script from this directory:
