@@ -1,0 +1,12 @@
+{
+  "name": "vmware-local",
+  "description": "Local native VMware Workstation tools for Windows and Linux.",
+  "owner": { "name": "mdaneri" },
+  "plugins": [
+    {
+      "name": "vmware-workstation",
+      "source": "./vmware-workstation",
+      "description": "Manage native local VMware Workstation VMs on Windows and Linux."
+    }
+  ]
+}

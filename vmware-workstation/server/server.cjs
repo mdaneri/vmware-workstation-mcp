@@ -58564,7 +58564,7 @@ var import_node_crypto12 = require("node:crypto");
 // package.json
 var package_default = {
   name: "vmware-workstation-plugin-dev",
-  version: "0.16.1",
+  version: "0.17.0",
   private: true,
   license: "MIT",
   repository: {
@@ -58582,7 +58582,7 @@ var package_default = {
     "test:ovf:live": "node scripts/live-ovf.mjs",
     validate: "node scripts/validate-package.mjs && node scripts/validate-credentials.mjs",
     prepackage: "npm run build && npm run validate",
-    package: "node scripts/package-plugin.mjs",
+    package: "node scripts/package-plugin.mjs && node scripts/package-clients.mjs",
     "test:disk:live": "node scripts/live-disks.mjs",
     "test:serial:live": "node scripts/live-serial.mjs",
     "test:readiness:live": "node scripts/live-readiness.mjs",
@@ -58591,7 +58591,10 @@ var package_default = {
     "test:hardware:live": "node scripts/live-hardware.mjs",
     "test:jobs:live": "node scripts/live-jobs.mjs",
     "test:labs:live": "node scripts/live-labs.mjs",
-    "test:templates:live": "node scripts/live-templates.mjs"
+    "test:templates:live": "node scripts/live-templates.mjs",
+    "validate:clients": "node scripts/validate-clients.mjs",
+    "package:mcpb": "npm run build && node scripts/package-clients.mjs",
+    "test:packages": "node --test tests/distribution-artifacts.mjs"
   },
   dependencies: {
     "@modelcontextprotocol/sdk": "1.32.2",
@@ -58602,6 +58605,9 @@ var package_default = {
     zod: "4.6.7"
   },
   devDependencies: {
+    "@anthropic-ai/claude-code": "2.1.318",
+    "@anthropic-ai/mcpb": "2.1.2",
+    "@resvg/resvg-js": "2.6.2",
     ajv: "8.20.0",
     esbuild: "0.28.2",
     fflate: "0.8.3"
