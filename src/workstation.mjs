@@ -235,10 +235,16 @@ export class Workstation {
     return { vmx, action, name, output: await this.run([action, vmx, name], { mutation: true }), commandSucceeded: true };
   }
 
-  async guestIP(input) {
+  async guestIP(input, { wait = false, timeout_seconds = 120, signal } = {}) {
+    if (typeof wait !== 'boolean' || !Number.isInteger(timeout_seconds) || timeout_seconds < 1 || timeout_seconds > 3600) throw new Error('Guest IP wait requires a boolean wait and timeout_seconds from 1 to 3600.');
     const vmx = await this.vmx(input);
+    signal?.throwIfAborted();
+    const deadline = performance.now() + timeout_seconds * 1000;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(new Error('Guest IP observation deadline expired.')), timeout_seconds * 1000);
+    signal = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
     try {
-      const address = (await this.run(['getGuestIPAddress', vmx])).trim();
+      const address = (await this.run(['getGuestIPAddress', vmx, ...(wait ? ['-wait'] : [])], { timeout: timeout_seconds * 1000, deadline, signal })).trim();
       if (!isIP(address)) throw new Error(`vmrun did not return a valid guest IP address. Output: ${address.slice(0, 4000) || '(empty)'}`);
       return { vmx, address };
     } catch (error) {
@@ -246,7 +252,9 @@ export class Workstation {
       // without retrying the IP query or treating Tools state as guest readiness.
       let toolsState;
       try {
-        const output = await this.run(['checkToolsState', vmx], { timeout: 5000 });
+        // The cross-check shares the request deadline and cancellation. A
+        // timed-out wait must not launch another native observation afterward.
+        const output = await this.run(['checkToolsState', vmx], { timeout: 5000, deadline, signal });
         toolsState = { state: ['running', 'installed', 'unknown'].includes(output) ? output : 'unknown', output: output.slice(0, 4000) };
       } catch (checkError) {
         toolsState = { state: 'unknown', error: checkError.message };
@@ -255,10 +263,10 @@ export class Workstation {
         code: 'GUEST_IP_UNAVAILABLE',
         details: {
           vmx, addressAvailable: false, toolsState,
-          note: 'The IP lookup failed. checkToolsState is a separate, later observation; even running Tools does not establish IP publication, network reachability, or guest readiness. The lookup error alone does not establish that Tools is stopped.',
-          action: 'Use vmrun_get_guest_ip_address with wait=true and an explicit timeout_seconds for a bounded read-only wait. Inspect guest networking and IP publication before considering service or power changes.',
+          note: 'The IP lookup failed. checkToolsState, when attempted, is a separate, later observation; it is skipped after cancellation/deadline. Even running Tools does not establish IP publication, network reachability, or guest readiness. The lookup error alone does not establish that Tools is stopped.',
+          action: 'Use get_guest_ip with wait=true and an explicit timeout_seconds for a bounded read-only wait, or vmrun_get_guest_ip_address if exposed. If documented tools are missing, compare plugin_catalog with the assistant-visible inventory and reconnect/check a fresh local chat. Inspect guest networking and IP publication before considering service or power changes; never replay mutations.',
         },
       });
-    }
+    } finally { clearTimeout(timer); }
   }
 }

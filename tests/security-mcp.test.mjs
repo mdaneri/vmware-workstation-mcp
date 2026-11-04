@@ -1,3 +1,4 @@
+import { assertCompatibleTool } from './tool-compatibility.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -39,10 +40,10 @@ require('node:child_process').execFile = stub;
     } });
   let stderr = ''; transport.stderr.on('data', data => { stderr += data; });
   await client.connect(transport);
-  const tools = (await client.listTools()).tools; assert.equal(tools.length, 150);
+  const tools = (await client.listTools()).tools; assert.equal(tools.length, 153);
   const prior = JSON.parse(await fs.readFile('tests/fixtures/pre-security-tool-schemas.json', 'utf8'));
   assert.equal(prior.tools.length, 148);
-  for (const tool of prior.tools) assert.deepEqual(tools.find(current => current.name === tool.name), tool);
+  for (const tool of prior.tools) assertCompatibleTool(tools.find(current => current.name === tool.name), tool);
   for (const name of ['vm_security_capabilities', 'vm_security_status']) {
     assert.equal(tools.find(tool => tool.name === name).annotations.readOnlyHint, true);
     const result = await client.callTool({ name, arguments: name.endsWith('status') ? { vmx } : {} });

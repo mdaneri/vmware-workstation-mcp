@@ -37,20 +37,27 @@ try {
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [path.join(pluginRoot, 'server/server.cjs')], stderr: 'pipe' }));
   assert.equal(client.getServerVersion().version, manifest.version, 'Bundled server version must match plugin');
   const { tools } = await client.listTools();
-  assert.equal(tools.length, 150);
-  assert.equal(new Set(tools.map(t => t.name)).size, 150);
+  assert.equal(tools.length, 153);
+  assert.equal(new Set(tools.map(t => t.name)).size, 153);
+  const preCatalog = JSON.parse(await fs.readFile('tests/fixtures/pre-catalog-tool-schemas.json', 'utf8'));
+  assert.equal(preCatalog.tools.length, 150);
+  for (const prior of preCatalog.tools) {
+    const current = tools.find(tool => tool.name === prior.name);
+    if (prior.name === 'get_guest_ip') assertCompatibleTool(current, prior);
+    else assert.deepEqual(current, prior);
+  }
   const preSecurity = JSON.parse(await fs.readFile('tests/fixtures/pre-security-tool-schemas.json', 'utf8'));
   assert.equal(preSecurity.tools.length, 148);
-  for (const prior of preSecurity.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Pre-security contract: ${prior.name}`);
+  for (const prior of preSecurity.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior, `Pre-security contract: ${prior.name}`);
   const preLab = JSON.parse(await fs.readFile('tests/fixtures/pre-lab-tool-schemas.json', 'utf8'));
   assert.equal(preLab.tools.length, 142);
-  for (const prior of preLab.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Pre-lab contract: ${prior.name}`);
+  for (const prior of preLab.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior, `Pre-lab contract: ${prior.name}`);
   const labJSON = JSON.parse(await fs.readFile(path.join(pluginRoot, 'labs/schema-v1.json'), 'utf8'));
   assert.deepEqual(labJSON, z.toJSONSchema(labSchema, { io: 'input' }));
   for (const name of ['two-vm', 'nested-esxi']) assert.ok(ajv.validate(labJSON, JSON.parse(await fs.readFile(path.join(pluginRoot, `labs/${name}.json`), 'utf8'))), JSON.stringify(ajv.errors));
   const preTemplate = JSON.parse(await fs.readFile('tests/fixtures/pre-template-tool-schemas.json', 'utf8'));
   assert.equal(preTemplate.tools.length, 138);
-  for (const prior of preTemplate.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior, `Pre-template contract: ${prior.name}`);
+  for (const prior of preTemplate.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior, `Pre-template contract: ${prior.name}`);
   const templateJSON = JSON.parse(await fs.readFile(path.join(pluginRoot, 'templates/schema-v1.json'), 'utf8'));
   assert.deepEqual(templateJSON, z.toJSONSchema(templateSchema), 'Published template JSON schema must match runtime');
   for (const name of ['linux', 'windows', 'nested-esxi']) {
@@ -89,5 +96,5 @@ try {
     assert.equal(typeof tool.annotations.readOnlyHint, 'boolean');
   }
   await writeGenerated('vmware-workstation/tool-schemas.json', JSON.stringify({ tools }, null, 2) + '\n');
-  console.log('Both portable manifests, template schema/examples and all 150 MCP schemas validated; all 148 previous tool definitions unchanged.');
+  console.log('Both portable manifests, template schema/examples and all 153 MCP schemas validated; earlier contracts preserved with optional get_guest_ip waiting fields.');
 } finally { await client.close(); }

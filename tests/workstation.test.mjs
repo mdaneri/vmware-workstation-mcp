@@ -179,6 +179,62 @@ test('guest IP target validation fails before either native query', async t => {
   await assert.rejects(f.backend.guestIP(f.vmx), /outside/);
   assert.equal(calls, 0);
 });
+
+test('bounded IP wait expires without a later Tools query or mutation', async t => {
+  const calls = [];
+  const f = await fixture(t, async (_, args, options) => {
+    calls.push(args);
+    await new Promise(resolve => setTimeout(resolve, options.timeout + 15));
+    throw Object.assign(new Error('timeout'), { killed: true });
+  });
+  await assert.rejects(f.backend.guestIP(f.vmx, { wait: true, timeout_seconds: 1 }), error => {
+    assert.equal(error.code, 'GUEST_IP_UNAVAILABLE');
+    assert.equal(error.details.toolsState.state, 'unknown');
+    assert.match(error.details.toolsState.error, /deadline/);
+    return true;
+  });
+  assert.deepEqual(calls, [['-T', 'ws', 'getGuestIPAddress', await fs.realpath(f.vmx), '-wait']]);
+});
+
+test('cancelled IP wait never launches its queued query or Tools cross-check', async t => {
+  let release;
+  let started;
+  const ready = new Promise(resolve => { started = resolve; });
+  const calls = [];
+  const f = await fixture(t, async (_, args) => {
+    calls.push(args[2]); started();
+    await new Promise(resolve => { release = resolve; });
+    return { stdout: '192.0.2.10' };
+  });
+  const target = await fs.realpath(f.vmx);
+  const blocker = f.backend.run(['getGuestIPAddress', target]);
+  await ready;
+  const controller = new AbortController();
+  const cancelled = f.backend.guestIP(f.vmx, { wait: true, timeout_seconds: 1, signal: controller.signal });
+  await new Promise(resolve => setTimeout(resolve, 20));
+  controller.abort(new Error('cancel IP observation'));
+  await assert.rejects(cancelled, /cancel IP observation/);
+  release(); await blocker;
+  assert.deepEqual(calls, ['getGuestIPAddress']);
+});
+
+test('IP deadline bounds time spent queued behind another VM operation', { timeout: 5000 }, async t => {
+  let release; let started;
+  const ready = new Promise(resolve => { started = resolve; });
+  const calls = [];
+  const f = await fixture(t, async (_, args) => {
+    calls.push(args[2]); started();
+    await new Promise(resolve => { release = resolve; });
+    return { stdout: '192.0.2.10' };
+  });
+  const target = await fs.realpath(f.vmx);
+  const blocker = f.backend.run(['getGuestIPAddress', target]);
+  await ready;
+  try {
+    await assert.rejects(f.backend.guestIP(f.vmx, { wait: true, timeout_seconds: 1 }), /deadline expired/);
+    assert.deepEqual(calls, ['getGuestIPAddress']);
+  } finally { release(); await blocker; }
+});
 test('concurrent invocations are serialized even after failure', async t => {
   let active = 0;
   let peak = 0;

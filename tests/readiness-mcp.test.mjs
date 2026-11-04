@@ -41,7 +41,7 @@ require('node:child_process').execFile = stub;
 `);
   const client = new Client({ name: 'readiness-mcp-regression', version: '1' }); t.after(() => client.close());
   await client.connect(new StdioClientTransport({ command: process.execPath, args: ['--require', preload, path.resolve('vmware-workstation/server/server.cjs')], stderr: 'pipe', env: { ...process.env, VMRUN_PATH: binary, VMWARE_ALLOWED_ROOTS: root, VMWARE_ALLOWED_HOST_ROOTS: root, VMWARE_DIAGNOSTICS_ROOTS: root, VMWARE_VDISKMANAGER_PATH: path.join(root, 'missing', process.platform === 'win32' ? 'vmware-vdiskmanager.exe' : 'vmware-vdiskmanager'), VMWARE_OVFTOOL_PATH: path.join(root, 'missing', process.platform === 'win32' ? 'ovftool.exe' : 'ovftool'), READINESS_TEST_VMX: vmx } }));
-  const tools = (await client.listTools()).tools; assert.equal(tools.length, 150);
+  const tools = (await client.listTools()).tools; assert.equal(tools.length, 153);
   const previous = JSON.parse(await fs.readFile('tests/fixtures/pre-readiness-tool-schemas.json', 'utf8'));
   for (const prior of previous.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior);
   const call = async (name, args = {}) => {

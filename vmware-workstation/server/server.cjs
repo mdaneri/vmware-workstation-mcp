@@ -47994,16 +47994,22 @@ var Workstation = class {
     }
     return { vmx: vmx3, action: action2, name: name2, output: await this.run([action2, vmx3, name2], { mutation: true }), commandSucceeded: true };
   }
-  async guestIP(input2) {
+  async guestIP(input2, { wait: wait2 = false, timeout_seconds = 120, signal } = {}) {
+    if (typeof wait2 !== "boolean" || !Number.isInteger(timeout_seconds) || timeout_seconds < 1 || timeout_seconds > 3600) throw new Error("Guest IP wait requires a boolean wait and timeout_seconds from 1 to 3600.");
     const vmx3 = await this.vmx(input2);
+    signal?.throwIfAborted();
+    const deadline = performance.now() + timeout_seconds * 1e3;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(new Error("Guest IP observation deadline expired.")), timeout_seconds * 1e3);
+    signal = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
     try {
-      const address = (await this.run(["getGuestIPAddress", vmx3])).trim();
+      const address = (await this.run(["getGuestIPAddress", vmx3, ...wait2 ? ["-wait"] : []], { timeout: timeout_seconds * 1e3, deadline, signal })).trim();
       if (!(0, import_node_net.isIP)(address)) throw new Error(`vmrun did not return a valid guest IP address. Output: ${address.slice(0, 4e3) || "(empty)"}`);
       return { vmx: vmx3, address };
     } catch (error62) {
       let toolsState;
       try {
-        const output2 = await this.run(["checkToolsState", vmx3], { timeout: 5e3 });
+        const output2 = await this.run(["checkToolsState", vmx3], { timeout: 5e3, deadline, signal });
         toolsState = { state: ["running", "installed", "unknown"].includes(output2) ? output2 : "unknown", output: output2.slice(0, 4e3) };
       } catch (checkError) {
         toolsState = { state: "unknown", error: checkError.message };
@@ -48014,10 +48020,12 @@ var Workstation = class {
           vmx: vmx3,
           addressAvailable: false,
           toolsState,
-          note: "The IP lookup failed. checkToolsState is a separate, later observation; even running Tools does not establish IP publication, network reachability, or guest readiness. The lookup error alone does not establish that Tools is stopped.",
-          action: "Use vmrun_get_guest_ip_address with wait=true and an explicit timeout_seconds for a bounded read-only wait. Inspect guest networking and IP publication before considering service or power changes."
+          note: "The IP lookup failed. checkToolsState, when attempted, is a separate, later observation; it is skipped after cancellation/deadline. Even running Tools does not establish IP publication, network reachability, or guest readiness. The lookup error alone does not establish that Tools is stopped.",
+          action: "Use get_guest_ip with wait=true and an explicit timeout_seconds for a bounded read-only wait, or vmrun_get_guest_ip_address if exposed. If documented tools are missing, compare plugin_catalog with the assistant-visible inventory and reconnect/check a fresh local chat. Inspect guest networking and IP publication before considering service or power changes; never replay mutations."
         }
       });
+    } finally {
+      clearTimeout(timer);
     }
   }
 };
@@ -50024,9 +50032,9 @@ var LanSegments = class {
     }
     return { bytes, document: parseLanPreferences(bytes || Buffer.alloc(0), process.platform === "win32" ? "windows-1252" : "UTF-8") };
   }
-  async unchanged(catalog) {
+  async unchanged(catalog2) {
     const current = await this.readCatalog();
-    if (catalog.bytes === null ? current.bytes !== null : current.bytes === null || !catalog.bytes.equals(current.bytes)) throw new Error("LAN segment preferences changed concurrently; inspect and retry.");
+    if (catalog2.bytes === null ? current.bytes !== null : current.bytes === null || !catalog2.bytes.equals(current.bytes)) throw new Error("LAN segment preferences changed concurrently; inspect and retry.");
   }
   exclusive(callback) {
     const job = this.tail.then(async () => {
@@ -50049,9 +50057,9 @@ var LanSegments = class {
     });
     return job;
   }
-  async writeCatalog(catalog, segments, beforeCommit) {
-    const bytes = renderPreferences(catalog.document, segments);
-    const backup = catalog.bytes === null ? null : `${this.filename}.backup-${(0, import_node_crypto.randomUUID)()}`;
+  async writeCatalog(catalog2, segments, beforeCommit) {
+    const bytes = renderPreferences(catalog2.document, segments);
+    const backup = catalog2.bytes === null ? null : `${this.filename}.backup-${(0, import_node_crypto.randomUUID)()}`;
     const temporary = `${this.filename}.edit-${(0, import_node_crypto.randomUUID)()}`;
     const write = async (filename2, content) => {
       await import_promises7.default.writeFile(filename2, "", { flag: "wx", mode: 384 });
@@ -50059,11 +50067,11 @@ var LanSegments = class {
       await import_promises7.default.writeFile(filename2, content);
     };
     try {
-      if (backup) await write(backup, catalog.bytes);
+      if (backup) await write(backup, catalog2.bytes);
       await write(temporary, bytes);
       if (beforeCommit) await beforeCommit();
       await this.assertGUIClosed();
-      await this.unchanged(catalog);
+      await this.unchanged(catalog2);
       await import_promises7.default.rename(temporary, this.filename);
     } catch (error62) {
       await import_promises7.default.unlink(temporary).catch((cleanup) => {
@@ -50107,33 +50115,33 @@ var LanSegments = class {
   }
   async list(input2 = {}) {
     const a = lanSegmentSchemas.list_lan_segments.parse(input2);
-    const catalog = await this.readCatalog();
-    return { preferencesPath: this.filename, segments: catalog.document.segments, ...a.vmx ? { vmx: a.vmx, adapters: this.adapters(await this.readVM(a.vmx), catalog.document.segments) } : {}, note: "Catalog is per host user. Supply vmx to inspect adapters. Inventory is not a disk scan; unregistered VMs may also reference these segment IDs." };
+    const catalog2 = await this.readCatalog();
+    return { preferencesPath: this.filename, segments: catalog2.document.segments, ...a.vmx ? { vmx: a.vmx, adapters: this.adapters(await this.readVM(a.vmx), catalog2.document.segments) } : {}, note: "Catalog is per host user. Supply vmx to inspect adapters. Inventory is not a disk scan; unregistered VMs may also reference these segment IDs." };
   }
   async create(input2) {
     const a = lanSegmentSchemas.create_lan_segment.parse(input2);
     return this.exclusive(async () => {
-      const catalog = await this.readCatalog();
-      const existing = catalog.document.segments.filter((entry) => entry.name.toLowerCase() === a.name.toLowerCase());
+      const catalog2 = await this.readCatalog();
+      const existing = catalog2.document.segments.filter((entry) => entry.name.toLowerCase() === a.name.toLowerCase());
       if (existing.length > 1) throw new Error("LAN segment name is ambiguous; catalog was not changed.");
       if (existing.length) return { created: false, segment: existing[0], backup: null };
-      if (catalog.document.segments.length >= 1e4) throw new Error("LAN segment catalog is full.");
+      if (catalog2.document.segments.length >= 1e4) throw new Error("LAN segment catalog is full.");
       let id;
       do {
         const bytes = (0, import_node_crypto.randomBytes)(16);
         bytes[0] = 82;
         const hex3 = [...bytes].map((byte) => byte.toString(16).padStart(2, "0"));
         id = `${hex3.slice(0, 8).join(" ")}-${hex3.slice(8).join(" ")}`;
-      } while (catalog.document.segments.some((entry) => entry.id === id));
+      } while (catalog2.document.segments.some((entry) => entry.id === id));
       const segment2 = { name: a.name, id };
-      return { created: true, segment: segment2, ...await this.writeCatalog(catalog, [...catalog.document.segments, segment2]) };
+      return { created: true, segment: segment2, ...await this.writeCatalog(catalog2, [...catalog2.document.segments, segment2]) };
     });
   }
   async remove(input2) {
     const a = lanSegmentSchemas.remove_lan_segment.parse(input2);
     return this.exclusive(async () => {
-      const catalog = await this.readCatalog();
-      const segment2 = resolveSegment(catalog.document.segments, a.segment);
+      const catalog2 = await this.readCatalog();
+      const segment2 = resolveSegment(catalog2.document.segments, a.segment);
       const inventoryBytes = await import_promises7.default.readFile(this.backend.inventoryPath);
       for (const line of inventoryBytes.toString("utf8").split(/\r?\n/)) {
         if (!/^\s*vmlist\d+\.config\b/i.test(line)) continue;
@@ -50162,7 +50170,7 @@ var LanSegments = class {
         if (scanned.has(key3)) continue;
         scanned.add(key3);
         snapshots.push(vm2);
-        for (const nic of this.adapters(vm2, catalog.document.segments)) {
+        for (const nic of this.adapters(vm2, catalog2.document.segments)) {
           if (nic.segmentId === segment2.id) references2.push({ vmx: vm2.vmx, adapter: nic.adapter });
         }
       }
@@ -50173,16 +50181,16 @@ var LanSegments = class {
         if (current.warnings.length || JSON.stringify(current.vms) !== JSON.stringify(inventory.vms)) throw new Error("VM inventory or running state changed during removal; inspect and retry.");
         for (const vm2 of snapshots) if (await import_promises7.default.readFile(vm2.vmx, "utf8") !== vm2.text) throw new Error("A VMX changed during segment removal; inspect and retry.");
       };
-      return { removed: true, segment: segment2, checkedVMs: scanned.size, skippedMissingVMs, ...await this.writeCatalog(catalog, catalog.document.segments.filter((entry) => entry.id !== segment2.id), recheck), note: "Checked registered/running and explicitly supplied VMX files. Unregistered VMs outside this set were not scanned." };
+      return { removed: true, segment: segment2, checkedVMs: scanned.size, skippedMissingVMs, ...await this.writeCatalog(catalog2, catalog2.document.segments.filter((entry) => entry.id !== segment2.id), recheck), note: "Checked registered/running and explicitly supplied VMX files. Unregistered VMs outside this set were not scanned." };
     });
   }
   async editAdapter(input2, detach) {
     const a = lanSegmentSchemas[detach ? "detach_vm_adapter_from_lan_segment" : "attach_vm_adapter_to_lan_segment"].parse(input2);
     if (detach && (a.network === "custom" ? !a.vmnet : a.vmnet !== void 0)) throw new Error("Supply vmnet only with network=custom; custom requires vmnet.");
     return this.exclusive(async () => {
-      const catalog = await this.readCatalog();
+      const catalog2 = await this.readCatalog();
       const vm2 = await this.readVM(a.vmx);
-      const segment2 = detach && idPattern.test(a.segment) ? { id: a.segment.toLowerCase(), name: catalog.document.segments.find((entry) => entry.id === a.segment.toLowerCase())?.name || null } : resolveSegment(catalog.document.segments, a.segment);
+      const segment2 = detach && idPattern.test(a.segment) ? { id: a.segment.toLowerCase(), name: catalog2.document.segments.find((entry) => entry.id === a.segment.toLowerCase())?.name || null } : resolveSegment(catalog2.document.segments, a.segment);
       const prefix2 = `ethernet${a.adapter}`;
       const present2 = vm2.values.get(`${prefix2}.present`) || "";
       if (detach ? !/^(true|false)$/i.test(present2) : !/^true$/i.test(present2)) throw new Error("Selected network adapter is not present. LAN tools do not create or delete adapters.");
@@ -50207,7 +50215,7 @@ var LanSegments = class {
       };
       const result = await this.vmFiles.configure({ vmx: vm2.vmx, settings }, { expectedOriginal: vm2.text, beforeCommit: async () => {
         await this.assertGUIClosed();
-        await this.unchanged(catalog);
+        await this.unchanged(catalog2);
       } });
       return { ...result, adapter: a.adapter, segment: segment2, attached: !detach, network: detach ? a.network : "pvn", startConnected: !detach };
     });
@@ -50355,8 +50363,8 @@ var HardwareManager = class {
   }
   async nicSettings(nics, config2, plannedSegments = []) {
     const settings = {}, seen = /* @__PURE__ */ new Set(), macs = /* @__PURE__ */ new Set();
-    let catalog = null;
-    if (nics?.some((n2) => n2.segment !== void 0 || n2.network === "lan_segment")) catalog = await this.lan.readCatalog();
+    let catalog2 = null;
+    if (nics?.some((n2) => n2.segment !== void 0 || n2.network === "lan_segment")) catalog2 = await this.lan.readCatalog();
     for (const n2 of nics || []) {
       if (seen.has(n2.index)) hardwareError("DUPLICATE_DEVICE", "NIC indices must be unique.");
       seen.add(n2.index);
@@ -50390,7 +50398,7 @@ var HardwareManager = class {
           settings[`${p}.vnet`] = n2.vmnet;
         }
         if (network === "lan_segment") {
-          const matches = [...catalog.document.segments, ...plannedSegments].filter((s2) => s2.id === n2.segment?.toLowerCase() || s2.name.toLowerCase() === n2.segment?.toLowerCase());
+          const matches = [...catalog2.document.segments, ...plannedSegments].filter((s2) => s2.id === n2.segment?.toLowerCase() || s2.name.toLowerCase() === n2.segment?.toLowerCase());
           if (matches.length !== 1) hardwareError("INVALID_NETWORK", "Select one unambiguous existing LAN segment by name or pvnID.");
           settings[`${p}.pvnID`] = matches[0].id;
         }
@@ -50399,7 +50407,7 @@ var HardwareManager = class {
     }
     const existingIndices = Object.keys(config2).flatMap((k) => k.match(/^ethernet(\d+)\.present$/)?.slice(1) || []);
     if ((/* @__PURE__ */ new Set([...existingIndices.map(Number), ...seen])).size > 10) hardwareError("UNSUPPORTED_CAPABILITY", "At most ten NICs are supported.");
-    return { settings, catalog };
+    return { settings, catalog: catalog2 };
   }
   settings(a, config2, caps) {
     if (a.vtpm !== void 0) hardwareError("UNSUPPORTED_CAPABILITY", caps.vtpm.reason);
@@ -58550,6 +58558,133 @@ var SecurityManager = class {
   }
 };
 
+// src/plugin-catalog.mjs
+var import_node_crypto12 = require("node:crypto");
+
+// package.json
+var package_default = {
+  name: "vmware-workstation-plugin-dev",
+  version: "0.16.0",
+  private: true,
+  license: "MIT",
+  repository: {
+    type: "git",
+    url: "git+https://github.com/mdaneri/vmware-workstation-mcp.git"
+  },
+  type: "module",
+  scripts: {
+    "security:probe": "node scripts/probe-security.mjs",
+    build: "node scripts/build.mjs",
+    test: "node --test tests/*.test.mjs",
+    smoke: "node scripts/smoke.mjs",
+    "smoke:rest": "node scripts/smoke-rest.mjs",
+    "test:console:live": "node scripts/live-console.mjs",
+    "test:ovf:live": "node scripts/live-ovf.mjs",
+    validate: "node scripts/validate-package.mjs && node scripts/validate-credentials.mjs",
+    prepackage: "npm run build && npm run validate",
+    package: "node scripts/package-plugin.mjs",
+    "test:disk:live": "node scripts/live-disks.mjs",
+    "test:serial:live": "node scripts/live-serial.mjs",
+    "test:readiness:live": "node scripts/live-readiness.mjs",
+    "test:guest-exec:live": "node scripts/live-guest-exec.mjs",
+    "test:iso:live": "node scripts/live-iso.mjs",
+    "test:hardware:live": "node scripts/live-hardware.mjs",
+    "test:jobs:live": "node scripts/live-jobs.mjs",
+    "test:labs:live": "node scripts/live-labs.mjs",
+    "test:templates:live": "node scripts/live-templates.mjs"
+  },
+  dependencies: {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "@xmldom/xmldom": "0.9.12",
+    pngjs: "7.0.0",
+    rfb2: "1.1.0",
+    "tar-stream": "3.2.2",
+    zod: "4.6.7"
+  },
+  devDependencies: {
+    ajv: "8.20.0",
+    esbuild: "0.28.2",
+    fflate: "0.8.3"
+  },
+  engines: {
+    node: ">=22.12"
+  }
+};
+
+// src/plugin-catalog.mjs
+var pluginVersion = package_default.version;
+var catalogSchema = external_exports.object({
+  tool: external_exports.string().regex(/^[a-z][a-z0-9_]*$/).max(128).optional().describe("Existing tool name to discover its exact input schema, annotations and bridge route. No operation is executed."),
+  observed_tools: external_exports.array(external_exports.string().regex(/^[a-z][a-z0-9_]*$/).max(128)).max(512).optional().describe("Optional complete assistant-visible VMware tool names, without namespace prefixes. Compared with this running server, never used to execute tools.")
+}).strict();
+var PluginCatalog = class {
+  constructor() {
+    this.names = /* @__PURE__ */ new Set();
+    this.entries = /* @__PURE__ */ new Map();
+    this.instance = (0, import_node_crypto12.randomUUID)();
+  }
+  add(name2, entry) {
+    if (this.names.has(name2)) throw new Error(`Duplicate tool registration: ${name2}`);
+    this.names.add(name2);
+    this.entries.set(name2, entry);
+  }
+  bridgeNames(readOnly) {
+    return [...this.entries].filter(([name2, entry]) => !name2.startsWith("plugin_") && entry.annotations.readOnlyHint === readOnly).map(([name2]) => name2).sort();
+  }
+  bridgeSchema(readOnly) {
+    return external_exports.object({
+      tool: external_exports.enum(this.bridgeNames(readOnly)).describe("Exact existing tool name discovered with plugin_catalog."),
+      arguments: external_exports.record(external_exports.string(), external_exports.unknown()).default({}).describe("Original tool arguments. Validated against that tool's unchanged strict schema before execution; no raw CLI or arbitrary operations."),
+      ...!readOnly ? { confirm: external_exports.literal(true).describe("Required after authorization for the exact target and effects. Original tool confirmation fields are also required.") } : {}
+    }).strict();
+  }
+  async invoke(readOnly, input2, extra) {
+    const a = this.bridgeSchema(readOnly).parse(input2);
+    const entry = this.entries.get(a.tool);
+    const args = await entry.schema.parseAsync(a.arguments);
+    extra?.signal?.throwIfAborted();
+    return entry.invoke(args, extra);
+  }
+  identity() {
+    const names2 = [...this.names].sort();
+    return {
+      name: "vmware-workstation",
+      version: pluginVersion,
+      instance_id: this.instance,
+      tool_count: names2.length,
+      // SHA-256 of the UTF-8 JSON array of sorted, unprefixed names; not a
+      // schema or bundle hash, and not evidence of what the client exposes.
+      tool_names_sha256: (0, import_node_crypto12.createHash)("sha256").update(JSON.stringify(names2)).digest("hex")
+    };
+  }
+  inspect({ observed_tools, tool: tool2 } = {}) {
+    const tool_names = [...this.names].sort();
+    const observed = observed_tools === void 0 ? null : [...new Set(observed_tools)].sort();
+    const entry = tool2 === void 0 ? null : this.entries.get(tool2);
+    if (tool2 !== void 0 && !entry) throw new Error("Unknown registered tool. Inspect tool_names before selecting an operation.");
+    return {
+      server: this.identity(),
+      tool_names,
+      selected_tool: entry ? {
+        name: tool2,
+        description: entry.description,
+        inputSchema: external_exports.toJSONSchema(entry.schema, { target: "draft-7", io: "input" }),
+        annotations: entry.annotations,
+        bridge: tool2.startsWith("plugin_") ? null : entry.annotations.readOnlyHint ? "plugin_query" : "plugin_mutate"
+      } : null,
+      comparison: observed === null ? null : {
+        observed_count: observed.length,
+        missing_from_observed: tool_names.filter((name2) => !observed.includes(name2)),
+        unknown_to_server: observed.filter((name2) => !this.names.has(name2)),
+        matches: JSON.stringify(observed) === JSON.stringify(tool_names),
+        alphabetical_prefix_only: observed.length > 0 && observed.length < tool_names.length && JSON.stringify(observed) === JSON.stringify(tool_names.slice(0, observed.length))
+      },
+      scope: "Running server registration only. Cannot observe the desktop client catalog, its filters, cache, or another server process. No VMware commands or credentials are accessed.",
+      action: "For a missing operation, discover its schema using tool, then use the indicated plugin_query or plugin_mutate route with the original arguments. These routes reuse the registered handlers and protections; never use them to evade intentional client policy. Compare server version and tool_names with raw MCP and assistant-visible catalogs, then reconnect/restart if stale. Never replay mutations or use raw CLI/guest execution to bypass missing tools."
+    };
+  }
+};
+
 // src/server.mjs
 var backend = new Workstation();
 var credentials = new Credentials();
@@ -58573,7 +58708,10 @@ var security2 = new SecurityManager({ backend, hardware });
 var jobOperations = new JobOperations({ backend, jobs, disks, ovf });
 var templates = new TemplateManager({ backend, hardware, rest });
 var labs = new LabManager({ backend, templates, lan: lanSegments, readiness: readiness2, protectFile: localFileProtector(backend) });
-var server = new McpServer({ name: "vmware-workstation", version: "0.15.0" });
+var catalog = new PluginCatalog();
+var server = new McpServer({ name: "vmware-workstation", version: pluginVersion }, {
+  instructions: "If a VMware tool is missing, call plugin_catalog with tool=<exact name> to discover its schema and route through plugin_query (read-only) or plugin_mutate (authorized changes, confirm=true). Both reuse original strict validation and handlers. Never bypass intentional client policy. get_guest_ip supports bounded waiting. Never replay mutations or substitute raw CLI/guest execution."
+});
 var vmx2 = external_exports.string().min(1).describe("Absolute path to an existing VMware .vmx file, obtained from inventory or supplied by the user.");
 var name = external_exports.string().min(1).max(256).describe("Exact snapshot name.");
 tool("vm_security_capabilities", "Read-only native worker/version and vmcli help discovery. Separates installed tools from a verified encryption/vTPM backend. No security mutations or encryption modes are supported; no VM or credentials are opened.", securitySchemas.vm_security_capabilities, true, () => security2.capabilities());
@@ -58605,23 +58743,23 @@ for (const kind of ["boot", "ip", "service"]) tool(`vm_wait_for_${kind}`, {
 tool("vm_get_recent_errors", "Read bounded current vmware.log data only after verifying its selected VM identity. Returns normalized error excerpts and actions; arbitrary log text/paths/secrets are omitted. No host log scan.", readinessSchemas.vm_get_recent_errors, true, (a) => readiness2.recentErrors(a));
 tool("vm_collect_diagnostics", "Save selected VM allowlisted hardware, lifecycle, Tools/IP, snapshot count and normalized log excerpts into a NEW approved directory. Optional direct VNC guest pixels are unredacted: review before sharing. Never captures host desktop or executes guest commands.", readinessSchemas.vm_collect_diagnostics, false, (a, extra) => readiness2.collect(a, extra), false, false, false);
 function tool(name2, description, schema, readOnly, callback, destructive = !readOnly, openWorld = false, idempotent = readOnly) {
-  server.registerTool(name2, {
-    description,
-    inputSchema: schema instanceof external_exports.ZodObject ? schema : external_exports.object(schema).strict(),
-    annotations: { readOnlyHint: readOnly, destructiveHint: destructive, idempotentHint: idempotent, openWorldHint: openWorld }
-  }, async (args, extra) => {
+  const inputSchema = schema instanceof external_exports.ZodObject ? schema : external_exports.object(schema).strict();
+  const annotations = { readOnlyHint: readOnly, destructiveHint: destructive, idempotentHint: idempotent, openWorldHint: openWorld };
+  const invoke = async (args, extra) => {
     try {
       if (name2.startsWith("job_") || name2.startsWith("ovf_") && name2 !== "ovf_tool_status") await jobs.initialize();
       const result = await callback(args, extra);
       if (result?.job_id || name2 === "job_list") return { content: [{ type: "text", text: JSON.stringify(jobs.publicResult(result), null, 2) }] };
-      if (Array.isArray(result?.content)) return { content: result.content.map((block) => block.type === "text" ? { ...block, text: credentials.redact(block.text) } : block) };
+      if (Array.isArray(result?.content)) return { ...result.isError ? { isError: true } : {}, content: result.content.map((block) => block.type === "text" ? { ...block, text: credentials.redact(block.text) } : block) };
       return { content: [{ type: "text", text: credentials.redact(JSON.stringify(result, null, 2)) }] };
     } catch (error62) {
       if (name2.startsWith("lab_")) return { isError: true, content: [{ type: "text", text: credentials.redact(JSON.stringify({ code: error62.code || "LAB_PREFLIGHT_FAILED", message: error62.message, ...error62.details })) }] };
       if (name2.startsWith("serial_")) return { isError: true, content: [{ type: "text", text: credentials.redact(JSON.stringify({ code: error62.code || "SERIAL_SETUP_REQUIRED", message: error62.message })) }] };
       return { isError: true, content: [{ type: "text", text: credentials.redact(error62.details || name2.startsWith("disk_") ? JSON.stringify({ code: error62.code || "DISK_PREFLIGHT_FAILED", message: error62.message, action: "Inspect the target and disk_manager_status before retrying.", ...error62.details }) : error62.message) }] };
     }
-  });
+  };
+  catalog.add(name2, { description, schema: inputSchema, annotations, invoke });
+  server.registerTool(name2, { description, inputSchema, annotations }, invoke);
 }
 tool("serial_status", "Inspect optional per-VM serial capability/configuration and session state without connecting or starting a VM. Only a connected session proves native endpoint ownership.", serialSchemas.serial_status, true, (a) => serial.status(a));
 tool("serial_configure", "Explicitly replace or disable one serial port configuration in a powered-off unlocked VMX, with a backup. Requires confirm=true after authorization. Uses only a generated per-VM local pipe/socket; never starts a VM.", serialSchemas.serial_configure, false, (a) => serial.configure(a));
@@ -58675,7 +58813,19 @@ tool("list_snapshots", "List snapshot names without changing the VM.", { vmx: vm
 tool("create_snapshot", "Create a named snapshot on the selected VM. Requires a user request to create it.", { vmx: vmx2, name }, false, (a) => backend.snapshot(a.vmx, "snapshot", a.name), false);
 tool("revert_snapshot", "Revert the VM to an existing snapshot. Discards later VM state; requires explicit user authorization for this VM and snapshot.", { vmx: vmx2, name }, false, (a) => backend.snapshot(a.vmx, "revertToSnapshot", a.name));
 tool("delete_snapshot", "Delete one named snapshot, preserving children. Removes a restore point; requires explicit user authorization for this VM and snapshot.", { vmx: vmx2, name }, false, (a) => backend.snapshot(a.vmx, "deleteSnapshot", a.name));
-tool("get_guest_ip", "Get the IP address reported by VMware Tools in a running VM. Does not log into the guest or wait for startup.", { vmx: vmx2 }, true, (a) => backend.guestIP(a.vmx));
+tool("get_guest_ip", "Get the IP address reported by VMware Tools in a running VM. Optional wait=true uses a bounded native wait; timeout_seconds defaults to 120. No guest login, power changes or automatic retries.", {
+  vmx: vmx2,
+  wait: external_exports.boolean().optional(),
+  timeout_seconds: external_exports.number().int().min(1).max(3600).optional()
+}, true, async (a, extra) => {
+  try {
+    return await backend.guestIP(a.vmx, { ...a, signal: extra.signal });
+  } catch (error62) {
+    if (error62.details) error62.details.server = catalog.identity();
+    throw error62;
+  }
+});
+tool("plugin_catalog", "Read running plugin version, process identity and complete registered tool names without VMware or credentials. Optionally compare assistant-visible names to diagnose missing tools, including an alphabetical cutoff. Cannot refresh the client catalog.", catalogSchema, true, (a) => catalog.inspect(a));
 for (const command of commands) {
   tool(
     `vmrun_${snake(command.command)}`,
@@ -58729,6 +58879,8 @@ tool("workstation_capabilities", "Show full vmrun/REST tool coverage, compare th
     note: "Coverage describes callable implementations. It does not prove a REST service is running, credentials work, or guest operations succeed."
   };
 });
+tool("plugin_query", "Call a discovered read-only VMware operation when its direct tool is missing. First use plugin_catalog with tool to obtain the original strict argument schema. Reuses the same handler, deadlines, cancellation and redaction. Cannot call mutations or arbitrary commands; never bypass intentional policy.", catalog.bridgeSchema(true), true, (a, extra) => catalog.invoke(true, a, extra), false, true, false);
+tool("plugin_mutate", "Call a discovered state-changing VMware operation when its direct tool is missing. First obtain its schema from plugin_catalog. Requires authorization for exact target/effects, confirm=true and every original confirmation. Reuses original validation, locks, credentials and handler; never retries. Do not bypass intentional policy.", catalog.bridgeSchema(false), false, (a, extra) => catalog.invoke(false, a, extra), true, true, false);
 async function shutdown() {
   serial.close();
   consoles.close();

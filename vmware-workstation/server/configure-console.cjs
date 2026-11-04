@@ -376,16 +376,22 @@ var Workstation = class {
     }
     return { vmx: vmx2, action, name, output: await this.run([action, vmx2, name], { mutation: true }), commandSucceeded: true };
   }
-  async guestIP(input2) {
+  async guestIP(input2, { wait = false, timeout_seconds = 120, signal } = {}) {
+    if (typeof wait !== "boolean" || !Number.isInteger(timeout_seconds) || timeout_seconds < 1 || timeout_seconds > 3600) throw new Error("Guest IP wait requires a boolean wait and timeout_seconds from 1 to 3600.");
     const vmx2 = await this.vmx(input2);
+    signal?.throwIfAborted();
+    const deadline = performance.now() + timeout_seconds * 1e3;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(new Error("Guest IP observation deadline expired.")), timeout_seconds * 1e3);
+    signal = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
     try {
-      const address = (await this.run(["getGuestIPAddress", vmx2])).trim();
+      const address = (await this.run(["getGuestIPAddress", vmx2, ...wait ? ["-wait"] : []], { timeout: timeout_seconds * 1e3, deadline, signal })).trim();
       if (!(0, import_node_net.isIP)(address)) throw new Error(`vmrun did not return a valid guest IP address. Output: ${address.slice(0, 4e3) || "(empty)"}`);
       return { vmx: vmx2, address };
     } catch (error62) {
       let toolsState;
       try {
-        const output2 = await this.run(["checkToolsState", vmx2], { timeout: 5e3 });
+        const output2 = await this.run(["checkToolsState", vmx2], { timeout: 5e3, deadline, signal });
         toolsState = { state: ["running", "installed", "unknown"].includes(output2) ? output2 : "unknown", output: output2.slice(0, 4e3) };
       } catch (checkError) {
         toolsState = { state: "unknown", error: checkError.message };
@@ -396,10 +402,12 @@ var Workstation = class {
           vmx: vmx2,
           addressAvailable: false,
           toolsState,
-          note: "The IP lookup failed. checkToolsState is a separate, later observation; even running Tools does not establish IP publication, network reachability, or guest readiness. The lookup error alone does not establish that Tools is stopped.",
-          action: "Use vmrun_get_guest_ip_address with wait=true and an explicit timeout_seconds for a bounded read-only wait. Inspect guest networking and IP publication before considering service or power changes."
+          note: "The IP lookup failed. checkToolsState, when attempted, is a separate, later observation; it is skipped after cancellation/deadline. Even running Tools does not establish IP publication, network reachability, or guest readiness. The lookup error alone does not establish that Tools is stopped.",
+          action: "Use get_guest_ip with wait=true and an explicit timeout_seconds for a bounded read-only wait, or vmrun_get_guest_ip_address if exposed. If documented tools are missing, compare plugin_catalog with the assistant-visible inventory and reconnect/check a fresh local chat. Inspect guest networking and IP publication before considering service or power changes; never replay mutations."
         }
       });
+    } finally {
+      clearTimeout(timer);
     }
   }
 };
