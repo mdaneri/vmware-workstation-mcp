@@ -3,6 +3,8 @@ import { z } from 'zod';
 import metadata from '../package.json' with { type: 'json' };
 
 export const pluginVersion = metadata.version;
+export const earlyCatalogTools = ['a_vmware_catalog', 'a_vmware_mutate', 'a_vmware_query'];
+const entrypoints = new Set([...earlyCatalogTools, 'plugin_catalog', 'plugin_query', 'plugin_mutate']);
 export const catalogSchema = z.object({
   tool: z.string().regex(/^[a-z][a-z0-9_]*$/).max(128).optional().describe('Existing tool name to discover its exact input schema, annotations and bridge route. No operation is executed.'),
   observed_tools: z.array(z.string().regex(/^[a-z][a-z0-9_]*$/).max(128)).max(512).optional()
@@ -25,12 +27,12 @@ export class PluginCatalog {
   }
 
   bridgeNames(readOnly) {
-    return [...this.entries].filter(([name, entry]) => !name.startsWith('plugin_') && entry.annotations.readOnlyHint === readOnly).map(([name]) => name).sort();
+    return [...this.entries].filter(([name, entry]) => !entrypoints.has(name) && entry.annotations.readOnlyHint === readOnly).map(([name]) => name).sort();
   }
 
-  bridgeSchema(readOnly) {
+  bridgeSchema(readOnly, discovery = 'plugin_catalog') {
     return z.object({
-      tool: z.enum(this.bridgeNames(readOnly)).describe('Exact existing tool name discovered with plugin_catalog.'),
+      tool: z.enum(this.bridgeNames(readOnly)).describe(`Exact existing tool name discovered with ${discovery}.`),
       arguments: z.record(z.string(), z.unknown()).default({}).describe('Original tool arguments. Validated against that tool\'s unchanged strict schema before execution; no raw CLI or arbitrary operations.'),
       ...(!readOnly ? { confirm: z.literal(true).describe('Required after authorization for the exact target and effects. Original tool confirmation fields are also required.') } : {}),
     }).strict();
@@ -67,7 +69,7 @@ export class PluginCatalog {
       selected_tool: entry ? {
         name: tool, description: entry.description, inputSchema: z.toJSONSchema(entry.schema, { target: 'draft-7', io: 'input' }),
         annotations: entry.annotations,
-        bridge: tool.startsWith('plugin_') ? null : entry.annotations.readOnlyHint ? 'plugin_query' : 'plugin_mutate',
+        bridge: entrypoints.has(tool) ? null : entry.annotations.readOnlyHint ? 'a_vmware_query' : 'a_vmware_mutate',
       } : null,
       comparison: observed === null ? null : {
         observed_count: observed.length,
@@ -78,7 +80,7 @@ export class PluginCatalog {
           JSON.stringify(observed) === JSON.stringify(tool_names.slice(0, observed.length)),
       },
       scope: 'Running server registration only. Cannot observe the desktop client catalog, its filters, cache, or another server process. No VMware commands or credentials are accessed.',
-      action: 'For a missing operation, discover its schema using tool, then use the indicated plugin_query or plugin_mutate route with the original arguments. These routes reuse the registered handlers and protections; never use them to evade intentional client policy. Compare server version and tool_names with raw MCP and assistant-visible catalogs, then reconnect/restart if stale. Never replay mutations or use raw CLI/guest execution to bypass missing tools.',
+      action: 'For a missing operation, discover its schema with a_vmware_catalog using tool, then use the indicated a_vmware_query or a_vmware_mutate route with the original arguments. These routes reuse the registered handlers and protections; never use them to evade intentional client policy. Compare server version and tool_names with raw MCP and assistant-visible catalogs, then reconnect/restart in a fresh chat if stale. Never replay mutations or use raw CLI/guest execution to bypass missing tools.',
     };
   }
 }

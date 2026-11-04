@@ -59,7 +59,7 @@ require('node:child_process').execFile = execFile;
   assert.equal(details.addressAvailable, false);
   assert.deepEqual(details.toolsState, { state: 'running', output: 'running' });
   assert.match(details.action, /get_guest_ip.*wait=true.*timeout_seconds/);
-  assert.equal(details.server.tool_count, 153);
+  assert.equal(details.server.tool_count, 156);
   assert.doesNotMatch(JSON.stringify(details), /DISK_PREFLIGHT|disk_manager_status/);
 
   const failedProbe = await call({ ipError: nativeError, toolsError: 'probe timeout test-password' });
@@ -108,4 +108,28 @@ require('node:child_process').execFile = execFile;
   const failedWait = await query({});
   assert.equal(failedWait.isError, true);
   assert.doesNotMatch(JSON.stringify(failedWait), /test-password/);
+
+  // #40: operate only through an entrypoint in the shorter visible prefix.
+  const visible = (await client.listTools()).tools.map(tool => tool.name).sort().slice(0, 46);
+  assert.ok(visible.includes('a_vmware_catalog') && visible.includes('a_vmware_query'));
+  assert.ok(!visible.includes('plugin_query') && !visible.includes('vmrun_get_guest_ip_address'));
+  const discovered = await client.callTool({ name: 'a_vmware_catalog', arguments: { tool: 'vmrun_get_guest_ip_address' } });
+  const route = JSON.parse(discovered.content[0].text).selected_tool.bridge;
+  assert.ok(visible.includes(route));
+  const earlyQuery = args => client.callTool({ name: route, arguments: { tool: 'vmrun_get_guest_ip_address', arguments: { vmx, wait: true, timeout_seconds: 2, ...args } } });
+  const failedEarlyWait = await earlyQuery({});
+  assert.deepEqual(failedEarlyWait, failedWait);
+  await fs.writeFile(scenario, JSON.stringify({ ipOutput: '192.0.2.10' }));
+  const earlyWait = await earlyQuery({});
+  assert.ok(!earlyWait.isError, JSON.stringify(earlyWait));
+  assert.equal(JSON.parse(earlyWait.content[0].text).commandSucceeded, true);
+  const earlyLog = (await fs.readFile(calls, 'utf8')).trim().split('\n').map(JSON.parse);
+  assert.deepEqual(earlyLog.at(-1).args, ['-T', 'ws', 'getGuestIPAddress', details.vmx, '-wait']);
+  assert.equal(earlyLog.at(-1).timeout, 2000);
+  for (const args of [{ timeout_seconds: 0 }, { timeout_seconds: 3601 }, { wait: 'yes' }, { password: 'never-accepted' }]) {
+    const denied = await earlyQuery(args);
+    assert.equal(denied.isError, true);
+    assert.doesNotMatch(JSON.stringify(denied), /never-accepted/);
+  }
+  assert.equal((await fs.readFile(calls, 'utf8')).trim().split('\n').length, earlyLog.length);
 });

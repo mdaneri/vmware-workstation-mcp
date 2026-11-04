@@ -3,11 +3,43 @@
 The installed package, a running MCP server, its raw `tools/list`, and the
 assistant-visible tool catalog are separate observations. A plugin refresh or
 version in `plugin.json` alone does not establish which process a chat uses or
-which tools the client exposes. Version 0.16.0 registers **153 tools**.
+which tools the client exposes. Version 0.16.1 registers **156 tools**: all 153 previous definitions plus three early discovery/bridge aliases.
+
+## Refresh and verify in a fresh local chat
+
+Let plugin jobs finish and fully quit desktop/CLI sessions using the plugin.
+From an external terminal, refresh the registered Git source, install from its
+updated snapshot, and check the installed version:
+
+```powershell
+codex plugin marketplace upgrade vmware-local
+codex plugin add vmware-workstation@vmware-local
+codex plugin list --marketplace vmware-local --json
+```
+
+For a local-directory marketplace, update/rebuild that source before `plugin add`;
+`marketplace upgrade` refreshes Git sources only. Reopen the desktop app and
+start a **fresh local chat** with this plugin enabled. This follows the
+[official marketplace lifecycle](https://developers.openai.com/plugins/build/plugins)
+and [CLI commands](https://developers.openai.com/codex/cli/reference).
+Continuing an existing chat after refresh is not a verification of new tool exposure.
+
+Ask the assistant to call `a_vmware_catalog` with
+`{"tool":"vmrun_get_guest_ip_address"}`. Check running version **0.16.1**,
+`tool_count: 156`, the selected schema's `wait` and `timeout_seconds` fields,
+and `selected_tool.bridge: "a_vmware_query"`. This performs no VMware operation.
+Then use the read-only bounded IP example below for an explicitly selected VM,
+with a client timeout longer than the requested bound. Verify its actual result;
+an IP lookup failure is separate from successful catalog discovery.
+
+If the early names are absent, preserve the observed inventory and use the
+independent diagnostic below. Check policies and the selected installed version;
+do not substitute raw CLI or replay a mutation. Early names address the reported
+prefix cuts; they cannot guarantee exposure under arbitrary client filtering.
 
 ## Check the active chat
 
-Call the read-only `plugin_catalog` tool with `{}`. It returns the running
+Call the read-only `a_vmware_catalog` tool with `{}`. It returns the running
 server's version, a per-process `instance_id`, `tool_count`, sorted `tool_names`,
 and `tool_names_sha256`. The hash covers the UTF-8 JSON array of sorted,
 unprefixed names; it is not a schema or executable hash. Neither VMware nor
@@ -18,9 +50,9 @@ namespace prefix and pass them as `observed_tools`:
 
 ```json
 {
-  "tool": "plugin_catalog",
+  "tool": "a_vmware_catalog",
   "arguments": {
-    "observed_tools": ["get_guest_ip", "list_vms", "plugin_catalog"]
+    "observed_tools": ["a_vmware_catalog", "get_guest_ip", "list_vms"]
   }
 }
 ```
@@ -34,8 +66,11 @@ schemas or successful VMware operations.
 
 ## Use an operation whose direct tool is missing
 
-Version 0.16.0 adds `plugin_query` and `plugin_mutate` alongside discovery. All
-three names sort before the observed cutoff. The 150 original operation names
+Version 0.16.1 adds `a_vmware_catalog`, `a_vmware_query` and `a_vmware_mutate`.
+These are the first three names alphabetically and in raw registration order,
+so they survive the observed 46-name and 74-name prefix cutoffs. The previous
+`plugin_catalog`, `plugin_query` and `plugin_mutate` remain callable with unchanged
+schemas and annotations. All six entrypoints reject bridge recursion. The 150 original operation names
 remain registered. The bridges accept only those registered operations, validate
 their original strict schemas and call the same handlers in the same server.
 They accept no executable, CLI command, arbitrary tool or unrestricted script
@@ -45,7 +80,7 @@ its existing credential and confirmation requirements.
 First discover the exact schema and annotations:
 
 ```json
-{ "tool": "plugin_catalog", "arguments": { "tool": "vmrun_get_guest_ip_address" } }
+{ "tool": "a_vmware_catalog", "arguments": { "tool": "vmrun_get_guest_ip_address" } }
 ```
 
 The returned `selected_tool` contains `inputSchema`, `annotations`, and `bridge`.
@@ -53,7 +88,7 @@ Use that route with the original arguments:
 
 ```json
 {
-  "tool": "plugin_query",
+  "tool": "a_vmware_query",
   "arguments": {
     "tool": "vmrun_get_guest_ip_address",
     "arguments": { "vmx": "<owned-vmx>", "wait": true, "timeout_seconds": 60 }
@@ -67,14 +102,14 @@ name is absent. The same discovery/query flow covers `vm_get_recent_errors`,
 original read-only operation. Each operation retains its own target, deadline,
 credential and session requirements. Query success is not proof of guest readiness.
 
-Changes use `plugin_mutate` with an additional outer `confirm: true` only after
+Changes use `a_vmware_mutate` with an additional outer `confirm: true` only after
 authorization for the exact target/effects. All original confirmation fields
 remain inside `arguments`; neither confirmation replaces the other. For example,
 after authorization for a typed offline hardware patch:
 
 ```json
 {
-  "tool": "plugin_mutate",
+  "tool": "a_vmware_mutate",
   "arguments": {
     "tool": "vm_hardware_set",
     "confirm": true,
@@ -89,18 +124,46 @@ bridge retains offline checks, allowlists, credential profiles, shared resource
 locks and original capability refusals. Both preserve MCP errors/images and
 cancellation context and never retry a failed operation automatically.
 
-Client tool policies apply separately to these three new tools. Do not use a
+Client tool policies apply separately to both the legacy and early entrypoints. Do not use a
 bridge to evade an intentionally disabled operation. Administrators restricting
-individual operation names should also restrict the corresponding bridge; a
+individual operation names should also restrict both corresponding legacy and early bridges; a
 bridge is an explicitly broader entry point to its advertised operation set.
 Its annotations are conservative: queries are read-only but may observe network
 services or consume serial data; changes are destructive, non-idempotent and
 require authorization. This fixes operation access through a small discoverable
 surface; it does not claim to repair the client's missing direct names.
 
+## Issue #40 and the earlier cutoff
+
+[Issue #40](https://github.com/mdaneri/vmware-workstation-mcp/issues/40) reports
+only 46 assistant-visible names in an existing 0.16.0 chat, ending at
+`ovf_inspect`, while its independent diagnostic returned 153 unique raw tools.
+All three `plugin_*` entrypoints fell beyond that shorter prefix. The original
+#36 regression modeled 74 names and therefore missed this access failure.
+Neither report proves the internal desktop filtering/caching cause or the active
+server version when discovery is unavailable. A separate diagnostic process
+cannot establish the existing chat's identity.
+
+The 0.16.1 regression models both cutoffs and only permits calls to visible
+entrypoints. It checks schema discovery for bounded IP, readiness, hardware and
+diagnostics; read-only and confirmed mutation routing; recursion rejection;
+strict arguments; original error/redaction behavior; and native `-wait` with a
+bounded timeout using a fake runner. No live VM operation is required. All 153
+previous descriptors are checked against the 0.16.0 baseline.
+
+On 2026-11-04, Codex CLI **0.166.0** installed the 0.16.1 local-directory
+marketplace in an isolated profile. Fresh app-server initialization and
+`config/mcpServer/reload` followed by `mcpServerStatus/list` each returned
+**156 tools**, version **0.16.1**, with all three early entrypoints and the typed
+bounded IP query. The extracted ZIP's raw catalog matched its generated
+`tool-schemas.json`, and its early discovery returned `a_vmware_query` for the
+original IP tool. This verifies local installation/reload and package contents;
+it does not verify a model turn or the existing desktop chat's exposure. No live
+VMware operation was called. Git-backed source refresh is a separate CLI step.
+
 ## Check an installed package independently
 
-If `plugin_catalog` is also missing, run the packaged diagnostic with Node.js:
+If `a_vmware_catalog` is also missing, run the packaged diagnostic with Node.js:
 
 ```powershell
 node "<plugin-root>/server/inspect-catalog.cjs"
@@ -125,7 +188,7 @@ No `npm install` is required for the packaged diagnostic.
 | Observation | Next step |
 | --- | --- |
 | Raw listing is incomplete or server initialization fails | Check the selected package root, Node.js, bundle and installation. Preserve the reported versions/hash and missing names. |
-| Active `plugin_catalog` version differs from the installed package | The chat uses a different version. Reconnect/restart, then compare again. A changed `instance_id` proves another process, not a complete client catalog. |
+| Active `a_vmware_catalog` version differs from the installed package | The chat uses a different version. Reconnect/restart, then compare again. A changed `instance_id` proves another process, not a complete client catalog. |
 | Raw listing is complete but the chat exposes fewer names | Check client tool policies and retain both inventories for a client exposure report. This alone does not distinguish filtering, caching and client truncation. |
 | A fresh local chat is complete while the existing chat is partial | Record both observations; the existing connection/catalog lifecycle needs investigation. |
 | Both catalogs match but an IP call fails | Investigate the selected guest's Tools/IP publication separately; catalog completeness does not establish guest readiness. |

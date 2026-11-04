@@ -32,7 +32,7 @@ npm test
 npm run package
 ```
 
-The package command builds all bundled entrypoints, refreshes the operation reference and dependency notices, validates portable manifests and all 153 MCP tool schemas, checks compatibility with all 150 previous tool definitions (including optional bounded-wait additions to `get_guest_ip`), verifies platform credential-file protection, and creates the plugin ZIP. CI performs these checks on Windows and Ubuntu. Run `npm run build` before testing changes to bundled helpers or the Linux MCP integration test.
+The package command builds all bundled entrypoints, refreshes the operation reference and dependency notices, validates portable manifests and all 156 MCP tool schemas, checks all 153 version 0.16.0 tool definitions unchanged and compatibility with the 150 earlier tool definitions (including optional bounded-wait additions to `get_guest_ip`), verifies platform credential-file protection, and creates the plugin ZIP. CI performs these checks on Windows and Ubuntu. Run `npm run build` before testing changes to bundled helpers or the Linux MCP integration test.
 
 For missing tools, use the [catalog diagnostic guide](vmware-workstation/catalog.md). The packaged `server/inspect-catalog.cjs` initializes MCP and lists tools only; it performs no VMware operations. Default catalog regressions compare every prior tool, all tool families, two independent connections, partial assistant inventories and both bridge routes. All 150 original schemas and annotations are discoverable; bridge calls preserve validation, confirmations, request context, cancellation and MCP error flags. A complete raw catalog does not prove Codex Desktop refresh/fresh-chat exposure.
 
