@@ -96,10 +96,13 @@ try {
   const preReadiness = JSON.parse(await fs.readFile('tests/fixtures/pre-readiness-tool-schemas.json', 'utf8'));
   assert.equal(preReadiness.tools.length, 123);
   for (const prior of preReadiness.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior, `Pre-readiness compatibility: ${prior.name}`);
+  const requiredHints = ['readOnlyHint', 'destructiveHint', 'idempotentHint', 'openWorldHint'];
   for (const tool of tools) {
     assert.ok(toolValidator.validateSchema(tool.inputSchema), `${tool.name}: invalid input schema`);
     assert.equal(tool.inputSchema.additionalProperties, false, `${tool.name}: tool arguments must be strict`);
-    assert.equal(typeof tool.annotations.readOnlyHint, 'boolean');
+    for (const hint of requiredHints) {
+      assert.equal(typeof tool.annotations?.[hint], 'boolean', `${tool.name}: ${hint} must be a boolean`);
+    }
   }
   await writeGenerated('vmware-workstation/tool-schemas.json', JSON.stringify({ tools }, null, 2) + '\n');
   console.log('Both portable manifests, template schema/examples and all 156 MCP schemas validated; earlier contracts preserved with optional get_guest_ip waiting fields.');
