@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "vmware-workstation",
-  "version": "0.17.2",
+  "version": "0.17.3",
   "license": "MIT",
   "homepage": "https://github.com/mdaneri/vmware-workstation-mcp",
   "repository": "https://github.com/mdaneri/vmware-workstation-mcp",
@@ -25,6 +25,7 @@
         "developerName": "mdaneri",
         "websiteURL": "https://github.com/mdaneri/vmware-workstation-mcp",
         "supportURL": "https://github.com/mdaneri/vmware-workstation-mcp/issues",
+        "privacyPolicyURL": "https://github.com/mdaneri/vmware-workstation-mcp/blob/main/PRIVACY.md",
         "shortDescription": "Manage local virtual machines",
         "longDescription": "Create and configure VMs, use the vmrun and REST tool catalog, and interact directly with native VNC consoles during firmware, boot, and installation. Console screenshots, clicks, keys, typing, scrolling, and status use loopback-only authenticated RFB without host desktop capture or input. Optional per-VM serial consoles use verified local named pipes or UNIX sockets with bounded byte I/O. Supports Windows and Linux with Node.js 22.12+, PowerShell 7 setup helpers, native VMware Workstation, and local credentials.",
         "category": "Developer Tools",
