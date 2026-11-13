@@ -1,6 +1,6 @@
 {
   "name": "vmware-workstation-plugin-dev",
-  "version": "0.17.3",
+  "version": "0.17.4",
   "private": true,
   "license": "MIT",
   "repository": {
@@ -33,6 +33,7 @@
     "test:packages": "node --test tests/distribution-artifacts.mjs"
   },
   "dependencies": {
+    "@cfworker/json-schema": "4.1.6",
     "@modelcontextprotocol/sdk": "1.32.2",
     "@xmldom/xmldom": "0.9.12",
     "pngjs": "7.0.0",
@@ -50,5 +51,10 @@
   },
   "engines": {
     "node": ">=22.12"
+  },
+  "overrides": {
+    "@anthropic-ai/mcpb": {
+      "zod": "4.6.7"
+    }
   }
 }

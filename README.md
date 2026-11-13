@@ -15,7 +15,7 @@ An independent Windows and Linux MCP plugin for VMware Workstation with **156 to
 
 The plugin package lives in `vmware-workstation/`. Start with the [configuration guide](vmware-workstation/README.md), [native console setup](vmware-workstation/console.md), or [complete tool reference](vmware-workstation/reference.md).
 
-See the [version history](VERSIONS.md) for changes by release and the [privacy policy](PRIVACY.md) for how the plugin handles data.
+See the [version history](VERSIONS.md) for changes by release and the [privacy policy](PRIVACY.md) for how the plugin handles data. The [published tool catalog](vmware-workstation/tool-schemas.json) is generated from MCP `tools/list` and contains all 156 tool names, input schemas, and annotations.
 
 ## Use in Codex
 
@@ -47,7 +47,7 @@ codex plugin add vmware-workstation@vmware-local
 codex plugin list --marketplace vmware-local --json
 ```
 
-The first command refreshes the Git marketplace snapshot; `plugin add` installs from that snapshot. Running `plugin add` alone can therefore reinstall an older version. Check the listed `version`, reopen the desktop app, and start a fresh local chat with the plugin enabled. Ask it to call `a_vmware_catalog` with `{"tool":"vmrun_get_guest_ip_address"}`. Verify version `0.17.3`, `tool_count: 156`, the bounded `wait`/`timeout_seconds` fields, and the returned `a_vmware_query` route before calling the selected VM query. An older version directory remaining in the cache does not establish which version the chat uses. See [catalog diagnostics](vmware-workstation/catalog.md) if versions or tools still differ.
+The first command refreshes the Git marketplace snapshot; `plugin add` installs from that snapshot. Running `plugin add` alone can therefore reinstall an older version. Check the listed `version`, reopen the desktop app, and start a fresh local chat with the plugin enabled. Ask it to call `a_vmware_catalog` with `{"tool":"vmrun_get_guest_ip_address"}`. Verify version `0.17.4`, `tool_count: 156`, the bounded `wait`/`timeout_seconds` fields, and the returned `a_vmware_query` route before calling the selected VM query. An older version directory remaining in the cache does not establish which version the chat uses. See [catalog diagnostics](vmware-workstation/catalog.md) if versions or tools still differ.
 
 For a marketplace registered from a local directory, update that source directory and rebuild after source changes before running `plugin add`; `marketplace upgrade` refreshes Git-backed sources only. Use `codex plugin marketplace list` to check the registered source root.
 
@@ -117,7 +117,7 @@ The plugin implements all **47 reference vmrun commands and 28 reference REST op
 
 Tests use a fake process runner, temporary VMX files, and a mock HTTP service. They do not change real VMs. The smoke script starts the actual bundled MCP process, discovers tools, and reads host status/inventory. If a running VM exists it reads selected hardware, snapshots, Tools state, and guest IP. It also reads host networks and checks the installed command coverage. It never powers VMs on/off or changes snapshots. `npm run smoke:rest` reads VM and network inventory from the real REST service after credentials are configured.
 
-Packaging writes `dist/vmware-workstation-0.17.3.zip`, `dist/vmware-workstation-0.17.3.mcpb` and SHA-256 checksums, and verifies their allowlisted entries and contents on both hosts. It includes one plugin and excludes source development dependencies, test VMs/credentials, and the repo marketplace.
+Packaging writes `dist/vmware-workstation-0.17.4.zip`, `dist/vmware-workstation-0.17.4.mcpb` and SHA-256 checksums, and verifies their allowlisted entries and contents on both hosts. It includes one plugin and excludes source development dependencies, test VMs/credentials, and the repo marketplace.
 
 ## Validation
 

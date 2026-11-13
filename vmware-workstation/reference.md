@@ -85,7 +85,7 @@ Read the [disk guide](disks.md) for create/inspect/expand/convert and explicit c
 
 ## Local OVF/OVA appliances and background jobs (10)
 
-Optional VMware OVF Tool is discovered automatically or configured with an absolute `VMWARE_OVFTOOL_PATH`. `ovf_tool_status` reports executable, version and installed flags. All other OVF tools return a background job ID, including read-only inspection/validation. Poll `job_status` until terminal; inspect `result` or `error`. See the [appliance workflow guide](ovf.md) for path configuration, examples, overwrite policy and limitations.
+Optional VMware OVF Tool is discovered automatically or configured with an absolute `VMWARE_OVFTOOL_PATH`. `ovf_tool_status` reports executable, version and installed flags. All other OVF tools start a background job, including inspection and validation. Those two jobs leave the source appliance intact, and admitting a job can evict old journal records. Poll `job_status` until terminal; inspect `result` or `error`. See the [appliance workflow guide](ovf.md) for path configuration, examples, overwrite policy and limitations.
 
 | Tool | Arguments |
 | --- | --- |

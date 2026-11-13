@@ -8,7 +8,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { assertCompatibleTool } from './tool-compatibility.mjs';
+import { annotationCorrections, assertCompatibleTool } from './tool-compatibility.mjs';
 
 test('raw and fresh MCP catalogs include every tool family; identity diagnoses a partial client without native calls', async t => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'vmware-catalog-'));
@@ -46,10 +46,15 @@ require('node:child_process').execFile = deny;
   const early = ['a_vmware_catalog', 'a_vmware_mutate', 'a_vmware_query'];
   assert.deepEqual(names.slice(0, 3), early);
   assert.deepEqual(raw.tools.slice(0, 3).map(tool => tool.name), early);
+  assert.deepEqual(raw.tools.slice(0, 3).map(tool => tool.annotations), [
+    { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true },
+    { readOnlyHint: true, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  ]);
   for (const name of ['a_vmware_query', 'a_vmware_mutate']) assert.match(raw.tools.find(tool => tool.name === name).inputSchema.properties.tool.description, /a_vmware_catalog/);
   const previous = JSON.parse(await fs.readFile('tests/fixtures/pre-early-catalog-tool-schemas.json', 'utf8'));
   assert.equal(previous.tools.length, 153);
-  for (const original of previous.tools) assert.deepEqual(raw.tools.find(tool => tool.name === original.name), original);
+  for (const original of previous.tools) assertCompatibleTool(raw.tools.find(tool => tool.name === original.name), original);
   for (const count of [46, 74]) {
     await t.test(`recovery through a ${count}-name assistant-visible prefix`, async () => {
       const visible = new Set(names.slice(0, count));
@@ -80,19 +85,17 @@ require('node:child_process').execFile = deny;
         const selected = JSON.parse((await visibleCall('a_vmware_catalog', { tool: name })).content[0].text);
         assert.equal(selected.selected_tool.bridge, null);
       }
-      assert.equal((await visibleCall('a_vmware_mutate', { tool: 'vm_boot_configure', arguments: { vmx: 'relative.vmx', confirm: true } })).isError, true);
-      assert.equal((await visibleCall('a_vmware_mutate', { tool: 'vm_boot_configure', confirm: true, arguments: { vmx: 'relative.vmx' } })).isError, true);
-      const unsupported = await visibleCall('a_vmware_mutate', { tool: 'vm_boot_configure', confirm: true, arguments: { vmx: 'relative.vmx', confirm: true } });
-      assert.equal(unsupported.isError, true);
-      assert.deepEqual(unsupported, await client.callTool({ name: 'vm_boot_configure', arguments: { vmx: 'relative.vmx', confirm: true } }));
+      const boot = { vmx: 'relative.vmx', confirm: true };
+      assert.deepEqual(await visibleCall('a_vmware_query', { tool: 'vm_boot_configure', arguments: boot }),
+        await client.callTool({ name: 'vm_boot_configure', arguments: boot }));
+      assert.equal((await visibleCall('a_vmware_mutate', { tool: 'vm_boot_configure', confirm: true, arguments: boot })).isError, true);
     });
   }
   const prior = JSON.parse(await fs.readFile('tests/fixtures/pre-catalog-tool-schemas.json', 'utf8'));
   assert.equal(prior.tools.length, 150);
   for (const tool of prior.tools) {
     const current = raw.tools.find(t => t.name === tool.name);
-    if (tool.name === 'get_guest_ip') assertCompatibleTool(current, tool);
-    else assert.deepEqual(current, tool);
+    assertCompatibleTool(current, tool);
   }
   for (const name of ['vmrun_get_guest_ip_address', 'vm_wait_for_ip', 'serial_read', 'template_list',
     'vm_hardware_get', 'vm_security_status', 'vm_boot_status', 'vm_power', 'revert_snapshot',
@@ -122,6 +125,20 @@ require('node:child_process').execFile = deny;
   const writes = mutations.inputSchema.properties.tool.enum;
   assert.deepEqual([...reads, ...writes].sort(), prior.tools.map(t => t.name).sort());
   assert.equal(reads.some(name => writes.includes(name)), false);
+  for (const tool of raw.tools) {
+    assert.equal(typeof tool.annotations.readOnlyHint, 'boolean', tool.name);
+    assert.equal(typeof tool.annotations.destructiveHint, 'boolean', tool.name);
+    assert.ok(!(tool.annotations.readOnlyHint && tool.annotations.destructiveHint), tool.name);
+  }
+  for (const [name, hints] of Object.entries(annotationCorrections)) {
+    const tool = raw.tools.find(tool => tool.name === name);
+    for (const [hint, expected] of Object.entries(hints)) assert.equal(tool.annotations[hint], expected, `${name}: ${hint}`);
+    if (hints.readOnlyHint === undefined) continue;
+    for (const [bridge, readOnly] of [['plugin_query', true], ['plugin_mutate', false], ['a_vmware_query', true], ['a_vmware_mutate', false]]) {
+      const selector = raw.tools.find(tool => tool.name === bridge).inputSchema.properties.tool;
+      assert.equal(selector.enum.includes(name), hints.readOnlyHint === readOnly, `${bridge}: ${name}`);
+    }
+  }
   for (const original of prior.tools) {
     const selected = (await inspect(client, { tool: original.name })).selected_tool;
     const direct = raw.tools.find(t => t.name === original.name);
@@ -143,13 +160,13 @@ require('node:child_process').execFile = deny;
     assert.ok(!JSON.stringify(denied).includes('never-print-this'));
   }
   for (const args of [
-    { tool: 'vm_boot_configure', arguments: { vmx: 'relative.vmx', confirm: true } },
-    { tool: 'vm_boot_configure', confirm: true, arguments: { vmx: 'relative.vmx' } },
+    { tool: 'serial_read', arguments: {} },
+    { tool: 'ovf_inspect', confirm: true, arguments: {} },
     { tool: 'template_list', confirm: true },
   ]) assert.equal((await client.callTool({ name: 'plugin_mutate', arguments: args })).isError, true);
   const unsupportedArgs = { vmx: 'relative.vmx', confirm: true };
   const unsupported = await client.callTool({ name: 'vm_boot_configure', arguments: unsupportedArgs });
-  const bridgedError = await client.callTool({ name: 'plugin_mutate', arguments: { tool: 'vm_boot_configure', confirm: true, arguments: unsupportedArgs } });
+  const bridgedError = await client.callTool({ name: 'plugin_query', arguments: { tool: 'vm_boot_configure', arguments: unsupportedArgs } });
   assert.equal(bridgedError.isError, true);
   assert.deepEqual(bridgedError, unsupported);
   const observed = names.slice(0, 74);

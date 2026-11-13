@@ -26,537 +26,6 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// src/configure-console.mjs
-var import_node_util2 = require("node:util");
-
-// src/workstation.mjs
-var import_node_child_process = require("node:child_process");
-var import_node_util = require("node:util");
-var import_promises2 = __toESM(require("node:fs/promises"), 1);
-var import_node_path3 = __toESM(require("node:path"), 1);
-var import_node_net = require("node:net");
-
-// src/host-platform.mjs
-var import_promises = __toESM(require("node:fs/promises"), 1);
-var import_node_fs = require("node:fs");
-var import_node_os = __toESM(require("node:os"), 1);
-var import_node_path = __toESM(require("node:path"), 1);
-function inventoryPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
-  return env.VMWARE_INVENTORY_PATH || (platform === "win32" ? import_node_path.default.join(env.APPDATA || import_node_path.default.join(home, "AppData", "Roaming"), "VMware", "inventory.vmls") : import_node_path.default.join(home, ".vmware", "inventory.vmls"));
-}
-function preferencesPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
-  return env.VMWARE_PREFERENCES_PATH || (platform === "win32" ? import_node_path.default.join(env.APPDATA || import_node_path.default.join(home, "AppData", "Roaming"), "VMware", "preferences.ini") : import_node_path.default.join(home, ".vmware", "preferences"));
-}
-function credentialsPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
-  if (env.VMWARE_CREDENTIALS_FILE) return env.VMWARE_CREDENTIALS_FILE;
-  if (platform === "win32") return env.APPDATA ? import_node_path.default.join(env.APPDATA, "VMwareWorkstationPlugin", "credentials.json") : null;
-  const base = env.XDG_CONFIG_HOME && import_node_path.default.isAbsolute(env.XDG_CONFIG_HOME) ? env.XDG_CONFIG_HOME : import_node_path.default.join(home, ".config");
-  return import_node_path.default.join(base, "vmware-workstation-mcp", "credentials.json");
-}
-async function findVMwareExecutable(name, { env = process.env, platform = process.platform, beside } = {}) {
-  if (!["win32", "linux"].includes(platform)) throw new Error("VMware Workstation hosts supported by this plugin are Windows and Linux.");
-  const filename = `${name}${platform === "win32" ? ".exe" : ""}`;
-  const setting = { vmrun: "VMRUN_PATH", vmcli: "VMWARE_VMCLI_PATH", "vmware-vdiskmanager": "VMWARE_VDISKMANAGER_PATH", "vmware-vmx": "VMWARE_VMX_PATH", ovftool: "VMWARE_OVFTOOL_PATH" }[name];
-  if (!setting) throw new Error("Unsupported VMware executable.");
-  const validFile = async (candidate) => {
-    if (!import_node_path.default.isAbsolute(candidate) || !(await import_promises.default.stat(candidate)).isFile()) return false;
-    if (platform !== "win32") await import_promises.default.access(candidate, import_node_fs.constants.X_OK);
-    return true;
-  };
-  if (env[setting]) {
-    const configured = env[setting];
-    const actualName = import_node_path.default.basename(configured);
-    if (!import_node_path.default.isAbsolute(configured) || (platform === "win32" ? actualName.toLowerCase() !== filename : actualName !== filename)) throw new Error(`${setting} must be an absolute path to ${filename}.`);
-    if (!await validFile(configured)) throw new Error(`${setting} is not an executable file.`);
-    return configured;
-  }
-  const directories = [
-    ...name === "ovftool" && beside ? [import_node_path.default.join(import_node_path.default.dirname(beside), "OVFTool"), import_node_path.default.join(import_node_path.default.dirname(beside), "ovftool")] : [],
-    ...beside ? [import_node_path.default.dirname(beside)] : [],
-    ...name === "vmware-vmx" && beside && platform === "win32" ? [import_node_path.default.join(import_node_path.default.dirname(beside), "x64")] : [],
-    ...platform === "win32" ? [env.ProgramFiles, env["ProgramFiles(x86)"]].filter(Boolean).map((root) => import_node_path.default.join(root, "VMware", "VMware Workstation")) : [],
-    ...name === "ovftool" && platform === "win32" ? [env.ProgramFiles, env["ProgramFiles(x86)"]].filter(Boolean).flatMap((root) => [import_node_path.default.join(root, "VMware", "VMware Workstation", "OVFTool"), import_node_path.default.join(root, "VMware", "VMware OVF Tool")]) : [],
-    ...(env.PATH || env.Path || "").split(import_node_path.default.delimiter).filter(Boolean),
-    ...platform === "linux" ? ["/usr/bin", "/usr/local/bin", "/usr/lib/vmware/bin"] : [],
-    ...name === "ovftool" && platform === "linux" ? ["/usr/lib/vmware-ovftool", "/opt/vmware/ovftool"] : []
-  ];
-  for (const directory of new Set(directories)) {
-    const candidate = import_node_path.default.join(directory, filename);
-    try {
-      if (await validFile(candidate)) return candidate;
-    } catch (error62) {
-      if (!["ENOENT", "ENOTDIR", "EACCES"].includes(error62.code)) throw error62;
-    }
-  }
-  throw new Error(`${filename} was not found. Install ${name === "ovftool" ? "VMware OVF Tool" : "VMware Workstation on this host"} or set ${setting}.`);
-}
-
-// src/resources.mjs
-var import_node_async_hooks = require("node:async_hooks");
-var import_node_path2 = __toESM(require("node:path"), 1);
-var Resources = class {
-  constructor() {
-    this.active = /* @__PURE__ */ new Map();
-    this.context = new import_node_async_hooks.AsyncLocalStorage();
-  }
-  key(file4) {
-    return process.platform === "win32" ? import_node_path2.default.resolve(file4).toLowerCase() : import_node_path2.default.resolve(file4);
-  }
-  assert(files) {
-    const owner = this.context.getStore();
-    const contains = (a, b) => {
-      const relative = import_node_path2.default.relative(a, b);
-      return !relative || !relative.startsWith(".." + import_node_path2.default.sep) && relative !== ".." && !import_node_path2.default.isAbsolute(relative);
-    };
-    const overlaps = (a, b) => contains(a, b) || contains(b, a);
-    for (const file4 of files.map((file5) => this.key(file5))) for (const [held, token] of this.active) {
-      if (token !== owner && overlaps(file4, held)) throw Object.assign(new Error("A conflicting operation holds this VM or disk path. Wait for it to finish, inspect state, then retry."), { code: "RESOURCE_BUSY" });
-    }
-  }
-  reserve(files) {
-    this.context.run(void 0, () => this.assert(files));
-    const token = /* @__PURE__ */ Symbol("reservation");
-    const keys = [...new Set(files.map((file4) => this.key(file4)))];
-    for (const key2 of keys) this.active.set(key2, token);
-    return {
-      run: (callback) => this.context.run(token, callback),
-      release: () => {
-        for (const key2 of keys) if (this.active.get(key2) === token) this.active.delete(key2);
-      }
-    };
-  }
-  async use(files, callback) {
-    this.assert(files);
-    const token = this.context.getStore() || /* @__PURE__ */ Symbol("resource-owner");
-    const added = files.map((file4) => this.key(file4)).filter((file4) => !this.active.has(file4));
-    for (const file4 of added) this.active.set(file4, token);
-    try {
-      return await this.context.run(token, callback);
-    } finally {
-      for (const file4 of added) this.active.delete(file4);
-    }
-  }
-};
-
-// src/workstation.mjs
-var import_node_async_hooks2 = require("node:async_hooks");
-var execute = (0, import_node_util.promisify)(import_node_child_process.execFile);
-function parseAssignments(text) {
-  const values = {};
-  for (const line of text.split(/\r?\n/)) {
-    const match = line.match(/^\s*([\w.:-]+)\s*=\s*"(.*)"\s*$/);
-    if (match) values[match[1]] = match[2].replace(/\|([0-9a-f]{2})/gi, (_, hex3) => String.fromCharCode(parseInt(hex3, 16)));
-  }
-  return values;
-}
-function parseCountedList(text) {
-  const lines = text.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
-  if (!lines.length || !/:\s*\d+$/.test(lines[0])) throw new Error("Unrecognized vmrun list output; refusing to infer an empty list.");
-  const count = Number(lines.shift().match(/(\d+)$/)[1]);
-  if (count !== lines.length) throw new Error("vmrun list count does not match its output.");
-  return lines;
-}
-function isWithin(root, target) {
-  const relative = import_node_path3.default.relative(root, target);
-  return relative === "" || !relative.startsWith(`..${import_node_path3.default.sep}`) && relative !== ".." && !import_node_path3.default.isAbsolute(relative);
-}
-var Workstation = class {
-  constructor({ env = process.env, run = execute } = {}) {
-    this.env = env;
-    this.execute = run;
-    this.queues = /* @__PURE__ */ new Map();
-    this.execution = new import_node_async_hooks2.AsyncLocalStorage();
-    this.inventoryPath = inventoryPath(env);
-    this.resources = new Resources();
-  }
-  async executable() {
-    return findVMwareExecutable("vmrun", { env: this.env });
-  }
-  async run(args, { mutation = false, authentication = [], timeout: timeout2 = 12e4, deadline, signal } = {}) {
-    const context = this.execution.getStore();
-    signal ||= context?.signal;
-    signal?.throwIfAborted();
-    if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
-    const key2 = args[1] && import_node_path3.default.isAbsolute(args[1]) ? this.resources.key(args[1]) : `host:${args[0]}`;
-    const previous = this.queues.get(key2) || Promise.resolve();
-    const job = previous.then(async () => {
-      if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
-      const binary = await this.executable();
-      signal?.throwIfAborted();
-      if (deadline !== void 0) {
-        timeout2 = Math.min(timeout2, Math.floor(deadline - performance.now()));
-        if (timeout2 <= 0) throw Object.assign(new Error("Observation deadline expired while waiting for vmrun."), { code: "OBSERVATION_DEADLINE" });
-      }
-      try {
-        const invoke = () => this.nativeRun(binary, ["-T", "ws", ...authentication, ...args], {
-          windowsHide: true,
-          shell: false,
-          timeout: timeout2,
-          signal,
-          maxBuffer: 1024 * 1024,
-          encoding: "utf8"
-        });
-        const result = mutation && args[1] && import_node_path3.default.isAbsolute(args[1]) ? await this.resources.use([args[1]], invoke) : await invoke();
-        return result.stdout.trim();
-      } catch (error62) {
-        const details = [error62.stderr, error62.stdout].filter(Boolean).join("\n").trim().slice(0, 4e3);
-        const uncertain = mutation ? " The operation may have taken effect; inspect the VM before retrying." : "";
-        throw Object.assign(new Error(`vmrun ${args[0] || "help"} failed (${error62.killed ? "timeout" : error62.code || "unknown error"}).${uncertain}${details ? ` ${details}` : ""}`), { code: error62.killed ? "VMRUN_TIMEOUT" : "VMRUN_FAILED" });
-      }
-    });
-    const tail = job.catch(() => {
-    });
-    this.queues.set(key2, tail);
-    void tail.then(() => {
-      if (this.queues.get(key2) === tail) this.queues.delete(key2);
-    });
-    if (!signal || context) return job;
-    return new Promise((resolve, reject) => {
-      const abort = () => reject(signal.reason || new Error("Operation cancelled."));
-      if (signal.aborted) abort();
-      else signal.addEventListener("abort", abort, { once: true });
-      job.then(resolve, reject).finally(() => signal.removeEventListener("abort", abort));
-    });
-  }
-  async nativeRun(file4, args, options = {}) {
-    const context = this.execution.getStore();
-    if (!context) return this.execute(file4, args, options);
-    context.signal.throwIfAborted();
-    const result = await context.run(file4, args, { ...options, env: options.env || this.env, logOutput: false, progress: null });
-    if (result.code !== 0) throw Object.assign(new Error("Native job command failed."), { code: result.code, stderr: result.output });
-    return { stdout: result.output, stderr: "" };
-  }
-  async help() {
-    const binary = await this.executable();
-    const options = { windowsHide: true, shell: false, timeout: 15e3, maxBuffer: 1024 * 1024, encoding: "utf8" };
-    try {
-      return (await this.execute(binary, [], options)).stdout;
-    } catch (error62) {
-      const output2 = [error62.stdout, error62.stderr].filter(Boolean).join("\n");
-      if (/vmrun version [\w.]+/.test(output2) && output2.includes("Usage: vmrun")) return output2;
-      throw new Error("Cannot read installed vmrun help. Check vmrun installation and access.");
-    }
-  }
-  async hostPath(input2, kind, overwrite = false) {
-    if (typeof input2 !== "string" || !import_node_path3.default.isAbsolute(input2) || /[\x00-\x1f]/.test(input2)) throw new Error("Host paths must be absolute and contain no control characters.");
-    const absolute = import_node_path3.default.resolve(input2);
-    let stat;
-    try {
-      stat = await import_promises2.default.stat(absolute);
-    } catch (error62) {
-      if (error62.code !== "ENOENT") throw error62;
-    }
-    if (kind === "input-file" && !stat?.isFile()) throw new Error("Host source must be an existing file.");
-    if (kind === "directory" && !stat?.isDirectory()) throw new Error("Host directory must already exist.");
-    if (kind === "new-vmx" && (stat || import_node_path3.default.extname(absolute).toLowerCase() !== ".vmx")) throw new Error("Clone destination must be a new .vmx file.");
-    if (kind === "output-file" && (stat?.isDirectory() || stat && !overwrite)) throw new Error("Host destination exists; choose another file or explicitly set overwrite=true.");
-    if (["destination-directory", "host-destination-directory"].includes(kind) && stat && !stat.isDirectory()) throw new Error("Destination must be a directory path.");
-    let ancestor = absolute;
-    const missing = [];
-    while (true) {
-      try {
-        ancestor = await import_promises2.default.realpath(ancestor);
-        break;
-      } catch (error62) {
-        if (error62.code !== "ENOENT") throw error62;
-        const entry = await import_promises2.default.lstat(ancestor).catch((missingError) => {
-          if (missingError.code !== "ENOENT") throw missingError;
-          return null;
-        });
-        if (entry?.isSymbolicLink()) throw new Error("Destination contains a dangling link.");
-        const parent = import_node_path3.default.dirname(ancestor);
-        if (parent === ancestor) throw error62;
-        missing.unshift(import_node_path3.default.basename(ancestor));
-        ancestor = parent;
-      }
-    }
-    const resolved = import_node_path3.default.join(ancestor, ...missing);
-    const rootSetting = kind === "new-vmx" || kind === "destination-directory" ? this.env.VMWARE_ALLOWED_ROOTS : this.env.VMWARE_ALLOWED_HOST_ROOTS;
-    if (rootSetting) {
-      const roots = rootSetting.split(import_node_path3.default.delimiter).filter(Boolean);
-      if (!roots.length || roots.some((root) => !import_node_path3.default.isAbsolute(root))) throw new Error("Allowed host roots must be absolute.");
-      const canonical = await Promise.all(roots.map((root) => import_promises2.default.realpath(root)));
-      if (!canonical.some((root) => isWithin(root, resolved))) throw new Error("Host path is outside the configured allowed roots.");
-    }
-    return resolved;
-  }
-  async vmx(input2) {
-    if (typeof input2 !== "string" || !import_node_path3.default.isAbsolute(input2) || import_node_path3.default.extname(input2).toLowerCase() !== ".vmx" || /[\x00-\x1f]/.test(input2)) throw new Error("Provide an absolute path to an existing .vmx file.");
-    const resolved = await import_promises2.default.realpath(input2);
-    if (import_node_path3.default.extname(resolved).toLowerCase() !== ".vmx" || !(await import_promises2.default.stat(resolved)).isFile()) throw new Error("VM target must resolve to a .vmx file.");
-    if (this.env.VMWARE_ALLOWED_ROOTS) {
-      const roots = this.env.VMWARE_ALLOWED_ROOTS.split(import_node_path3.default.delimiter).filter(Boolean);
-      if (!roots.length || roots.some((root) => !import_node_path3.default.isAbsolute(root))) throw new Error("VMWARE_ALLOWED_ROOTS must contain absolute directories.");
-      const canonicalRoots = await Promise.all(roots.map((root) => import_promises2.default.realpath(root)));
-      if (!canonicalRoots.some((root) => isWithin(root, resolved))) throw new Error("VM is outside VMWARE_ALLOWED_ROOTS.");
-    }
-    return resolved;
-  }
-  async status() {
-    const executable = await this.executable();
-    const running = parseCountedList(await this.run(["list"]));
-    return { executable, inventoryPath: this.inventoryPath, runningCount: running.length, allowedRoots: this.env.VMWARE_ALLOWED_ROOTS || null, transport: "local stdio" };
-  }
-  async resolveVM(vmID, { aliases = {}, restInventory } = {}) {
-    if (typeof vmID !== "string" || !vmID.trim() || /[\x00-\x1f]/.test(vmID)) throw new Error("Provide a VMX path, unique inventory name, console profile alias, or REST VM ID.");
-    if (import_node_path3.default.isAbsolute(vmID)) return this.vmx(vmID);
-    if (Object.hasOwn(aliases, vmID)) return this.vmx(aliases[vmID]);
-    const { vms } = await this.listVMs();
-    const normalize = (value) => process.platform === "win32" ? value.toLowerCase() : value;
-    const matches = vms.filter((vm) => [vm.displayName, import_node_path3.default.basename(vm.vmx, ".vmx")].some((name) => normalize(name) === normalize(vmID)));
-    if (matches.length > 1) throw new Error("VM name is ambiguous. Use the exact VMX path.");
-    if (matches.length === 1) return this.vmx(matches[0].vmx);
-    if (restInventory) {
-      const records = await restInventory();
-      const record2 = records.find((vm) => vm.id === vmID);
-      if (record2?.path) return this.vmx(record2.path);
-    }
-    throw new Error("VM was not found. Use an absolute VMX path or a unique configured console alias.");
-  }
-  async listVMs() {
-    const running = parseCountedList(await this.run(["list"]));
-    let entries = {};
-    const warnings = [];
-    try {
-      entries = parseAssignments(await import_promises2.default.readFile(this.inventoryPath, "utf8"));
-    } catch (error62) {
-      warnings.push(`Inventory unavailable (${error62.code || error62.message}); showing running VMs only.`);
-    }
-    const key2 = (value) => process.platform === "win32" ? import_node_path3.default.normalize(value).toLowerCase() : import_node_path3.default.normalize(value);
-    const records = /* @__PURE__ */ new Map();
-    for (const [name, vmx2] of Object.entries(entries)) {
-      if (/^vmlist\d+\.config$/.test(name) && vmx2 && import_node_path3.default.extname(vmx2).toLowerCase() === ".vmx") {
-        records.set(key2(vmx2), { vmx: vmx2, displayName: entries[name.replace(/\.config$/, ".DisplayName")] || import_node_path3.default.basename(vmx2, import_node_path3.default.extname(vmx2)), registered: true, running: false });
-      }
-    }
-    for (const vmx2 of running) {
-      const record2 = records.get(key2(vmx2)) || { vmx: vmx2, displayName: import_node_path3.default.basename(vmx2, import_node_path3.default.extname(vmx2)), registered: false };
-      records.set(key2(vmx2), { ...record2, running: true });
-    }
-    const vms = await Promise.all([...records.values()].map(async (record2) => {
-      try {
-        await import_promises2.default.access(record2.vmx);
-        return { ...record2, exists: true };
-      } catch {
-        return { ...record2, exists: false };
-      }
-    }));
-    return { vms, warnings, note: "running=false does not distinguish powered off, suspended, or unavailable VMs. Inventory is not a disk scan." };
-  }
-  async details(input2) {
-    const vmx2 = await this.vmx(input2);
-    const config2 = parseAssignments(await import_promises2.default.readFile(vmx2, "utf8"));
-    const running = parseCountedList(await this.run(["list"]));
-    const realRunning = await Promise.all(running.map(async (file4) => import_promises2.default.realpath(file4).catch(() => file4)));
-    const compare = (file4) => process.platform === "win32" ? file4.toLowerCase() : file4;
-    const hardware = Object.fromEntries(Object.entries(config2).filter(([key2]) => /^(displayName|guestOS|memsize|numvcpus|virtualHW.version|ethernet\d+\.(present|connectionType|vnet)|(?:scsi|sata|ide|nvme)\d+:\d+\.(present|fileName|deviceType))$/.test(key2)));
-    return { vmx: vmx2, running: realRunning.some((file4) => compare(file4) === compare(vmx2)), hardware };
-  }
-  async power(input2, action, mode = "soft", gui = false) {
-    if (!["start", "stop", "reset", "suspend", "pause", "unpause"].includes(action)) throw new Error("Unsupported power action.");
-    if (!["soft", "hard"].includes(mode)) throw new Error("Power mode must be soft or hard.");
-    const vmx2 = await this.vmx(input2);
-    const args = [action, vmx2];
-    if (action === "start") args.push(gui ? "gui" : "nogui");
-    if (["stop", "reset", "suspend"].includes(action)) args.push(mode);
-    const output2 = await this.run(args, { mutation: true });
-    return { vmx: vmx2, action, output: output2, commandSucceeded: true, note: "vmrun returned successfully; guest application readiness is not established." };
-  }
-  async snapshots(input2) {
-    const vmx2 = await this.vmx(input2);
-    return { vmx: vmx2, snapshots: parseCountedList(await this.run(["listSnapshots", vmx2])) };
-  }
-  async snapshot(input2, action, name) {
-    if (!["snapshot", "revertToSnapshot", "deleteSnapshot"].includes(action)) throw new Error("Unsupported snapshot action.");
-    if (typeof name !== "string" || !name.trim() || name.length > 256 || /[\x00-\x1f]/.test(name)) throw new Error("Provide a nonblank snapshot name of at most 256 characters without control characters.");
-    const vmx2 = await this.vmx(input2);
-    if (action !== "snapshot") {
-      const { snapshots } = await this.snapshots(vmx2);
-      if (snapshots.filter((value) => value === name).length !== 1) throw new Error("Snapshot name must identify exactly one existing snapshot; inspect the snapshot tree in Workstation if ambiguous.");
-    }
-    return { vmx: vmx2, action, name, output: await this.run([action, vmx2, name], { mutation: true }), commandSucceeded: true };
-  }
-  async guestIP(input2, { wait = false, timeout_seconds = 120, signal } = {}) {
-    if (typeof wait !== "boolean" || !Number.isInteger(timeout_seconds) || timeout_seconds < 1 || timeout_seconds > 3600) throw new Error("Guest IP wait requires a boolean wait and timeout_seconds from 1 to 3600.");
-    const vmx2 = await this.vmx(input2);
-    signal?.throwIfAborted();
-    const deadline = performance.now() + timeout_seconds * 1e3;
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(new Error("Guest IP observation deadline expired.")), timeout_seconds * 1e3);
-    signal = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
-    try {
-      const address = (await this.run(["getGuestIPAddress", vmx2, ...wait ? ["-wait"] : []], { timeout: timeout_seconds * 1e3, deadline, signal })).trim();
-      if (!(0, import_node_net.isIP)(address)) throw new Error(`vmrun did not return a valid guest IP address. Output: ${address.slice(0, 4e3) || "(empty)"}`);
-      return { vmx: vmx2, address };
-    } catch (error62) {
-      let toolsState;
-      try {
-        const output2 = await this.run(["checkToolsState", vmx2], { timeout: 5e3, deadline, signal });
-        toolsState = { state: ["running", "installed", "unknown"].includes(output2) ? output2 : "unknown", output: output2.slice(0, 4e3) };
-      } catch (checkError) {
-        toolsState = { state: "unknown", error: checkError.message };
-      }
-      throw Object.assign(new Error(error62.message, { cause: error62 }), {
-        code: "GUEST_IP_UNAVAILABLE",
-        details: {
-          vmx: vmx2,
-          addressAvailable: false,
-          toolsState,
-          note: "The IP lookup failed. checkToolsState, when attempted, is a separate, later observation; it is skipped after cancellation/deadline. Even running Tools does not establish IP publication, network reachability, or guest readiness. The lookup error alone does not establish that Tools is stopped.",
-          action: "Use get_guest_ip with wait=true and an explicit timeout_seconds for a bounded read-only wait, or vmrun_get_guest_ip_address if exposed. If documented tools are missing, compare plugin_catalog with the assistant-visible inventory and reconnect/check a fresh local chat. Inspect guest networking and IP publication before considering service or power changes; never replay mutations."
-        }
-      });
-    } finally {
-      clearTimeout(timer);
-    }
-  }
-};
-
-// src/credentials.mjs
-var import_promises4 = __toESM(require("node:fs/promises"), 1);
-var import_node_path5 = __toESM(require("node:path"), 1);
-
-// src/local-file-security.mjs
-var import_node_path4 = __toESM(require("node:path"), 1);
-var import_promises3 = __toESM(require("node:fs/promises"), 1);
-var import_node_fs2 = require("node:fs");
-async function openPrivateFile(filename, flags2 = import_node_fs2.constants.O_RDONLY) {
-  const handle = await import_promises3.default.open(filename, flags2 | import_node_fs2.constants.O_NOFOLLOW | import_node_fs2.constants.O_NONBLOCK, 384);
-  try {
-    const stat = await handle.stat();
-    if (!stat.isFile() || stat.uid !== process.getuid() || stat.nlink !== 1) throw new Error("Sensitive files must be regular files owned by the current user with exactly one hard link.");
-    return handle;
-  } catch (error62) {
-    await handle.close();
-    throw error62;
-  }
-}
-async function readPrivateFile(filename) {
-  const handle = await openPrivateFile(filename);
-  try {
-    if ((await handle.stat()).mode & 63) throw new Error("Credentials file must be private (chmod 600).");
-    return await handle.readFile("utf8");
-  } finally {
-    await handle.close();
-  }
-}
-function localFileProtector(backend, { platform = process.platform, root } = {}) {
-  if (platform === "linux") return async (filename) => {
-    const handle = await openPrivateFile(filename);
-    try {
-      await handle.chmod(384);
-      if ((await handle.stat()).mode & 63) throw new Error("This filesystem does not enforce private Linux file permissions. Use a native Linux filesystem for sensitive files.");
-    } finally {
-      await handle.close();
-    }
-  };
-  const script = import_node_path4.default.join(root ?? import_node_path4.default.resolve(import_node_path4.default.dirname(process.argv[1]), ".."), "scripts", "Protect-LocalFile.ps1");
-  const preflight = async () => {
-    try {
-      if (!(await import_promises3.default.stat(script)).isFile()) throw new Error("Expected a regular helper file.");
-      await import_promises3.default.access(script, import_node_fs2.constants.R_OK);
-    } catch (cause) {
-      throw Object.assign(new Error("PLUGIN_RUNTIME_MISSING: The VMware Workstation plugin runtime is incomplete or no longer available (Protect-LocalFile.ps1). Reconnect the plugin or open a fresh chat to use the installed version. If this persists, reinstall/reimport the plugin before retrying.", { cause }), { code: "PLUGIN_RUNTIME_MISSING" });
-    }
-  };
-  const protect = async (filename) => {
-    await preflight();
-    try {
-      return await backend.execute("pwsh", ["-NoProfile", "-File", script, "-LiteralPath", filename], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
-    } catch (error62) {
-      await preflight();
-      throw error62;
-    }
-  };
-  protect.preflight = preflight;
-  return protect;
-}
-
-// src/credentials.mjs
-var Credentials = class {
-  constructor(env = process.env) {
-    this.env = env;
-    this.secrets = /* @__PURE__ */ new Set();
-    this.filename = credentialsPath(env);
-  }
-  async load() {
-    if (!this.filename) return {};
-    try {
-      const result = JSON.parse(process.platform === "linux" ? await readPrivateFile(this.filename) : await import_promises4.default.readFile(this.filename, "utf8"));
-      if (!result || typeof result !== "object" || Array.isArray(result)) throw new Error();
-      return result;
-    } catch (error62) {
-      if (!this.env.VMWARE_CREDENTIALS_FILE && error62.code === "ENOENT") return {};
-      throw new Error("Cannot read local VMware credentials as a JSON object. Check VMWARE_CREDENTIALS_FILE or the default credentials file, permissions, and format. On Linux use an owned regular file with mode 600.");
-    }
-  }
-  profile(value = "default") {
-    if (!/^[a-z][a-z0-9_]{0,31}$/i.test(value)) throw new Error("Credential profile must start with a letter and contain at most 32 letters, digits or underscores.");
-    return value.toLowerCase();
-  }
-  remember(password) {
-    if (typeof password === "string" && password) {
-      this.secrets.add(password);
-      this.secrets.add(encodeURIComponent(password));
-      this.secrets.add(new URLSearchParams({ secret: password }).toString().slice(7));
-      this.secrets.add(JSON.stringify(password).slice(1, -1));
-    }
-    return password;
-  }
-  async guest(profile = "default") {
-    const name = this.profile(profile);
-    const file4 = await this.load();
-    const prefix2 = `VMWARE_GUEST_${name.toUpperCase()}`;
-    const username = this.env[`${prefix2}_USERNAME`] ?? file4.guest?.[name]?.username;
-    const password = this.remember(this.env[`${prefix2}_PASSWORD`] ?? file4.guest?.[name]?.password);
-    if (typeof username !== "string" || !username || typeof password !== "string" || !password) throw new Error(`Guest credential profile '${name}' is not configured. Use VMWARE_CREDENTIALS_FILE or ${prefix2}_USERNAME/PASSWORD; never paste passwords into chat.`);
-    return { username, password };
-  }
-  async vm(profile) {
-    const name = this.profile(profile);
-    const file4 = await this.load();
-    const password = this.remember(this.env[`VMWARE_VM_${name.toUpperCase()}_PASSWORD`] ?? file4.vm?.[name]?.password);
-    if (typeof password !== "string" || !password) throw new Error(`Encrypted VM password profile '${name}' is not configured.`);
-    return password;
-  }
-  async console(vmx2, requestedProfile) {
-    const file4 = await this.load();
-    const canonical = (value) => process.platform === "win32" ? import_node_path5.default.resolve(value).toLowerCase() : import_node_path5.default.resolve(value);
-    const profiles = file4.console || {};
-    const resolved = await Promise.all(Object.entries(profiles).map(async ([name2, entry2]) => [name2, typeof entry2?.vmx === "string" ? await import_promises4.default.realpath(entry2.vmx).catch(() => entry2.vmx) : null]));
-    const matches = resolved.filter(([, target]) => target && canonical(target) === canonical(vmx2));
-    if (!requestedProfile && matches.length > 1) throw new Error("Multiple console profiles identify this VM. Use its configured profile alias as vm_id.");
-    const name = this.profile(requestedProfile || matches[0]?.[0] || "default");
-    const entry = profiles[name];
-    const profileTarget = resolved.find(([profile]) => profile === name)?.[1];
-    if (profileTarget && canonical(profileTarget) !== canonical(vmx2)) throw new Error("Console credential profile belongs to another VM.");
-    const password = this.remember(this.env[`VMWARE_CONSOLE_${name.toUpperCase()}_PASSWORD`] ?? entry?.password);
-    if (typeof password !== "string" || !/^[\x20-\x7e]{1,8}$/.test(password)) throw new Error(`Console password profile '${name}' must contain 1 to 8 ASCII characters. Configure it locally; never paste passwords into chat.`);
-    return { profile: name, password };
-  }
-  async rest() {
-    const file4 = await this.load();
-    const username = this.env.VMWARE_REST_USERNAME ?? file4.rest?.username;
-    const password = this.remember(this.env.VMWARE_REST_PASSWORD ?? file4.rest?.password);
-    if (typeof username !== "string" || !username || typeof password !== "string" || !password || username.includes(":")) throw new Error("REST credentials are not configured. Set VMWARE_REST_USERNAME/PASSWORD or VMWARE_CREDENTIALS_FILE. REST usernames cannot contain colons.");
-    const token = Buffer.from(`${username}:${password}`, "utf8").toString("base64");
-    this.secrets.add(token);
-    return { authorization: `Basic ${token}` };
-  }
-  redact(text) {
-    let result = text;
-    for (const [name, value] of Object.entries(this.env)) if (/^VMWARE_.*PASSWORD$/.test(name)) this.remember(value);
-    for (const value of [...this.secrets].sort((a, b) => b.length - a.length)) result = result.split(value).join("[REDACTED]");
-    return result;
-  }
-};
-
-// src/vm-files.mjs
-var import_promises9 = __toESM(require("node:fs/promises"), 1);
-var import_node_fs3 = require("node:fs");
-var import_node_path10 = __toESM(require("node:path"), 1);
-var import_node_crypto2 = require("node:crypto");
-
 // node_modules/zod/v4/classic/external.js
 var external_exports = {};
 __export(external_exports, {
@@ -20273,6 +19742,540 @@ function bigint3(params) {
 function date4(params) {
   return _coercedDate(ZodDate, params);
 }
+
+// src/zod-interpreted.mjs
+external_exports.config({ jitless: true });
+
+// src/configure-console.mjs
+var import_node_util2 = require("node:util");
+
+// src/workstation.mjs
+var import_node_child_process = require("node:child_process");
+var import_node_util = require("node:util");
+var import_promises2 = __toESM(require("node:fs/promises"), 1);
+var import_node_path3 = __toESM(require("node:path"), 1);
+var import_node_net = require("node:net");
+
+// src/host-platform.mjs
+var import_promises = __toESM(require("node:fs/promises"), 1);
+var import_node_fs = require("node:fs");
+var import_node_os = __toESM(require("node:os"), 1);
+var import_node_path = __toESM(require("node:path"), 1);
+function inventoryPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
+  return env.VMWARE_INVENTORY_PATH || (platform === "win32" ? import_node_path.default.join(env.APPDATA || import_node_path.default.join(home, "AppData", "Roaming"), "VMware", "inventory.vmls") : import_node_path.default.join(home, ".vmware", "inventory.vmls"));
+}
+function preferencesPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
+  return env.VMWARE_PREFERENCES_PATH || (platform === "win32" ? import_node_path.default.join(env.APPDATA || import_node_path.default.join(home, "AppData", "Roaming"), "VMware", "preferences.ini") : import_node_path.default.join(home, ".vmware", "preferences"));
+}
+function credentialsPath(env = process.env, platform = process.platform, home = import_node_os.default.homedir()) {
+  if (env.VMWARE_CREDENTIALS_FILE) return env.VMWARE_CREDENTIALS_FILE;
+  if (platform === "win32") return env.APPDATA ? import_node_path.default.join(env.APPDATA, "VMwareWorkstationPlugin", "credentials.json") : null;
+  const base = env.XDG_CONFIG_HOME && import_node_path.default.isAbsolute(env.XDG_CONFIG_HOME) ? env.XDG_CONFIG_HOME : import_node_path.default.join(home, ".config");
+  return import_node_path.default.join(base, "vmware-workstation-mcp", "credentials.json");
+}
+async function findVMwareExecutable(name, { env = process.env, platform = process.platform, beside } = {}) {
+  if (!["win32", "linux"].includes(platform)) throw new Error("VMware Workstation hosts supported by this plugin are Windows and Linux.");
+  const filename = `${name}${platform === "win32" ? ".exe" : ""}`;
+  const setting = { vmrun: "VMRUN_PATH", vmcli: "VMWARE_VMCLI_PATH", "vmware-vdiskmanager": "VMWARE_VDISKMANAGER_PATH", "vmware-vmx": "VMWARE_VMX_PATH", ovftool: "VMWARE_OVFTOOL_PATH" }[name];
+  if (!setting) throw new Error("Unsupported VMware executable.");
+  const validFile = async (candidate) => {
+    if (!import_node_path.default.isAbsolute(candidate) || !(await import_promises.default.stat(candidate)).isFile()) return false;
+    if (platform !== "win32") await import_promises.default.access(candidate, import_node_fs.constants.X_OK);
+    return true;
+  };
+  if (env[setting]) {
+    const configured = env[setting];
+    const actualName = import_node_path.default.basename(configured);
+    if (!import_node_path.default.isAbsolute(configured) || (platform === "win32" ? actualName.toLowerCase() !== filename : actualName !== filename)) throw new Error(`${setting} must be an absolute path to ${filename}.`);
+    if (!await validFile(configured)) throw new Error(`${setting} is not an executable file.`);
+    return configured;
+  }
+  const directories = [
+    ...name === "ovftool" && beside ? [import_node_path.default.join(import_node_path.default.dirname(beside), "OVFTool"), import_node_path.default.join(import_node_path.default.dirname(beside), "ovftool")] : [],
+    ...beside ? [import_node_path.default.dirname(beside)] : [],
+    ...name === "vmware-vmx" && beside && platform === "win32" ? [import_node_path.default.join(import_node_path.default.dirname(beside), "x64")] : [],
+    ...platform === "win32" ? [env.ProgramFiles, env["ProgramFiles(x86)"]].filter(Boolean).map((root) => import_node_path.default.join(root, "VMware", "VMware Workstation")) : [],
+    ...name === "ovftool" && platform === "win32" ? [env.ProgramFiles, env["ProgramFiles(x86)"]].filter(Boolean).flatMap((root) => [import_node_path.default.join(root, "VMware", "VMware Workstation", "OVFTool"), import_node_path.default.join(root, "VMware", "VMware OVF Tool")]) : [],
+    ...(env.PATH || env.Path || "").split(import_node_path.default.delimiter).filter(Boolean),
+    ...platform === "linux" ? ["/usr/bin", "/usr/local/bin", "/usr/lib/vmware/bin"] : [],
+    ...name === "ovftool" && platform === "linux" ? ["/usr/lib/vmware-ovftool", "/opt/vmware/ovftool"] : []
+  ];
+  for (const directory of new Set(directories)) {
+    const candidate = import_node_path.default.join(directory, filename);
+    try {
+      if (await validFile(candidate)) return candidate;
+    } catch (error62) {
+      if (!["ENOENT", "ENOTDIR", "EACCES"].includes(error62.code)) throw error62;
+    }
+  }
+  throw new Error(`${filename} was not found. Install ${name === "ovftool" ? "VMware OVF Tool" : "VMware Workstation on this host"} or set ${setting}.`);
+}
+
+// src/resources.mjs
+var import_node_async_hooks = require("node:async_hooks");
+var import_node_path2 = __toESM(require("node:path"), 1);
+var Resources = class {
+  constructor() {
+    this.active = /* @__PURE__ */ new Map();
+    this.context = new import_node_async_hooks.AsyncLocalStorage();
+  }
+  key(file4) {
+    return process.platform === "win32" ? import_node_path2.default.resolve(file4).toLowerCase() : import_node_path2.default.resolve(file4);
+  }
+  assert(files) {
+    const owner = this.context.getStore();
+    const contains = (a, b) => {
+      const relative = import_node_path2.default.relative(a, b);
+      return !relative || !relative.startsWith(".." + import_node_path2.default.sep) && relative !== ".." && !import_node_path2.default.isAbsolute(relative);
+    };
+    const overlaps = (a, b) => contains(a, b) || contains(b, a);
+    for (const file4 of files.map((file5) => this.key(file5))) for (const [held, token] of this.active) {
+      if (token !== owner && overlaps(file4, held)) throw Object.assign(new Error("A conflicting operation holds this VM or disk path. Wait for it to finish, inspect state, then retry."), { code: "RESOURCE_BUSY" });
+    }
+  }
+  reserve(files) {
+    this.context.run(void 0, () => this.assert(files));
+    const token = /* @__PURE__ */ Symbol("reservation");
+    const keys = [...new Set(files.map((file4) => this.key(file4)))];
+    for (const key2 of keys) this.active.set(key2, token);
+    return {
+      run: (callback) => this.context.run(token, callback),
+      release: () => {
+        for (const key2 of keys) if (this.active.get(key2) === token) this.active.delete(key2);
+      }
+    };
+  }
+  async use(files, callback) {
+    this.assert(files);
+    const token = this.context.getStore() || /* @__PURE__ */ Symbol("resource-owner");
+    const added = files.map((file4) => this.key(file4)).filter((file4) => !this.active.has(file4));
+    for (const file4 of added) this.active.set(file4, token);
+    try {
+      return await this.context.run(token, callback);
+    } finally {
+      for (const file4 of added) this.active.delete(file4);
+    }
+  }
+};
+
+// src/workstation.mjs
+var import_node_async_hooks2 = require("node:async_hooks");
+var execute = (0, import_node_util.promisify)(import_node_child_process.execFile);
+function parseAssignments(text) {
+  const values = {};
+  for (const line of text.split(/\r?\n/)) {
+    const match = line.match(/^\s*([\w.:-]+)\s*=\s*"(.*)"\s*$/);
+    if (match) values[match[1]] = match[2].replace(/\|([0-9a-f]{2})/gi, (_, hex3) => String.fromCharCode(parseInt(hex3, 16)));
+  }
+  return values;
+}
+function parseCountedList(text) {
+  const lines = text.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+  if (!lines.length || !/:\s*\d+$/.test(lines[0])) throw new Error("Unrecognized vmrun list output; refusing to infer an empty list.");
+  const count = Number(lines.shift().match(/(\d+)$/)[1]);
+  if (count !== lines.length) throw new Error("vmrun list count does not match its output.");
+  return lines;
+}
+function isWithin(root, target) {
+  const relative = import_node_path3.default.relative(root, target);
+  return relative === "" || !relative.startsWith(`..${import_node_path3.default.sep}`) && relative !== ".." && !import_node_path3.default.isAbsolute(relative);
+}
+var Workstation = class {
+  constructor({ env = process.env, run = execute } = {}) {
+    this.env = env;
+    this.execute = run;
+    this.queues = /* @__PURE__ */ new Map();
+    this.execution = new import_node_async_hooks2.AsyncLocalStorage();
+    this.inventoryPath = inventoryPath(env);
+    this.resources = new Resources();
+  }
+  async executable() {
+    return findVMwareExecutable("vmrun", { env: this.env });
+  }
+  async run(args, { mutation = false, authentication = [], timeout: timeout2 = 12e4, deadline, signal } = {}) {
+    const context = this.execution.getStore();
+    signal ||= context?.signal;
+    signal?.throwIfAborted();
+    if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
+    const key2 = args[1] && import_node_path3.default.isAbsolute(args[1]) ? this.resources.key(args[1]) : `host:${args[0]}`;
+    const previous = this.queues.get(key2) || Promise.resolve();
+    const job = previous.then(async () => {
+      if (mutation && args[1] && import_node_path3.default.isAbsolute(args[1])) this.resources.assert([args[1]]);
+      const binary = await this.executable();
+      signal?.throwIfAborted();
+      if (deadline !== void 0) {
+        timeout2 = Math.min(timeout2, Math.floor(deadline - performance.now()));
+        if (timeout2 <= 0) throw Object.assign(new Error("Observation deadline expired while waiting for vmrun."), { code: "OBSERVATION_DEADLINE" });
+      }
+      try {
+        const invoke = () => this.nativeRun(binary, ["-T", "ws", ...authentication, ...args], {
+          windowsHide: true,
+          shell: false,
+          timeout: timeout2,
+          signal,
+          maxBuffer: 1024 * 1024,
+          encoding: "utf8"
+        });
+        const result = mutation && args[1] && import_node_path3.default.isAbsolute(args[1]) ? await this.resources.use([args[1]], invoke) : await invoke();
+        return result.stdout.trim();
+      } catch (error62) {
+        const details = [error62.stderr, error62.stdout].filter(Boolean).join("\n").trim().slice(0, 4e3);
+        const uncertain = mutation ? " The operation may have taken effect; inspect the VM before retrying." : "";
+        throw Object.assign(new Error(`vmrun ${args[0] || "help"} failed (${error62.killed ? "timeout" : error62.code || "unknown error"}).${uncertain}${details ? ` ${details}` : ""}`), { code: error62.killed ? "VMRUN_TIMEOUT" : "VMRUN_FAILED" });
+      }
+    });
+    const tail = job.catch(() => {
+    });
+    this.queues.set(key2, tail);
+    void tail.then(() => {
+      if (this.queues.get(key2) === tail) this.queues.delete(key2);
+    });
+    if (!signal || context) return job;
+    return new Promise((resolve, reject) => {
+      const abort = () => reject(signal.reason || new Error("Operation cancelled."));
+      if (signal.aborted) abort();
+      else signal.addEventListener("abort", abort, { once: true });
+      job.then(resolve, reject).finally(() => signal.removeEventListener("abort", abort));
+    });
+  }
+  async nativeRun(file4, args, options = {}) {
+    const context = this.execution.getStore();
+    if (!context) return this.execute(file4, args, options);
+    context.signal.throwIfAborted();
+    const result = await context.run(file4, args, { ...options, env: options.env || this.env, logOutput: false, progress: null });
+    if (result.code !== 0) throw Object.assign(new Error("Native job command failed."), { code: result.code, stderr: result.output });
+    return { stdout: result.output, stderr: "" };
+  }
+  async help() {
+    const binary = await this.executable();
+    const options = { windowsHide: true, shell: false, timeout: 15e3, maxBuffer: 1024 * 1024, encoding: "utf8" };
+    try {
+      return (await this.execute(binary, [], options)).stdout;
+    } catch (error62) {
+      const output2 = [error62.stdout, error62.stderr].filter(Boolean).join("\n");
+      if (/vmrun version [\w.]+/.test(output2) && output2.includes("Usage: vmrun")) return output2;
+      throw new Error("Cannot read installed vmrun help. Check vmrun installation and access.");
+    }
+  }
+  async hostPath(input2, kind, overwrite = false) {
+    if (typeof input2 !== "string" || !import_node_path3.default.isAbsolute(input2) || /[\x00-\x1f]/.test(input2)) throw new Error("Host paths must be absolute and contain no control characters.");
+    const absolute = import_node_path3.default.resolve(input2);
+    let stat;
+    try {
+      stat = await import_promises2.default.stat(absolute);
+    } catch (error62) {
+      if (error62.code !== "ENOENT") throw error62;
+    }
+    if (kind === "input-file" && !stat?.isFile()) throw new Error("Host source must be an existing file.");
+    if (kind === "directory" && !stat?.isDirectory()) throw new Error("Host directory must already exist.");
+    if (kind === "new-vmx" && (stat || import_node_path3.default.extname(absolute).toLowerCase() !== ".vmx")) throw new Error("Clone destination must be a new .vmx file.");
+    if (kind === "output-file" && (stat?.isDirectory() || stat && !overwrite)) throw new Error("Host destination exists; choose another file or explicitly set overwrite=true.");
+    if (["destination-directory", "host-destination-directory"].includes(kind) && stat && !stat.isDirectory()) throw new Error("Destination must be a directory path.");
+    let ancestor = absolute;
+    const missing = [];
+    while (true) {
+      try {
+        ancestor = await import_promises2.default.realpath(ancestor);
+        break;
+      } catch (error62) {
+        if (error62.code !== "ENOENT") throw error62;
+        const entry = await import_promises2.default.lstat(ancestor).catch((missingError) => {
+          if (missingError.code !== "ENOENT") throw missingError;
+          return null;
+        });
+        if (entry?.isSymbolicLink()) throw new Error("Destination contains a dangling link.");
+        const parent = import_node_path3.default.dirname(ancestor);
+        if (parent === ancestor) throw error62;
+        missing.unshift(import_node_path3.default.basename(ancestor));
+        ancestor = parent;
+      }
+    }
+    const resolved = import_node_path3.default.join(ancestor, ...missing);
+    const rootSetting = kind === "new-vmx" || kind === "destination-directory" ? this.env.VMWARE_ALLOWED_ROOTS : this.env.VMWARE_ALLOWED_HOST_ROOTS;
+    if (rootSetting) {
+      const roots = rootSetting.split(import_node_path3.default.delimiter).filter(Boolean);
+      if (!roots.length || roots.some((root) => !import_node_path3.default.isAbsolute(root))) throw new Error("Allowed host roots must be absolute.");
+      const canonical = await Promise.all(roots.map((root) => import_promises2.default.realpath(root)));
+      if (!canonical.some((root) => isWithin(root, resolved))) throw new Error("Host path is outside the configured allowed roots.");
+    }
+    return resolved;
+  }
+  async vmx(input2) {
+    if (typeof input2 !== "string" || !import_node_path3.default.isAbsolute(input2) || import_node_path3.default.extname(input2).toLowerCase() !== ".vmx" || /[\x00-\x1f]/.test(input2)) throw new Error("Provide an absolute path to an existing .vmx file.");
+    const resolved = await import_promises2.default.realpath(input2);
+    if (import_node_path3.default.extname(resolved).toLowerCase() !== ".vmx" || !(await import_promises2.default.stat(resolved)).isFile()) throw new Error("VM target must resolve to a .vmx file.");
+    if (this.env.VMWARE_ALLOWED_ROOTS) {
+      const roots = this.env.VMWARE_ALLOWED_ROOTS.split(import_node_path3.default.delimiter).filter(Boolean);
+      if (!roots.length || roots.some((root) => !import_node_path3.default.isAbsolute(root))) throw new Error("VMWARE_ALLOWED_ROOTS must contain absolute directories.");
+      const canonicalRoots = await Promise.all(roots.map((root) => import_promises2.default.realpath(root)));
+      if (!canonicalRoots.some((root) => isWithin(root, resolved))) throw new Error("VM is outside VMWARE_ALLOWED_ROOTS.");
+    }
+    return resolved;
+  }
+  async status() {
+    const executable = await this.executable();
+    const running = parseCountedList(await this.run(["list"]));
+    return { executable, inventoryPath: this.inventoryPath, runningCount: running.length, allowedRoots: this.env.VMWARE_ALLOWED_ROOTS || null, transport: "local stdio" };
+  }
+  async resolveVM(vmID, { aliases = {}, restInventory } = {}) {
+    if (typeof vmID !== "string" || !vmID.trim() || /[\x00-\x1f]/.test(vmID)) throw new Error("Provide a VMX path, unique inventory name, console profile alias, or REST VM ID.");
+    if (import_node_path3.default.isAbsolute(vmID)) return this.vmx(vmID);
+    if (Object.hasOwn(aliases, vmID)) return this.vmx(aliases[vmID]);
+    const { vms } = await this.listVMs();
+    const normalize = (value) => process.platform === "win32" ? value.toLowerCase() : value;
+    const matches = vms.filter((vm) => [vm.displayName, import_node_path3.default.basename(vm.vmx, ".vmx")].some((name) => normalize(name) === normalize(vmID)));
+    if (matches.length > 1) throw new Error("VM name is ambiguous. Use the exact VMX path.");
+    if (matches.length === 1) return this.vmx(matches[0].vmx);
+    if (restInventory) {
+      const records = await restInventory();
+      const record2 = records.find((vm) => vm.id === vmID);
+      if (record2?.path) return this.vmx(record2.path);
+    }
+    throw new Error("VM was not found. Use an absolute VMX path or a unique configured console alias.");
+  }
+  async listVMs() {
+    const running = parseCountedList(await this.run(["list"]));
+    let entries = {};
+    const warnings = [];
+    try {
+      entries = parseAssignments(await import_promises2.default.readFile(this.inventoryPath, "utf8"));
+    } catch (error62) {
+      warnings.push(`Inventory unavailable (${error62.code || error62.message}); showing running VMs only.`);
+    }
+    const key2 = (value) => process.platform === "win32" ? import_node_path3.default.normalize(value).toLowerCase() : import_node_path3.default.normalize(value);
+    const records = /* @__PURE__ */ new Map();
+    for (const [name, vmx2] of Object.entries(entries)) {
+      if (/^vmlist\d+\.config$/.test(name) && vmx2 && import_node_path3.default.extname(vmx2).toLowerCase() === ".vmx") {
+        records.set(key2(vmx2), { vmx: vmx2, displayName: entries[name.replace(/\.config$/, ".DisplayName")] || import_node_path3.default.basename(vmx2, import_node_path3.default.extname(vmx2)), registered: true, running: false });
+      }
+    }
+    for (const vmx2 of running) {
+      const record2 = records.get(key2(vmx2)) || { vmx: vmx2, displayName: import_node_path3.default.basename(vmx2, import_node_path3.default.extname(vmx2)), registered: false };
+      records.set(key2(vmx2), { ...record2, running: true });
+    }
+    const vms = await Promise.all([...records.values()].map(async (record2) => {
+      try {
+        await import_promises2.default.access(record2.vmx);
+        return { ...record2, exists: true };
+      } catch {
+        return { ...record2, exists: false };
+      }
+    }));
+    return { vms, warnings, note: "running=false does not distinguish powered off, suspended, or unavailable VMs. Inventory is not a disk scan." };
+  }
+  async details(input2) {
+    const vmx2 = await this.vmx(input2);
+    const config2 = parseAssignments(await import_promises2.default.readFile(vmx2, "utf8"));
+    const running = parseCountedList(await this.run(["list"]));
+    const realRunning = await Promise.all(running.map(async (file4) => import_promises2.default.realpath(file4).catch(() => file4)));
+    const compare = (file4) => process.platform === "win32" ? file4.toLowerCase() : file4;
+    const hardware = Object.fromEntries(Object.entries(config2).filter(([key2]) => /^(displayName|guestOS|memsize|numvcpus|virtualHW.version|ethernet\d+\.(present|connectionType|vnet)|(?:scsi|sata|ide|nvme)\d+:\d+\.(present|fileName|deviceType))$/.test(key2)));
+    return { vmx: vmx2, running: realRunning.some((file4) => compare(file4) === compare(vmx2)), hardware };
+  }
+  async power(input2, action, mode = "soft", gui = false) {
+    if (!["start", "stop", "reset", "suspend", "pause", "unpause"].includes(action)) throw new Error("Unsupported power action.");
+    if (!["soft", "hard"].includes(mode)) throw new Error("Power mode must be soft or hard.");
+    const vmx2 = await this.vmx(input2);
+    const args = [action, vmx2];
+    if (action === "start") args.push(gui ? "gui" : "nogui");
+    if (["stop", "reset", "suspend"].includes(action)) args.push(mode);
+    const output2 = await this.run(args, { mutation: true });
+    return { vmx: vmx2, action, output: output2, commandSucceeded: true, note: "vmrun returned successfully; guest application readiness is not established." };
+  }
+  async snapshots(input2) {
+    const vmx2 = await this.vmx(input2);
+    return { vmx: vmx2, snapshots: parseCountedList(await this.run(["listSnapshots", vmx2])) };
+  }
+  async snapshot(input2, action, name) {
+    if (!["snapshot", "revertToSnapshot", "deleteSnapshot"].includes(action)) throw new Error("Unsupported snapshot action.");
+    if (typeof name !== "string" || !name.trim() || name.length > 256 || /[\x00-\x1f]/.test(name)) throw new Error("Provide a nonblank snapshot name of at most 256 characters without control characters.");
+    const vmx2 = await this.vmx(input2);
+    if (action !== "snapshot") {
+      const { snapshots } = await this.snapshots(vmx2);
+      if (snapshots.filter((value) => value === name).length !== 1) throw new Error("Snapshot name must identify exactly one existing snapshot; inspect the snapshot tree in Workstation if ambiguous.");
+    }
+    return { vmx: vmx2, action, name, output: await this.run([action, vmx2, name], { mutation: true }), commandSucceeded: true };
+  }
+  async guestIP(input2, { wait = false, timeout_seconds = 120, signal } = {}) {
+    if (typeof wait !== "boolean" || !Number.isInteger(timeout_seconds) || timeout_seconds < 1 || timeout_seconds > 3600) throw new Error("Guest IP wait requires a boolean wait and timeout_seconds from 1 to 3600.");
+    const vmx2 = await this.vmx(input2);
+    signal?.throwIfAborted();
+    const deadline = performance.now() + timeout_seconds * 1e3;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(new Error("Guest IP observation deadline expired.")), timeout_seconds * 1e3);
+    signal = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
+    try {
+      const address = (await this.run(["getGuestIPAddress", vmx2, ...wait ? ["-wait"] : []], { timeout: timeout_seconds * 1e3, deadline, signal })).trim();
+      if (!(0, import_node_net.isIP)(address)) throw new Error(`vmrun did not return a valid guest IP address. Output: ${address.slice(0, 4e3) || "(empty)"}`);
+      return { vmx: vmx2, address };
+    } catch (error62) {
+      let toolsState;
+      try {
+        const output2 = await this.run(["checkToolsState", vmx2], { timeout: 5e3, deadline, signal });
+        toolsState = { state: ["running", "installed", "unknown"].includes(output2) ? output2 : "unknown", output: output2.slice(0, 4e3) };
+      } catch (checkError) {
+        toolsState = { state: "unknown", error: checkError.message };
+      }
+      throw Object.assign(new Error(error62.message, { cause: error62 }), {
+        code: "GUEST_IP_UNAVAILABLE",
+        details: {
+          vmx: vmx2,
+          addressAvailable: false,
+          toolsState,
+          note: "The IP lookup failed. checkToolsState, when attempted, is a separate, later observation; it is skipped after cancellation/deadline. Even running Tools does not establish IP publication, network reachability, or guest readiness. The lookup error alone does not establish that Tools is stopped.",
+          action: "Use get_guest_ip with wait=true and an explicit timeout_seconds for a bounded read-only wait, or vmrun_get_guest_ip_address if exposed. If documented tools are missing, compare plugin_catalog with the assistant-visible inventory and reconnect/check a fresh local chat. Inspect guest networking and IP publication before considering service or power changes; never replay mutations."
+        }
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+};
+
+// src/credentials.mjs
+var import_promises4 = __toESM(require("node:fs/promises"), 1);
+var import_node_path5 = __toESM(require("node:path"), 1);
+
+// src/local-file-security.mjs
+var import_node_path4 = __toESM(require("node:path"), 1);
+var import_promises3 = __toESM(require("node:fs/promises"), 1);
+var import_node_fs2 = require("node:fs");
+async function openPrivateFile(filename, flags2 = import_node_fs2.constants.O_RDONLY) {
+  const handle = await import_promises3.default.open(filename, flags2 | import_node_fs2.constants.O_NOFOLLOW | import_node_fs2.constants.O_NONBLOCK, 384);
+  try {
+    const stat = await handle.stat();
+    if (!stat.isFile() || stat.uid !== process.getuid() || stat.nlink !== 1) throw new Error("Sensitive files must be regular files owned by the current user with exactly one hard link.");
+    return handle;
+  } catch (error62) {
+    await handle.close();
+    throw error62;
+  }
+}
+async function readPrivateFile(filename) {
+  const handle = await openPrivateFile(filename);
+  try {
+    if ((await handle.stat()).mode & 63) throw new Error("Credentials file must be private (chmod 600).");
+    return await handle.readFile("utf8");
+  } finally {
+    await handle.close();
+  }
+}
+function localFileProtector(backend, { platform = process.platform, root } = {}) {
+  if (platform === "linux") return async (filename) => {
+    const handle = await openPrivateFile(filename);
+    try {
+      await handle.chmod(384);
+      if ((await handle.stat()).mode & 63) throw new Error("This filesystem does not enforce private Linux file permissions. Use a native Linux filesystem for sensitive files.");
+    } finally {
+      await handle.close();
+    }
+  };
+  const script = import_node_path4.default.join(root ?? import_node_path4.default.resolve(import_node_path4.default.dirname(process.argv[1]), ".."), "scripts", "Protect-LocalFile.ps1");
+  const preflight = async () => {
+    try {
+      if (!(await import_promises3.default.stat(script)).isFile()) throw new Error("Expected a regular helper file.");
+      await import_promises3.default.access(script, import_node_fs2.constants.R_OK);
+    } catch (cause) {
+      throw Object.assign(new Error("PLUGIN_RUNTIME_MISSING: The VMware Workstation plugin runtime is incomplete or no longer available (Protect-LocalFile.ps1). Reconnect the plugin or open a fresh chat to use the installed version. If this persists, reinstall/reimport the plugin before retrying.", { cause }), { code: "PLUGIN_RUNTIME_MISSING" });
+    }
+  };
+  const protect = async (filename) => {
+    await preflight();
+    try {
+      return await backend.execute("pwsh", ["-NoProfile", "-File", script, "-LiteralPath", filename], { windowsHide: true, shell: false, encoding: "utf8", timeout: 1e4 });
+    } catch (error62) {
+      await preflight();
+      throw error62;
+    }
+  };
+  protect.preflight = preflight;
+  return protect;
+}
+
+// src/credentials.mjs
+var Credentials = class {
+  constructor(env = process.env) {
+    this.env = env;
+    this.secrets = /* @__PURE__ */ new Set();
+    this.filename = credentialsPath(env);
+  }
+  async load() {
+    if (!this.filename) return {};
+    try {
+      const result = JSON.parse(process.platform === "linux" ? await readPrivateFile(this.filename) : await import_promises4.default.readFile(this.filename, "utf8"));
+      if (!result || typeof result !== "object" || Array.isArray(result)) throw new Error();
+      return result;
+    } catch (error62) {
+      if (!this.env.VMWARE_CREDENTIALS_FILE && error62.code === "ENOENT") return {};
+      throw new Error("Cannot read local VMware credentials as a JSON object. Check VMWARE_CREDENTIALS_FILE or the default credentials file, permissions, and format. On Linux use an owned regular file with mode 600.");
+    }
+  }
+  profile(value = "default") {
+    if (!/^[a-z][a-z0-9_]{0,31}$/i.test(value)) throw new Error("Credential profile must start with a letter and contain at most 32 letters, digits or underscores.");
+    return value.toLowerCase();
+  }
+  remember(password) {
+    if (typeof password === "string" && password) {
+      this.secrets.add(password);
+      this.secrets.add(encodeURIComponent(password));
+      this.secrets.add(new URLSearchParams({ secret: password }).toString().slice(7));
+      this.secrets.add(JSON.stringify(password).slice(1, -1));
+    }
+    return password;
+  }
+  async guest(profile = "default") {
+    const name = this.profile(profile);
+    const file4 = await this.load();
+    const prefix2 = `VMWARE_GUEST_${name.toUpperCase()}`;
+    const username = this.env[`${prefix2}_USERNAME`] ?? file4.guest?.[name]?.username;
+    const password = this.remember(this.env[`${prefix2}_PASSWORD`] ?? file4.guest?.[name]?.password);
+    if (typeof username !== "string" || !username || typeof password !== "string" || !password) throw new Error(`Guest credential profile '${name}' is not configured. Use VMWARE_CREDENTIALS_FILE or ${prefix2}_USERNAME/PASSWORD; never paste passwords into chat.`);
+    return { username, password };
+  }
+  async vm(profile) {
+    const name = this.profile(profile);
+    const file4 = await this.load();
+    const password = this.remember(this.env[`VMWARE_VM_${name.toUpperCase()}_PASSWORD`] ?? file4.vm?.[name]?.password);
+    if (typeof password !== "string" || !password) throw new Error(`Encrypted VM password profile '${name}' is not configured.`);
+    return password;
+  }
+  async console(vmx2, requestedProfile) {
+    const file4 = await this.load();
+    const canonical = (value) => process.platform === "win32" ? import_node_path5.default.resolve(value).toLowerCase() : import_node_path5.default.resolve(value);
+    const profiles = file4.console || {};
+    const resolved = await Promise.all(Object.entries(profiles).map(async ([name2, entry2]) => [name2, typeof entry2?.vmx === "string" ? await import_promises4.default.realpath(entry2.vmx).catch(() => entry2.vmx) : null]));
+    const matches = resolved.filter(([, target]) => target && canonical(target) === canonical(vmx2));
+    if (!requestedProfile && matches.length > 1) throw new Error("Multiple console profiles identify this VM. Use its configured profile alias as vm_id.");
+    const name = this.profile(requestedProfile || matches[0]?.[0] || "default");
+    const entry = profiles[name];
+    const profileTarget = resolved.find(([profile]) => profile === name)?.[1];
+    if (profileTarget && canonical(profileTarget) !== canonical(vmx2)) throw new Error("Console credential profile belongs to another VM.");
+    const password = this.remember(this.env[`VMWARE_CONSOLE_${name.toUpperCase()}_PASSWORD`] ?? entry?.password);
+    if (typeof password !== "string" || !/^[\x20-\x7e]{1,8}$/.test(password)) throw new Error(`Console password profile '${name}' must contain 1 to 8 ASCII characters. Configure it locally; never paste passwords into chat.`);
+    return { profile: name, password };
+  }
+  async rest() {
+    const file4 = await this.load();
+    const username = this.env.VMWARE_REST_USERNAME ?? file4.rest?.username;
+    const password = this.remember(this.env.VMWARE_REST_PASSWORD ?? file4.rest?.password);
+    if (typeof username !== "string" || !username || typeof password !== "string" || !password || username.includes(":")) throw new Error("REST credentials are not configured. Set VMWARE_REST_USERNAME/PASSWORD or VMWARE_CREDENTIALS_FILE. REST usernames cannot contain colons.");
+    const token = Buffer.from(`${username}:${password}`, "utf8").toString("base64");
+    this.secrets.add(token);
+    return { authorization: `Basic ${token}` };
+  }
+  redact(text) {
+    let result = text;
+    for (const [name, value] of Object.entries(this.env)) if (/^VMWARE_.*PASSWORD$/.test(name)) this.remember(value);
+    for (const value of [...this.secrets].sort((a, b) => b.length - a.length)) result = result.split(value).join("[REDACTED]");
+    return result;
+  }
+};
+
+// src/vm-files.mjs
+var import_promises9 = __toESM(require("node:fs/promises"), 1);
+var import_node_fs3 = require("node:fs");
+var import_node_path10 = __toESM(require("node:path"), 1);
+var import_node_crypto2 = require("node:crypto");
 
 // src/hardware-schemas.mjs
 var file2 = external_exports.string().min(1).max(4096).refine((v) => !/[\x00-\x1f]/.test(v));

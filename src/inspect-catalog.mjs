@@ -1,9 +1,9 @@
+import './zod-interpreted.mjs';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-
 // Standalone diagnostic: initialize and tools/list only. Works against older
 // packages without plugin_catalog. Never invokes a VMware tool or opens secrets.
 async function main() {

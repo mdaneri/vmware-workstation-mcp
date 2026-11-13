@@ -1,5 +1,7 @@
 # Version history
 
+Version 0.17.4 uses patched Zod 4 for Claude Desktop packaging and switches the bundled MCP SDK validator to an interpreter. The bundled server and catalog diagnostic run with Node.js string code generation disabled in package tests. The README links to the [156-tool MCP catalog](vmware-workstation/tool-schemas.json), including schemas and annotations. The annotation audit corrects read-only and destructive hints for serial I/O, job handling, lab workflows, boot configuration, and additive VMware operations. All tools must explicitly declare both hints and may set both to false for additive writes.
+
 Version 0.17.3 publishes the [privacy policy](PRIVACY.md) and links it from the repository README and plugin listing metadata. The policy covers local VMware data, tool results sent to the MCP host, configured network connections, and retention of job journals and other local files. Package validation now requires all four boolean MCP annotations on every tool.
 
 Version 0.17.2 moves release notes into this file and documents where to add future entries in [AGENTS.md](AGENTS.md).

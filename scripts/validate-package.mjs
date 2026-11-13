@@ -44,13 +44,12 @@ try {
   assert.deepEqual(tools.map(tool => tool.name).sort().slice(0, 3), early);
   const preEarlyCatalog = JSON.parse(await fs.readFile('tests/fixtures/pre-early-catalog-tool-schemas.json', 'utf8'));
   assert.equal(preEarlyCatalog.tools.length, 153);
-  for (const prior of preEarlyCatalog.tools) assert.deepEqual(tools.find(tool => tool.name === prior.name), prior);
+  for (const prior of preEarlyCatalog.tools) assertCompatibleTool(tools.find(tool => tool.name === prior.name), prior);
   const preCatalog = JSON.parse(await fs.readFile('tests/fixtures/pre-catalog-tool-schemas.json', 'utf8'));
   assert.equal(preCatalog.tools.length, 150);
   for (const prior of preCatalog.tools) {
     const current = tools.find(tool => tool.name === prior.name);
-    if (prior.name === 'get_guest_ip') assertCompatibleTool(current, prior);
-    else assert.deepEqual(current, prior);
+    assertCompatibleTool(current, prior);
   }
   const preSecurity = JSON.parse(await fs.readFile('tests/fixtures/pre-security-tool-schemas.json', 'utf8'));
   assert.equal(preSecurity.tools.length, 148);
@@ -100,10 +99,11 @@ try {
   for (const tool of tools) {
     assert.ok(toolValidator.validateSchema(tool.inputSchema), `${tool.name}: invalid input schema`);
     assert.equal(tool.inputSchema.additionalProperties, false, `${tool.name}: tool arguments must be strict`);
+    assert.ok(!(tool.annotations?.readOnlyHint && tool.annotations?.destructiveHint), `${tool.name}: a read-only tool cannot be destructive`);
     for (const hint of requiredHints) {
       assert.equal(typeof tool.annotations?.[hint], 'boolean', `${tool.name}: ${hint} must be a boolean`);
     }
   }
   await writeGenerated('vmware-workstation/tool-schemas.json', JSON.stringify({ tools }, null, 2) + '\n');
-  console.log('Both portable manifests, template schema/examples and all 156 MCP schemas validated; earlier contracts preserved with optional get_guest_ip waiting fields.');
+  console.log('Both portable manifests, template schema/examples and all 156 MCP schemas validated; earlier contracts checked with reviewed annotation and optional input changes.');
 } finally { await client.close(); }
