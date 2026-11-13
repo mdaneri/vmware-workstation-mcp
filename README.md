@@ -1,8 +1,15 @@
-<p align="center">
-  <img src="vmware-workstation/assets/icon.svg" alt="VMware Workstation Plugin logo" width="128" height="128">
-</p>
-
 # VMware Workstation Plugin
+
+![VMware Workstation Plugin logo](vmware-workstation/assets/icon.svg)
+
+[![CI](https://github.com/mdaneri/vmware-workstation-mcp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/mdaneri/vmware-workstation-mcp/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/github/package-json/v/mdaneri/vmware-workstation-mcp?label=version)](package.json)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![M8ven Score](https://m8ven.ai/badge/mcp/mdaneri-vmware-workstation-mcp-1mvlu7?v=ec017e5ec7511db811106f366d3b9445)](https://m8ven.ai/mcp/mdaneri-vmware-workstation-mcp-1mvlu7?s=readme)
+
+[![OpenAI Codex](https://img.shields.io/badge/OpenAI-Codex-412991)](#use-in-codex)
+[![Claude Code](https://img.shields.io/badge/Claude-Code-D97757)](#use-in-claude-code)
+[![Claude Desktop](https://img.shields.io/badge/Claude-Desktop-D97757)](#use-in-claude-desktop)
 
 An independent Windows and Linux MCP plugin for VMware Workstation with **156 tools** for multi-VM labs, declarative VM templates, typed hardware, VMDK lifecycle, ISO media, background jobs, readiness diagnostics, VM management, OVF/OVA appliances, LAN segments, verified guest execution, file transfers, direct headless VNC/RFB console control, and optional serial consoles. It is not an official VMware or Broadcom product.
 
@@ -38,7 +45,7 @@ codex plugin add vmware-workstation@vmware-local
 codex plugin list --marketplace vmware-local --json
 ```
 
-The first command refreshes the Git marketplace snapshot; `plugin add` installs from that snapshot. Running `plugin add` alone can therefore reinstall an older version. Check the listed `version`, reopen the desktop app, and start a fresh local chat with the plugin enabled. Ask it to call `a_vmware_catalog` with `{"tool":"vmrun_get_guest_ip_address"}`. Verify version `0.17.0`, `tool_count: 156`, the bounded `wait`/`timeout_seconds` fields, and the returned `a_vmware_query` route before calling the selected VM query. An older version directory remaining in the cache does not establish which version the chat uses. See [catalog diagnostics](vmware-workstation/catalog.md) if versions or tools still differ.
+The first command refreshes the Git marketplace snapshot; `plugin add` installs from that snapshot. Running `plugin add` alone can therefore reinstall an older version. Check the listed `version`, reopen the desktop app, and start a fresh local chat with the plugin enabled. Ask it to call `a_vmware_catalog` with `{"tool":"vmrun_get_guest_ip_address"}`. Verify version `0.17.1`, `tool_count: 156`, the bounded `wait`/`timeout_seconds` fields, and the returned `a_vmware_query` route before calling the selected VM query. An older version directory remaining in the cache does not establish which version the chat uses. See [catalog diagnostics](vmware-workstation/catalog.md) if versions or tools still differ.
 
 For a marketplace registered from a local directory, update that source directory and rebuild after source changes before running `plugin add`; `marketplace upgrade` refreshes Git-backed sources only. Use `codex plugin marketplace list` to check the registered source root.
 
@@ -93,6 +100,8 @@ See [Claude installation, configuration, updates and troubleshooting](vmware-wor
 
 ## Develop
 
+Version 0.17.1 fixes the repository README's Markdown formatting and adds project and client badges.
+
 Version 0.17.0 adds native Claude Code marketplace and Claude Desktop MCPB distributions using the same 156-tool server and version source. Optional Desktop settings preserve local credential profiles. See the [Claude guide](vmware-workstation/claude-installation.md) and [native validation record](docs/claude-validation.md).
 
 Version 0.16.1 adds early `a_vmware_catalog`, `a_vmware_query` and `a_vmware_mutate` entrypoints for [issue #40](https://github.com/mdaneri/vmware-workstation-mcp/issues/40). They lead alphabetical and raw registration listings, preserving access under the reported 46-name cutoff as well as #36's 74-name cutoff. All 153 previous tool definitions are unchanged. Regression tests use the visible entrypoints to discover and call missing operations while preserving strict validation and authorization. See [refresh verification and bounded IP examples](vmware-workstation/catalog.md).
@@ -140,7 +149,7 @@ The plugin implements all **47 reference vmrun commands and 28 reference REST op
 
 Tests use a fake process runner, temporary VMX files, and a mock HTTP service. They do not change real VMs. The smoke script starts the actual bundled MCP process, discovers tools, and reads host status/inventory. If a running VM exists it reads selected hardware, snapshots, Tools state, and guest IP. It also reads host networks and checks the installed command coverage. It never powers VMs on/off or changes snapshots. `npm run smoke:rest` reads VM and network inventory from the real REST service after credentials are configured.
 
-Packaging writes `dist/vmware-workstation-0.17.0.zip`, `dist/vmware-workstation-0.17.0.mcpb` and SHA-256 checksums, and verifies their allowlisted entries and contents on both hosts. It includes one plugin and excludes source development dependencies, test VMs/credentials, and the repo marketplace.
+Packaging writes `dist/vmware-workstation-0.17.1.zip`, `dist/vmware-workstation-0.17.1.mcpb` and SHA-256 checksums, and verifies their allowlisted entries and contents on both hosts. It includes one plugin and excludes source development dependencies, test VMs/credentials, and the repo marketplace.
 
 ## Validation
 
