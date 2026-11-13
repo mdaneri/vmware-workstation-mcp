@@ -67,7 +67,10 @@
               "iso_eject",
               "iso_mount",
               "job_cancel",
+              "job_list",
+              "job_logs",
               "job_start",
+              "job_status",
               "lab_deploy",
               "lab_destroy",
               "lab_start",
@@ -75,6 +78,8 @@
               "ovf_convert",
               "ovf_export",
               "ovf_import",
+              "ovf_inspect",
+              "ovf_validate",
               "remove_lan_segment",
               "rest_change_power_state",
               "rest_config_vm_params",
@@ -96,9 +101,9 @@
               "serial_configure",
               "serial_connect",
               "serial_disconnect",
+              "serial_read",
               "serial_write",
               "template_deploy",
-              "vm_boot_configure",
               "vm_collect_diagnostics",
               "vm_hardware_set",
               "vm_power",
@@ -189,17 +194,12 @@
               "get_guest_ip",
               "get_vm_details",
               "iso_list",
-              "job_list",
-              "job_logs",
-              "job_status",
               "lab_status",
               "lab_validate",
               "list_lan_segments",
               "list_snapshots",
               "list_vms",
-              "ovf_inspect",
               "ovf_tool_status",
-              "ovf_validate",
               "rest_get_all_networks",
               "rest_get_all_nic_devices",
               "rest_get_all_shared_folders",
@@ -212,11 +212,11 @@
               "rest_get_vm",
               "rest_get_vm_params",
               "rest_get_vm_restrictions",
-              "serial_read",
               "serial_status",
               "template_export",
               "template_list",
               "template_validate",
+              "vm_boot_configure",
               "vm_boot_status",
               "vm_get_recent_errors",
               "vm_hardware_capabilities",
@@ -1267,7 +1267,7 @@
       },
       "annotations": {
         "readOnlyHint": false,
-        "destructiveHint": false,
+        "destructiveHint": true,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -1333,7 +1333,7 @@
       },
       "annotations": {
         "readOnlyHint": false,
-        "destructiveHint": false,
+        "destructiveHint": true,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -2524,9 +2524,9 @@
         "additionalProperties": false
       },
       "annotations": {
-        "readOnlyHint": false,
-        "destructiveHint": true,
-        "idempotentHint": false,
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
         "openWorldHint": false
       },
       "execution": {
@@ -2992,7 +2992,7 @@
     },
     {
       "name": "serial_read",
-      "description": "Read at most max_bytes from an explicitly connected VM serial port. Bounded wait returns timed_out with empty data. Base64 preserves bytes; UTF-8 also returns raw_base64. MCP cancellation preserves unread bytes.",
+      "description": "Consume and return up to max_bytes of buffered output from an explicitly connected VM serial port. Bounded wait returns timed_out with empty data. Base64 preserves bytes; UTF-8 also returns raw_base64. MCP cancellation preserves unread bytes.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -3034,8 +3034,8 @@
         "additionalProperties": false
       },
       "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
+        "readOnlyHint": false,
+        "destructiveHint": true,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -3120,7 +3120,7 @@
       },
       "annotations": {
         "readOnlyHint": false,
-        "destructiveHint": false,
+        "destructiveHint": true,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -4125,7 +4125,7 @@
     },
     {
       "name": "ovf_inspect",
-      "description": "Start a read-only background appliance probe. job_status.result reports hardware, disks, NICs, properties, deployment options and manifest checks. Local flat OVF/OVA packages only.",
+      "description": "Start a background appliance probe without editing the source. Job admission can evict old journal records. job_status.result reports hardware, disks, NICs, properties, deployment options and manifest checks. Local flat OVF/OVA packages only.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -4149,9 +4149,9 @@
         "additionalProperties": false
       },
       "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
         "openWorldHint": false
       },
       "execution": {
@@ -4160,7 +4160,7 @@
     },
     {
       "name": "ovf_validate",
-      "description": "Start read-only local OVF/OVA schema and manifest validation. Returns a job ID. Remote-host compatibility, signer trust and guest boot are not established.",
+      "description": "Start a background job to validate a local OVF/OVA schema and manifest without editing the source. Job admission can evict old journal records. Returns a job ID. Remote-host compatibility, signer trust and guest boot are not established.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -4184,9 +4184,9 @@
         "additionalProperties": false
       },
       "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
         "openWorldHint": false
       },
       "execution": {
@@ -4195,7 +4195,7 @@
     },
     {
       "name": "ovf_import",
-      "description": "Start an OVF/OVA import into a NEW VM directory. Supports typed network/property mappings and explicit EULA acceptance. Registration through REST and headless power-on are opt-in. Returns a job ID; poll job_status.",
+      "description": "Start an OVF/OVA import into a NEW VM directory. Supports typed network/property mappings and explicit EULA acceptance. Registration through REST and headless power-on are opt-in. Returns a job ID. Job admission can evict old journal records; poll job_status.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -4282,7 +4282,7 @@
       },
       "annotations": {
         "readOnlyHint": false,
-        "destructiveHint": false,
+        "destructiveHint": true,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -4703,7 +4703,7 @@
     },
     {
       "name": "job_status",
-      "description": "Read background state, genuine backend progress and verified result/error from private bounded journals. Unfinished prior-session jobs report interrupted with unknown outcome and are never replayed.",
+      "description": "Read background state, genuine backend progress and verified result/error from private bounded journals. Expired job journals may be pruned. Unfinished prior-session jobs report interrupted with unknown outcome and are never replayed.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -4720,9 +4720,9 @@
         "additionalProperties": false
       },
       "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
         "openWorldHint": false
       },
       "execution": {
@@ -4731,7 +4731,7 @@
     },
     {
       "name": "job_list",
-      "description": "List up to 100 current and retained historical jobs from private redacted journals, retained for at most seven days. History does not imply a previous process has stopped.",
+      "description": "List up to 100 current and retained historical jobs from private redacted journals. The call prunes expired records. History does not imply a previous process has stopped.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -4739,9 +4739,9 @@
         "additionalProperties": false
       },
       "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
         "openWorldHint": false
       },
       "execution": {
@@ -4778,7 +4778,7 @@
     },
     {
       "name": "job_logs",
-      "description": "Read bounded, redacted background job output. Raw probe metadata/property defaults are omitted. A truncated log is explicitly marked.",
+      "description": "Read bounded, redacted background job output. Expired job journals may be pruned. Raw probe metadata/property defaults are omitted. A truncated log is explicitly marked.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -4795,9 +4795,9 @@
         "additionalProperties": false
       },
       "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
         "openWorldHint": false
       },
       "execution": {
@@ -5362,7 +5362,7 @@
       },
       "annotations": {
         "readOnlyHint": false,
-        "destructiveHint": true,
+        "destructiveHint": false,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -5596,7 +5596,7 @@
       },
       "annotations": {
         "readOnlyHint": false,
-        "destructiveHint": true,
+        "destructiveHint": false,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -5689,7 +5689,7 @@
       },
       "annotations": {
         "readOnlyHint": false,
-        "destructiveHint": true,
+        "destructiveHint": false,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -6241,7 +6241,7 @@
       },
       "annotations": {
         "readOnlyHint": false,
-        "destructiveHint": true,
+        "destructiveHint": false,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -6630,7 +6630,7 @@
       },
       "annotations": {
         "readOnlyHint": false,
-        "destructiveHint": true,
+        "destructiveHint": false,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -6722,7 +6722,7 @@
       },
       "annotations": {
         "readOnlyHint": false,
-        "destructiveHint": true,
+        "destructiveHint": false,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -7673,7 +7673,7 @@
       },
       "annotations": {
         "readOnlyHint": false,
-        "destructiveHint": true,
+        "destructiveHint": false,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -7881,7 +7881,7 @@
       },
       "annotations": {
         "readOnlyHint": false,
-        "destructiveHint": true,
+        "destructiveHint": false,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -8177,7 +8177,7 @@
       },
       "annotations": {
         "readOnlyHint": false,
-        "destructiveHint": true,
+        "destructiveHint": false,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -8390,7 +8390,7 @@
       },
       "annotations": {
         "readOnlyHint": false,
-        "destructiveHint": true,
+        "destructiveHint": false,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -8637,7 +8637,7 @@
       },
       "annotations": {
         "readOnlyHint": false,
-        "destructiveHint": true,
+        "destructiveHint": false,
         "idempotentHint": false,
         "openWorldHint": false
       },
@@ -8936,17 +8936,12 @@
               "get_guest_ip",
               "get_vm_details",
               "iso_list",
-              "job_list",
-              "job_logs",
-              "job_status",
               "lab_status",
               "lab_validate",
               "list_lan_segments",
               "list_snapshots",
               "list_vms",
-              "ovf_inspect",
               "ovf_tool_status",
-              "ovf_validate",
               "rest_get_all_networks",
               "rest_get_all_nic_devices",
               "rest_get_all_shared_folders",
@@ -8959,11 +8954,11 @@
               "rest_get_vm",
               "rest_get_vm_params",
               "rest_get_vm_restrictions",
-              "serial_read",
               "serial_status",
               "template_export",
               "template_list",
               "template_validate",
+              "vm_boot_configure",
               "vm_boot_status",
               "vm_get_recent_errors",
               "vm_hardware_capabilities",
@@ -9046,7 +9041,10 @@
               "iso_eject",
               "iso_mount",
               "job_cancel",
+              "job_list",
+              "job_logs",
               "job_start",
+              "job_status",
               "lab_deploy",
               "lab_destroy",
               "lab_start",
@@ -9054,6 +9052,8 @@
               "ovf_convert",
               "ovf_export",
               "ovf_import",
+              "ovf_inspect",
+              "ovf_validate",
               "remove_lan_segment",
               "rest_change_power_state",
               "rest_config_vm_params",
@@ -9075,9 +9075,9 @@
               "serial_configure",
               "serial_connect",
               "serial_disconnect",
+              "serial_read",
               "serial_write",
               "template_deploy",
-              "vm_boot_configure",
               "vm_collect_diagnostics",
               "vm_hardware_set",
               "vm_power",

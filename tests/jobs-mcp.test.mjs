@@ -3,10 +3,13 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
+import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { assertCompatibleTool } from './tool-compatibility.mjs';
+import { localFileProtector } from '../src/local-file-security.mjs';
+import { Workstation } from '../src/workstation.mjs';
 
 test('bundled job submission preserves all prior inputs; verifies disk, clone, power batches and crash recovery', async t => {
   const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'jobs-mcp-')));
@@ -50,6 +53,19 @@ cp.spawn = (file, args, options) => {
   const tools = (await f.client.listTools()).tools; assert.equal(tools.length, 156);
   const prior = JSON.parse(await fs.readFile('tests/fixtures/pre-jobs-tool-schemas.json', 'utf8'));
   for (const tool of prior.tools) assertCompatibleTool(tools.find(t => t.name === tool.name), tool);
+  const journal = path.join(root, 'journal');
+  await fs.mkdir(journal, { mode: 0o700 });
+  const expiredID = `${randomUUID()}:${randomUUID()}`;
+  const expiredJournal = path.join(journal, `${expiredID.replace(':', '_')}.json`);
+  await fs.writeFile(expiredJournal, JSON.stringify({ job_id: expiredID, state: 'succeeded',
+    started_at: new Date(Date.now() - 8 * 86400000).toISOString() }), { mode: 0o600 });
+  await localFileProtector(new Workstation(), { root: path.resolve('vmware-workstation') })(expiredJournal);
+  const blocked = await f.client.callTool({ name: 'a_vmware_query', arguments: { tool: 'job_list' } });
+  assert.equal(blocked.isError, true);
+  await fs.stat(expiredJournal);
+  assert.deepEqual((await f.call('a_vmware_mutate', { tool: 'job_list', confirm: true })).jobs, []);
+  await assert.rejects(fs.stat(expiredJournal), { code: 'ENOENT' });
+
   assert.equal((await f.client.callTool({ name: 'job_start', arguments: { steps: [] } })).isError, true);
   assert.equal((await f.client.callTool({ name: 'job_start', arguments: { confirm: true, steps: [{ operation: 'shell', arguments: {} }] } })).isError, true);
   const converted = path.join(root, 'converted', 'disk.vmdk');

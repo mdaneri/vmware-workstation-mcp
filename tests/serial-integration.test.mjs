@@ -64,6 +64,9 @@ test('bundled MCP serial uses native local streams, exact worker ownership and t
     assert.equal(read.timed_out, false); echoed = Buffer.concat([echoed, Buffer.from(read.data, 'base64')]);
   }
   assert.deepEqual(echoed, data);
+  const drained = await call('serial_read', { ...targets[0], timeout_ms: 5 });
+  assert.equal(drained.bytes, 0);
+  assert.equal(drained.timed_out, true);
   assert.equal((await call('serial_read', { ...targets[1], timeout_ms: 5 })).timed_out, true);
   await call('serial_write', { ...targets[1], data: 'other-vm\r\n' });
   assert.equal((await call('serial_read', { ...targets[1], encoding: 'utf8', timeout_ms: 5000 })).data, 'other-vm\r\n');
