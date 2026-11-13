@@ -1,8 +1,15 @@
-<p align="center">
-  <img src="vmware-workstation/assets/icon.svg" alt="VMware Workstation Plugin logo" width="128" height="128">
-</p>
-
 # VMware Workstation Plugin
+
+![VMware Workstation Plugin logo](vmware-workstation/assets/icon.svg)
+
+[![CI](https://github.com/mdaneri/vmware-workstation-mcp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/mdaneri/vmware-workstation-mcp/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/github/package-json/v/mdaneri/vmware-workstation-mcp?label=version)](package.json)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![M8ven Score](https://m8ven.ai/badge/mcp/mdaneri-vmware-workstation-mcp-1mvlu7?v=ec017e5ec7511db811106f366d3b9445)](https://m8ven.ai/mcp/mdaneri-vmware-workstation-mcp-1mvlu7?s=readme)
+
+[![OpenAI Codex](https://img.shields.io/badge/OpenAI-Codex-412991)](#use-in-codex)
+[![Claude Code](https://img.shields.io/badge/Claude-Code-D97757)](#use-in-claude-code)
+[![Claude Desktop](https://img.shields.io/badge/Claude-Desktop-D97757)](#use-in-claude-desktop)
 
 An independent Windows and Linux MCP plugin for VMware Workstation with **156 tools** for multi-VM labs, declarative VM templates, typed hardware, VMDK lifecycle, ISO media, background jobs, readiness diagnostics, VM management, OVF/OVA appliances, LAN segments, verified guest execution, file transfers, direct headless VNC/RFB console control, and optional serial consoles. It is not an official VMware or Broadcom product.
 
