@@ -1,4 +1,5 @@
 // Offline setup entrypoint: credentials are read locally, never passed via argv/stdout.
+import './zod-interpreted.mjs';
 import { parseArgs } from 'node:util';
 import { Workstation } from './workstation.mjs';
 import { Credentials } from './credentials.mjs';

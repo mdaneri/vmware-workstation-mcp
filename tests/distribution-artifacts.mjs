@@ -34,7 +34,7 @@ for (const extension of ['zip', 'mcpb']) {
     const manifest = JSON.parse(Buffer.from(entries[extension === 'zip' ? '.claude-plugin/plugin.json' : 'manifest.json']));
     assert.equal(manifest.version, metadata.version);
     const config = extension === 'zip' ? JSON.parse(Buffer.from(entries['.mcp.json'])).mcpServers['vmware-workstation'] : manifest.server.mcp_config;
-    const args = config.args.map(value => value.replaceAll('${CLAUDE_PLUGIN_ROOT}', root).replaceAll('${__dirname}', root));
+    const args = ['--disallow-code-generation-from-strings', ...config.args.map(value => value.replaceAll('${CLAUDE_PLUGIN_ROOT}', root).replaceAll('${__dirname}', root))];
     const env = { ...process.env, NODE_PATH: '', VMWARE_CREDENTIALS_FILE: path.join(temporary, 'must-not-read.json') };
     for (const key of Object.keys(env)) if (key.startsWith('VMWARE_DESKTOP_')) delete env[key];
     if (extension === 'mcpb') for (const key of Object.keys(config.env)) env[key] = ''; // Every optional field unset.
@@ -55,7 +55,7 @@ for (const extension of ['zip', 'mcpb']) {
     const rejected = await client.callTool({ name: 'plugin_query', arguments: { tool: 'start_vm', arguments: {} } });
     assert.ok(rejected.isError, 'A read-only bridge must not dispatch mutations');
     await client.close();
-    const { stdout } = await promisify(execFile)(process.execPath, [path.join(root, 'server/inspect-catalog.cjs')], { cwd, env, windowsHide: true, timeout: 15000 });
+    const { stdout } = await promisify(execFile)(process.execPath, ['--disallow-code-generation-from-strings', path.join(root, 'server/inspect-catalog.cjs')], { cwd, env, windowsHide: true, timeout: 15000 });
     assert.equal(JSON.parse(stdout).tool_count, 156);
     if (extension === 'mcpb') {
       await assert.rejects(promisify(execFile)(process.execPath, args, {
