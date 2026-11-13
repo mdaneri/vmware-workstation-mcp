@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "vmware-workstation",
-  "version": "0.17.1",
+  "version": "0.17.2",
   "license": "MIT",
   "homepage": "https://github.com/mdaneri/vmware-workstation-mcp",
   "repository": "https://github.com/mdaneri/vmware-workstation-mcp",
