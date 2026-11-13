@@ -58564,7 +58564,7 @@ var import_node_crypto12 = require("node:crypto");
 // package.json
 var package_default = {
   name: "vmware-workstation-plugin-dev",
-  version: "0.17.0",
+  version: "0.17.1",
   private: true,
   license: "MIT",
   repository: {

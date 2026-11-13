@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "vmware-workstation",
   "display_name": "VMware Workstation",
-  "version": "0.17.0",
+  "version": "0.17.1",
   "description": "Manage VMware Workstation with vmrun, REST, LAN segments, direct headless VNC/RFB console screenshots and input, and optional serial consoles.",
   "author": {
     "name": "mdaneri",
