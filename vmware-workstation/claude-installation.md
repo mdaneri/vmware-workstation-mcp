@@ -30,7 +30,7 @@ The Claude registration uses `${CLAUDE_PLUGIN_ROOT}/server/server.cjs`. Its skil
 ## Claude Desktop
 
 1. Install [Claude Desktop from Anthropic](https://claude.com/download) and native VMware Workstation.
-2. Download `vmware-workstation-0.17.1.mcpb` from the corresponding [GitHub Release](https://github.com/mdaneri/vmware-workstation-mcp/releases). Compare its SHA-256 with the release's `SHA256SUMS.txt` file if desired.
+2. Download `vmware-workstation-0.17.2.mcpb` from the corresponding [GitHub Release](https://github.com/mdaneri/vmware-workstation-mcp/releases). Compare its SHA-256 with the release's `SHA256SUMS.txt` file if desired.
 3. Open Settings > Desktop app > Extensions > Manage (or Settings > Extensions in older versions), then Advanced settings > **Install Extension…**. Select the MCPB and follow the prompts.
 4. Leave all optional settings blank for ordinary current-user inventory. Enable the extension, start a fresh chat, and use the inventory prompt above.
 

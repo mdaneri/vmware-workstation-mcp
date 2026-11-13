@@ -15,6 +15,8 @@ An independent Windows and Linux MCP plugin for VMware Workstation with **156 to
 
 The plugin package lives in `vmware-workstation/`. Start with the [configuration guide](vmware-workstation/README.md), [native console setup](vmware-workstation/console.md), or [complete tool reference](vmware-workstation/reference.md).
 
+See the [version history](VERSIONS.md) for changes by release.
+
 ## Use in Codex
 
 Register this GitHub marketplace and install the plugin:
@@ -45,7 +47,7 @@ codex plugin add vmware-workstation@vmware-local
 codex plugin list --marketplace vmware-local --json
 ```
 
-The first command refreshes the Git marketplace snapshot; `plugin add` installs from that snapshot. Running `plugin add` alone can therefore reinstall an older version. Check the listed `version`, reopen the desktop app, and start a fresh local chat with the plugin enabled. Ask it to call `a_vmware_catalog` with `{"tool":"vmrun_get_guest_ip_address"}`. Verify version `0.17.1`, `tool_count: 156`, the bounded `wait`/`timeout_seconds` fields, and the returned `a_vmware_query` route before calling the selected VM query. An older version directory remaining in the cache does not establish which version the chat uses. See [catalog diagnostics](vmware-workstation/catalog.md) if versions or tools still differ.
+The first command refreshes the Git marketplace snapshot; `plugin add` installs from that snapshot. Running `plugin add` alone can therefore reinstall an older version. Check the listed `version`, reopen the desktop app, and start a fresh local chat with the plugin enabled. Ask it to call `a_vmware_catalog` with `{"tool":"vmrun_get_guest_ip_address"}`. Verify version `0.17.2`, `tool_count: 156`, the bounded `wait`/`timeout_seconds` fields, and the returned `a_vmware_query` route before calling the selected VM query. An older version directory remaining in the cache does not establish which version the chat uses. See [catalog diagnostics](vmware-workstation/catalog.md) if versions or tools still differ.
 
 For a marketplace registered from a local directory, update that source directory and rebuild after source changes before running `plugin add`; `marketplace upgrade` refreshes Git-backed sources only. Use `codex plugin marketplace list` to check the registered source root.
 
@@ -100,40 +102,6 @@ See [Claude installation, configuration, updates and troubleshooting](vmware-wor
 
 ## Develop
 
-Version 0.17.1 fixes the repository README's Markdown formatting and adds project and client badges.
-
-Version 0.17.0 adds native Claude Code marketplace and Claude Desktop MCPB distributions using the same 156-tool server and version source. Optional Desktop settings preserve local credential profiles. See the [Claude guide](vmware-workstation/claude-installation.md) and [native validation record](docs/claude-validation.md).
-
-Version 0.16.1 adds early `a_vmware_catalog`, `a_vmware_query` and `a_vmware_mutate` entrypoints for [issue #40](https://github.com/mdaneri/vmware-workstation-mcp/issues/40). They lead alphabetical and raw registration listings, preserving access under the reported 46-name cutoff as well as #36's 74-name cutoff. All 153 previous tool definitions are unchanged. Regression tests use the visible entrypoints to discover and call missing operations while preserving strict validation and authorization. See [refresh verification and bounded IP examples](vmware-workstation/catalog.md).
-
-Version 0.16.0 adds [catalog discovery and validated operation bridges](vmware-workstation/catalog.md) and bounded native waiting through `get_guest_ip` for [issue #36](https://github.com/mdaneri/vmware-workstation-mcp/issues/36). An independent installed-package check returned all 150 prior tools while an audited Windows Codex desktop chat exposed only the first 74 alphabetically, affecting 76 tools across multiple families. `plugin_catalog` discovers original operation schemas; `plugin_query` and `plugin_mutate` make original operations available through existing handlers when those entrypoints are exposed. Read-only and mutation routes are separate; mutations require additional confirmation. A bundled diagnostic lists raw MCP tools without VMware calls. Codex app-server independently receives the full installed 0.15.0 catalog; assistant direct-name exposure remains a separate client limitation.
-
-Version 0.15.0 adds two [read-only security inspection tools](vmware-workstation/security.md) for the feasibility slice of [issue #27](https://github.com/mdaneri/vmware-workstation-mcp/issues/27). Native Windows 26.0.1 help probes and Broadcom engineering guidance identified no verified headless encryption/vTPM provisioning backend. Encryption enablement and TPM provisioning/persistence remain blocked; this release does not complete #27. All 148 previous tool definitions remain unchanged.
-
-Version 0.14.0 adds six [multi-VM lab tools](vmware-workstation/labs.md): versioned recipes, dependency/readiness ordering, private ownership manifests, explicit safe recovery and tracked-resource teardown. Two/three-VM private-LAN and nested ESXi examples reuse templates/hardware/disk/LAN infrastructure. All mutations default to dry-run; actual deployment/start/stop/destroy require confirmation. Uncertain creation and changed ownership fail explicitly; unexpected files remain. All 142 previous tool definitions are unchanged. Native VMware lab deployment, guest connectivity and lifecycle validation remain unverified; the opt-in live harness is not part of default tests. See [issue #12](https://github.com/mdaneri/vmware-workstation-mcp/issues/12) and [tracker #6](https://github.com/mdaneri/vmware-workstation-mcp/issues/6).
-
-Version 0.13.0 adds four [declarative VM template tools](vmware-workstation/templates.md): versioned portable JSON recipes, capability-aware validation, read-only deployment plans, sanitized blank-hardware export and explicit no-overwrite deployment. Bundled Linux, Windows Server and nested ESXi examples keep network/media bindings local. All 138 previous tool definitions are unchanged. Registration and power-on are opt-in; vTPM and forced PXE boot order fail explicitly. See [issue #11](https://github.com/mdaneri/vmware-workstation-mcp/issues/11) and [tracker #6](https://github.com/mdaneri/vmware-workstation-mcp/issues/6).
-
-Version 0.12.1 adds the project website, support URL and developer name to the plugin listing, with matching portable homepage metadata and a new layered VM logo.
-
-Version 0.12.0 adds [reusable asynchronous jobs](vmware-workstation/jobs.md): disk conversion/expansion, full offline clones and sequential VM power batches through `job_start`. Unrelated VMs run concurrently, resources share locks with existing tools, cancellation stops native process trees, and bounded private journals retain results across restart. Existing input schemas and annotations remain compatible; three job descriptions are updated. See [issue #10](https://github.com/mdaneri/vmware-workstation-mcp/issues/10) and [tracker #6](https://github.com/mdaneri/vmware-workstation-mcp/issues/6).
-
-Version 0.11.0 adds [typed hardware configuration](vmware-workstation/hardware.md): optional multi-controller/disk/NIC creation, CPU topology, nested virtualization and firmware/Secure Boot patches. Three new tools inspect capabilities, read typed hardware and apply backed-up offline changes. Existing NIC identity and devices are preserved; vTPM/encryption writes return explicit unsupported errors. All 133 other tool definitions are unchanged; `create_vm` adds only optional fields. See [issue #8](https://github.com/mdaneri/vmware-workstation-mcp/issues/8) and [tracker #6](https://github.com/mdaneri/vmware-workstation-mcp/issues/6).
-
-Version 0.10.0 adds five [ISO media and boot capability tools](vmware-workstation/iso.md): inspect optical drives, mount/eject existing media with offline VMX backups, and inspect boot capabilities. Unproven next-boot firmware and boot-order writes fail explicitly. All 129 previous tool definitions remain unchanged. See [issue #9](https://github.com/mdaneri/vmware-workstation-mcp/issues/9) and [tracker #6](https://github.com/mdaneri/vmware-workstation-mcp/issues/6).
-
-Version 0.9.0 adds [verified guest execution](vmware-workstation/guest-exec.md): `guest_exec` uses an explicit local credential profile, literal program arguments or an explicit script interpreter, bounded stdout/stderr capture, and a unique completion record for guest exit status. Timeout, transport failure and cleanup remain separate. All 128 previous tool definitions remain unchanged. See [issue #13](https://github.com/mdaneri/vmware-workstation-mcp/issues/13) and [tracker #6](https://github.com/mdaneri/vmware-workstation-mcp/issues/6).
-
-Version 0.8.0 adds five [readiness and diagnostics tools](vmware-workstation/readiness.md): separate bounded OS agent/IP/service waits, normalized recent errors and private selected-VM bundles with optional guest-only RFB evidence. All 123 previous tool definitions remain unchanged. See [issue #14](https://github.com/mdaneri/vmware-workstation-mcp/issues/14) and [tracker #6](https://github.com/mdaneri/vmware-workstation-mcp/issues/6).
-
-Version 0.7.0 adds six [optional direct serial tools](vmware-workstation/serial.md): explicit offline setup, status, connect, bounded byte reads/writes, and disconnect with cancellation. Windows uses local named pipes and Linux uses private UNIX sockets, with native VMware worker verification. All 117 previous tool definitions remain unchanged. See [issue #15](https://github.com/mdaneri/vmware-workstation-mcp/issues/15) and [tracker #6](https://github.com/mdaneri/vmware-workstation-mcp/issues/6).
-
-Version 0.6.0 adds nine [VMDK lifecycle tools](vmware-workstation/disks.md): runtime disk-manager discovery, inspect/create/expand/convert/compact/defragment, and explicit controller/slot attach/detach with VMX backups. All 108 existing tool definitions remain unchanged. In-place edits require explicit confirmation; snapshots, shared/backing chains and unsafe VM states are refused. Expansion does not resize guest filesystems. See [issue #7](https://github.com/mdaneri/vmware-workstation-mcp/issues/7) and [tracker #6](https://github.com/mdaneri/vmware-workstation-mcp/issues/6).
-
-Version 0.5.0 adds six [OVF/OVA tools and four background job tools](vmware-workstation/ovf.md), including an absolute `VMWARE_OVFTOOL_PATH` override. Exports/imports run as cancellable jobs and preserve no-overwrite defaults. Phase 1 of [roadmap #1](https://github.com/mdaneri/vmware-workstation-mcp/issues/1) is implemented; later roadmap phases remain open.
-
-Version 0.4.0 added five [LAN segment tools](vmware-workstation/README.md#lan-segments) to create/list/remove segments and attach/detach existing VM adapters. Changes are backed up; removal refuses known VM references. Close the Workstation GUI before changes and power off VMs before editing adapters. LAN mutation tests use temporary fixtures; guest connectivity has not been live-validated.
-
 ```powershell
 npm ci
 npm run build
@@ -149,7 +117,7 @@ The plugin implements all **47 reference vmrun commands and 28 reference REST op
 
 Tests use a fake process runner, temporary VMX files, and a mock HTTP service. They do not change real VMs. The smoke script starts the actual bundled MCP process, discovers tools, and reads host status/inventory. If a running VM exists it reads selected hardware, snapshots, Tools state, and guest IP. It also reads host networks and checks the installed command coverage. It never powers VMs on/off or changes snapshots. `npm run smoke:rest` reads VM and network inventory from the real REST service after credentials are configured.
 
-Packaging writes `dist/vmware-workstation-0.17.1.zip`, `dist/vmware-workstation-0.17.1.mcpb` and SHA-256 checksums, and verifies their allowlisted entries and contents on both hosts. It includes one plugin and excludes source development dependencies, test VMs/credentials, and the repo marketplace.
+Packaging writes `dist/vmware-workstation-0.17.2.zip`, `dist/vmware-workstation-0.17.2.mcpb` and SHA-256 checksums, and verifies their allowlisted entries and contents on both hosts. It includes one plugin and excludes source development dependencies, test VMs/credentials, and the repo marketplace.
 
 ## Validation
 

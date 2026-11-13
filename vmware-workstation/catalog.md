@@ -3,7 +3,7 @@
 The installed package, a running MCP server, its raw `tools/list`, and the
 assistant-visible tool catalog are separate observations. A plugin refresh or
 version in `plugin.json` alone does not establish which process a chat uses or
-which tools the client exposes. Version 0.17.1 retains the **156 tools** introduced in 0.16.1: all 153 previous definitions plus three early discovery/bridge aliases.
+which tools the client exposes. Version 0.17.2 retains the **156 tools** introduced in 0.16.1: all 153 previous definitions plus three early discovery/bridge aliases.
 
 ## Refresh and verify in a fresh local chat
 
@@ -25,7 +25,7 @@ and [CLI commands](https://developers.openai.com/codex/cli/reference).
 Continuing an existing chat after refresh is not a verification of new tool exposure.
 
 Ask the assistant to call `a_vmware_catalog` with
-`{"tool":"vmrun_get_guest_ip_address"}`. Check running version **0.17.1**,
+`{"tool":"vmrun_get_guest_ip_address"}`. Check running version **0.17.2**,
 `tool_count: 156`, the selected schema's `wait` and `timeout_seconds` fields,
 and `selected_tool.bridge: "a_vmware_query"`. This performs no VMware operation.
 Then use the read-only bounded IP example below for an explicitly selected VM,
