@@ -46,6 +46,11 @@ require('node:child_process').execFile = deny;
   const early = ['a_vmware_catalog', 'a_vmware_mutate', 'a_vmware_query'];
   assert.deepEqual(names.slice(0, 3), early);
   assert.deepEqual(raw.tools.slice(0, 3).map(tool => tool.name), early);
+  assert.deepEqual(raw.tools.slice(0, 3).map(tool => tool.annotations), [
+    { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true },
+    { readOnlyHint: true, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  ]);
   for (const name of ['a_vmware_query', 'a_vmware_mutate']) assert.match(raw.tools.find(tool => tool.name === name).inputSchema.properties.tool.description, /a_vmware_catalog/);
   const previous = JSON.parse(await fs.readFile('tests/fixtures/pre-early-catalog-tool-schemas.json', 'utf8'));
   assert.equal(previous.tools.length, 153);
