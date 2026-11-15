@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import path from 'node:path';
+import metadata from '../package.json' with { type: 'json' };
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 
@@ -163,6 +165,21 @@ const expectedTools = [
   'workstation_capabilities',
   'workstation_status',
 ];
+
+test('the declared CLI exposes the complete MCP catalog', { timeout: 15000 }, async t => {
+  const executable = path.resolve(metadata.bin['vmware-workstation-mcp']);
+  const client = new Client({ name: 'cli-discovery', version: '1' });
+  t.after(() => client.close());
+  await client.connect(new StdioClientTransport({
+    command: process.platform === 'win32' ? process.execPath : executable,
+    args: process.platform === 'win32' ? [executable] : [],
+    stderr: 'pipe',
+  }));
+  assert.equal(client.getServerVersion().version, metadata.version);
+  const { tools, nextCursor } = await client.listTools();
+  assert.equal(nextCursor, undefined);
+  assert.deepEqual(tools.map(tool => tool.name).sort(), expectedTools);
+});
 
 test('the repository stdio entrypoint rejects unknown arguments for every registered tool', { timeout: 30000 }, async t => {
   const client = new Client({ name: 'tool-input-validation', version: '1' });

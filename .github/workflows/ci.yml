@@ -34,7 +34,7 @@ jobs:
       - name: Test extracted distributions without development dependencies
         run: npm run test:packages
       - name: Check generated files are current
-        run: git diff --exit-code -- vmware-workstation packaging
+        run: git diff --exit-code -- src/register-tools.generated.mjs vmware-workstation packaging
       - name: Upload plugin distributions and checksums
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
