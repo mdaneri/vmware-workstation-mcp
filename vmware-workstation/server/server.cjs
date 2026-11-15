@@ -52474,6 +52474,7 @@ var package_default = {
     url: "git+https://github.com/mdaneri/vmware-workstation-mcp.git"
   },
   type: "module",
+  main: "vmware-workstation/server/server.cjs",
   scripts: {
     "security:probe": "node scripts/probe-security.mjs",
     build: "node scripts/build.mjs",
