@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-Run `node .` from a repository checkout to start the bundled MCP server over stdio. A new MCP integration test checks that each of the 156 registered tools declares a strict input schema and rejects unknown arguments.
+Run `node .` from a repository checkout to start the bundled MCP server over stdio. The package also declares `vmware-workstation-mcp` as a CLI pointing to the same bundled server. All 156 SDK registrations name their tool and explicitly bind its existing Zod input schema. MCP integration tests verify CLI discovery and rejection of unknown arguments for every tool.
 
 Version 0.17.4 uses patched Zod 4 for Claude Desktop packaging and switches the bundled MCP SDK validator to an interpreter. The bundled server and catalog diagnostic run with Node.js string code generation disabled in package tests. The README links to the [156-tool MCP catalog](vmware-workstation/tool-schemas.json), including schemas and annotations. The annotation audit corrects read-only and destructive hints for serial I/O, job handling, lab workflows, boot configuration, and additive VMware operations. All tools must explicitly declare both hints and may set both to false for additive writes.
 
