@@ -17,6 +17,8 @@ The plugin package lives in `vmware-workstation/`. Start with the [configuration
 
 See the [version history](VERSIONS.md) for changes by release and the [privacy policy](PRIVACY.md) for how the plugin handles data. The [published tool catalog](vmware-workstation/tool-schemas.json) is generated from MCP `tools/list` and contains all 156 tool names, input schemas, and annotations.
 
+From a repository checkout, `node .` starts the committed MCP server over stdio. An MCP client can initialize it and request `tools/list` with Node.js 22.12 or later. Discovery requires no dependency install, VMware installation, or credentials. To inspect the listing from a terminal, run `node vmware-workstation/server/inspect-catalog.cjs`.
+
 ## Use in Codex
 
 Register this GitHub marketplace and install the plugin:
