@@ -1,6 +1,6 @@
 # Version history
 
-## Unreleased
+## 0.17.5
 
 Run `node .` from a repository checkout to start the bundled MCP server over stdio. The package also declares `vmware-workstation-mcp` as a CLI pointing to the same bundled server. All 156 SDK registrations name their tool and explicitly bind its existing Zod input schema. MCP integration tests verify CLI discovery and rejection of unknown arguments for every tool.
 
